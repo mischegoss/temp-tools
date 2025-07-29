@@ -1,0 +1,288 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Import SeasonMix font */
+@font-face {
+  font-family: 'SeasonMix';
+  src: url('/fonts/SeasonMix-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SeasonMix';
+  src: url('/fonts/SeasonMix-RegularItalic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Import Inter font for documentation content */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* You can override the default Infima variables here. */
+:root {
+  /* Brand Colors - Primary */
+  --brand-white: #ffffff;
+  --brand-black: #05070f;
+  --brand-blue: #0050c7;
+  --brand-green: #00b070;
+  --brand-purple: #8f4aff;
+  --brand-orange: #ff9900;
+  --brand-aqua: #00d4ff;
+
+  /* Brand Colors - Secondary */
+  --brand-blue-400: #0066ff;
+  --brand-blue-100: #cbe0ff;
+  --brand-black-700: #0d1637;
+  --brand-aqua-800: #051414;
+  --brand-aqua-600: #02636f;
+  --brand-grey-600: #8792a3;
+  --brand-grey-500: #cbd1da;
+  --brand-grey-400: #d4d4d4;
+  --brand-grey-300: #dadada;
+  --brand-grey-200: #e2e3e4;
+  --brand-grey-250: #ededed;
+  --brand-grey-100: #f6f6f6;
+  --brand-secondary-white: #f6f6f6;
+
+  /* Regular theme - using blues */
+  --ifm-color-primary: var(--brand-blue); /* Blue */
+  --ifm-color-primary-dark: var(--brand-black-700); /* Black 700 */
+  --ifm-color-primary-darker: var(--brand-black); /* Black */
+  --ifm-color-primary-darkest: var(--brand-black); /* Black */
+  --ifm-color-primary-light: var(--brand-blue-400); /* Blue 400 */
+  --ifm-color-primary-lighter: var(--brand-blue-100); /* Blue 100 */
+  --ifm-color-primary-lightest: var(--brand-blue-100); /* Blue 100 */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Set SeasonMix as the default font family for most text */
+  --ifm-font-family-base: 'SeasonMix', 'Inter', system-ui, -apple-system,
+    Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif,
+    BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+
+  /* Set SeasonMix for headings */
+  --ifm-heading-font-family: 'SeasonMix', 'Inter', system-ui, -apple-system,
+    sans-serif;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  /* Dark theme - using greys */
+  --ifm-color-primary: var(--brand-grey-600); /* Grey 600 */
+  --ifm-color-primary-dark: var(--brand-grey-500); /* Grey 500 */
+  --ifm-color-primary-darker: var(--brand-grey-400); /* Grey 400 */
+  --ifm-color-primary-darkest: var(--brand-grey-300); /* Grey 300 */
+  --ifm-color-primary-light: var(--brand-grey-200); /* Grey 200 */
+  --ifm-color-primary-lighter: var(--brand-grey-250); /* Grey 250 */
+  --ifm-color-primary-lightest: var(--brand-white); /* White */
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Inter font for documentation content specifically */
+.markdown {
+  font-family: 'Inter', 'SeasonMix', system-ui, -apple-system, Segoe UI, Roboto,
+    Ubuntu, Cantarell, Noto Sans, sans-serif !important;
+}
+
+/* Keep SeasonMix for headings within docs to maintain brand consistency */
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  font-family: 'SeasonMix', 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Footer styling with brand gradient */
+.footer {
+  background: linear-gradient(
+    to bottom,
+    var(--brand-black) 0%,
+    var(--brand-blue) 100%
+  ) !important;
+  border-top: 2px solid var(--brand-blue-400);
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure dark theme footer uses our custom gradient */
+.footer--dark {
+  background: linear-gradient(
+    to bottom,
+    var(--brand-black) 0%,
+    var(--brand-blue) 100%
+  ) !important;
+}
+
+/* Subtle gradient overlay for visual depth */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 10% 20%,
+    rgba(0, 80, 199, 0.05) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* Additional subtle gradient effect */
+.footer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 90% 80%,
+    rgba(0, 102, 255, 0.03) 0%,
+    transparent 30%
+  );
+  pointer-events: none;
+}
+
+/* Ensure content is positioned above the gradient overlays */
+.footer .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Footer text colors */
+.footer__links {
+  color: var(--brand-white) !important;
+}
+
+.footer__link-item {
+  color: var(--brand-grey-200) !important;
+  transition: color 0.3s ease;
+}
+
+.footer__link-item:hover {
+  color: var(--brand-blue-400) !important;
+}
+
+.footer__copyright {
+  color: var(--brand-grey-300) !important;
+  border-top: 1px solid var(--brand-grey-600);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.footer__title {
+  color: var(--brand-white) !important;
+  font-weight: 600;
+}
+
+/* Dark Mode Header/Navbar Styling */
+[data-theme='dark'] .navbar {
+  background-color: var(--brand-black) !important;
+  border-bottom: 2px solid var(--brand-blue-400);
+}
+
+[data-theme='dark'] .navbar--dark {
+  background-color: var(--brand-black) !important;
+}
+
+[data-theme='dark'] .navbar__link {
+  color: var(--brand-grey-200) !important;
+  transition: color 0.3s ease;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .navbar__link:hover {
+  color: var(--brand-blue-400) !important;
+}
+
+[data-theme='dark'] .navbar__title {
+  color: var(--brand-white) !important;
+  font-weight: 600;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .navbar__brand {
+  color: var(--brand-white) !important;
+}
+
+[data-theme='dark'] .navbar__item {
+  color: var(--brand-grey-200) !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .navbar__item:hover {
+  color: var(--brand-blue-400) !important;
+}
+
+[data-theme='dark'] .dropdown__link {
+  color: var(--brand-grey-200) !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .dropdown__link:hover {
+  color: var(--brand-blue-400) !important;
+  background-color: var(--brand-grey-600) !important;
+}
+
+/* Light mode navbar styling for consistency */
+.navbar {
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+.navbar__link,
+.navbar__title,
+.navbar__item,
+.dropdown__link {
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+/*DO NOT TOUCH BELOW THIS LINE*/
+
+/* Hide the chatbot button on the homepage */
+body[data-homepage='true'] #ainiro_chat_btn {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Target Docusaurus pages with specific classes */
+/* Only hide navbar on forms pages */
+html[class*='mdx-wrapper'][class*='plugin-pages']
+  body[data-pathname*='/forms/']
+  nav.navbar.navbar--fixed-top,
+.mdx-wrapper.mdx-page.plugin-pages.plugin-id-default
+  body[data-pathname*='/forms/']
+  nav.navbar.navbar--fixed-top {
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Adjust spacing only on forms pages */
+body[data-pathname*='/forms/'] #docusaurus_skipToContent_fallback {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Hide Back to Top Button */
+.theme-back-to-top-button {
+  display: none !important;
+}
