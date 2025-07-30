@@ -1,4 +1,3 @@
-// src/components/Forms/login/LoginComponent.jsx
 import React, { useState, useEffect } from 'react'
 import {
   createUserWithEmailAndPassword,
@@ -31,32 +30,76 @@ export default function LoginComponent() {
     return () => console.log('[LoginComponent] Unmounted')
   }, [])
 
-  // Handle redirect after successful authentication
+  // Handle redirect after successful authentication - PREVENT FLASH
   useEffect(() => {
     if (user && !redirectAttempted) {
       console.log('[LoginComponent] User authenticated, preparing redirect')
       setRedirectAttempted(true)
 
       try {
-        const redirectUrl = getSessionItem(
-          'redirectUrl',
-          '/learning/service-blueprinting',
-        )
+        const redirectUrl = getSessionItem('redirectUrl', '/learning/discover/')
         console.log('[LoginComponent] Redirecting after login to:', redirectUrl)
 
         // Clear the saved redirect URL
         removeSessionItem('redirectUrl')
 
-        // Use React Router's history instead of window.location
+        // Immediate redirect for already-logged-in users (no delay needed)
+        console.log('[LoginComponent] Executing redirect to:', redirectUrl)
         history.push(redirectUrl)
       } catch (error) {
         console.error('[LoginComponent] Error during redirect:', error)
         setLoading(false)
         // Use React Router's history for fallback too
-        history.push('/learning/service-blueprinting')
+        history.push('/learning/discover/')
       }
     }
   }, [user, redirectAttempted, history])
+
+  // PREVENT RENDERING LOGIN FORM IF USER IS ALREADY AUTHENTICATED
+  if (user && !redirectAttempted) {
+    // Show loading state instead of flashing login form
+    return (
+      <div
+        style={{
+          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+          minHeight: '100vh',
+          background: 'var(--brand-secondary-white)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+        }}
+      >
+        <div
+          style={{
+            padding: '2rem',
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            color: 'var(--brand-black-700)',
+          }}
+        >
+          <div
+            style={{
+              marginBottom: '1rem',
+              fontSize: '2rem',
+            }}
+          >
+            ✓
+          </div>
+          Welcome back, {user.email}!
+          <div
+            style={{
+              marginTop: '0.5rem',
+              fontSize: '1rem',
+              color: 'var(--brand-grey-600)',
+            }}
+          >
+            Redirecting you to the learning hub...
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const handleLogin = async e => {
     e.preventDefault()
@@ -81,12 +124,11 @@ export default function LoginComponent() {
         setItem('companyName', userCredential.user.displayName)
       }
 
-      // No need to set loginSuccess state anymore
-      // Auth state change will trigger the redirect useEffect
+      // Don't set loading to false here - let the redirect useEffect handle it
     } catch (error) {
       console.error('[LoginComponent] Login error:', error)
       setError(getErrorMessage(error))
-      setLoading(false)
+      setLoading(false) // Only set loading false on error
     }
   }
 
@@ -131,12 +173,11 @@ export default function LoginComponent() {
       setItem('companyName', companyName)
       console.log('[LoginComponent] Company name stored in browserStorage')
 
-      // No need for loginSuccess state or timeout redirects
-      // Auth state change will trigger the redirect useEffect
+      // Don't set loading to false here - let the redirect useEffect handle it
     } catch (error) {
       console.error('[LoginComponent] Signup error:', error)
       setError(getErrorMessage(error))
-      setLoading(false)
+      setLoading(false) // Only set loading false on error
     }
   }
 
@@ -157,6 +198,7 @@ export default function LoginComponent() {
     }
   }
 
+  // FIXED STYLES - Remove conflicting properties
   const cardStyle = {
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
     border: '2px solid var(--brand-blue-400)',
@@ -184,6 +226,7 @@ export default function LoginComponent() {
     marginBottom: '1rem',
   }
 
+  // FIXED - Remove conflicting border properties
   const inputStyle = {
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
     width: '100%',
@@ -193,7 +236,7 @@ export default function LoginComponent() {
     fontSize: '16px',
     backgroundColor: 'var(--brand-white)',
     color: 'var(--brand-aqua-800)',
-    transition: 'all 0.3s ease',
+    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
     outline: 'none',
   }
 

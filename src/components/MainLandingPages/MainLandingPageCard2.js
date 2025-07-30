@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Button } from 'react-bootstrap'
 import Link from '@docusaurus/Link'
 
 const MainLandingPageCards = ({ resources = [] }) => {
@@ -15,7 +14,7 @@ const MainLandingPageCards = ({ resources = [] }) => {
           margin: '2rem 0',
           border: '2px solid var(--brand-grey-300)',
           boxShadow:
-            '0 0 10px rgba(0, 102, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05)',
+            '0 0 10px rgba(0, 80, 199, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05)',
           fontFamily: 'var(--ifm-font-family-base)',
         }}
       >
@@ -54,43 +53,37 @@ const MainLandingPageCards = ({ resources = [] }) => {
     }))
   }
 
-  // Helper function to format level display - ALL CAPS
-  const formatLevelDisplay = level => {
-    if (!level) return ''
-    return level.toUpperCase()
-  }
-
-  // Get the level badge background color using brand colors - updated for gradients
+  // Get the level badge background color using professional blue/teal palette
   const getLevelBadgeColor = level => {
     switch (level?.toLowerCase()) {
       case 'beginner':
-        return 'linear-gradient(135deg, #00D4FF 0%, #00B4D8 100%)' // Cyan gradient
+        return 'var(--brand-blue)' // Professional blue
       case 'intermediate':
-        return 'linear-gradient(135deg, #0066FF 0%, #0050C7 100%)' // Blue gradient
+        return 'var(--brand-blue-400)' // Slightly lighter blue
       case 'advanced':
-        return 'linear-gradient(135deg, #0D1637 0%, #05070F 100%)' // Dark navy gradient
+        return 'var(--brand-black-700)' // Dark professional
       default:
-        return 'var(--brand-grey-600)' // Default gray
+        return 'var(--brand-grey-600)' // Professional grey
     }
   }
 
-  // Get footer background color - matching your design
-  const getFooterBackgroundColor = level => {
+  // Get border color based on level
+  const getBorderColor = level => {
     switch (level?.toLowerCase()) {
       case 'beginner':
-        return 'linear-gradient(135deg, #00D4FF 0%, #00B4D8 100%)' // Cyan gradient to match your image
+        return 'var(--brand-blue)'
       case 'intermediate':
-        return 'linear-gradient(135deg, #0066FF 0%, #0050C7 100%)' // Blue gradient to match your image
+        return 'var(--brand-blue-400)'
       case 'advanced':
-        return 'linear-gradient(135deg, #0D1637 0%, #05070F 100%)' // Dark navy gradient to match your image
+        return 'var(--brand-black-700)'
       default:
-        return 'var(--brand-grey-600)' // Default gray
+        return 'var(--brand-grey-600)'
     }
   }
 
-  // Get content type from resource - NOW USES PRIMARY LEVEL FIRST
+  // Get content type from resource
   const getContentType = resource => {
-    // First check for primaryLevel - this is the key change
+    // First check for primaryLevel
     if (resource.primaryLevel) {
       return resource.primaryLevel.toLowerCase()
     }
@@ -103,143 +96,58 @@ const MainLandingPageCards = ({ resources = [] }) => {
     if (resource.featureType) {
       return resource.featureType.toLowerCase()
     }
-    // Fallback to checking title/description for keywords
-    const title = resource.title?.toLowerCase() || ''
-    const description = resource.description?.toLowerCase() || ''
-    const combined = title + ' ' + description
 
-    if (
-      combined.includes('device discovery') ||
-      combined.includes('insights')
-    ) {
-      return 'device discovery and management'
-    }
-    if (
-      combined.includes('automation development') ||
-      combined.includes('actions') ||
-      combined.includes('pro') ||
-      combined.includes('express')
-    ) {
-      return 'automation development'
-    }
-    if (
-      combined.includes('automation design') ||
-      combined.includes('blueprint')
-    ) {
-      return 'automation design'
-    }
-    if (
-      combined.includes('product overview') ||
-      combined.includes('overview')
-    ) {
-      return 'product overview'
+    // Check for resourceType property
+    if (resource.resourceType) {
+      return resource.resourceType.toLowerCase()
     }
 
-    return 'default'
+    // Return a default value
+    return 'learning resource'
   }
 
-  // Get footer color based on content type (solid colors only)
-  const getFooterColor = resource => {
-    const contentType = getContentType(resource)
-
-    switch (contentType) {
-      case 'device discovery and management':
-        return 'var(--brand-aqua)'
-      case 'automation development':
-        return 'var(--brand-blue)'
-      case 'automation design':
-        return 'var(--brand-purple)'
-      case 'product overview':
-        return 'var(--brand-green)'
-      default:
-        return 'var(--brand-grey-600)'
-    }
+  // Helper function to format level for display
+  const formatLevelDisplay = level => {
+    if (!level) return ''
+    return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase()
   }
 
-  // Get dual footer color for resources with secondary content type
-  const getDualFooterColor = resource => {
-    const primaryType = getContentType(resource)
-    const secondaryType = resource.secondaryContentType?.toLowerCase() || null
-
-    if (secondaryType) {
-      const primaryColor = getFooterColor(resource)
-      const secondaryColorMap = {
-        'device discovery and management': 'var(--brand-aqua)',
-        'automation development': 'var(--brand-blue)',
-        'automation design': 'var(--brand-purple)',
-        'product overview': 'var(--brand-green)',
-      }
-      const secondaryColor =
-        secondaryColorMap[secondaryType] || 'var(--brand-grey-600)'
-      return `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`
-    }
-
-    return getFooterColor(resource)
+  // Button styles
+  const baseButtonStyle = {
+    background: 'var(--brand-blue)',
+    color: 'var(--brand-white)',
+    border: '2px solid var(--brand-blue)',
+    borderRadius: '6px',
+    padding: '12px 28px',
+    fontSize: '1.1rem',
+    fontFamily: 'var(--ifm-font-family-base)',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease-in-out',
+    boxShadow: '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
+    textDecoration: 'none',
+    display: 'inline-block',
   }
 
-  // Get border color based on primary level using brand colors - updated
-  const getBorderColor = level => {
-    switch (level?.toLowerCase()) {
-      case 'beginner':
-        return 'var(--brand-aqua)' // Cyan/aqua for beginner
-      case 'intermediate':
-        return 'var(--brand-blue)' // Blue for intermediate
-      case 'advanced':
-        return 'var(--brand-black-700)' // Dark navy for advanced
-      default:
-        return 'var(--brand-grey-300)' // Default gray
-    }
+  const disabledButtonStyle = {
+    ...baseButtonStyle,
+    background: 'var(--brand-grey-400)',
+    color: 'var(--brand-grey-600)',
+    border: '2px solid var(--brand-grey-400)',
+    cursor: 'not-allowed',
+    opacity: 0.6,
   }
 
-  // Helper function to get default level descriptions
-  const getLevelDescription = level => {
-    switch (level.toLowerCase()) {
-      case 'beginner':
-        return 'Perfect for new users with no prior experience.'
-      case 'intermediate':
-        return 'For users who are familiar with basic functionality and want to expand their skills.'
-      case 'advanced':
-        return 'Designed for experienced users who want to master complex features.'
-      default:
-        return 'Suitable for all skill levels.'
-    }
-  }
-
-  // Get content type display name - UPDATED TO HANDLE PRIMARY LEVEL VALUES
-  const getContentTypeDisplay = resource => {
-    const contentType = getContentType(resource)
-
-    switch (contentType) {
-      case 'device discovery and management':
-        return 'Device Discovery and Management'
-      case 'automation development':
-        return 'Automation Development'
-      case 'automation design':
-        return 'Automation Design'
-      case 'product overview':
-        return 'Product Overview'
-      default:
-        return 'General'
-    }
-  }
-
-  // Individual card component
+  // Card component for individual resources
   const ResourceCard = ({ resource, index }) => {
-    const isHovered = hoveredCards[index] || false
-    const isExpanded = expandedCards[index] || false
-
-    // Use primaryLevel and secondaryLevel from resource or default to level for backward compatibility
+    const isExpanded = expandedCards[index]
+    const isHovered = hoveredCards[index]
+    const isDisabled = resource.available === false
     const primaryLevel = resource.primaryLevel || resource.level || 'beginner'
-    const secondaryLevel = resource.secondaryLevel || null
 
-    // Check if card is disabled
-    const isDisabled = resource.disabled === true
-
-    // Text and card styles
     const titleStyle = {
       fontFamily: 'var(--ifm-font-family-base)',
-      fontWeight: 600,
-      fontSize: '1.75rem',
+      fontSize: '1.5rem',
+      fontWeight: '600',
       color: isDisabled ? 'var(--brand-grey-500)' : 'var(--brand-black-700)',
       margin: '0 0 16px 0',
     }
@@ -250,14 +158,6 @@ const MainLandingPageCards = ({ resources = [] }) => {
       fontSize: '1.2rem',
       lineHeight: '1.5',
       margin: '0',
-    }
-
-    // Handle button click for disabled cards
-    const handleButtonClick = e => {
-      if (isDisabled) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
     }
 
     return (
@@ -308,135 +208,48 @@ const MainLandingPageCards = ({ resources = [] }) => {
         )}
 
         {!isExpanded ? (
-          // Summary View
-          <div
-            style={{
-              padding: '24px',
-            }}
-          >
-            {/* Logo and Title Row */}
+          // Condensed Card View
+          <div style={{ padding: '32px' }}>
+            <h3 style={titleStyle}>{resource.title}</h3>
+            <p style={descriptionStyle}>{resource.description}</p>
+
+            {/* Level badge and buttons container */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'flex-start',
-                marginBottom: '1.25rem',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '24px',
               }}
             >
-              <div
-                style={{
-                  background: 'var(--brand-black)',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  marginRight: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow:
-                    '0 0 10px rgba(5, 7, 15, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid var(--brand-black-700)',
-                }}
-              >
-                <img
-                  src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
-                  alt='Resolve'
+              {/* Level badge */}
+              {primaryLevel && (
+                <div
                   style={{
-                    width: '40px',
-                    height: '40px',
-                    objectFit: 'contain',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={titleStyle}>{resource.title}</h3>
-                <p style={descriptionStyle}>{resource.description}</p>
-              </div>
-            </div>
-
-            {/* Buttons in center of card body */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '20px',
-                marginTop: '32px',
-              }}
-            >
-              <Button
-                onClick={() => !isDisabled && toggleCardDetails(index)}
-                style={{
-                  background: 'var(--brand-blue)',
-                  color: 'var(--brand-white)',
-                  border: '2px solid var(--brand-blue)',
-                  borderRadius: '6px',
-                  padding: '12px 28px',
-                  fontSize: '1.1rem',
-                  fontFamily: 'var(--ifm-font-family-base)',
-                  cursor: isDisabled ? 'default' : 'pointer',
-                  transition: 'all 0.3s ease-in-out',
-                  boxShadow:
-                    '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                  opacity: isDisabled ? 0.6 : 1,
-                }}
-                onMouseOver={e => {
-                  if (!isDisabled) {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow =
-                      '0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3)'
-                    e.currentTarget.style.borderColor = 'var(--brand-blue-400)'
-                    e.currentTarget.style.background = 'var(--brand-blue-400)'
-                  }
-                }}
-                onMouseOut={e => {
-                  if (!isDisabled) {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow =
-                      '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)'
-                    e.currentTarget.style.borderColor = 'var(--brand-blue)'
-                    e.currentTarget.style.background = 'var(--brand-blue)'
-                  }
-                }}
-                disabled={isDisabled}
-              >
-                View Details
-              </Button>
-
-              {isDisabled ? (
-                <Button
-                  style={{
-                    background: 'var(--brand-blue)',
+                    background: getLevelBadgeColor(primaryLevel),
                     color: 'var(--brand-white)',
-                    border: '2px solid var(--brand-blue)',
-                    borderRadius: '6px',
-                    padding: '12px 28px',
-                    fontSize: '1.1rem',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '0.9rem',
                     fontFamily: 'var(--ifm-font-family-base)',
-                    cursor: 'default',
-                    transition: 'all 0.3s ease-in-out',
-                    boxShadow:
-                      '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                    opacity: 0.6,
+                    fontWeight: '600',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                    opacity: isDisabled ? 0.7 : 1,
                   }}
-                  disabled={true}
                 >
-                  {resource.resourceType === 'module'
-                    ? 'Get Started'
-                    : 'View Module'}
-                </Button>
-              ) : (
-                <Link to={resource.link}>
-                  <Button
+                  {formatLevelDisplay(primaryLevel)}
+                </div>
+              )}
+
+              {/* Buttons */}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                {!isDisabled && (
+                  <button
+                    onClick={() => toggleCardDetails(index)}
                     style={{
-                      background: 'var(--brand-blue)',
-                      color: 'var(--brand-white)',
-                      border: '2px solid var(--brand-blue)',
-                      borderRadius: '6px',
-                      padding: '12px 28px',
-                      fontSize: '1.1rem',
-                      fontFamily: 'var(--ifm-font-family-base)',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease-in-out',
-                      boxShadow:
-                        '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
+                      ...baseButtonStyle,
+                      padding: '10px 20px',
+                      fontSize: '0.95rem',
                     }}
                     onMouseOver={e => {
                       e.currentTarget.style.transform = 'translateY(-2px)'
@@ -449,263 +262,133 @@ const MainLandingPageCards = ({ resources = [] }) => {
                     onMouseOut={e => {
                       e.currentTarget.style.transform = 'translateY(0)'
                       e.currentTarget.style.boxShadow =
-                        '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)'
+                        baseButtonStyle.boxShadow
                       e.currentTarget.style.borderColor = 'var(--brand-blue)'
                       e.currentTarget.style.background = 'var(--brand-blue)'
                     }}
-                    onClick={handleButtonClick}
                   >
+                    View Details
+                  </button>
+                )}
+
+                {isDisabled ? (
+                  <button style={disabledButtonStyle} disabled={true}>
                     {resource.resourceType === 'module'
                       ? 'Get Started'
                       : 'View Module'}
-                  </Button>
-                </Link>
-              )}
+                  </button>
+                ) : (
+                  <Link to={resource.link} style={{ textDecoration: 'none' }}>
+                    <button
+                      style={baseButtonStyle}
+                      onMouseOver={e => {
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow =
+                          '0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3)'
+                        e.currentTarget.style.borderColor =
+                          'var(--brand-blue-400)'
+                        e.currentTarget.style.background =
+                          'var(--brand-blue-400)'
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow =
+                          baseButtonStyle.boxShadow
+                        e.currentTarget.style.borderColor = 'var(--brand-blue)'
+                        e.currentTarget.style.background = 'var(--brand-blue)'
+                      }}
+                    >
+                      {resource.resourceType === 'module'
+                        ? 'Get Started'
+                        : 'View Module'}
+                    </button>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         ) : (
-          // Expanded Details View
-          <div
-            style={{
-              padding: '24px',
-            }}
-          >
-            {/* Header with Logo and Title */}
+          // Expanded Card View
+          <div style={{ padding: '32px' }}>
+            <h3 style={titleStyle}>{resource.title}</h3>
+            <p style={descriptionStyle}>{resource.description}</p>
+
+            {/* Detailed content */}
             <div
               style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                marginBottom: '1.25rem',
+                marginTop: '24px',
+                borderTop: '1px solid var(--brand-grey-300)',
+                paddingTop: '24px',
               }}
             >
               <div
                 style={{
-                  background: 'var(--brand-black)',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  marginRight: '20px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow:
-                    '0 0 10px rgba(5, 7, 15, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid var(--brand-black-700)',
+                  gap: '32px',
+                  alignItems: 'flex-start',
                 }}
               >
-                <img
-                  src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
-                  alt='Resolve'
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    objectFit: 'contain',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={titleStyle}>{resource.title}</h3>
-                <p style={descriptionStyle}>{resource.description}</p>
-              </div>
-            </div>
-
-            {/* Additional Details - Full Width */}
-            <div
-              style={{
-                marginTop: '1.5rem',
-                paddingTop: '1.5rem',
-                borderTop: '2px solid var(--brand-grey-300)',
-                marginBottom: '1.5rem',
-              }}
-            >
-              {/* Extended Description */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h5
-                  style={{
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    fontWeight: 600,
-                    fontSize: '1.3rem',
-                    color: isDisabled
-                      ? 'var(--brand-grey-500)'
-                      : 'var(--brand-black-700)',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  Course Description
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: 'var(--brand-grey-100)',
-                    padding: '1rem',
-                    borderRadius: '6px',
-                    border: '2px solid var(--brand-grey-300)',
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    fontSize: '1.1rem',
-                    color: isDisabled
-                      ? 'var(--brand-grey-500)'
-                      : 'var(--brand-black)',
-                  }}
-                >
-                  <p>{resource.extendedDescription}</p>
-                </div>
-              </div>
-
-              {/* Level Details */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h5
-                  style={{
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    fontWeight: 600,
-                    fontSize: '1.3rem',
-                    color: isDisabled
-                      ? 'var(--brand-grey-500)'
-                      : 'var(--brand-black-700)',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  Level Information
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: 'var(--brand-grey-100)',
-                    padding: '1rem',
-                    borderRadius: '6px',
-                    border: '2px solid var(--brand-grey-300)',
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    fontSize: '1.1rem',
-                    color: isDisabled
-                      ? 'var(--brand-grey-500)'
-                      : 'var(--brand-black)',
-                  }}
-                >
-                  {/* Primary Level */}
-                  <div
+                {/* Left column - Course list */}
+                <div style={{ flex: 1 }}>
+                  <h4
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: '0.75rem',
+                      fontFamily: 'var(--ifm-font-family-base)',
+                      fontSize: '1.3rem',
+                      fontWeight: '600',
+                      margin: '0 0 16px 0',
+                      color: isDisabled
+                        ? 'var(--brand-grey-500)'
+                        : 'var(--brand-black-700)',
                     }}
                   >
-                    <div
-                      style={{
-                        background: getLevelBadgeColor(primaryLevel),
-                        borderRadius: '4px',
-                        padding: '0.25rem 0.75rem',
-                        color: 'var(--brand-white)',
-                        fontWeight: '500',
-                        fontSize: '1.05rem',
-                        marginRight: '0.75rem',
-                        fontFamily: 'var(--ifm-font-family-base)',
-                        opacity: isDisabled ? 0.7 : 1,
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                      }}
-                    >
-                      {formatLevelDisplay(primaryLevel)}
-                    </div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--ifm-font-family-base)',
-                      }}
-                    >
-                      <strong>Primary Level:</strong>{' '}
-                      {resource.primaryLevelDescription ||
-                        resource.levelDescription ||
-                        getLevelDescription(primaryLevel)}
-                    </span>
+                    {resource.resourceType === 'module'
+                      ? 'What you will learn:'
+                      : 'Courses included:'}
+                  </h4>
+                  <div
+                    style={{
+                      fontSize: '1.1rem',
+                      lineHeight: '1.6',
+                      color: isDisabled
+                        ? 'var(--brand-grey-500)'
+                        : 'var(--brand-black)',
+                    }}
+                  >
+                    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                      {resource.courses &&
+                        resource.courses.map((course, i) => (
+                          <li key={i} style={{ marginBottom: '0.5rem' }}>
+                            {course}
+                          </li>
+                        ))}
+                    </ul>
+                    {resource.usageInstructions && (
+                      <p style={{ marginTop: '0.75rem' }}>
+                        {resource.usageInstructions}
+                      </p>
+                    )}
                   </div>
-
-                  {/* Secondary Level - Only show if it exists */}
-                  {secondaryLevel && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: '0.75rem',
-                        marginTop: '0.75rem',
-                      }}
-                    >
-                      <div
-                        style={{
-                          background: getLevelBadgeColor(secondaryLevel),
-                          borderRadius: '4px',
-                          padding: '0.25rem 0.75rem',
-                          color: 'var(--brand-white)',
-                          fontWeight: '500',
-                          fontSize: '1.05rem',
-                          marginRight: '0.75rem',
-                          fontFamily: 'var(--ifm-font-family-base)',
-                          opacity: isDisabled ? 0.7 : 1,
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                        }}
-                      >
-                        {formatLevelDisplay(secondaryLevel)}
-                      </div>
-                      <span
-                        style={{
-                          fontFamily: 'var(--ifm-font-family-base)',
-                        }}
-                      >
-                        <strong>Secondary Level:</strong>{' '}
-                        {resource.secondaryLevelDescription ||
-                          getLevelDescription(secondaryLevel)}
-                      </span>
-                    </div>
-                  )}
-
-                  {resource.prerequisites && (
-                    <div
-                      style={{
-                        marginTop: '0.75rem',
-                        fontFamily: 'var(--ifm-font-family-base)',
-                      }}
-                    >
-                      <strong>Prerequisites:</strong> {resource.prerequisites}
-                    </div>
-                  )}
                 </div>
-              </div>
 
-              {/* Course List */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h5
-                  style={{
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    fontWeight: 600,
-                    fontSize: '1.3rem',
-                    color: isDisabled
-                      ? 'var(--brand-grey-500)'
-                      : 'var(--brand-black-700)',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  Courses Include
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: 'var(--brand-grey-100)',
-                    padding: '1rem',
-                    borderRadius: '6px',
-                    border: '2px solid var(--brand-grey-300)',
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    fontSize: '1.1rem',
-                    color: isDisabled
-                      ? 'var(--brand-grey-500)'
-                      : 'var(--brand-black)',
-                  }}
-                >
-                  <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-                    {resource.courses &&
-                      resource.courses.map((course, i) => (
-                        <li key={i} style={{ marginBottom: '0.5rem' }}>
-                          {course}
-                        </li>
-                      ))}
-                  </ul>
-                  {resource.usageInstructions && (
-                    <p style={{ marginTop: '0.75rem' }}>
-                      {resource.usageInstructions}
-                    </p>
-                  )}
-                </div>
+                {/* Right column - Level badge */}
+                {primaryLevel && (
+                  <div
+                    style={{
+                      background: getLevelBadgeColor(primaryLevel),
+                      color: 'var(--brand-white)',
+                      padding: '12px 20px',
+                      borderRadius: '25px',
+                      fontSize: '1rem',
+                      fontFamily: 'var(--ifm-font-family-base)',
+                      fontWeight: '600',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      whiteSpace: 'nowrap',
+                      opacity: isDisabled ? 0.7 : 1,
+                    }}
+                  >
+                    {formatLevelDisplay(primaryLevel)}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -718,21 +401,9 @@ const MainLandingPageCards = ({ resources = [] }) => {
                 marginTop: '32px',
               }}
             >
-              <Button
+              <button
                 onClick={() => toggleCardDetails(index)}
-                style={{
-                  background: 'var(--brand-blue)',
-                  color: 'var(--brand-white)',
-                  border: '2px solid var(--brand-blue)',
-                  borderRadius: '6px',
-                  padding: '12px 28px',
-                  fontSize: '1.1rem',
-                  fontFamily: 'var(--ifm-font-family-base)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease-in-out',
-                  boxShadow:
-                    '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                }}
+                style={baseButtonStyle}
                 onMouseOver={e => {
                   e.currentTarget.style.transform = 'translateY(-2px)'
                   e.currentTarget.style.boxShadow =
@@ -742,53 +413,24 @@ const MainLandingPageCards = ({ resources = [] }) => {
                 }}
                 onMouseOut={e => {
                   e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow =
-                    '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)'
+                  e.currentTarget.style.boxShadow = baseButtonStyle.boxShadow
                   e.currentTarget.style.borderColor = 'var(--brand-blue)'
                   e.currentTarget.style.background = 'var(--brand-blue)'
                 }}
               >
                 Close Details
-              </Button>
+              </button>
 
               {isDisabled ? (
-                <Button
-                  style={{
-                    background: 'var(--brand-blue)',
-                    color: 'var(--brand-white)',
-                    border: '2px solid var(--brand-blue)',
-                    borderRadius: '6px',
-                    padding: '12px 28px',
-                    fontSize: '1.1rem',
-                    fontFamily: 'var(--ifm-font-family-base)',
-                    cursor: 'default',
-                    transition: 'all 0.3s ease-in-out',
-                    boxShadow:
-                      '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                    opacity: 0.6,
-                  }}
-                  disabled={true}
-                >
+                <button style={disabledButtonStyle} disabled={true}>
                   {resource.resourceType === 'module'
                     ? 'Get Started'
                     : 'View Module'}
-                </Button>
+                </button>
               ) : (
-                <Link to={resource.link}>
-                  <Button
-                    style={{
-                      background: 'var(--brand-blue)',
-                      color: 'var(--brand-white)',
-                      border: '2px solid var(--brand-blue)',
-                      borderRadius: '6px',
-                      padding: '12px 28px',
-                      fontSize: '1.1rem',
-                      fontFamily: 'var(--ifm-font-family-base)',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease-in-out',
-                      boxShadow:
-                        '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-                    }}
+                <Link to={resource.link} style={{ textDecoration: 'none' }}>
+                  <button
+                    style={baseButtonStyle}
                     onMouseOver={e => {
                       e.currentTarget.style.transform = 'translateY(-2px)'
                       e.currentTarget.style.boxShadow =
@@ -800,7 +442,7 @@ const MainLandingPageCards = ({ resources = [] }) => {
                     onMouseOut={e => {
                       e.currentTarget.style.transform = 'translateY(0)'
                       e.currentTarget.style.boxShadow =
-                        '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)'
+                        baseButtonStyle.boxShadow
                       e.currentTarget.style.borderColor = 'var(--brand-blue)'
                       e.currentTarget.style.background = 'var(--brand-blue)'
                     }}
@@ -808,32 +450,25 @@ const MainLandingPageCards = ({ resources = [] }) => {
                     {resource.resourceType === 'module'
                       ? 'Get Started'
                       : 'View Module'}
-                  </Button>
+                  </button>
                 </Link>
               )}
             </div>
           </div>
         )}
 
-        {/* Footer with level indicator - using matching gradients */}
+        {/* Footer with level indicator */}
         {resource.secondaryLevel ? (
-          // Dual level footer - blend the two gradients
+          // Dual level footer
           <div
             style={{
-              height: '40px',
-              background: `linear-gradient(to right, 
-                ${getFooterBackgroundColor(primaryLevel)
-                  .replace('linear-gradient(135deg, ', '')
-                  .replace(')', '')}, 
-                ${getFooterBackgroundColor(resource.secondaryLevel)
-                  .replace('linear-gradient(135deg, ', '')
-                  .replace(')', '')})`,
-              borderBottomLeftRadius: '6px',
-              borderBottomRightRadius: '6px',
+              padding: '12px 20px',
+              background: `linear-gradient(135deg, ${getLevelBadgeColor(
+                primaryLevel,
+              )} 0%, ${getLevelBadgeColor(resource.secondaryLevel)} 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 24px',
               opacity: isDisabled ? 0.7 : 1,
             }}
           >
@@ -863,13 +498,11 @@ const MainLandingPageCards = ({ resources = [] }) => {
             </span>
           </div>
         ) : (
-          // Single level footer with gradient
+          // Single level footer
           <div
             style={{
-              height: '40px',
-              background: getFooterBackgroundColor(primaryLevel),
-              borderBottomLeftRadius: '6px',
-              borderBottomRightRadius: '6px',
+              padding: '12px 20px',
+              backgroundColor: getLevelBadgeColor(primaryLevel),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
