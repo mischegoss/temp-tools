@@ -1,5 +1,5 @@
 ---
-title: Identify Your Automation Potential Module 
+title: Automation Essentials Business Requirements
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
@@ -65,33 +65,21 @@ import { useState, useEffect, useRef } from 'react';
 `}
 </style>
 
-<BrowserOnly fallback={<div style={{padding: '2rem', textAlign: 'center'}}>Loading automation module...</div>}>
-  {() => <AutomationContent />}
-</BrowserOnly>
-
-export function AutomationContent() {
-  return (
-    <ProtectedRoute>
-      <ModuleContent />
-    </ProtectedRoute>
-  );
-}
-
 export function ModuleContent() {
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Simple handler to hide the loading spinner when iframe loads
-  const handleIframeLoad = () => {
-    setIsLoading(false);
-  };
-  
-  return (
-    <>
-      <Navigation />
-      
-      <div 
-        style={{ 
+const { user } = useAuth();
+const [isLoading, setIsLoading] = useState(true);
+
+// Simple handler to hide the loading spinner when iframe loads
+const handleIframeLoad = () => {
+setIsLoading(false);
+};
+
+return (
+<>
+<Navigation />
+
+      <div
+        style={{
           position: 'absolute',
           top: 0,
           left: 0,
@@ -128,5 +116,18 @@ export function ModuleContent() {
         />
       </div>
     </>
-  );
+
+);
 }
+
+export function AutomationContent() {
+return (
+<ProtectedRoute>
+<ModuleContent />
+</ProtectedRoute>
+);
+}
+
+<BrowserOnly fallback={<div style={{padding: '2rem', textAlign: 'center'}}>Loading automation module...</div>}>
+{() => <AutomationContent />}
+</BrowserOnly>

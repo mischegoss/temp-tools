@@ -1,3 +1,4 @@
+// Enhanced AuthContext with better skipAuthCheck handling
 // src/contexts/AuthContext.js
 import React, {
   createContext,
@@ -9,8 +10,8 @@ import React, {
 import { onAuthStateChanged } from 'firebase/auth'
 import { useLocation } from '@docusaurus/router'
 import { auth } from '@site/src/firebase/firebase'
-import useFormAssociation from '../components/Forms/utils/UseFormAssociation' // Hook to Associate Forms
-import { useFirebase } from './FirebaseContext' // Import to get db reference
+import useFormAssociation from '../components/Forms/utils/UseFormAssociation'
+import { useFirebase } from './FirebaseContext'
 import {
   isBrowser,
   getItem,
@@ -24,33 +25,54 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(!skipAuthCheck)
   const location = useLocation()
-  const { db } = useFirebase() // Get the db reference
+  const { db } = useFirebase()
 
-  // Use a ref to track mounted state
+  // Use a ref to track mounted state and prevent double listeners
   const isMounted = useRef(true)
+  const authListenerRef = useRef(null)
 
   // Use the form association hook to link anonymous submissions
   useFormAssociation(db, user)
 
   // Set isMounted to false when component unmounts
   useEffect(() => {
-    console.log('[AuthContext] Provider mounted')
+    console.log('[AuthContext] Provider mounted, skipAuthCheck:', skipAuthCheck)
     return () => {
       console.log('[AuthContext] Provider unmounting')
       isMounted.current = false
+      // Clean up any existing auth listener
+      if (authListenerRef.current) {
+        authListenerRef.current()
+        authListenerRef.current = null
+      }
     }
   }, [])
 
-  // Handle authentication state changes - REMOVED location.pathname dependency
+  // Handle authentication state changes with better cleanup
   useEffect(() => {
-    // Skip auth checking for non-learning paths
-    if (skipAuthCheck) {
-      console.log('[AuthContext] Skipping auth check as specified')
-      setLoading(false)
-      return () => {} // Empty cleanup function
+    // Clean up any existing listener first
+    if (authListenerRef.current) {
+      console.log('[AuthContext] Cleaning up existing auth listener')
+      authListenerRef.current()
+      authListenerRef.current = null
     }
 
-    console.log('[AuthContext] Setting up auth state listener')
+    // Skip auth checking for non-learning paths
+    if (skipAuthCheck) {
+      console.log(
+        '[AuthContext] Skipping auth check as specified for path:',
+        location.pathname,
+      )
+      if (isMounted.current) {
+        setLoading(false)
+      }
+      return
+    }
+
+    console.log(
+      '[AuthContext] Setting up auth state listener for path:',
+      location.pathname,
+    )
 
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -61,6 +83,7 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
             : 'null',
           path: location.pathname,
           mounted: isMounted.current,
+          skipAuthCheck,
         })
 
         // Only update state if component is still mounted
@@ -110,12 +133,18 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
       },
     )
 
-    // Clean up subscription on unmount
+    // Store the unsubscribe function
+    authListenerRef.current = unsubscribe
+
+    // Clean up subscription on unmount or effect re-run
     return () => {
       console.log('[AuthContext] Cleaning up auth state observer')
-      unsubscribe()
+      if (authListenerRef.current) {
+        authListenerRef.current()
+        authListenerRef.current = null
+      }
     }
-  }, [skipAuthCheck]) // REMOVED location.pathname dependency
+  }, [skipAuthCheck, location.pathname]) // Include location.pathname for path-based logic
 
   // Debug log authentication state - Only log when NOT skipping auth check
   useEffect(() => {

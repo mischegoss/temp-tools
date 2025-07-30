@@ -1,5 +1,5 @@
 ---
-title: Explore Orchestration
+title: Explore Orchestration Module 
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
@@ -65,18 +65,6 @@ import { useState, useEffect, useRef } from 'react';
 `}
 </style>
 
-<BrowserOnly fallback={<div style={{padding: '2rem', textAlign: 'center'}}>Loading orchestration module...</div>}>
-  {() => <OrchestrationContent />}
-</BrowserOnly>
-
-export function OrchestrationContent() {
-  return (
-    <ProtectedRoute>
-      <ModuleContent />
-    </ProtectedRoute>
-  );
-}
-
 export function ModuleContent() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
@@ -130,3 +118,15 @@ export function ModuleContent() {
     </>
   );
 }
+
+export function AutomationContent() {
+  return (
+    <ProtectedRoute>
+      <ModuleContent />
+    </ProtectedRoute>
+  );
+}
+
+<BrowserOnly fallback={<div style={{padding: '2rem', textAlign: 'center'}}>Loading orchestration module...</div>}>
+  {() => <AutomationContent />}
+</BrowserOnly>

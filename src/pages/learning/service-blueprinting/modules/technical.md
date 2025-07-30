@@ -1,5 +1,5 @@
 ---
-title: People and Technology Module 
+title: Focus on People and Technology Module 
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
@@ -65,18 +65,6 @@ import { useState, useEffect, useRef } from 'react';
 `}
 </style>
 
-<BrowserOnly fallback={<div style={{padding: '2rem', textAlign: 'center'}}>Loading people and technology module...</div>}>
-  {() => <PeopleTechContent />}
-</BrowserOnly>
-
-export function PeopleTechContent() {
-  return (
-    <ProtectedRoute>
-      <ModuleContent />
-    </ProtectedRoute>
-  );
-}
-
 export function ModuleContent() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
@@ -121,7 +109,7 @@ export function ModuleContent() {
             overflow: 'hidden',
             display: 'block'
           }}
-          title="People and Technology"
+          title="Focus on People and Technology"
           frameBorder="0"
           allowFullScreen
           onLoad={handleIframeLoad}
@@ -130,3 +118,15 @@ export function ModuleContent() {
     </>
   );
 }
+
+export function AutomationContent() {
+  return (
+    <ProtectedRoute>
+      <ModuleContent />
+    </ProtectedRoute>
+  );
+}
+
+<BrowserOnly fallback={<div style={{padding: '2rem', textAlign: 'center'}}>Loading technical readiness module...</div>}>
+  {() => <AutomationContent />}
+</BrowserOnly>

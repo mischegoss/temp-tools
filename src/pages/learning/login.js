@@ -1,10 +1,11 @@
-// Enhanced version with error boundary
+// Fixed version - Remove duplicate AuthProvider wrapping
 // File: src/pages/learning/login.js
 
 import React from 'react'
 import Layout from '@theme/Layout'
-import { AuthProvider } from '@site/src/contexts/AuthContext'
-import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
+// Remove these imports - providers are already global
+// import { AuthProvider } from '@site/src/contexts/AuthContext'
+// import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
 import LoginComponent from '@site/src/components/service-blueprinting/login/LoginComponent'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 import ErrorBoundary from '@docusaurus/ErrorBoundary'
@@ -36,11 +37,8 @@ export default function LoginPage() {
               </div>
             )}
           >
-            <FirebaseProvider>
-              <AuthProvider skipAuthCheck={false}>
-                <LoginComponent />
-              </AuthProvider>
-            </FirebaseProvider>
+            {/* No need for providers - they're already global via Root */}
+            <LoginComponent />
           </ErrorBoundary>
         )}
       </BrowserOnly>
