@@ -24,6 +24,43 @@ export default function LoginComponent() {
   const { user } = useAuth()
   const [redirectAttempted, setRedirectAttempted] = useState(false)
 
+  // Check if user was redirected from a protected page
+  const redirectUrl = getSessionItem('redirectUrl', '')
+
+  // Helper functions to classify pages
+  const isPublicPage = url => {
+    const publicPaths = [
+      '/learning/',
+      '/learning/discover',
+      '/learning/actions',
+      '/learning/contact-us',
+      '/', // homepage
+    ]
+    return publicPaths.some(path => url.startsWith(path))
+  }
+
+  const isProtectedPage = url => {
+    return (
+      url.includes('/service-blueprinting') ||
+      url.includes('/automation-essentials')
+    )
+  }
+
+  // Determine page origin
+  const cameFromPublic = isPublicPage(redirectUrl)
+  const cameFromProtected = isProtectedPage(redirectUrl)
+
+  // Get user-friendly course name for auth message
+  const getAuthMessage = url => {
+    if (url.includes('service-blueprinting')) {
+      return 'The Service Blueprinting course requires you to login.'
+    }
+    if (url.includes('automation-essentials')) {
+      return 'The Automation Essentials course requires you to login.'
+    }
+    return 'This content requires you to login.'
+  }
+
   // Debug logging for component mounting and state changes
   useEffect(() => {
     console.log('[LoginComponent] Mounted')
@@ -37,8 +74,25 @@ export default function LoginComponent() {
       setRedirectAttempted(true)
 
       try {
-        const redirectUrl = getSessionItem('redirectUrl', '/learning/discover/')
-        console.log('[LoginComponent] Redirecting after login to:', redirectUrl)
+        let redirectUrl = getSessionItem('redirectUrl', '')
+        console.log(
+          '[LoginComponent] Raw redirectUrl from session:',
+          redirectUrl,
+        )
+
+        // FIXED: Handle cases where redirectUrl is invalid or points to login page
+        if (
+          !redirectUrl ||
+          redirectUrl === '/learning/login' ||
+          redirectUrl.includes('/login')
+        ) {
+          console.log(
+            '[LoginComponent] Invalid or missing redirectUrl, using default',
+          )
+          redirectUrl = '/learning/discover/'
+        }
+
+        console.log('[LoginComponent] Final redirectUrl:', redirectUrl)
 
         // Clear the saved redirect URL
         removeSessionItem('redirectUrl')
@@ -172,6 +226,19 @@ export default function LoginComponent() {
       // Also store in browserStorage for easy access
       setItem('companyName', companyName)
       console.log('[LoginComponent] Company name stored in browserStorage')
+
+      // MANUAL FIX: Force user state update for signup
+      // The AuthContext listener might not catch the state change fast enough
+      console.log(
+        '[LoginComponent] Manually triggering auth state refresh after signup',
+      )
+
+      // Force Firebase to refresh the current user and trigger listeners
+      await auth.currentUser.reload()
+      console.log(
+        '[LoginComponent] Auth state refreshed, current user:',
+        auth.currentUser?.email,
+      )
 
       // Don't set loading to false here - let the redirect useEffect handle it
     } catch (error) {
@@ -344,6 +411,33 @@ export default function LoginComponent() {
                 />
               </div>
 
+              {/* Authentication Required Message */}
+              {cameFromProtected && (
+                <div
+                  style={{
+                    padding: '1.5rem 2rem 0',
+                    textAlign: 'center',
+                    backgroundColor: 'var(--brand-blue-50, #f0f8ff)',
+                    borderBottom: '2px solid var(--brand-blue-200, #bfdbfe)',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: '12px 16px',
+                      background:
+                        'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)',
+                      color: 'var(--brand-white)',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                    }}
+                  >
+                    🔒 {getAuthMessage(redirectUrl)}
+                  </div>
+                </div>
+              )}
+
               <div style={{ padding: '2rem', marginBottom: '1rem' }}>
                 {error && (
                   <div style={errorStyle} role='alert'>
@@ -481,6 +575,148 @@ export default function LoginComponent() {
                   {isLogin
                     ? 'Need an account? Sign up'
                     : 'Already have an account? Login'}
+                </button>
+              </div>
+            </div>
+
+            {/* Don't Want to Login Menu - Below the login card */}
+            <div
+              style={{
+                marginTop: '2rem',
+                textAlign: 'center',
+                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: 'var(--brand-aqua-800)',
+                  marginBottom: '1rem',
+                }}
+              >
+                Don't want to login right now?
+              </h3>
+
+              <div
+                style={{
+                  border: '2px solid var(--brand-blue-400)',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--brand-white)',
+                  padding: '1.5rem',
+                  boxShadow: '0 4px 12px rgba(0, 102, 255, 0.1)',
+                  maxWidth: '400px',
+                  margin: '0 auto',
+                }}
+              >
+                {/* Learning Hub Option */}
+                <button
+                  onClick={() => {
+                    removeSessionItem('redirectUrl')
+                    history.push('/learning/')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    marginBottom: '8px',
+                    border: '2px solid var(--brand-grey-300)',
+                    borderRadius: '8px',
+                    backgroundColor: 'var(--brand-white)',
+                    color: 'var(--brand-aqua-800)',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  onMouseEnter={e => {
+                    e.target.style.borderColor = 'var(--brand-blue-400)'
+                    e.target.style.backgroundColor = 'var(--brand-blue-50)'
+                    e.target.style.transform = 'translateX(4px)'
+                  }}
+                  onMouseLeave={e => {
+                    e.target.style.borderColor = 'var(--brand-grey-300)'
+                    e.target.style.backgroundColor = 'var(--brand-white)'
+                    e.target.style.transform = 'translateX(0)'
+                  }}
+                  disabled={loading}
+                >
+                  → Learning Hub
+                </button>
+
+                {/* Discover Resolve Option */}
+                <button
+                  onClick={() => {
+                    removeSessionItem('redirectUrl')
+                    history.push('/learning/discover')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    marginBottom: '8px',
+                    border: '2px solid var(--brand-grey-300)',
+                    borderRadius: '8px',
+                    backgroundColor: 'var(--brand-white)',
+                    color: 'var(--brand-aqua-800)',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  onMouseEnter={e => {
+                    e.target.style.borderColor = 'var(--brand-blue-400)'
+                    e.target.style.backgroundColor = 'var(--brand-blue-50)'
+                    e.target.style.transform = 'translateX(4px)'
+                  }}
+                  onMouseLeave={e => {
+                    e.target.style.borderColor = 'var(--brand-grey-300)'
+                    e.target.style.backgroundColor = 'var(--brand-white)'
+                    e.target.style.transform = 'translateX(0)'
+                  }}
+                  disabled={loading}
+                >
+                  → Discover Resolve
+                </button>
+
+                {/* Service Blueprinting Catalog Option */}
+                <button
+                  onClick={() => {
+                    removeSessionItem('redirectUrl')
+                    history.push('/learning/service-blueprinting/')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid var(--brand-grey-300)',
+                    borderRadius: '8px',
+                    backgroundColor: 'var(--brand-white)',
+                    color: 'var(--brand-aqua-800)',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  onMouseEnter={e => {
+                    e.target.style.borderColor = 'var(--brand-blue-400)'
+                    e.target.style.backgroundColor = 'var(--brand-blue-50)'
+                    e.target.style.transform = 'translateX(4px)'
+                  }}
+                  onMouseLeave={e => {
+                    e.target.style.borderColor = 'var(--brand-grey-300)'
+                    e.target.style.backgroundColor = 'var(--brand-white)'
+                    e.target.style.transform = 'translateX(0)'
+                  }}
+                  disabled={loading}
+                >
+                  → Service Blueprinting Catalog
                 </button>
               </div>
             </div>

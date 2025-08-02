@@ -1,4 +1,3 @@
-// src/components/Forms/utils/WelcomeSection.jsx
 import React, { useState } from 'react'
 import { useAuth } from '@site/src/contexts/AuthContext'
 import Link from '@docusaurus/Link'
@@ -6,7 +5,6 @@ import { auth } from '@site/src/firebase/firebase'
 import { signOut } from 'firebase/auth'
 import { useHistory } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
-import { setSessionItem } from '@site/src/components/Forms/utils/BrowserStorage'
 
 /**
  * Reusable welcome section component for form and course pages
@@ -37,24 +35,143 @@ const WelcomeSectionClient = ({
   const history = useHistory()
   const [isHovered, setIsHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
+  const [showLogoutMessage, setShowLogoutMessage] = useState(false)
 
-  // Handle redirect for non-logged in users
+  // Handle logout detection and redirect - KEEP FOR DEBUGGING AuthContext
   React.useEffect(() => {
+    console.log(
+      '[ServiceBlueprintingWelcome] useEffect triggered - user:',
+      user ? user.email : 'null',
+    )
+
     if (!user) {
-      // Store the current URL before redirecting to login - using safe browserStorage
-      setSessionItem('redirectUrl', window.location.pathname)
-      // Use React Router history instead of window.location
-      history.push('/learning/login')
+      console.log(
+        '[ServiceBlueprintingWelcome] AuthContext detected user is null',
+      )
+
+      // Check if we should show the logout banner (legacy approach)
+      const shouldShowBanner =
+        sessionStorage.getItem('showLogoutBanner') === 'true'
+      console.log(
+        '[ServiceBlueprintingWelcome] Should show banner from session:',
+        shouldShowBanner,
+      )
+
+      if (shouldShowBanner) {
+        // This is the old approach - keeping for comparison
+        sessionStorage.removeItem('showLogoutBanner')
+        console.log(
+          '[ServiceBlueprintingWelcome] [LEGACY] Would show logout banner from AuthContext',
+        )
+      } else {
+        // Normal "not authenticated" behavior - redirect to login
+        console.log(
+          '[ServiceBlueprintingWelcome] [LEGACY] Would redirect to login from AuthContext',
+        )
+        // Commenting out to prevent conflicts with manual approach
+        // history.push('/learning/login')
+      }
+    } else {
+      console.log(
+        '[ServiceBlueprintingWelcome] User authenticated:',
+        user.email,
+      )
+      // Only clear manual banner if user becomes authenticated
+      setShowLogoutMessage(false)
     }
   }, [user, history])
 
   const handleLogout = async () => {
     try {
+      console.log('[ServiceBlueprintingWelcome] User initiating logout')
+
+      // Show banner immediately (don't wait for AuthContext)
+      setShowLogoutMessage(true)
+      console.log(
+        '[ServiceBlueprintingWelcome] Logout banner shown immediately',
+      )
+
+      // Sign out from Firebase
       await signOut(auth)
-      history.push('/learning/login')
+      console.log('[ServiceBlueprintingWelcome] Firebase sign out successful')
+
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        console.log('[ServiceBlueprintingWelcome] Redirecting to Learning Hub')
+        history.push('/learning/')
+      }, 3000)
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('[ServiceBlueprintingWelcome] Error signing out:', error)
+      // Still show banner even on error
+      setShowLogoutMessage(true)
+      setTimeout(() => {
+        history.push('/learning/')
+      }, 3000)
     }
+  }
+
+  // Show logout message
+  if (showLogoutMessage) {
+    return (
+      <div
+        style={{
+          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '2.5rem',
+          borderRadius: '12px',
+          border: '2px solid var(--brand-green, #10b981)',
+          backgroundColor: 'var(--brand-white)',
+          boxShadow:
+            '0 0 15px rgba(16, 185, 129, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
+          marginBottom: '2rem',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ marginBottom: '1rem' }}>
+          <div
+            style={{
+              fontSize: '2rem',
+              color: 'var(--brand-green, #10b981)',
+            }}
+          >
+            ✓
+          </div>
+        </div>
+        <h3
+          style={{
+            color: 'var(--brand-black-700)',
+            margin: '0 0 1rem 0',
+            fontSize: '1.5rem',
+            fontWeight: '600',
+          }}
+        >
+          You have been logged out
+        </h3>
+        <p
+          style={{
+            color: 'var(--brand-grey-600)',
+            margin: 0,
+            fontSize: '1.1rem',
+          }}
+        >
+          Redirecting you to the Learning Hub...
+        </p>
+        <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '20px',
+              border: '2px solid var(--brand-green-200, #bbf7d0)',
+              borderTop: '2px solid var(--brand-green, #10b981)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+            }}
+          ></div>
+        </div>
+      </div>
+    )
   }
 
   // Brand-compliant styles
@@ -65,19 +182,13 @@ const WelcomeSectionClient = ({
       flexDirection: 'column',
       padding: '2.5rem',
       borderRadius: '12px',
-      border: '2px solid var(--brand-blue-400)', // Brand secondary stroke outline
+      border: '2px solid var(--brand-blue-400)',
       backgroundColor: 'var(--brand-white)',
       boxShadow:
-        '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)', // Brand shadow
+        '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
       transition: 'all 0.3s ease-in-out',
       marginBottom: '2rem',
-      transform: isHovered && user ? 'translateY(-5px)' : 'none', // Brand hover lift
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    cardHover: {
-      boxShadow:
-        '0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2)', // Enhanced brand shadow
+      transform: isHovered && user ? 'translateY(-5px)' : 'translateY(0)',
     },
     gradientOverlay: {
       position: 'absolute',
@@ -87,132 +198,103 @@ const WelcomeSectionClient = ({
       height: '100%',
       background:
         'radial-gradient(circle at 10% 20%, rgba(0, 80, 199, 0.05) 0%, transparent 50%)',
-      pointerEvents: 'none',
       borderRadius: '12px',
+      pointerEvents: 'none',
       zIndex: 1,
     },
     contentWrapper: {
-      display: 'flex',
-      flexDirection: 'column',
       position: 'relative',
       zIndex: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.5rem',
     },
     headerSection: {
-      marginBottom: '1.5rem',
-      paddingBottom: '1.5rem',
-      borderBottom: '2px solid var(--brand-aqua)', // Brand aqua divider
-      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     nameText: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      color: 'var(--brand-blue)', // Brand blue
-      fontSize: '2.25rem',
+      fontSize: '1.8rem',
       fontWeight: '700',
-      margin: '0',
+      color: 'var(--brand-black-700)',
+      margin: 0,
+      lineHeight: '1.2',
     },
     infoSection: {
       display: 'flex',
+      alignItems: 'flex-end',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      gap: '2rem',
     },
     userInfo: {
-      display: 'flex',
-      flexDirection: 'column',
+      flex: 1,
     },
     description: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.1rem',
-      color: 'var(--brand-grey-600)',
+      fontSize: '1rem',
+      color: 'var(--brand-grey-700)',
+      margin: '0 0 0.5rem 0',
       lineHeight: '1.5',
-      fontWeight: '500',
     },
     email: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1rem',
-      marginTop: '0.5rem',
+      fontSize: '0.9rem',
       color: 'var(--brand-grey-600)',
+      margin: 0,
+      fontStyle: 'italic',
     },
-    button: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      padding: '14px 28px',
-      fontSize: '1.1rem',
-      fontWeight: '600',
-      background:
-        'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-aqua) 100%)', // Brand aqua gradient
-      color: 'var(--brand-white)',
-      border: '2px solid var(--brand-aqua)',
+    logoutButton: {
+      padding: '12px 24px',
+      backgroundColor: 'transparent',
+      color: 'var(--brand-aqua-800)',
+      border: '2px solid var(--brand-grey-400)',
       borderRadius: '8px',
+      fontSize: '1rem',
+      fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.3s ease-in-out',
-      boxShadow: 'none',
-      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
       outline: 'none',
-    },
-    buttonHover: {
-      transform: 'translateY(-2px)',
-      boxShadow:
-        '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 16px rgba(0, 212, 255, 0.3)', // Brand aqua glow
-    },
-    buttonActive: {
-      transform: 'translateY(-1px)',
-    },
-    loginLink: {
       fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontWeight: 'bold',
-      color: 'var(--brand-aqua)',
-      textDecoration: 'none',
-      transition: 'color 0.3s ease',
+      whiteSpace: 'nowrap',
     },
-    loginLinkHover: {
-      color: 'var(--brand-blue)',
+    logoutButtonHover: {
+      borderColor: 'var(--brand-blue-400)',
+      backgroundColor: 'var(--brand-blue-50)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(0, 102, 255, 0.2)',
     },
     guestTitle: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.75rem',
+      fontSize: '1.5rem',
       fontWeight: '600',
-      marginBottom: '0.75rem',
-      color: 'var(--brand-blue)',
-      textAlign: 'center',
+      color: 'var(--brand-black-700)',
+      margin: '0 0 1rem 0',
     },
     guestMessage: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.1rem',
-      color: 'var(--brand-grey-600)',
-      textAlign: 'center',
+      fontSize: '1rem',
+      color: 'var(--brand-grey-700)',
+      margin: 0,
+      lineHeight: '1.5',
+    },
+    loginLink: {
+      color: 'var(--brand-aqua-800)',
+      textDecoration: 'underline',
+      fontWeight: '600',
+      transition: 'color 0.3s ease',
     },
   }
 
-  const [isButtonActive, setIsButtonActive] = useState(false)
-  const [isLinkHovered, setIsLinkHovered] = useState(false)
-
   const getCardStyle = () => {
-    let style = { ...styles.card }
-    if (isHovered && user) {
-      style = { ...style, ...styles.cardHover }
+    return {
+      ...styles.card,
+      ...(isHovered && user ? { transform: 'translateY(-5px)' } : {}),
     }
-    return style
   }
 
   const getButtonStyle = () => {
-    let style = { ...styles.button }
-    if (isButtonHovered) {
-      style = { ...style, ...styles.buttonHover }
-    }
-    if (isButtonActive) {
-      style = { ...style, ...styles.buttonActive }
-    }
-    return style
-  }
-
-  const getLinkStyle = () => {
     return {
-      ...styles.loginLink,
-      ...(isLinkHovered ? styles.loginLinkHover : {}),
+      ...styles.logoutButton,
+      ...(isButtonHovered ? styles.logoutButtonHover : {}),
     }
   }
-
-  const handleButtonMouseDown = () => setIsButtonActive(true)
-  const handleButtonMouseUp = () => setIsButtonActive(false)
 
   // Conditional rendering based on user authentication status
   return (
@@ -228,7 +310,10 @@ const WelcomeSectionClient = ({
         <div style={styles.contentWrapper}>
           <div style={styles.headerSection}>
             <h2 style={styles.nameText}>
-              Welcome, {userProfile?.companyName || user.email.split('@')[0]}
+              Welcome,{' '}
+              {user.displayName ||
+                userProfile?.companyName ||
+                user.email.split('@')[0]}
             </h2>
           </div>
 
@@ -241,12 +326,7 @@ const WelcomeSectionClient = ({
               onClick={handleLogout}
               style={getButtonStyle()}
               onMouseEnter={() => setIsButtonHovered(true)}
-              onMouseLeave={() => {
-                setIsButtonHovered(false)
-                setIsButtonActive(false)
-              }}
-              onMouseDown={handleButtonMouseDown}
-              onMouseUp={handleButtonMouseUp}
+              onMouseLeave={() => setIsButtonHovered(false)}
             >
               Logout
             </button>
@@ -264,12 +344,7 @@ const WelcomeSectionClient = ({
           <h3 style={styles.guestTitle}>{guestTitle}</h3>
           <p style={styles.guestMessage}>
             {guestMessage}{' '}
-            <Link
-              to='/learning/login'
-              style={getLinkStyle()}
-              onMouseEnter={() => setIsLinkHovered(true)}
-              onMouseLeave={() => setIsLinkHovered(false)}
-            >
+            <Link to='/learning/login' style={styles.loginLink}>
               login
             </Link>
           </p>

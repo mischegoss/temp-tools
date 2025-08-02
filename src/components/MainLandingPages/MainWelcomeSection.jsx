@@ -5,7 +5,6 @@ import { auth } from '@site/src/firebase/firebase'
 import { signOut } from 'firebase/auth'
 import { useHistory } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
-import { setSessionItem } from '@site/src/components/Forms/utils/BrowserStorage'
 
 /**
  * Reusable welcome section component for form and course pages
@@ -32,45 +31,89 @@ const WelcomeSectionClient = ({
   guestTitle = 'Welcome!',
   guestMessage = 'Please login to access all content.',
 }) => {
-  const { user, loading } = useAuth() // Added loading from useAuth
+  const { user, loading } = useAuth()
   const history = useHistory()
   const [isHovered, setIsHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const [isButtonActive, setIsButtonActive] = useState(false)
   const [isLinkHovered, setIsLinkHovered] = useState(false)
+  const [showLogoutMessage, setShowLogoutMessage] = useState(false)
 
-  // FIXED: Handle redirect for non-logged in users - WAIT FOR LOADING TO COMPLETE
+  // Handle logout detection and redirect
   React.useEffect(() => {
+    console.log(
+      '[WelcomeSection] useEffect triggered - loading:',
+      loading,
+      'user:',
+      user ? user.email : 'null',
+    )
+
     // Don't redirect while auth is still loading
     if (loading) {
       console.log('[WelcomeSection] Auth is loading, waiting...')
       return
     }
 
-    // Only redirect if user is definitely not authenticated and loading is complete
     if (!loading && !user) {
-      console.log(
-        '[WelcomeSection] User not authenticated, redirecting to login',
-      )
-      // Store the current URL before redirecting to login - using safe browserStorage
-      setSessionItem('redirectUrl', window.location.pathname)
-      // Use React Router history instead of window.location
-      history.push('/learning/login')
+      // Check if we should show the logout banner
+      const shouldShowBanner =
+        sessionStorage.getItem('showLogoutBanner') === 'true'
+      console.log('[WelcomeSection] Should show banner:', shouldShowBanner)
+
+      if (shouldShowBanner) {
+        // Clear the flag immediately so it only shows once
+        sessionStorage.removeItem('showLogoutBanner')
+        console.log('[WelcomeSection] Showing logout banner and redirecting')
+
+        setShowLogoutMessage(true)
+
+        // Redirect to Learning Hub after 3 seconds
+        const timer = setTimeout(() => {
+          console.log('[WelcomeSection] Redirecting to Learning Hub')
+          history.push('/learning/')
+        }, 3000)
+
+        return () => clearTimeout(timer)
+      } else {
+        // Normal "not authenticated" behavior - redirect to login
+        console.log(
+          '[WelcomeSection] User not authenticated, redirecting to login',
+        )
+        history.push('/learning/login')
+      }
     } else if (!loading && user) {
       console.log('[WelcomeSection] User authenticated:', user.email)
+      setShowLogoutMessage(false)
     }
-  }, [user, loading, history]) // Added loading to dependency array
+  }, [user, loading, history])
 
   const handleLogout = async () => {
     try {
+      console.log('[MainWelcomeSection] User initiating logout')
+
+      // Show banner immediately (don't wait for AuthContext)
+      setShowLogoutMessage(true)
+      console.log('[MainWelcomeSection] Logout banner shown immediately')
+
+      // Sign out from Firebase
       await signOut(auth)
-      history.push('/learning/login')
+      console.log('[MainWelcomeSection] Firebase sign out successful')
+
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        console.log('[MainWelcomeSection] Redirecting to Learning Hub')
+        history.push('/learning/')
+      }, 3000)
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('[MainWelcomeSection] Error signing out:', error)
+      // Still show banner even on error
+      setShowLogoutMessage(true)
+      setTimeout(() => {
+        history.push('/learning/')
+      }, 3000)
     }
   }
 
-  // FIXED: Moved early return AFTER all hooks are called
   // Show loading state while auth is being determined
   if (loading) {
     console.log('[WelcomeSection] Showing loading state')
@@ -116,6 +159,70 @@ const WelcomeSectionClient = ({
     )
   }
 
+  // Show logout message
+  if (showLogoutMessage) {
+    return (
+      <div
+        style={{
+          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '2.5rem',
+          borderRadius: '12px',
+          border: '2px solid var(--brand-green, #10b981)',
+          backgroundColor: 'var(--brand-white)',
+          boxShadow:
+            '0 0 15px rgba(16, 185, 129, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
+          marginBottom: '2rem',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ marginBottom: '1rem' }}>
+          <div
+            style={{
+              fontSize: '2rem',
+              color: 'var(--brand-green, #10b981)',
+            }}
+          >
+            ✓
+          </div>
+        </div>
+        <h3
+          style={{
+            color: 'var(--brand-black-700)',
+            margin: '0 0 1rem 0',
+            fontSize: '1.5rem',
+            fontWeight: '600',
+          }}
+        >
+          You have been logged out
+        </h3>
+        <p
+          style={{
+            color: 'var(--brand-grey-600)',
+            margin: 0,
+            fontSize: '1.1rem',
+          }}
+        >
+          Redirecting you to the Learning Hub...
+        </p>
+        <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '20px',
+              border: '2px solid var(--brand-green-200, #bbf7d0)',
+              borderTop: '2px solid var(--brand-green, #10b981)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+            }}
+          ></div>
+        </div>
+      </div>
+    )
+  }
+
   // Brand-compliant styles
   const styles = {
     card: {
@@ -124,19 +231,13 @@ const WelcomeSectionClient = ({
       flexDirection: 'column',
       padding: '2.5rem',
       borderRadius: '12px',
-      border: '2px solid var(--brand-blue-400)', // Brand secondary stroke outline
+      border: '2px solid var(--brand-blue-400)',
       backgroundColor: 'var(--brand-white)',
       boxShadow:
-        '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)', // Brand shadow
+        '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
       transition: 'all 0.3s ease-in-out',
       marginBottom: '2rem',
       transform: isHovered && user ? 'translateY(-5px)' : 'translateY(0)',
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    cardHover: {
-      boxShadow:
-        '0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2)',
     },
     gradientOverlay: {
       position: 'absolute',
@@ -146,6 +247,7 @@ const WelcomeSectionClient = ({
       height: '100%',
       background:
         'radial-gradient(circle at 10% 20%, rgba(0, 80, 199, 0.05) 0%, transparent 50%)',
+      borderRadius: '12px',
       pointerEvents: 'none',
       zIndex: 1,
     },
@@ -157,102 +259,97 @@ const WelcomeSectionClient = ({
       gap: '1.5rem',
     },
     headerSection: {
-      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     nameText: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.75rem',
-      fontWeight: '600',
+      fontSize: '1.8rem',
+      fontWeight: '700',
+      color: 'var(--brand-black-700)',
       margin: 0,
-      color: 'var(--brand-blue)',
-      textTransform: 'capitalize',
+      lineHeight: '1.2',
     },
     infoSection: {
       display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '1rem',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      gap: '2rem',
     },
     userInfo: {
-      textAlign: 'center',
+      flex: 1,
     },
     description: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.1rem',
-      color: 'var(--brand-grey-600)',
+      fontSize: '1rem',
+      color: 'var(--brand-grey-700)',
       margin: '0 0 0.5rem 0',
+      lineHeight: '1.5',
     },
     email: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '0.95rem',
-      color: 'var(--brand-grey-500)',
+      fontSize: '0.9rem',
+      color: 'var(--brand-grey-600)',
       margin: 0,
+      fontStyle: 'italic',
     },
-    button: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      padding: '0.75rem 1.5rem',
-      backgroundColor: 'var(--brand-blue)',
-      color: 'var(--brand-white)',
-      border: 'none',
-      borderRadius: '6px',
+    logoutButton: {
+      padding: '12px 24px',
+      backgroundColor: 'transparent',
+      color: 'var(--brand-aqua-800)',
+      border: '2px solid var(--brand-grey-400)',
+      borderRadius: '8px',
+      fontSize: '1rem',
+      fontWeight: '600',
       cursor: 'pointer',
-      fontSize: '0.95rem',
-      fontWeight: '500',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 2px 4px rgba(0, 80, 199, 0.2)',
+      transition: 'all 0.3s ease-in-out',
+      outline: 'none',
+      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+      whiteSpace: 'nowrap',
     },
-    buttonHover: {
-      backgroundColor: 'var(--brand-blue-400)',
+    logoutButtonHover: {
+      borderColor: 'var(--brand-blue-400)',
+      backgroundColor: 'var(--brand-blue-50)',
       transform: 'translateY(-2px)',
-      boxShadow: '0 4px 8px rgba(0, 80, 199, 0.3)',
+      boxShadow: '0 4px 12px rgba(0, 102, 255, 0.2)',
     },
-    buttonActive: {
+    logoutButtonActive: {
       transform: 'translateY(-1px)',
-      boxShadow: '0 3px 6px rgba(0, 80, 199, 0.25)',
+    },
+    guestTitle: {
+      fontSize: '1.5rem',
+      fontWeight: '600',
+      color: 'var(--brand-black-700)',
+      margin: '0 0 1rem 0',
+    },
+    guestMessage: {
+      fontSize: '1rem',
+      color: 'var(--brand-grey-700)',
+      margin: 0,
+      lineHeight: '1.5',
     },
     loginLink: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontWeight: 'bold',
-      color: 'var(--brand-aqua)',
-      textDecoration: 'none',
+      color: 'var(--brand-aqua-800)',
+      textDecoration: 'underline',
+      fontWeight: '600',
       transition: 'color 0.3s ease',
     },
     loginLinkHover: {
-      color: 'var(--brand-blue)',
-    },
-    guestTitle: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.75rem',
-      fontWeight: '600',
-      marginBottom: '0.75rem',
-      color: 'var(--brand-blue)',
-      textAlign: 'center',
-    },
-    guestMessage: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontSize: '1.1rem',
-      color: 'var(--brand-grey-600)',
-      textAlign: 'center',
+      color: 'var(--brand-aqua)',
     },
   }
 
   const getCardStyle = () => {
-    let style = { ...styles.card }
-    if (isHovered && user) {
-      style = { ...style, ...styles.cardHover }
+    return {
+      ...styles.card,
+      ...(isHovered && user ? { transform: 'translateY(-5px)' } : {}),
     }
-    return style
   }
 
   const getButtonStyle = () => {
-    let style = { ...styles.button }
-    if (isButtonHovered) {
-      style = { ...style, ...styles.buttonHover }
+    return {
+      ...styles.logoutButton,
+      ...(isButtonHovered ? styles.logoutButtonHover : {}),
+      ...(isButtonActive ? styles.logoutButtonActive : {}),
     }
-    if (isButtonActive) {
-      style = { ...style, ...styles.buttonActive }
-    }
-    return style
   }
 
   const getLinkStyle = () => {

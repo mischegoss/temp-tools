@@ -1,6 +1,13 @@
-// Simplified AuthContext with single auth listener and no race conditions
+// Optimized AuthContext with stable state management
 // src/contexts/AuthContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useLocation } from '@docusaurus/router'
 import { auth } from '@site/src/firebase/firebase'
@@ -17,27 +24,46 @@ const AuthContext = createContext()
 export function AuthProvider({ children, skipAuthCheck = false }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(!skipAuthCheck)
+  const [authInitialized, setAuthInitialized] = useState(false)
   const location = useLocation()
   const { db } = useFirebase()
 
   // Use the form association hook to link anonymous submissions
   useFormAssociation(db, user)
 
-  // Single auth listener with simplified logic
+  // Memoize company name function to prevent recreations
+  const getCompanyName = useCallback(() => {
+    if (user && user.displayName) {
+      return user.displayName
+    }
+    return getItem('companyName', '')
+  }, [user])
+
+  // Single auth listener with optimized logic
   useEffect(() => {
-    // Skip auth checking for non-learning paths
+    // Always set up auth listener, but behavior differs based on skipAuthCheck
     if (skipAuthCheck) {
-      console.log('[AuthContext] Skipping auth check for:', location.pathname)
+      console.log(
+        '[AuthContext] Setting up auth listener for login page:',
+        location.pathname,
+      )
+      // For login page: listen for auth changes but don't show loading states
       setLoading(false)
+      setAuthInitialized(true)
+    } else {
+      console.log(
+        '[AuthContext] Setting up auth listener for protected page:',
+        location.pathname,
+      )
+      // For protected pages: full auth checking with loading states
+    }
+
+    // Only initialize once
+    if (authInitialized && !skipAuthCheck) {
       return
     }
 
-    console.log(
-      '[AuthContext] Setting up auth listener for:',
-      location.pathname,
-    )
-
-    // Single auth state listener
+    // Single auth state listener - ALWAYS set up for both login and protected pages
     const unsubscribe = onAuthStateChanged(
       auth,
       currentUser => {
@@ -63,11 +89,18 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
           removeItem('companyName')
         }
 
-        setLoading(false)
+        // Only set loading false for protected pages (login page already has loading=false)
+        if (!skipAuthCheck) {
+          setLoading(false)
+          setAuthInitialized(true)
+        }
       },
       error => {
         console.error('[AuthContext] Auth error:', error)
-        setLoading(false)
+        if (!skipAuthCheck) {
+          setLoading(false)
+          setAuthInitialized(true)
+        }
       },
     )
 
@@ -76,18 +109,20 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
       console.log('[AuthContext] Cleaning up auth listener')
       unsubscribe()
     }
-  }, [skipAuthCheck]) // Remove location.pathname dependency to prevent re-runs
+  }, [skipAuthCheck, authInitialized, location.pathname])
 
-  // Helper function to get the company name
-  const getCompanyName = () => {
-    if (user && user.displayName) {
-      return user.displayName
-    }
-    return getItem('companyName', '')
-  }
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      user,
+      loading,
+      getCompanyName,
+    }),
+    [user, loading, getCompanyName],
+  )
 
   // Show loading screen until auth resolves - prevents button issues
-  if (loading) {
+  if (loading && !skipAuthCheck) {
     return (
       <div
         style={{
@@ -105,14 +140,9 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
     )
   }
 
-  // Provide context value
-  const value = {
-    user,
-    loading: false, // Always false here since we handled loading above
-    getCompanyName,
-  }
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  )
 }
 
 // Simplified useAuth hook with better error handling
