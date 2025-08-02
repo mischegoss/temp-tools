@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from '@docusaurus/Link'
 import { Grid, Box } from '@mui/material'
-import heroStyles from './styles/herostyles1-light.js'
+import heroStyles from '../library/styles/herostyles1-light.js'
 //import { heroData as defaultHeroData } from '../Actions/data/'
 
 const Hero1 = ({ heroData = defaultHeroData }) => {

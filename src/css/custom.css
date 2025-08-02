@@ -1,9 +1,16 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
 /* Font Definitions */
 @font-face {
   font-family: 'SeasonMix';
   src: url('/fonts/SeasonMix-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -11,7 +18,11 @@
   src: url('/fonts/SeasonMix-RegularItalic.ttf') format('truetype');
   font-weight: 400;
   font-style: italic;
+  font-display: swap;
 }
+
+/* Import Inter font for documentation content */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   /* Brand Colors - Primary */
@@ -21,7 +32,7 @@
   --brand-green: #00b070;
   --brand-purple: #8f4aff;
   --brand-orange: #ff9900;
-  --brand-aqua: #00b8de;
+  --brand-aqua: #00d4ff;
 
   /* Brand Colors - Secondary */
   --brand-blue-400: #0066ff;
@@ -29,7 +40,7 @@
   --brand-black-700: #0d1637;
   --brand-aqua-800: #051414;
   --brand-aqua-600: #02636f;
-  --brand-grey-600: #1A1A1A;
+  --brand-grey-600: #1a1a1a;
   --brand-grey-500: #cbd1da;
   --brand-grey-400: #d4d4d4;
   --brand-grey-300: #dadada;
@@ -60,75 +71,69 @@
   --brand-neutral-100: #f5f5f5; /* Near-white neutral gray */
 
   /* Set SeasonMix as default for body and headings */
-  --ifm-font-family-base: 'SeasonMix', system-ui, -apple-system, sans-serif;
+  --ifm-font-family-base: 'SeasonMix', 'Inter', system-ui, -apple-system,
+    Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif,
+    BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   --ifm-font-family-heading: 'SeasonMix', system-ui, -apple-system, sans-serif;
 
   /* Primary Blue - Mapped to Brand Blue */
-  --ifm-color-primary: var(--brand-blue); /* was #0215a1 */
-  --ifm-color-primary-dark: var(--brand-black-700); /* was #011291 */
-  --ifm-color-primary-darker: var(--brand-black); /* was #010f7f */
-  --ifm-color-primary-darkest: var(--brand-black); /* was #000c6c */
-  --ifm-color-primary-light: var(--brand-blue-400); /* was #1f2fb3 */
-  --ifm-color-primary-lighter: var(--brand-blue-400); /* was #3a4fc0 */
-  --ifm-color-primary-lightest: var(--brand-blue-100); /* was #5a6fce */
+  --ifm-color-primary: var(--brand-blue);
+  --ifm-color-primary-dark: var(--brand-black-700);
+  --ifm-color-primary-darker: var(--brand-black);
+  --ifm-color-primary-darkest: var(--brand-black);
+  --ifm-color-primary-light: var(--brand-blue-400);
+  --ifm-color-primary-lighter: var(--brand-blue-400);
+  --ifm-color-primary-lightest: var(--brand-blue-100);
 
   /* Code settings */
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(
-    0,
-    80,
-    199,
-    0.08
-  ); /* brand blue with opacity */
+  --docusaurus-highlighted-code-line-bg: rgba(0, 80, 199, 0.08);
 
   /* Accent/Secondary - Mapped to Brand Colors */
-  --color-secondary-purple: var(--brand-purple); /* was #6804db */
-  --color-secondary-green: var(--brand-green); /* was #18db57 */
-  --color-accent-teal: var(--brand-aqua); /* was #51f0e6 */
-  --color-accent-pale: var(
-    --brand-purple-pale
-  ); /* was #ab85d3 - NOW BETTER MATCH */
+  --color-secondary-purple: var(--brand-purple);
+  --color-secondary-green: var(--brand-green);
+  --color-accent-teal: var(--brand-aqua);
+  --color-accent-pale: var(--brand-purple-pale);
 
   /* Product-specific accent colors - Mapped to Brand Colors */
-  --pro-accent: var(--brand-green); /* was #18db57 */
-  --insights-accent: var(--brand-aqua); /* was #51f0e6 */
-  --express-accent: var(--brand-purple); /* was #a855f7 */
-  --actions-accent: var(--brand-blue-400); /* was #3b82f6 */
+  --pro-accent: var(--brand-green);
+  --insights-accent: var(--brand-aqua);
+  --express-accent: var(--brand-purple);
+  --actions-accent: var(--brand-blue-400);
 
   /* Product-specific shadow colors - Using Brand RGBA */
-  --pro-shadow: rgba(0, 176, 112, 0.2); /* brand green */
-  --insights-shadow: rgba(0, 212, 255, 0.2); /* brand aqua */
-  --express-shadow: rgba(143, 74, 255, 0.2); /* brand purple */
-  --actions-shadow: rgba(0, 102, 255, 0.2); /* brand blue-400 */
+  --pro-shadow: rgba(0, 176, 112, 0.2);
+  --insights-shadow: rgba(0, 212, 255, 0.2);
+  --express-shadow: rgba(143, 74, 255, 0.2);
+  --actions-shadow: rgba(0, 102, 255, 0.2);
 
   /* Dynamic product variables - set by ProductProvider */
   --product-accent-color: var(--actions-accent);
   --product-accent-shadow: var(--actions-shadow);
 
   /* Semantic Text Colors - Mapped to Brand Colors */
-  --color-text-primary: var(--brand-black-700); /* was #2c3e50 */
-  --color-text-secondary: var(--brand-grey-600); /* was #6c757d */
-  --color-text-light: var(--brand-grey-500); /* was #a0a0a0 */
-  --color-text-white: var(--brand-white); /* was #ffffff */
+  --color-text-primary: var(--brand-black-700);
+  --color-text-secondary: var(--brand-grey-600);
+  --color-text-light: var(--brand-grey-500);
+  --color-text-white: var(--brand-white);
 
   /* Semantic Background Colors - Mapped to Brand Colors */
-  --color-bg-gradient-start: var(--brand-grey-100); /* was #f8f9fa */
-  --color-bg-gradient-end: var(--brand-grey-200); /* was #e9ecef */
-  --color-bg-dark-section: var(--brand-black); /* was #0f0f0f */
-  --color-bg-card-dark: var(--brand-black-700); /* was #1a1a1a */
-  --color-bg-card-light: var(--brand-white); /* was #ffffff */
+  --color-bg-gradient-start: var(--brand-grey-100);
+  --color-bg-gradient-end: var(--brand-grey-200);
+  --color-bg-dark-section: var(--brand-black);
+  --color-bg-card-dark: var(--brand-black-700);
+  --color-bg-card-light: var(--brand-white);
   --color-bg-footer: var(--color-bg-card-dark);
-  --color-bg-overlay: rgba(5, 7, 15, 0.08); /* brand black with opacity */
+  --color-bg-overlay: rgba(5, 7, 15, 0.08);
 
   /* Semantic Border Colors - Mapped to Brand Colors */
-  --color-border-light: var(--brand-grey-200); /* was #e9ecef */
-  --color-border-dark: var(
-    --brand-neutral-700
-  ); /* was #333333 - NOW BETTER MATCH */
+  --color-border-light: var(--brand-grey-200);
+  --color-border-dark: var(--brand-neutral-700);
 
   /* Semantic Shadow Colors - Using Brand RGBA */
-  --color-shadow-light: rgba(5, 7, 15, 0.08); /* brand black */
-  --color-shadow-medium: rgba(5, 7, 15, 0.12); /* brand black */
+  --color-shadow-light: rgba(5, 7, 15, 0.08);
+  --color-shadow-medium: rgba(5, 7, 15, 0.12);
 
   /* Docusaurus Footer Override */
   --ifm-footer-background-color: var(--color-bg-footer);
@@ -136,59 +141,138 @@
 
 [data-theme='dark'] {
   /* Lightened colors for dark backgrounds - using brand palette */
-  --ifm-color-primary: var(--brand-blue-100); /* was #5a6fce */
-  --ifm-color-primary-dark: var(--brand-blue-400); /* was #3a4fc0 */
-  --ifm-color-primary-darker: var(--brand-blue); /* was #1f2fb3 */
-  --ifm-color-primary-darkest: var(--brand-black-700); /* was #0215a1 */
-  --ifm-color-primary-light: var(--brand-grey-300); /* was #7b8de0 */
-  --ifm-color-primary-lighter: var(--brand-grey-200); /* was #9caaf0 */
-  --ifm-color-primary-lightest: var(--brand-white); /* was #bcc9ff */
-  --docusaurus-highlighted-code-line-bg: rgba(
-    203,
-    224,
-    255,
-    0.15
-  ); /* brand blue-100 with opacity */
+  --ifm-color-primary: var(--brand-blue-100);
+  --ifm-color-primary-dark: var(--brand-blue-400);
+  --ifm-color-primary-darker: var(--brand-blue);
+  --ifm-color-primary-darkest: var(--brand-black-700);
+  --ifm-color-primary-light: var(--brand-grey-300);
+  --ifm-color-primary-lighter: var(--brand-grey-200);
+  --ifm-color-primary-lightest: var(--brand-white);
+  --docusaurus-highlighted-code-line-bg: rgba(203, 224, 255, 0.15);
 
   /* Dark Theme Semantic Overrides - using brand palette */
-  --color-text-primary: var(--brand-white); /* was #ffffff */
-  --color-text-secondary: var(--brand-grey-500); /* was #b8bcc8 */
-  --color-text-light: var(--brand-grey-600); /* was #8b949e */
+  --color-text-primary: var(--brand-white);
+  --color-text-secondary: var(--brand-grey-500);
+  --color-text-light: var(--brand-grey-600);
 
-  --color-bg-gradient-start: var(--brand-black-700); /* was #1c1e21 */
-  --color-bg-gradient-end: var(
-    --brand-neutral-800
-  ); /* was #2f3136 - NOW BETTER MATCH */
-  --color-bg-dark-section: var(--brand-black); /* was #0d1117 */
-  --color-bg-card-dark: var(--brand-black-700); /* was #1c1e21 */
-  --color-bg-card-light: var(
-    --brand-neutral-800
-  ); /* was #2f3136 - NOW BETTER MATCH */
-  --color-bg-overlay: rgba(255, 255, 255, 0.08); /* brand white with opacity */
+  --color-bg-gradient-start: var(--brand-black-700);
+  --color-bg-gradient-end: var(--brand-neutral-800);
+  --color-bg-dark-section: var(--brand-black);
+  --color-bg-card-dark: var(--brand-black-700);
+  --color-bg-card-light: var(--brand-neutral-800);
+  --color-bg-overlay: rgba(255, 255, 255, 0.08);
 
-  --color-border-light: var(
-    --brand-neutral-600
-  ); /* was #30363d - NOW BETTER MATCH */
-  --color-border-dark: var(--brand-black-700); /* was #21262d */
+  --color-border-light: var(--brand-neutral-600);
+  --color-border-dark: var(--brand-black-700);
 
-  --color-shadow-light: rgba(5, 7, 15, 0.3); /* brand black */
-  --color-shadow-medium: rgba(5, 7, 15, 0.4); /* brand black */
+  --color-shadow-light: rgba(5, 7, 15, 0.3);
+  --color-shadow-medium: rgba(5, 7, 15, 0.4);
 
   /* Docusaurus Footer Override */
   --ifm-footer-background-color: var(--color-bg-footer);
 }
 
-/* Footer-specific overrides - targeting the classes directly */
-.footer {
-  --ifm-footer-background-color: var(--color-bg-footer);
-  background-color: var(--color-bg-footer) !important;
-  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif;
+/* Inter font for documentation content specifically */
+.markdown {
+  font-family: 'Inter', 'SeasonMix', system-ui, -apple-system, Segoe UI, Roboto,
+    Ubuntu, Cantarell, Noto Sans, sans-serif !important;
 }
 
+/* Keep SeasonMix for headings within docs to maintain brand consistency */
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  font-family: 'SeasonMix', 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Footer styling with brand gradient */
+.footer {
+  background: linear-gradient(
+    to bottom,
+    var(--brand-black) 0%,
+    var(--brand-blue) 100%
+  ) !important;
+  border-top: 2px solid var(--brand-blue-400);
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure dark theme footer uses our custom gradient */
 .footer--dark {
-  --ifm-footer-background-color: var(--color-bg-footer);
-  background-color: var(--color-bg-footer) !important;
-  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(
+    to bottom,
+    var(--brand-black) 0%,
+    var(--brand-blue) 100%
+  ) !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Subtle gradient overlay for visual depth */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 10% 20%,
+    rgba(0, 80, 199, 0.05) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* Additional subtle gradient effect */
+.footer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 90% 80%,
+    rgba(0, 102, 255, 0.03) 0%,
+    transparent 30%
+  );
+  pointer-events: none;
+}
+
+/* Ensure content is positioned above the gradient overlays */
+.footer .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Footer text colors */
+.footer__links {
+  color: var(--brand-white) !important;
+}
+
+.footer__link-item {
+  color: var(--brand-grey-200) !important;
+  transition: color 0.3s ease;
+}
+
+.footer__link-item:hover {
+  color: var(--brand-blue-400) !important;
+}
+
+.footer__copyright {
+  color: var(--brand-grey-300) !important;
+  border-top: 1px solid var(--brand-grey-600);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.footer__title {
+  color: var(--brand-white) !important;
+  font-weight: 600;
 }
 
 /* Brand Gradients - Using provided examples */
@@ -273,6 +357,67 @@
   );
 }
 
+/* Dark Mode Header/Navbar Styling */
+[data-theme='dark'] .navbar {
+  background-color: var(--brand-black) !important;
+  border-bottom: 2px solid var(--brand-blue-400);
+}
+
+[data-theme='dark'] .navbar--dark {
+  background-color: var(--brand-black) !important;
+}
+
+[data-theme='dark'] .navbar__link {
+  color: var(--brand-grey-200) !important;
+  transition: color 0.3s ease;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .navbar__link:hover {
+  color: var(--brand-blue-400) !important;
+}
+
+[data-theme='dark'] .navbar__title {
+  color: var(--brand-white) !important;
+  font-weight: 600;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .navbar__brand {
+  color: var(--brand-white) !important;
+}
+
+[data-theme='dark'] .navbar__item {
+  color: var(--brand-grey-200) !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .navbar__item:hover {
+  color: var(--brand-blue-400) !important;
+}
+
+[data-theme='dark'] .dropdown__link {
+  color: var(--brand-grey-200) !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+[data-theme='dark'] .dropdown__link:hover {
+  color: var(--brand-blue-400) !important;
+  background-color: var(--brand-grey-600) !important;
+}
+
+/* Light mode navbar styling for consistency */
+.navbar {
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+.navbar__link,
+.navbar__title,
+.navbar__item,
+.dropdown__link {
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
 /* Ensure all text elements use SeasonMix font */
 body,
 h1,
@@ -321,152 +466,3 @@ h6,
     padding: 120px 0 140px 0 !important;
   }
 }
-
-/* ============================================ */
-/* CHATBOT CONFIGURATION */
-/* ============================================ */
-
-/* Multi-layered approach to completely eliminate the chatbot button from bottom of screen*/
-
-/* Method 1: Hide with display none */
-html > body > button.ainiro {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
-/* Method 2: Move off-screen */
-html > body > button.ainiro {
-  position: absolute !important;
-  left: -99999px !important;
-  top: -99999px !important;
-  transform: translateX(-99999px) !important;
-}
-
-/* Method 3: Size and positioning destruction */
-html > body > button.ainiro {
-  width: 0 !important;
-  height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  z-index: -999999 !important;
-}
-
-/* Method 4: Text and content removal */
-html > body > button.ainiro {
-  font-size: 0 !important;
-  line-height: 0 !important;
-  text-indent: -99999px !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-}
-
-/* Method 5: Interaction blocking */
-html > body > button.ainiro {
-  pointer-events: none !important;
-  cursor: none !important;
-  user-select: none !important;
-}
-
-/* Method 6: Animation and transition killing */
-html > body > button.ainiro {
-  animation: none !important;
-  transition: none !important;
-  transform-origin: 0 0 !important;
-  clip: rect(0, 0, 0, 0) !important;
-}
-
-/* EXCEPTION: Allow the floating button to be clicked programmatically */
-/* Override the pointer-events for programmatic clicks */
-html > body > button.ainiro {
-  pointer-events: auto !important;
-}
-
-/* Position and style the chatbot container */
-html > body > div.ainiro {
-  /* Position 150px from top */
-  top: 150px !important;
-  height: calc(100vh - 150px) !important;
-
-  /* Remove shadow for integrated look */
-  box-shadow: none !important;
-
-  /* Ensure proper positioning */
-  position: fixed !important;
-  right: 0 !important;
-  bottom: 0 !important;
-
-  /* Optional: Add a subtle border instead of shadow */
-  border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-
-/* IMPORTANT: Restore functionality for specific chatbot buttons that should work */
-/* Allow the close button and other toolbar buttons to function */
-html > body > div.ainiro button.ainiro_action {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  position: relative !important;
-  z-index: 1000 !important;
-  transform: none !important;
-  clip: auto !important;
-  width: auto !important;
-  height: auto !important;
-  font-size: inherit !important;
-  line-height: inherit !important;
-  text-indent: 0 !important;
-  overflow: visible !important;
-  white-space: normal !important;
-}
-
-/* Ensure the close button specifically works */
-html > body > div.ainiro > div.ainiro_toolbar > button.ainiro_close {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Make sure the entire toolbar is visible and functional */
-html > body > div.ainiro > div.ainiro_toolbar {
-  display: flex !important;
-  position: relative !important;
-  z-index: 999 !important;
-}
-
-/* Ensure send button and other interactive elements work */
-html > body > div.ainiro button.ainiro_send,
-html > body > div.ainiro button.ainiro_new_chat,
-html > body > div.ainiro button.ainiro_maximize {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  position: relative !important;
-  transform: none !important;
-  clip: auto !important;
-  width: auto !important;
-  height: auto !important;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  html > body > div.ainiro {
-    /* On mobile, maybe less top margin */
-    top: 80px !important;
-    height: calc(100vh - 80px) !important;
-
-    /* Full width on mobile */
-    width: 100% !important;
-    right: 0 !important;
-  }
-}
-
-/* DO NOT hide the chat container - we want it functional for the navbar button */
-/* The div.ainiro container should remain untouched so it can be opened programmatically */
-
-

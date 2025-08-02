@@ -13,14 +13,14 @@ export const learningHubData = {
           description:
             'Learn how to document, assess, and prepare your business processes for automation through service blueprinting.',
           available: true,
-          link: '/learning-hub/service-blueprinting',
+          link: '/learning/service-blueprinting',
         },
         {
           title: 'Technical Blueprinting',
           description:
             'Discover the detailed technical requirements of automation and how to implement automated workflows in your organization.',
           available: false,
-          link: '/learning-hub/technical-blueprinting',
+          link: '/learning/technical-blueprinting',
         },
       ],
     },
@@ -32,21 +32,21 @@ export const learningHubData = {
           description:
             'Our newest drag-and-drop, no-code IT process automation platform.',
           available: true,
-          link: '/learning-hub/actions-platform',
+          link: '/learning/actions',
         },
         {
           title: 'Resolve Actions Pro',
           description:
             'Tailor-made IT automation with powerful code-based features.',
           available: true,
-          link: '/learning-hub/actions-pro',
+          link: '/learning/pro',
         },
         {
           title: 'Resolve Actions Express',
           description:
             'Drag-and-drop, no-code IT automation with a large built-in library of automation actions.',
           available: true,
-          link: '/learning-hub/actions-express',
+          link: '/learning/express',
         },
       ],
     },
@@ -57,7 +57,7 @@ export const learningHubData = {
           title: 'Resolve Insights',
           description: 'Our Discovery and Dependency Mapping (DDM) product.',
           available: true,
-          link: '/learning-hub/insights',
+          link: '/learning/insights',
         },
       ],
     },
