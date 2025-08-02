@@ -1,4 +1,7 @@
-import React, { useState } from 'react'
+// Optimized DiscoverCards - Instant button response, minimal JavaScript
+// src/components/Discover/discovercards.js
+
+import React, { useState, useMemo, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
 import Link from '@docusaurus/Link'
 import {
@@ -7,16 +10,77 @@ import {
   cardsContainerStyle,
   noResourcesStyle,
   noResourcesTextStyle,
-  buttonStyle,
-  disabledButtonStyle,
-  getLevelBadgeColor,
-  getFooterColor,
-  getBorderColor,
 } from './styles/cardstyles'
 
+// CSS-in-JS styles for instant hover effects
+const injectDiscoverStyles = () => {
+  const styleId = 'discover-cards-styles'
+
+  // Check if styles already exist
+  if (document.getElementById(styleId)) return
+
+  const styles = `
+    .discover-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    
+    .discover-card:hover {
+      transform: translateY(-4px) !important;
+      box-shadow: 0 8px 24px rgba(0, 139, 139, 0.15) !important;
+    }
+    
+    .discover-button {
+      transition: all 0.2s ease !important;
+      pointer-events: auto !important;
+      user-select: none !important;
+    }
+    
+    .discover-button:hover {
+      background: linear-gradient(135deg, #0052CC 0%, #0099B8 100%) !important;
+      transform: translateY(-1px) !important;
+      text-decoration: none !important;
+      color: #FFFFFF !important;
+    }
+    
+    .discover-button:active {
+      transform: translateY(0) !important;
+    }
+    
+    .discover-button:disabled {
+      pointer-events: none !important;
+      transform: none !important;
+    }
+    
+    .discover-button:focus {
+      outline: 2px solid #0066FF !important;
+      outline-offset: 2px !important;
+    }
+    
+    @media (max-width: 768px) {
+      .discover-card:hover {
+        transform: none !important;
+      }
+      
+      .discover-button:hover {
+        transform: none !important;
+      }
+    }
+  `
+
+  const styleSheet = document.createElement('style')
+  styleSheet.id = styleId
+  styleSheet.textContent = styles
+  document.head.appendChild(styleSheet)
+}
+
 const DiscoverCards = ({ resources = [], hideSection = false }) => {
-  // Check if resources is valid before rendering
-  if (!resources || !Array.isArray(resources) || resources.length === 0) {
+  // Inject CSS styles on component mount
+  useEffect(() => {
+    injectDiscoverStyles()
+  }, [])
+
+  // Early validation with minimal processing
+  if (!resources?.length) {
     const noResourcesContent = (
       <div style={noResourcesStyle}>
         <p style={noResourcesTextStyle}>
@@ -24,692 +88,248 @@ const DiscoverCards = ({ resources = [], hideSection = false }) => {
         </p>
       </div>
     )
-
-    if (hideSection) {
-      return noResourcesContent
-    }
-
-    return (
+    return hideSection ? (
+      noResourcesContent
+    ) : (
       <section style={learningHubSectionStyle}>
         <div style={containerStyle}>{noResourcesContent}</div>
       </section>
     )
   }
 
-  // State to track which cards have expanded details
+  // Minimal state - only what's actually needed
   const [expandedCards, setExpandedCards] = useState({})
 
-  // State to track which cards are being hovered
-  const [hoveredCards, setHoveredCards] = useState({})
+  // Memoized styles to prevent recalculation
+  const styles = useMemo(
+    () => ({
+      card: {
+        background: '#FFFFFF',
+        borderRadius: '12px',
+        border: '2px solid #008B8B',
+        boxShadow: '0 4px 12px rgba(0, 139, 139, 0.1)',
+        marginBottom: '30px',
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        overflow: 'hidden',
+        transition: 'all 0.3s ease',
+      },
+      cardContent: {
+        padding: '30px',
+      },
+      logoContainer: {
+        background: '#05070f',
+        borderRadius: '8px',
+        padding: '8px',
+        marginRight: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 2px 8px rgba(5, 7, 15, 0.2)',
+      },
+      title: {
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        fontSize: '1.5rem',
+        fontWeight: '600',
+        color: '#2D3748',
+        margin: '0 0 8px 0',
+      },
+      description: {
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        color: '#4A5568',
+        fontSize: '1rem',
+        lineHeight: '1.6',
+        margin: '0',
+      },
+      buttonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '12px',
+        marginTop: '32px',
+      },
+      primaryButton: {
+        background: 'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+        color: '#FFFFFF',
+        border: 'none',
+        borderRadius: '8px',
+        padding: '12px 24px',
+        fontSize: '0.95rem',
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        cursor: 'pointer',
+        fontWeight: '500',
+        textDecoration: 'none',
+        display: 'inline-block',
+        lineHeight: '1',
+      },
+      disabledButton: {
+        background: '#E2E8F0',
+        color: '#718096',
+        border: 'none',
+        borderRadius: '8px',
+        padding: '12px 24px',
+        fontSize: '0.95rem',
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        cursor: 'not-allowed',
+        fontWeight: '500',
+      },
+      expandedContent: {
+        backgroundColor: '#F7FAFC',
+        padding: '16px',
+        borderRadius: '8px',
+        border: '1px solid #E2E8F0',
+        marginTop: '16px',
+      },
+      footer: {
+        padding: '12px 20px',
+        backgroundColor: '#008B8B',
+        color: '#FFFFFF',
+        fontSize: '0.9rem',
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        fontWeight: '500',
+        textAlign: 'center',
+      },
+    }),
+    [],
+  )
 
-  // Toggle expanded details for a specific card
-  const toggleCardDetails = resourceId => {
+  // Simple toggle function
+  const toggleCard = index => {
     setExpandedCards(prev => ({
       ...prev,
-      [resourceId]: !prev[resourceId],
+      [index]: !prev[index],
     }))
   }
 
-  // Set card hover state
-  const setCardHover = (resourceId, isHovered) => {
-    setHoveredCards(prev => ({
-      ...prev,
-      [resourceId]: isHovered,
-    }))
-  }
-
-  // Get content type from resource - USES PRIMARY LEVEL FIRST
-  const getContentType = resource => {
-    // First check for primaryLevel
-    if (resource.primaryLevel) {
-      return resource.primaryLevel.toLowerCase()
-    }
-
-    // Check for explicit contentType property
-    if (resource.contentType) {
-      return resource.contentType.toLowerCase()
-    }
-    // Check for featureType property
-    if (resource.featureType) {
-      return resource.featureType.toLowerCase()
-    }
-    // Fallback to checking title/description for keywords
-    const title = resource.title?.toLowerCase() || ''
-    const description = resource.description?.toLowerCase() || ''
-    const combined = title + ' ' + description
-
-    if (
-      combined.includes('device discovery') ||
-      combined.includes('insights')
-    ) {
-      return 'device discovery and management'
-    }
-    if (
-      combined.includes('automation development') ||
-      combined.includes('actions') ||
-      combined.includes('pro') ||
-      combined.includes('express')
-    ) {
-      return 'automation development'
-    }
-    if (
-      combined.includes('automation design') ||
-      combined.includes('blueprint')
-    ) {
-      return 'automation design'
-    }
-    if (
-      combined.includes('product overview') ||
-      combined.includes('overview')
-    ) {
-      return 'product overview'
-    }
-
-    return 'default'
-  }
-
-  // Get dual footer color for resources with secondary content type
-  const getDualFooterColor = resource => {
-    const primaryType = getContentType(resource)
-    const secondaryType = resource.secondaryContentType?.toLowerCase() || null
-
-    if (secondaryType) {
-      const primaryColor = getFooterColor(primaryType)
-      // LearningHub secondary color mapping
-      const secondaryColorMap = {
-        'device discovery and management': '#008B8B',
-        'automation development': '#1E3A8A',
-        'automation design': '#4A90E2',
-        'product overview': '#008B8B',
-      }
-      const secondaryColor = secondaryColorMap[secondaryType] || '#008B8B'
-      return `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`
-    }
-
-    return getFooterColor(primaryType)
-  }
-
-  // Helper function to get default level descriptions
-  const getLevelDescription = level => {
-    switch (level.toLowerCase()) {
-      case 'beginner':
-        return 'Perfect for new users with no prior experience.'
-      case 'intermediate':
-        return 'For users who are familiar with basic functionality and want to expand their skills.'
-      case 'advanced':
-        return 'Designed for experienced users who want to master complex features.'
-      default:
-        return 'Suitable for all skill levels.'
-    }
-  }
-
-  // Content type display names
-  const getContentTypeDisplay = resource => {
-    const contentType = getContentType(resource)
-
-    switch (contentType) {
-      case 'device discovery and management':
-        return 'Device Discovery and Management'
-      case 'automation development':
-        return 'Automation Development'
-      case 'automation design':
-        return 'Automation Design'
-      case 'product overview':
-        return 'Product Overview'
-      default:
-        return 'General'
-    }
-  }
-
-  // Individual card component - USING ORIGINAL WORKING LOGIC
+  // Simple ResourceCard - minimal complexity
   const ResourceCard = ({ resource, index }) => {
-    const isHovered = hoveredCards[index] || false
-    const isExpanded = expandedCards[index] || false
-
-    // Use primaryLevel and secondaryLevel from resource or default to level for backward compatibility
-    const primaryLevel = resource.primaryLevel || resource.level || 'Beginner'
-    const secondaryLevel = resource.secondaryLevel || null
-
-    // Check if card is disabled
-    const isDisabled = resource.disabled === true
-
-    // LearningHub text and card styles
-    const titleStyle = {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      fontWeight: 600,
-      fontSize: '1.5rem',
-      color: isDisabled ? '#718096' : '#2D3748',
-      margin: '0 0 8px 0',
-    }
-
-    const descriptionStyle = {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      color: isDisabled ? '#718096' : '#4A5568',
-      fontSize: '1rem',
-      lineHeight: '1.6',
-      margin: '0',
-    }
-
-    // Handle button click for disabled cards
-    const handleButtonClick = e => {
-      if (isDisabled) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    }
+    const isExpanded = expandedCards[index]
+    const isDisabled = resource.disabled || resource.comingSoon
 
     return (
       <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '12px',
-          transition: 'all 0.3s ease',
-          border: '2px solid #008B8B',
-          borderLeft: `6px solid ${getBorderColor(primaryLevel)}`,
-          overflow: 'hidden',
-          boxShadow:
-            isHovered && !isDisabled
-              ? '0 8px 24px rgba(0, 139, 139, 0.15)'
-              : '0 4px 12px rgba(0, 139, 139, 0.1)',
-          transform:
-            isHovered && !isDisabled ? 'translateY(-4px)' : 'translateY(0)',
-          marginBottom: '30px',
-          position: 'relative',
-          cursor: isDisabled ? 'default' : 'pointer',
-          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-          opacity: isDisabled ? 0.8 : 1,
-        }}
-        onMouseEnter={() => !isDisabled && setCardHover(index, true)}
-        onMouseLeave={() => !isDisabled && setCardHover(index, false)}
+        className='discover-card' // Use CSS class for hover effects
+        style={styles.card}
       >
-        {/* Coming Soon Banner HIDDEN per request - but keeping disabled functionality */}
-        {/* {isDisabled && (
+        <div style={styles.cardContent}>
+          {/* Header with logo and content */}
           <div
             style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: '#008B8B',
-              color: '#FFFFFF',
-              padding: '8px 20px',
-              borderRadius: '6px',
-              fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-              fontSize: '0.9rem',
-              fontWeight: 'bold',
-              zIndex: 2,
-              boxShadow: '0 2px 8px rgba(0, 139, 139, 0.2)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              marginBottom: '16px',
             }}
           >
-            Coming Soon
-          </div>
-        )} */}
-
-        {!isExpanded ? (
-          // Summary View
-          <div
-            style={{
-              padding: '30px',
-            }}
-          >
-            {/* Logo and Title Row */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                marginBottom: '16px',
-              }}
-            >
-              <div
-                style={{
-                  background: '#05070f',
-                  borderRadius: '8px',
-                  padding: '8px',
-                  marginRight: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(5, 7, 15, 0.2)',
-                }}
-              >
-                <img
-                  src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
-                  alt='Resolve'
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    objectFit: 'contain',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={titleStyle}>{resource.title}</h3>
-                <p style={descriptionStyle}>{resource.description}</p>
-              </div>
+            <div style={styles.logoContainer}>
+              <img
+                src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
+                alt='Resolve'
+                style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+              />
             </div>
+            <div style={{ flex: 1 }}>
+              <h3 style={styles.title}>{resource.title}</h3>
+              <p style={styles.description}>{resource.description}</p>
+            </div>
+          </div>
 
-            {/* Buttons in center of card body */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '12px',
-                marginTop: '32px',
-              }}
-            >
-              <Button
-                onClick={() => !isDisabled && toggleCardDetails(index)}
-                style={isDisabled ? disabledButtonStyle : buttonStyle}
-                onMouseOver={e => {
-                  if (!isDisabled) {
-                    e.currentTarget.style.background =
-                      'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                  }
+          {/* Expanded content - only render when needed */}
+          {isExpanded && resource.courses && (
+            <div style={styles.expandedContent}>
+              <h5
+                style={{
+                  margin: '0 0 12px 0',
+                  fontWeight: 600,
+                  color: '#2D3748',
                 }}
-                onMouseOut={e => {
-                  if (!isDisabled) {
-                    e.currentTarget.style.background =
-                      'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
-                    e.currentTarget.style.transform = 'translateY(0)'
-                  }
-                }}
-                disabled={isDisabled}
               >
-                View Details
-              </Button>
+                Courses Include
+              </h5>
+              <ul style={{ margin: 0, paddingLeft: '24px' }}>
+                {resource.courses.map((course, i) => (
+                  <li key={i} style={{ marginBottom: '8px', color: '#4A5568' }}>
+                    {course}
+                  </li>
+                ))}
+              </ul>
+              {resource.usageInstructions && (
+                <p
+                  style={{
+                    marginTop: '12px',
+                    marginBottom: 0,
+                    color: '#4A5568',
+                  }}
+                >
+                  {resource.usageInstructions}
+                </p>
+              )}
+            </div>
+          )}
 
-              {isDisabled ? (
-                <Button style={disabledButtonStyle} disabled={true}>
-                  {resource.resourceType === 'module'
-                    ? 'Get Started'
-                    : 'View Module'}
-                </Button>
-              ) : (
-                <Link to={resource.link}>
-                  <Button
-                    style={buttonStyle}
-                    onMouseOver={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                    }}
-                    onMouseOut={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }}
-                    onClick={handleButtonClick}
+          {/* Buttons */}
+          <div style={styles.buttonContainer}>
+            {isExpanded ? (
+              // Expanded state buttons
+              <>
+                <button
+                  onClick={() => toggleCard(index)}
+                  style={styles.primaryButton}
+                  className='discover-button' // CSS hover effects
+                >
+                  Close Details
+                </button>
+                {isDisabled ? (
+                  <button style={styles.disabledButton} disabled>
+                    {resource.resourceType === 'module'
+                      ? 'Get Started'
+                      : 'View Module'}
+                  </button>
+                ) : (
+                  <Link
+                    to={resource.link}
+                    style={styles.primaryButton}
+                    className='discover-button'
                   >
                     {resource.resourceType === 'module'
                       ? 'Get Started'
                       : 'View Module'}
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        ) : (
-          // Expanded Details View
-          <div
-            style={{
-              padding: '30px',
-            }}
-          >
-            {/* Header with Logo and Title */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                marginBottom: '16px',
-              }}
-            >
-              <div
-                style={{
-                  background: '#05070f',
-                  borderRadius: '8px',
-                  padding: '8px',
-                  marginRight: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(5, 7, 15, 0.2)',
-                }}
-              >
-                <img
-                  src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
-                  alt='Resolve'
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    objectFit: 'contain',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={titleStyle}>{resource.title}</h3>
-                <p style={descriptionStyle}>{resource.description}</p>
-              </div>
-            </div>
-
-            {/* Additional Details - Full Width */}
-            <div
-              style={{
-                marginTop: '24px',
-                paddingTop: '24px',
-                borderTop: '1px solid #E2E8F0',
-                marginBottom: '24px',
-              }}
-            >
-              {/* Extended Description */}
-              <div style={{ marginBottom: '20px' }}>
-                <h5
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '1.2rem',
-                    color: '#2D3748',
-                    marginBottom: '12px',
-                    margin: '0 0 12px 0',
-                  }}
+                  </Link>
+                )}
+              </>
+            ) : (
+              // Collapsed state buttons
+              <>
+                <button
+                  onClick={() => toggleCard(index)}
+                  style={styles.primaryButton}
+                  className='discover-button'
                 >
-                  Course Description
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: '#F7FAFC',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E2E8F0',
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1rem',
-                    color: '#4A5568',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  <p style={{ margin: 0 }}>{resource.extendedDescription}</p>
-                </div>
-              </div>
-
-              {/* Level Details */}
-              <div style={{ marginBottom: '20px' }}>
-                <h5
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '1.2rem',
-                    color: '#2D3748',
-                    marginBottom: '12px',
-                    margin: '0 0 12px 0',
-                  }}
-                >
-                  Level Information
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: '#F7FAFC',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E2E8F0',
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1rem',
-                    color: '#4A5568',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  {/* Primary Level */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: '12px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        backgroundColor: getLevelBadgeColor(primaryLevel),
-                        borderRadius: '4px',
-                        padding: '6px 12px',
-                        color: '#FFFFFF',
-                        fontWeight: '500',
-                        fontSize: '0.9rem',
-                        marginRight: '12px',
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
-                        opacity: isDisabled ? 0.7 : 1,
-                      }}
-                    >
-                      {primaryLevel}
-                    </div>
-                    <span
-                      style={{
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
-                      }}
-                    >
-                      <strong>Primary Level:</strong>{' '}
-                      {resource.primaryLevelDescription ||
-                        resource.levelDescription ||
-                        getLevelDescription(primaryLevel)}
-                    </span>
-                  </div>
-
-                  {/* Secondary Level - Only show if it exists */}
-                  {secondaryLevel && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: '12px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor: getLevelBadgeColor(secondaryLevel),
-                          borderRadius: '4px',
-                          padding: '6px 12px',
-                          color: '#FFFFFF',
-                          fontWeight: '500',
-                          fontSize: '0.9rem',
-                          marginRight: '12px',
-                          fontFamily:
-                            'SeasonMix, system-ui, -apple-system, sans-serif',
-                          opacity: isDisabled ? 0.7 : 1,
-                        }}
-                      >
-                        {secondaryLevel}
-                      </div>
-                      <span
-                        style={{
-                          fontFamily:
-                            'SeasonMix, system-ui, -apple-system, sans-serif',
-                        }}
-                      >
-                        <strong>Secondary Level:</strong>{' '}
-                        {resource.secondaryLevelDescription ||
-                          getLevelDescription(secondaryLevel)}
-                      </span>
-                    </div>
-                  )}
-
-                  {resource.prerequisites && (
-                    <div
-                      style={{
-                        marginTop: '12px',
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
-                      }}
-                    >
-                      <strong>Prerequisites:</strong> {resource.prerequisites}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Course List */}
-              <div style={{ marginBottom: '20px' }}>
-                <h5
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '1.2rem',
-                    color: '#2D3748',
-                    marginBottom: '12px',
-                    margin: '0 0 12px 0',
-                  }}
-                >
-                  Courses Include
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: '#F7FAFC',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E2E8F0',
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1rem',
-                    color: '#4A5568',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  <ul style={{ margin: 0, paddingLeft: '24px' }}>
-                    {resource.courses &&
-                      resource.courses.map((course, i) => (
-                        <li key={i} style={{ marginBottom: '8px' }}>
-                          {course}
-                        </li>
-                      ))}
-                  </ul>
-                  {resource.usageInstructions && (
-                    <p style={{ marginTop: '12px', marginBottom: 0 }}>
-                      {resource.usageInstructions}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Buttons in center of expanded card */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '12px',
-                marginTop: '32px',
-              }}
-            >
-              <Button
-                onClick={() => toggleCardDetails(index)}
-                style={buttonStyle}
-                onMouseOver={e => {
-                  e.currentTarget.style.background =
-                    'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.background =
-                    'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                Close Details
-              </Button>
-
-              {isDisabled ? (
-                <Button style={disabledButtonStyle} disabled={true}>
-                  {resource.resourceType === 'module'
-                    ? 'Get Started'
-                    : 'View Module'}
-                </Button>
-              ) : (
-                <Link to={resource.link}>
-                  <Button
-                    style={buttonStyle}
-                    onMouseOver={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                    }}
-                    onMouseOut={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }}
+                  View Details
+                </button>
+                {isDisabled ? (
+                  <button style={styles.disabledButton} disabled>
+                    {resource.resourceType === 'module'
+                      ? 'Get Started'
+                      : 'View Module'}
+                  </button>
+                ) : (
+                  <Link
+                    to={resource.link}
+                    style={styles.primaryButton}
+                    className='discover-button'
                   >
                     {resource.resourceType === 'module'
                       ? 'Get Started'
                       : 'View Module'}
-                  </Button>
-                </Link>
-              )}
-            </div>
+                  </Link>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
 
-        {/* Footer with LearningHub content type indicator */}
-        {resource.secondaryContentType ? (
-          // Dual content type footer
-          <div
-            style={{
-              padding: '12px 20px',
-              background: getDualFooterColor(resource),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              opacity: isDisabled ? 0.7 : 1,
-            }}
-          >
-            <span
-              style={{
-                color: '#FFFFFF',
-                fontSize: '0.9rem',
-                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-                fontWeight: '500',
-              }}
-            >
-              {getContentTypeDisplay(resource)}
-            </span>
-            <span
-              style={{
-                color: '#FFFFFF',
-                fontSize: '0.9rem',
-                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-                fontWeight: '500',
-              }}
-            >
-              {resource.secondaryContentType}
-            </span>
-          </div>
-        ) : (
-          // Single content type footer
-          <div
-            style={{
-              padding: '12px 20px',
-              backgroundColor: getFooterColor(getContentType(resource)),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: isDisabled ? 0.7 : 1,
-            }}
-          >
-            <span
-              style={{
-                color: '#FFFFFF',
-                fontSize: '0.9rem',
-                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-                fontWeight: '500',
-                textAlign: 'center',
-              }}
-            >
-              {getContentTypeDisplay(resource)}
-            </span>
-          </div>
-        )}
+        {/* Footer */}
+        <div style={styles.footer}>
+          {resource.primaryLevel || resource.contentType || 'Course'}
+        </div>
       </div>
     )
   }
@@ -717,16 +337,18 @@ const DiscoverCards = ({ resources = [], hideSection = false }) => {
   const cardsContent = (
     <div style={cardsContainerStyle}>
       {resources.map((resource, idx) => (
-        <ResourceCard key={idx} resource={resource} index={idx} />
+        <ResourceCard
+          key={`${resource.title}-${idx}`}
+          resource={resource}
+          index={idx}
+        />
       ))}
     </div>
   )
 
-  if (hideSection) {
-    return cardsContent
-  }
-
-  return (
+  return hideSection ? (
+    cardsContent
+  ) : (
     <section style={learningHubSectionStyle}>
       <div style={containerStyle}>{cardsContent}</div>
     </section>
