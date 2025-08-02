@@ -1,104 +1,232 @@
-// Fixed ProtectedRoute with proper React imports
+// Clean Enhanced ProtectedRoute - Built from scratch
 // src/components/service-blueprinting/login/ProtectedRoute.jsx
-import React, { useEffect, useState } from 'react'
+
+import React, { useState } from 'react'
 import { useHistory } from '@docusaurus/router'
 import { useAuth } from '@site/src/contexts/AuthContext'
+import { auth } from '@site/src/firebase/firebase'
+import { signOut } from 'firebase/auth'
+import Link from '@docusaurus/Link'
 
 export default function ProtectedRoute({ children }) {
   const { loading, user } = useAuth()
   const history = useHistory()
-  const [isProtectedPath, setIsProtectedPath] = useState(false)
+  const [isLogoutHovered, setIsLogoutHovered] = useState(false)
 
-  useEffect(() => {
-    // Determine if current path is protected
-    const currentPath = window.location.pathname
+  // Simple path detection - no complex state management
+  const currentPath = window.location.pathname
+  const isProtectedPath =
+    currentPath.startsWith('/learning/') && currentPath !== '/learning/login'
 
-    // Only protect paths that start with /learning/ (excluding the login page)
-    const protectedPath =
-      currentPath.startsWith('/learning/') && currentPath !== '/learning/login'
+  console.log('[ProtectedRoute] Simple check:', {
+    currentPath,
+    isProtectedPath,
+    loading,
+    user: !!user,
+  })
 
-    setIsProtectedPath(protectedPath)
-
-    console.log('[ProtectedRoute] Path check:', {
-      path: currentPath,
-      isProtected: protectedPath,
-      loading,
-      isAuthenticated: !!user,
-    })
-
-    // ONLY redirect on learning paths - don't protect homepage or other sections
-    if (!loading && protectedPath && !user) {
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      console.log('[ProtectedRoute] Logout clicked')
+      await signOut(auth)
       console.log(
-        '[ProtectedRoute] User not authenticated on protected learning path',
+        '[ProtectedRoute] Logout successful, redirecting to Learning Hub',
       )
-      console.log('[ProtectedRoute] Saving redirect path:', currentPath)
-
-      // Use sessionStorage from browser storage utils for consistency
-      try {
-        sessionStorage.setItem('redirectUrl', currentPath)
-      } catch (error) {
-        console.error('[ProtectedRoute] Error saving redirect URL:', error)
-      }
-
-      console.log('[ProtectedRoute] Redirecting to login page')
-      // Use React Router history instead of window.location for better control
-      history.push('/learning/login')
-    } else if (!loading) {
-      if (protectedPath && user) {
-        console.log(
-          '[ProtectedRoute] User authenticated on protected path, allowing access',
-        )
-      } else if (!protectedPath) {
-        console.log(
-          '[ProtectedRoute] Not a protected path, no auth check needed',
-        )
-      }
-    } else {
-      console.log('[ProtectedRoute] Still loading auth state, waiting...')
+      history.push('/learning/')
+    } catch (error) {
+      console.error('[ProtectedRoute] Logout error:', error)
+      history.push('/learning/')
     }
-  }, [loading, user, history])
+  }
 
-  // Show loading spinner only on protected learning paths while authentication is loading
-  if (loading && isProtectedPath) {
-    console.log('[ProtectedRoute] Showing loading spinner on protected path')
+  // Non-protected paths - just render children
+  if (!isProtectedPath) {
+    console.log('[ProtectedRoute] Non-protected path, rendering children')
+    return children
+  }
+
+  // Protected paths - check authentication
+  console.log('[ProtectedRoute] Protected path detected')
+
+  // Still loading authentication
+  if (loading) {
+    console.log('[ProtectedRoute] Loading authentication...')
     return (
       <div
-        className='loading-container'
         style={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          flexDirection: 'column',
-          padding: '2rem',
-          margin: '2rem',
+          minHeight: '200px',
+          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
         }}
       >
-        <div
-          className='loading-spinner'
-          style={{
-            display: 'inline-block',
-            width: '50px',
-            height: '50px',
-            border: '3px solid rgba(0, 0, 0, 0.1)',
-            borderRadius: '50%',
-            borderTopColor: '#3b82f6',
-            animation: 'spin 1s ease-in-out infinite',
-          }}
-        ></div>
-        <p>Loading authentication...</p>
+        <div>Loading authentication...</div>
       </div>
     )
   }
 
-  // Always render children on non-protected paths
-  // Only check auth on learning paths
-  const shouldRenderChildren = !isProtectedPath || (isProtectedPath && user)
+  // Not authenticated - show login overlay
+  if (!user) {
+    console.log('[ProtectedRoute] No user, showing login overlay')
 
-  console.log('[ProtectedRoute] Render decision:', {
-    isProtectedPath,
-    userAuthenticated: !!user,
-    shouldRenderChildren,
-  })
+    // Save redirect URL
+    try {
+      if (currentPath !== '/learning/login') {
+        sessionStorage.setItem('redirectUrl', currentPath)
+        console.log('[ProtectedRoute] Saved redirect URL:', currentPath)
+      }
+    } catch (error) {
+      console.error('[ProtectedRoute] Error saving redirect URL:', error)
+    }
 
-  return shouldRenderChildren ? children : null
+    // Determine course name for personalized message
+    let courseName = 'this content'
+    let courseIcon = '🔒'
+
+    if (currentPath.includes('service-blueprinting')) {
+      courseName = 'Service Blueprinting'
+      courseIcon = '🔰'
+    } else if (currentPath.includes('automation-essentials')) {
+      courseName = 'Automation Essentials'
+      courseIcon = '⚡'
+    }
+
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: 'var(--brand-white)',
+            padding: '3rem',
+            borderRadius: '16px',
+            border: '2px solid var(--brand-blue-400)',
+            boxShadow: '0 0 30px rgba(0, 102, 255, 0.3)',
+            textAlign: 'center',
+            maxWidth: '500px',
+            margin: '1rem',
+          }}
+        >
+          <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>
+            {courseIcon}
+          </div>
+
+          <h2
+            style={{
+              color: 'var(--brand-black-700)',
+              margin: '0 0 1rem 0',
+              fontSize: '2rem',
+              fontWeight: '600',
+            }}
+          >
+            Login Required
+          </h2>
+
+          <p
+            style={{
+              color: 'var(--brand-grey-600)',
+              margin: '0 0 2rem 0',
+              fontSize: '1.2rem',
+              lineHeight: '1.6',
+            }}
+          >
+            {courseName === 'this content'
+              ? 'This content requires you to login to continue.'
+              : `The ${courseName} course requires you to login to continue.`}
+          </p>
+
+          <Link
+            to='/learning/login'
+            style={{
+              display: 'inline-block',
+              backgroundColor: 'var(--brand-blue)',
+              color: 'var(--brand-white)',
+              padding: '1rem 2.5rem',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontSize: '1.2rem',
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 12px rgba(0, 102, 255, 0.2)',
+            }}
+          >
+            Login to Continue
+          </Link>
+
+          <p
+            style={{
+              color: 'var(--brand-grey-500)',
+              margin: '2rem 0 0 0',
+              fontSize: '0.95rem',
+            }}
+          >
+            Don't have an account?{' '}
+            <Link
+              to='/learning/login'
+              style={{
+                color: 'var(--brand-blue)',
+                textDecoration: 'none',
+                fontWeight: '500',
+              }}
+            >
+              Sign up here
+            </Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Authenticated - show content with logout button
+  console.log(
+    '[ProtectedRoute] User authenticated, showing content with logout button',
+  )
+
+  return (
+    <>
+      {/* Logout button */}
+      <button
+        onClick={handleLogout}
+        onMouseEnter={() => setIsLogoutHovered(true)}
+        onMouseLeave={() => setIsLogoutHovered(false)}
+        style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          backgroundColor: isLogoutHovered ? '#dc2626' : '#0066cc',
+          color: 'white',
+          border: '2px solid white',
+          borderRadius: '8px',
+          padding: '0.8rem 1.5rem',
+          fontSize: '1rem',
+          fontWeight: '700',
+          cursor: 'pointer',
+          zIndex: 99999,
+          transition: 'all 0.3s ease',
+          boxShadow: '0 4px 15px rgba(0, 102, 204, 0.4)',
+          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        }}
+        title={`Logout ${user.email}`}
+      >
+        🚪 Logout
+      </button>
+
+      {/* Page content */}
+      {children}
+    </>
+  )
 }

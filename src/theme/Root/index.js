@@ -1,66 +1,84 @@
-// Optimized Root provider - Fix auth loop issue
+// Fixed Root provider - Correct protected vs public path handling
 // src/theme/Root/index.js
 import React, { useMemo } from 'react'
 import { useLocation } from '@docusaurus/router'
 import { AuthProvider } from '@site/src/contexts/AuthContext'
 import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
 
-// Define auth-required paths as constants to avoid re-creating arrays
-const AUTH_REQUIRED_PATHS = [
+// Define PROTECTED path stubs - these need AuthContext
+const PROTECTED_PATH_STUBS = [
   '/learning/service-blueprinting',
   '/learning/automation-essentials',
 ]
 
-const AUTH_REQUIRED_INCLUDES = ['/forms', '/courses']
+// Define PUBLIC pages that need NO auth/Firebase at all
+const PUBLIC_PATHS = [
+  '/', // Homepage
+  '/learning/', // Learning hub root (exact match)
+  '/learning/discover', // Discovery page
+  '/learning/actions', // Public documentation
+  '/learning/contact-us', // Public contact
+  '/learning/login', // Login page
+]
 
-// Memoized function to check if auth is needed
-const checkIfAuthNeeded = pathname => {
-  return (
-    AUTH_REQUIRED_PATHS.some(path => pathname.startsWith(path)) ||
-    AUTH_REQUIRED_INCLUDES.some(include => pathname.includes(include))
-  )
+// Check if page is protected (needs AuthContext)
+const isProtectedPage = pathname => {
+  return PROTECTED_PATH_STUBS.some(stub => pathname.startsWith(stub))
+}
+
+// Check if page is completely public (no auth needed)
+const isPublicPage = pathname => {
+  // Handle learning root as exact match
+  if (pathname === '/learning/' || pathname === '/learning') {
+    return true
+  }
+
+  // Check other public paths
+  return PUBLIC_PATHS.some(path => {
+    if (path === '/' || path === '/learning/') {
+      return pathname === path // Exact match for these
+    }
+    return pathname.startsWith(path) // Starts with for others
+  })
 }
 
 export default function Root({ children }) {
   const location = useLocation()
+  const pathname = location.pathname
 
-  // Use useMemo with stable comparison to prevent unnecessary re-renders
-  const authConfig = useMemo(() => {
-    const isAuthRequiredPath = checkIfAuthNeeded(location.pathname)
-    const isLoginPage = location.pathname.startsWith('/learning/login')
-
-    // Login page needs AuthProvider but skips auth checks
-    // Protected pages need AuthProvider with auth checks
-    const needsAuthProvider = isAuthRequiredPath || isLoginPage
-    const skipAuthCheck = isLoginPage
-
-    console.log('[Root] Auth decision for:', location.pathname, {
-      needsAuthProvider,
-      skipAuthCheck,
-      isAuthRequiredPath,
-      isLoginPage,
-    })
-
-    return { needsAuthProvider, skipAuthCheck }
-  }, [location.pathname])
-
-  // Always call useMemo for the providers to maintain hook order
-  const authProviders = useMemo(
-    () => (
-      <FirebaseProvider>
-        <AuthProvider skipAuthCheck={authConfig.skipAuthCheck}>
-          {children}
-        </AuthProvider>
-      </FirebaseProvider>
-    ),
-    [children, authConfig.skipAuthCheck],
-  )
-
-  // For pages that don't need any auth context, render without providers
-  if (!authConfig.needsAuthProvider) {
+  // Early return for public pages - no auth providers at all
+  if (isPublicPage(pathname)) {
+    console.log(
+      '[Root] Public page detected, rendering without auth providers:',
+      pathname,
+    )
     return children
   }
 
-  // For auth-required pages and login page, provide auth context
-  return authProviders
+  // For all non-public pages, provide auth context
+  const authConfig = useMemo(() => {
+    const isProtected = isProtectedPage(pathname)
+    const isLoginPage = pathname.startsWith('/learning/login')
+
+    // Login page needs AuthProvider but skips auth checks
+    // Protected pages need AuthProvider with auth checks
+    const skipAuthCheck = isLoginPage
+
+    console.log('[Root] Non-public page, providing auth context:', pathname, {
+      isProtected,
+      isLoginPage,
+      skipAuthCheck,
+    })
+
+    return { skipAuthCheck }
+  }, [pathname])
+
+  // Always provide auth context for non-public pages
+  return (
+    <FirebaseProvider>
+      <AuthProvider skipAuthCheck={authConfig.skipAuthCheck}>
+        {children}
+      </AuthProvider>
+    </FirebaseProvider>
+  )
 }

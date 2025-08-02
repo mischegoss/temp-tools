@@ -1,3 +1,6 @@
+// Complete Fixed LoginComponent with proper redirect logic
+// src/components/service-blueprinting/login/LoginComponent.jsx
+
 import React, { useState, useEffect } from 'react'
 import {
   createUserWithEmailAndPassword,
@@ -67,34 +70,37 @@ export default function LoginComponent() {
     return () => console.log('[LoginComponent] Unmounted')
   }, [])
 
-  // Handle redirect after successful authentication - PREVENT FLASH
+  // Handle redirect after successful authentication - FIXED LOGIC
   useEffect(() => {
     if (user && !redirectAttempted) {
       console.log('[LoginComponent] User authenticated, preparing redirect')
       setRedirectAttempted(true)
 
       try {
-        let redirectUrl = getSessionItem('redirectUrl', '')
+        // Try the protected key first, then fall back to regular key
+        let redirectUrl =
+          getSessionItem('protectedPageRedirect', '') ||
+          getSessionItem('redirectUrl', '')
         console.log(
           '[LoginComponent] Raw redirectUrl from session:',
           redirectUrl,
         )
 
-        // FIXED: Handle cases where redirectUrl is invalid or points to login page
-        if (
-          !redirectUrl ||
-          redirectUrl === '/learning/login' ||
-          redirectUrl.includes('/login')
-        ) {
+        // FIXED: Only default to discover if there's NO saved redirect URL at all
+        // OR if the saved URL is the login page itself (invalid redirect)
+        if (!redirectUrl || redirectUrl === '/learning/login') {
           console.log(
-            '[LoginComponent] Invalid or missing redirectUrl, using default',
+            '[LoginComponent] No valid redirectUrl found, using default',
           )
           redirectUrl = '/learning/discover/'
+        } else {
+          console.log('[LoginComponent] Using saved redirectUrl:', redirectUrl)
         }
 
         console.log('[LoginComponent] Final redirectUrl:', redirectUrl)
 
-        // Clear the saved redirect URL
+        // Clear both redirect URLs
+        removeSessionItem('protectedPageRedirect')
         removeSessionItem('redirectUrl')
 
         // Immediate redirect for already-logged-in users (no delay needed)
@@ -269,458 +275,300 @@ export default function LoginComponent() {
   const cardStyle = {
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
     border: '2px solid var(--brand-blue-400)',
-    boxShadow: '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
     borderRadius: '12px',
+    boxShadow: '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
     backgroundColor: 'var(--brand-white)',
-    overflow: 'hidden',
+    padding: '0', // Remove padding from card, let sections handle it
+    margin: '2rem auto',
+    width: '100%',
+    maxWidth: '500px',
     position: 'relative',
-    transition: 'all 0.3s ease-in-out',
+    overflow: 'hidden',
   }
 
-  const cardHoverStyle = {
-    transform: 'translateY(-5px)',
-    boxShadow:
-      '0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2)',
+  const gradientStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background:
+      'radial-gradient(circle at 15% 25%, rgba(0, 80, 199, 0.08) 0%, transparent 50%)',
+    pointerEvents: 'none',
+    zIndex: 1,
+  }
+
+  const contentStyle = {
+    position: 'relative',
+    zIndex: 2,
+    padding: '3rem 2.5rem',
   }
 
   const headerStyle = {
-    background:
-      'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)',
-    color: 'var(--brand-white)',
-    padding: '1.5rem',
     textAlign: 'center',
-    position: 'relative',
-    marginBottom: '1rem',
+    marginBottom: '2rem',
   }
 
-  // FIXED - Remove conflicting border properties
-  const inputStyle = {
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    width: '100%',
-    padding: '12px 16px',
-    border: '2px solid var(--brand-grey-300)',
-    borderRadius: '8px',
-    fontSize: '16px',
-    backgroundColor: 'var(--brand-white)',
-    color: 'var(--brand-aqua-800)',
-    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-    outline: 'none',
+  const titleStyle = {
+    fontSize: '2rem',
+    fontWeight: '700',
+    color: 'var(--brand-black-700)',
+    margin: '0 0 1rem 0',
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
   }
 
-  const inputFocusStyle = {
-    borderColor: 'var(--brand-blue-400)',
-    boxShadow: '0 0 10px rgba(0, 102, 255, 0.2)',
+  const subtitleStyle = {
+    fontSize: '1.1rem',
+    color: 'var(--brand-grey-600)',
+    margin: 0,
+    lineHeight: '1.5',
   }
 
-  const buttonPrimaryStyle = {
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    width: '100%',
-    padding: '14px 24px',
-    background:
-      'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)',
-    color: 'var(--brand-white)',
-    border: '2px solid var(--brand-blue-400)',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease-in-out',
-    outline: 'none',
+  const formStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
   }
 
-  const buttonSecondaryStyle = {
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    background: 'transparent',
-    color: 'var(--brand-aqua-800)',
-    border: 'none',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'color 0.3s ease',
-    textDecoration: 'underline',
+  const inputGroupStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
   }
 
   const labelStyle = {
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    display: 'block',
-    marginBottom: '8px',
-    color: 'var(--brand-aqua-800)',
-    fontSize: '14px',
+    fontSize: '1rem',
     fontWeight: '600',
+    color: 'var(--brand-black-700)',
+    margin: 0,
+  }
+
+  const inputStyle = {
+    padding: '0.75rem 1rem',
+    border: '2px solid var(--brand-grey-300)',
+    borderRadius: '6px',
+    fontSize: '1rem',
+    fontFamily: 'inherit',
+    transition: 'all 0.2s ease',
+    backgroundColor: 'var(--brand-white)',
+  }
+
+  const buttonStyle = {
+    padding: '0.875rem 2rem',
+    backgroundColor: 'var(--brand-blue)',
+    color: 'var(--brand-white)',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    cursor: loading ? 'not-allowed' : 'pointer',
+    transition: 'all 0.3s ease',
+    fontFamily: 'inherit',
+    opacity: loading ? 0.7 : 1,
+    transform: loading ? 'none' : 'scale(1)',
+    boxShadow: loading
+      ? 'none'
+      : '0 4px 12px rgba(0, 102, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1)',
   }
 
   const errorStyle = {
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    padding: '12px 16px',
-    background:
-      'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-orange) 100%)',
-    color: 'var(--brand-white)',
-    border: '2px solid var(--brand-orange)',
-    borderRadius: '8px',
-    marginBottom: '1rem',
-    fontSize: '14px',
+    color: 'var(--brand-red, #dc2626)',
+    fontSize: '0.95rem',
+    textAlign: 'center',
+    margin: '1rem 0 0 0',
+    padding: '0.75rem',
+    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+    border: '1px solid rgba(220, 38, 38, 0.2)',
+    borderRadius: '6px',
   }
 
-  const containerStyle = {
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    minHeight: '100vh',
-    background: 'var(--brand-secondary-white)',
-    paddingTop: '2rem',
-    paddingBottom: '2rem',
+  const toggleStyle = {
+    textAlign: 'center',
+    marginTop: '1.5rem',
+    fontSize: '0.95rem',
+    color: 'var(--brand-grey-600)',
+  }
+
+  const toggleLinkStyle = {
+    color: 'var(--brand-blue)',
+    textDecoration: 'none',
+    fontWeight: '600',
+    cursor: 'pointer',
   }
 
   return (
-    <div style={containerStyle}>
-      <div className='container margin-vert--xl'>
-        <div className='row'>
-          <div className='col col--4 col--offset-4'>
-            <div
-              style={cardStyle}
-              onMouseEnter={e => {
-                Object.assign(e.target.style, cardHoverStyle)
-              }}
-              onMouseLeave={e => {
-                Object.assign(e.target.style, cardStyle)
-              }}
-            >
-              <div style={headerStyle}>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: '24px',
-                    fontWeight: '600',
-                    color: 'var(--brand-white)',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-                    position: 'relative',
-                    zIndex: 10,
-                  }}
-                >
-                  {isLogin ? 'Login' : 'Create an Account'}
-                </h2>
-                {/* Gradient overlay */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background:
-                      'radial-gradient(circle at 10% 20%, rgba(0, 80, 199, 0.05) 0%, transparent 50%)',
-                    pointerEvents: 'none',
-                  }}
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--brand-secondary-white)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+    >
+      <div style={cardStyle}>
+        <div style={gradientStyle}></div>
+        <div style={contentStyle}>
+          <div style={headerStyle}>
+            <h1 style={titleStyle}>
+              {isLogin ? 'Welcome Back' : 'Create Account'}
+            </h1>
+            <p style={subtitleStyle}>
+              {redirectUrl && cameFromProtected
+                ? getAuthMessage(redirectUrl)
+                : isLogin
+                ? 'Sign in to access your learning dashboard'
+                : 'Join thousands of automation professionals'}
+            </p>
+          </div>
+
+          <form
+            onSubmit={isLogin ? handleLogin : handleSignup}
+            style={formStyle}
+          >
+            <div style={inputGroupStyle}>
+              <label htmlFor='email' style={labelStyle}>
+                Email Address
+              </label>
+              <input
+                type='email'
+                id='email'
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                style={inputStyle}
+                placeholder='Enter your email'
+                disabled={loading}
+              />
+            </div>
+
+            <div style={inputGroupStyle}>
+              <label htmlFor='password' style={labelStyle}>
+                Password
+              </label>
+              <input
+                type='password'
+                id='password'
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                style={inputStyle}
+                placeholder={
+                  isLogin
+                    ? 'Enter your password'
+                    : 'Create a password (6+ characters)'
+                }
+                disabled={loading}
+              />
+            </div>
+
+            {!isLogin && (
+              <div style={inputGroupStyle}>
+                <label htmlFor='companyName' style={labelStyle}>
+                  Company Name
+                </label>
+                <input
+                  type='text'
+                  id='companyName'
+                  value={companyName}
+                  onChange={e => setCompanyName(e.target.value)}
+                  required
+                  style={inputStyle}
+                  placeholder='Enter your company name'
+                  disabled={loading}
                 />
               </div>
+            )}
 
-              {/* Authentication Required Message */}
-              {cameFromProtected && (
-                <div
-                  style={{
-                    padding: '1.5rem 2rem 0',
-                    textAlign: 'center',
-                    backgroundColor: 'var(--brand-blue-50, #f0f8ff)',
-                    borderBottom: '2px solid var(--brand-blue-200, #bfdbfe)',
-                    marginBottom: '1rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: '12px 16px',
-                      background:
-                        'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)',
-                      color: 'var(--brand-white)',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                    }}
-                  >
-                    🔒 {getAuthMessage(redirectUrl)}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ padding: '2rem', marginBottom: '1rem' }}>
-                {error && (
-                  <div style={errorStyle} role='alert'>
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={isLogin ? handleLogin : handleSignup}>
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label htmlFor='email' style={labelStyle}>
-                      Email:
-                    </label>
-                    <input
-                      id='email'
-                      type='email'
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      style={inputStyle}
-                      onFocus={e =>
-                        Object.assign(e.target.style, {
-                          ...inputStyle,
-                          ...inputFocusStyle,
-                        })
-                      }
-                      onBlur={e => Object.assign(e.target.style, inputStyle)}
-                      required
-                      autoComplete='email'
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label htmlFor='password' style={labelStyle}>
-                      Password:
-                    </label>
-                    <input
-                      id='password'
-                      type='password'
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      style={inputStyle}
-                      onFocus={e =>
-                        Object.assign(e.target.style, {
-                          ...inputStyle,
-                          ...inputFocusStyle,
-                        })
-                      }
-                      onBlur={e => Object.assign(e.target.style, inputStyle)}
-                      required
-                      autoComplete={
-                        isLogin ? 'current-password' : 'new-password'
-                      }
-                    />
-                  </div>
-
-                  {!isLogin && (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <label htmlFor='companyName' style={labelStyle}>
-                        Company Name:
-                      </label>
-                      <input
-                        id='companyName'
-                        type='text'
-                        value={companyName}
-                        onChange={e => setCompanyName(e.target.value)}
-                        style={inputStyle}
-                        onFocus={e =>
-                          Object.assign(e.target.style, {
-                            ...inputStyle,
-                            ...inputFocusStyle,
-                          })
-                        }
-                        onBlur={e => Object.assign(e.target.style, inputStyle)}
-                        required
-                      />
-                    </div>
-                  )}
-
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <button
-                      type='submit'
-                      style={buttonPrimaryStyle}
-                      onMouseEnter={e => {
-                        if (!loading) {
-                          e.target.style.transform = 'translateY(-2px)'
-                          e.target.style.boxShadow =
-                            '0 0 20px rgba(0, 102, 255, 0.4), 0 4px 16px rgba(0, 102, 255, 0.3)'
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        e.target.style.transform = 'translateY(0)'
-                        e.target.style.boxShadow = 'none'
-                      }}
-                      onMouseDown={e => {
-                        if (!loading) {
-                          e.target.style.transform = 'translateY(-1px)'
-                        }
-                      }}
-                      onMouseUp={e => {
-                        if (!loading) {
-                          e.target.style.transform = 'translateY(-2px)'
-                        }
-                      }}
-                      disabled={loading}
-                    >
-                      {loading
-                        ? 'Processing...'
-                        : isLogin
-                        ? 'Login'
-                        : 'Sign Up'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <div
-                style={{
-                  padding: '1rem 2rem 2rem',
-                  textAlign: 'center',
-                  borderTop: '1px solid var(--brand-grey-250)',
-                }}
-              >
-                <button
-                  onClick={() => {
-                    setIsLogin(!isLogin)
-                    setError(null) // Clear any previous errors
-                  }}
-                  style={buttonSecondaryStyle}
-                  onMouseEnter={e => {
-                    e.target.style.color = 'var(--brand-aqua)'
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.color = 'var(--brand-aqua-800)'
-                  }}
-                >
-                  {isLogin
-                    ? 'Need an account? Sign up'
-                    : 'Already have an account? Login'}
-                </button>
-              </div>
-            </div>
-
-            {/* Don't Want to Login Menu - Below the login card */}
-            <div
-              style={{
-                marginTop: '2rem',
-                textAlign: 'center',
-                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+            <button
+              type='submit'
+              disabled={loading}
+              style={buttonStyle}
+              onMouseEnter={e => {
+                if (!loading) {
+                  e.target.style.backgroundColor = 'var(--brand-blue-400)'
+                  e.target.style.transform = 'translateY(-1px)'
+                  e.target.style.boxShadow =
+                    '0 6px 16px rgba(0, 102, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15)'
+                }
+              }}
+              onMouseLeave={e => {
+                if (!loading) {
+                  e.target.style.backgroundColor = 'var(--brand-blue)'
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow =
+                    '0 4px 12px rgba(0, 102, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1)'
+                }
               }}
             >
-              <h3
-                style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: 'var(--brand-aqua-800)',
-                  marginBottom: '1rem',
-                }}
-              >
-                Don't want to login right now?
-              </h3>
+              {loading
+                ? isLogin
+                  ? 'Signing in...'
+                  : 'Creating account...'
+                : isLogin
+                ? 'Sign In'
+                : 'Create Account'}
+            </button>
 
-              <div
-                style={{
-                  border: '2px solid var(--brand-blue-400)',
-                  borderRadius: '12px',
-                  backgroundColor: 'var(--brand-white)',
-                  padding: '1.5rem',
-                  boxShadow: '0 4px 12px rgba(0, 102, 255, 0.1)',
-                  maxWidth: '400px',
-                  margin: '0 auto',
-                }}
-              >
-                {/* Learning Hub Option */}
-                <button
-                  onClick={() => {
-                    removeSessionItem('redirectUrl')
-                    history.push('/learning/')
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    marginBottom: '8px',
-                    border: '2px solid var(--brand-grey-300)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--brand-white)',
-                    color: 'var(--brand-aqua-800)',
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  onMouseEnter={e => {
-                    e.target.style.borderColor = 'var(--brand-blue-400)'
-                    e.target.style.backgroundColor = 'var(--brand-blue-50)'
-                    e.target.style.transform = 'translateX(4px)'
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.borderColor = 'var(--brand-grey-300)'
-                    e.target.style.backgroundColor = 'var(--brand-white)'
-                    e.target.style.transform = 'translateX(0)'
-                  }}
-                  disabled={loading}
-                >
-                  → Learning Hub
-                </button>
+            {error && <div style={errorStyle}>{error}</div>}
+          </form>
 
-                {/* Discover Resolve Option */}
-                <button
-                  onClick={() => {
-                    removeSessionItem('redirectUrl')
-                    history.push('/learning/discover')
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    marginBottom: '8px',
-                    border: '2px solid var(--brand-grey-300)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--brand-white)',
-                    color: 'var(--brand-aqua-800)',
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  onMouseEnter={e => {
-                    e.target.style.borderColor = 'var(--brand-blue-400)'
-                    e.target.style.backgroundColor = 'var(--brand-blue-50)'
-                    e.target.style.transform = 'translateX(4px)'
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.borderColor = 'var(--brand-grey-300)'
-                    e.target.style.backgroundColor = 'var(--brand-white)'
-                    e.target.style.transform = 'translateX(0)'
-                  }}
-                  disabled={loading}
-                >
-                  → Discover Resolve
-                </button>
-
-                {/* Service Blueprinting Catalog Option */}
-                <button
-                  onClick={() => {
-                    removeSessionItem('redirectUrl')
-                    history.push('/learning/service-blueprinting/')
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '2px solid var(--brand-grey-300)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--brand-white)',
-                    color: 'var(--brand-aqua-800)',
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  onMouseEnter={e => {
-                    e.target.style.borderColor = 'var(--brand-blue-400)'
-                    e.target.style.backgroundColor = 'var(--brand-blue-50)'
-                    e.target.style.transform = 'translateX(4px)'
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.borderColor = 'var(--brand-grey-300)'
-                    e.target.style.backgroundColor = 'var(--brand-white)'
-                    e.target.style.transform = 'translateX(0)'
-                  }}
-                  disabled={loading}
-                >
-                  → Service Blueprinting Catalog
-                </button>
-              </div>
-            </div>
+          <div style={toggleStyle}>
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <span
+              onClick={() => {
+                setIsLogin(!isLogin)
+                setError(null)
+                setEmail('')
+                setPassword('')
+                setCompanyName('')
+              }}
+              style={toggleLinkStyle}
+              onMouseEnter={e => {
+                e.target.style.textDecoration = 'underline'
+              }}
+              onMouseLeave={e => {
+                e.target.style.textDecoration = 'none'
+              }}
+            >
+              {isLogin ? 'Sign up here' : 'Sign in here'}
+            </span>
           </div>
+
+          {redirectUrl && cameFromPublic && (
+            <div
+              style={{
+                textAlign: 'center',
+                marginTop: '1.5rem',
+                padding: '1rem',
+                backgroundColor: 'var(--brand-blue-50, #f0f7ff)',
+                borderRadius: '6px',
+                border: '1px solid var(--brand-blue-200, #bde0ff)',
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: '0.95rem',
+                  color: 'var(--brand-blue-700, #1e40af)',
+                }}
+              >
+                Don't want to login right now?{' '}
+                <span
+                  onClick={() => history.push('/learning/')}
+                  style={{
+                    color: 'var(--brand-blue)',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                  }}
+                >
+                  Browse our free content
+                </span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
