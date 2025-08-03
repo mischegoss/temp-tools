@@ -7,7 +7,7 @@ import Link from '@docusaurus/Link'
 import { learningPaths } from './data/LearningPathsServiceBlueprinting.js'
 
 // Import ServiceBlueprinting-styled components and styles
-import ServiceBlueprintingCards from './serviceblueprintingcards'
+import ServiceBlueprintingCards from './serviceblueprintingcards.js'
 import {
   learningHubSectionStyle,
   containerStyle,
