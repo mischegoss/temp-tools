@@ -11,7 +11,6 @@ import Link from '@docusaurus/Link'
 export default function ProtectedRoute({ children }) {
   const { loading, user } = useAuth()
   const history = useHistory()
-  const [isLogoutHovered, setIsLogoutHovered] = useState(false)
 
   // Simple path detection - no complex state management
   const currentPath = window.location.pathname
@@ -198,31 +197,37 @@ export default function ProtectedRoute({ children }) {
 
   return (
     <>
-      {/* Logout button */}
+      {/* Logout button - custom styled */}
       <button
         onClick={handleLogout}
-        onMouseEnter={() => setIsLogoutHovered(true)}
-        onMouseLeave={() => setIsLogoutHovered(false)}
         style={{
           position: 'fixed',
-          top: '80px',
+          top: '20px',
           right: '20px',
-          backgroundColor: isLogoutHovered ? '#dc2626' : '#0066cc',
+          backgroundColor: 'var(--brand-aqua-600)',
           color: 'white',
           border: '2px solid white',
-          borderRadius: '8px',
-          padding: '0.8rem 1.5rem',
+          borderRadius: '25px',
+          padding: '12px 24px',
           fontSize: '1rem',
           fontWeight: '700',
           cursor: 'pointer',
           zIndex: 99999,
           transition: 'all 0.3s ease',
-          boxShadow: '0 4px 15px rgba(0, 102, 204, 0.4)',
+          boxShadow: '0 4px 15px rgba(0, 212, 255, 0.4)',
           fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        }}
+        onMouseEnter={e => {
+          e.target.style.backgroundColor = 'var(--brand-aqua-800)'
+          e.target.style.transform = 'translateY(-2px)'
+        }}
+        onMouseLeave={e => {
+          e.target.style.backgroundColor = 'var(--brand-aqua-600)'
+          e.target.style.transform = 'translateY(0)'
         }}
         title={`Logout ${user.email}`}
       >
-        🚪 Logout
+        Logout
       </button>
 
       {/* Page content */}

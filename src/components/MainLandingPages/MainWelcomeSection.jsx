@@ -28,70 +28,24 @@ const WelcomeSectionClient = ({
   accessMessage = 'You have full access to all content.',
   guestTitle = 'Welcome!',
   guestMessage = 'Please login to access all content.',
+  showWelcomeCard = true,
 }) => {
-  const { user, loading } = useAuth()
+  const { user } = useAuth()
   const [isHovered, setIsHovered] = useState(false)
   const [isLinkHovered, setIsLinkHovered] = useState(false)
 
-  // Show loading state while auth is being determined
-  if (loading) {
-    return (
-      <div
-        style={{
-          fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '2.5rem',
-          borderRadius: '12px',
-          border: '2px solid var(--brand-blue-400)',
-          backgroundColor: 'var(--brand-white)',
-          boxShadow:
-            '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-          marginBottom: '2rem',
-          textAlign: 'center',
-        }}
-      >
-        <div style={{ marginBottom: '1rem' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              width: '30px',
-              height: '30px',
-              border: '3px solid var(--brand-blue-100)',
-              borderTop: '3px solid var(--brand-blue)',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-            }}
-          ></div>
-        </div>
-        <p
-          style={{
-            color: 'var(--brand-grey-600)',
-            margin: 0,
-            fontSize: '1.1rem',
-          }}
-        >
-          Loading your learning dashboard...
-        </p>
-      </div>
-    )
-  }
-
-  // Brand-compliant styles
+  // Dynamic styles object
   const styles = {
     card: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '2.5rem',
+      background: 'var(--brand-white)',
       borderRadius: '12px',
       border: '2px solid var(--brand-blue-400)',
-      backgroundColor: 'var(--brand-white)',
-      boxShadow:
-        '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.3s ease-in-out',
-      marginBottom: '2rem',
-      transform: isHovered && user ? 'translateY(-3px)' : 'translateY(0)',
+      padding: '2rem',
+      margin: '2rem 0',
+      boxShadow: '0 4px 15px rgba(0, 102, 255, 0.1)',
+      transition: 'all 0.3s ease',
+      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+      transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
       position: 'relative',
       overflow: 'hidden',
     },
@@ -141,10 +95,10 @@ const WelcomeSectionClient = ({
       lineHeight: '1.5',
     },
     email: {
-      fontSize: '0.95rem',
-      color: 'var(--brand-grey-500)',
+      fontSize: '1.1rem', // Increased from 0.95rem
+      color: 'var(--brand-blue-400)', // Changed from var(--brand-grey-500) to match border
       margin: 0,
-      fontWeight: '500',
+      fontWeight: '600', // Increased from 500
     },
     guestTitle: {
       fontSize: '1.6rem',

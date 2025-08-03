@@ -1,6 +1,6 @@
-// Fixed Root provider - Correct login page handling
+// Fixed Root provider - Correct login page handling + Scroll restoration
 // src/theme/Root/index.js
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { useLocation } from '@docusaurus/router'
 import { AuthProvider } from '@site/src/contexts/AuthContext'
 import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
@@ -48,6 +48,13 @@ const isLoginPage = pathname => {
 export default function Root({ children }) {
   const location = useLocation()
   const pathname = location.pathname
+
+  // Scroll restoration - scroll to top when pathname changes (but not on hash changes)
+  useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo(0, 0)
+    }
+  }, [pathname]) // Only trigger on pathname change, not hash
 
   // ALWAYS call useMemo to avoid Rules of Hooks violation
   const authConfig = useMemo(() => {

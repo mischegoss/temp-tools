@@ -166,24 +166,24 @@ export const homePageData = [
     title: 'Discover Resolve',
     description: 'New to Resolve? Start here.',
     icon: <DocumentationIcon />,
-    link: '/learning/',
+    link: '/learning/discover',
   },
   {
     title: 'Automation Design',
     description: 'Master service blueprints',
     icon: <LearningIcon />,
-    link: '/learning/service-blueprinting/',
+    link: '/learning#automationdesign',
   },
   {
     title: 'Automation Development',
     description: 'Build powerful automations',
     icon: <AutomationIcon />,
-    link: '/learning/actions/',
+    link: '/learning#automationdevelopment',
   },
   {
     title: 'Device Discovery and Management',
     description: 'Discover and manage devices',
     icon: <DeviceIcon />,
-    link: '/learning/discover/',
+    link: '/learning#devicediscoveryandmanagement',
   },
 ]
