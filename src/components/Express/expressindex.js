@@ -1,8 +1,8 @@
-// @site/src/components/Pro/proindex.js
+// @site/src/components/Express/expressindex.js
 
 import React, { useState, useMemo } from 'react'
 import Link from '@docusaurus/Link'
-import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsPro.js'
+import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsExpress.js'
 import LandingPageCards from '@site/src/components/LandingPageLibrary/landingpagecards.js'
 import FilterSection from '@site/src/components/LandingPageLibrary/filtersection.js'
 import {
@@ -19,24 +19,24 @@ import {
 } from '@site/src/components/LandingPageLibrary/sharedStyles.js'
 import { getColorTheme } from '@site/src/components/LandingPageLibrary/colorThemes.js'
 
-// Get Pro color theme
-const proTheme = getColorTheme('pro')
+// Get Express color theme
+const expressTheme = getColorTheme('express')
 
 // Create themed styles
-const accentLineStyle = createAccentLineStyle(proTheme.primary)
-const helpSectionStyle = createHelpSectionStyle(proTheme.primary)
-const helpLinkStyle = createHelpLinkStyle(proTheme.primary)
+const accentLineStyle = createAccentLineStyle(expressTheme.primary)
+const helpSectionStyle = createHelpSectionStyle(expressTheme.primary)
+const helpLinkStyle = createHelpLinkStyle(expressTheme.primary)
 
 /**
- * ProIndex component - Creates a brand-compliant landing page for Resolve Actions Pro
+ * ExpressIndex component - Creates a brand-compliant landing page for Resolve Actions Express
  * Following LearningHub/DiscoverPage design patterns
  */
-const ProIndex = ({
+const ExpressIndex = ({
   // Welcome section props
   welcomeSectionProps = {
-    title: 'Welcome to Resolve Actions Pro Learning',
+    title: 'Welcome to Resolve Actions Express Learning',
     content:
-      "Explore our specialized learning paths designed to help you master Resolve Pro. Whether you're just getting started, managing the platform, or developing custom solutions, we have the perfect learning path for you.",
+      'Explore our specialized learning paths designed to help you master Resolve Actions Express. Our drag-and-drop, no-code IT automation platform with a large built-in library of automation actions will transform your workflow efficiency.',
   },
   // Filter section props
   filterSectionProps = {
@@ -115,7 +115,7 @@ const ProIndex = ({
         setActiveFilter={setActiveFilter}
         totalByLevel={totalByLevel}
         resources={resources}
-        colorTheme={proTheme}
+        colorTheme={expressTheme}
       />
 
       {/* Cards Section */}
@@ -124,7 +124,7 @@ const ProIndex = ({
           <LandingPageCards
             resources={filteredPaths}
             hideSection={true}
-            colorTheme={proTheme}
+            colorTheme={expressTheme}
           />
         </div>
       </section>
@@ -151,4 +151,4 @@ const ProIndex = ({
   )
 }
 
-export default ProIndex
+export default ExpressIndex

@@ -3,7 +3,7 @@ import {
   getFilterButtonStyle,
   getFilterHoverStyle,
   getFilterActiveStyle,
-} from './styles/prostyles'
+} from './sharedStyles.js'
 
 /**
  * LevelFilter component - Renders buttons for filtering by skill level

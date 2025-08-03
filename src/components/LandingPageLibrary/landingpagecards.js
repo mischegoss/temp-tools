@@ -13,7 +13,7 @@ import {
   getLevelBadgeColor,
   getFooterColor,
   getBorderColor,
-} from './styles/actionstyles.js'
+} from './sharedStyles.js'
 
 const LandingPageCards = ({ resources = [], hideSection = false }) => {
   // Check if resources is valid before rendering

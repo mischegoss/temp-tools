@@ -1,20 +1,31 @@
+// @site/src/components/Actions/actionsindex.js
+
 import React, { useState, useMemo } from 'react'
 import Link from '@docusaurus/Link'
-import { learningPaths } from './data/LearningPathsActions.js'
-import LandingPageCards from './landingpagecards'
-import FilterSection from './filtersection'
+import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsActions.js'
+import LandingPageCards from '@site/src/components/LandingPageLibrary/landingpagecards.js'
+import FilterSection from '@site/src/components/LandingPageLibrary/filtersection.js'
 import {
   learningHubSectionStyle,
   containerStyle,
   headerStyle,
   sectionTitleStyle,
   subtitleStyle,
-  accentLineStyle,
-  helpSectionStyle,
+  createAccentLineStyle,
+  createHelpSectionStyle,
   helpTitleStyle,
   helpDescriptionStyle,
-  helpLinkStyle,
-} from './styles/actionstyles.js'
+  createHelpLinkStyle,
+} from '@site/src/components/LandingPageLibrary/sharedStyles.js'
+import { getColorTheme } from '@site/src/components/LandingPageLibrary/colorThemes.js'
+
+// Get Actions color theme
+const actionsTheme = getColorTheme('actions')
+
+// Create themed styles
+const accentLineStyle = createAccentLineStyle(actionsTheme.primary)
+const helpSectionStyle = createHelpSectionStyle(actionsTheme.primary)
+const helpLinkStyle = createHelpLinkStyle(actionsTheme.primary)
 
 /**
  * ActionsIndex component - Creates a brand-compliant landing page for Resolve Actions
@@ -104,12 +115,17 @@ const ActionsIndex = ({
         setActiveFilter={setActiveFilter}
         totalByLevel={totalByLevel}
         resources={resources}
+        colorTheme={actionsTheme}
       />
 
       {/* Cards Section */}
       <section style={learningHubSectionStyle} className='cards-section'>
         <div style={containerStyle}>
-          <LandingPageCards resources={filteredPaths} hideSection={true} />
+          <LandingPageCards
+            resources={filteredPaths}
+            hideSection={true}
+            colorTheme={actionsTheme}
+          />
         </div>
       </section>
 

@@ -418,18 +418,14 @@ const CertificateGenerator = () => {
                 {pdfGenerated && (
                   <button
                     onClick={() => {
-                      const shareUrl = window.location.href
-                      const title = `I completed the Automation Essentials course!`
-                      const description = `I'm excited to share that I've completed the Automation Essentials course. Check it out!`
+                      const shareText = `🎉 I just completed the Automation Essentials course!\n\nLearned essential automation concepts and best practices. Ready to streamline processes!\n\n#AutomationEssentials #ProcessImprovement #ProfessionalDevelopment`
 
-                      const linkedInShareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-                        shareUrl,
-                      )}&title=${encodeURIComponent(
-                        title,
-                      )}&summary=${encodeURIComponent(description)}`
+                      const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(
+                        shareText,
+                      )}`
 
                       window.open(
-                        linkedInShareUrl,
+                        linkedInUrl,
                         'linkedin-share-dialog',
                         'width=600,height=600',
                       )

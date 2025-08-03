@@ -1,12 +1,12 @@
 import React from 'react'
-import LevelFilter from './levelfilter'
+import LevelFilter from './levelfilter.js'
 import {
   filterSectionStyle,
   containerStyle,
   filterTitleStyle,
   filterDescriptionStyle,
   filterButtonsContainerStyle,
-} from './styles/prostyles.js'
+} from './sharedStyles.js'
 
 /**
  * FilterSection component - Contains the filter description and filter buttons
