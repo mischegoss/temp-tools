@@ -1,10 +1,9 @@
 // src/components/DocsProducts/styles/docsProductsStyles.js
 
 const docsProductsStyles = {
-  // Section styling with seamless gradient from homepage
+  // Section styling with brand compliance
   sectionStyle: {
-    background:
-      'linear-gradient(to bottom, #00b8de 0%, #33dbff 30%, #b3f0ff 70%, #ffffff 100%)',
+    background: 'var(--brand-grey-100)',
     padding: '80px 0 100px 0',
     minHeight: '60vh',
     width: '100%',
@@ -30,28 +29,26 @@ const docsProductsStyles = {
     marginBottom: '48px',
   },
 
-  // Main title with brand typography - VERY DARK BLUE TEXT
+  // Main title with brand typography
   titleStyle: {
     fontSize: '2.8rem',
     fontWeight: '600',
-    color: '#0d1637', // Very dark blue
+    color: 'var(--brand-black)',
     marginBottom: '16px',
     lineHeight: '1.2',
     textAlign: 'center',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
-    textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)', // Light shadow for contrast
   },
 
-  // Subtitle with brand typography - VERY DARK BLUE TEXT
+  // Subtitle with brand typography
   subtitleStyle: {
     fontSize: '1.2rem',
-    color: '#0d1637', // Very dark blue
+    color: 'var(--brand-grey-600)',
     maxWidth: '700px',
     margin: '0 auto',
     lineHeight: '1.6',
     textAlign: 'center',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
-    textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)', // Light shadow for contrast
   },
 
   // Product card with dark gradient background
@@ -124,7 +121,7 @@ const docsProductsStyles = {
       'linear-gradient(to bottom, #001a1f 0%, #002a33 30%, #004454 70%, #006b7a 100%)',
   },
 
-  // Grid layout - Original MUI Grid approach
+  // Grid layout
   gridStyle: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -137,20 +134,14 @@ const docsProductsStyles = {
   '@media (max-width: 768px)': {
     titleStyle: {
       fontSize: '2.2rem',
-      color: '#0d1637', // Very dark blue on mobile
-      textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)',
     },
     subtitleStyle: {
       fontSize: '1.1rem',
-      color: '#0d1637', // Very dark blue on mobile
-      textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)',
     },
     containerStyle: {
       padding: '0 24px',
     },
     sectionStyle: {
-      background:
-        'linear-gradient(to bottom, #00b8de 0%, #33dbff 30%, #b3f0ff 70%, #ffffff 100%)',
       padding: '60px 0 80px 0',
     },
     productCardStyle: {
@@ -167,13 +158,9 @@ const docsProductsStyles = {
   '@media (max-width: 480px)': {
     titleStyle: {
       fontSize: '1.8rem',
-      color: '#0d1637', // Very dark blue on mobile
-      textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)',
     },
     subtitleStyle: {
       fontSize: '1rem',
-      color: '#0d1637', // Very dark blue on mobile
-      textShadow: '0 1px 2px rgba(255, 255, 255, 0.3)',
     },
     productCardStyle: {
       minHeight: '220px',

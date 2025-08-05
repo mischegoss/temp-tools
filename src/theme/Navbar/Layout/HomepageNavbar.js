@@ -1,8 +1,8 @@
-// HomepageNavbar.js - Fixed with clickable logo and improved dropdowns
+// HomepageNavbar.js - Fixed with working hamburger
 import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
 import NavigationDropdowns from './NavigationDropdowns'
-import MobileSidebar from './MobileSidebar'
+import MobileSidebar from './MobileSidebar' // Your custom component
 import styles from './styles.module.css'
 
 export default function HomepageNavbar(props) {
@@ -13,23 +13,24 @@ export default function HomepageNavbar(props) {
       className={`navbar navbar--fixed-top ${styles.navbarHomepageGradient}`}
     >
       <div className='navbar__inner'>
-        {/* Fixed Logo - Removed nested Link structure */}
-        <Link to='/' className={`navbar__brand ${styles.navbarBrand}`}>
-          <div className='navbar__logo'>
-            <img
-              src='/img/Resolve-Logo-White-Teal-RGB.svg'
-              alt='RESOLVE Logo'
-              className='navbar__logo-img'
-            />
-          </div>
-          <b className={styles.brandTitle}></b>
-        </Link>
+        <div className='navbar__brand'>
+          <Link to='/' className='navbar__brand'>
+            <div className='navbar__logo'>
+              <img
+                src='/img/Resolve-Logo-White-Teal-RGB.svg'
+                alt='RESOLVE Logo'
+                className='navbar__logo-img'
+              />
+            </div>
+            <b className={styles.brandTitle}></b>
+          </Link>
+        </div>
 
         <div className='navbar__items'>
           <NavigationDropdowns />
         </div>
 
-        {/* Mobile menu toggle */}
+        {/* Mobile menu toggle - NOW WITH CLICK HANDLER */}
         <div
           className={styles.navbarToggle}
           role='button'
@@ -60,7 +61,7 @@ export default function HomepageNavbar(props) {
         </div>
       </div>
 
-      {/* Mobile sidebar */}
+      {/* Your custom mobile sidebar with state */}
       <MobileSidebar
         logoSrc='/img/Resolve-Logo-White-Teal-RGB.svg'
         showRaniButton={false}
