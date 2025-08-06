@@ -1,20 +1,52 @@
-import React from 'react'
-import OriginalNavbar from '@theme-original/Navbar'
-import HomepageNavbar from './HomepageNavbar'
-import ActionsNavbar from './ActionsNavbar'
-import { useLocation } from '@docusaurus/router'
-
-export default function Navbar(props) {
-  const location = useLocation()
-  const pathname = location.pathname
-
-  // Check for specific paths
-  if (pathname === '/') {
-    return <HomepageNavbar {...props} />
-  } else if (pathname.startsWith('/actions')) {
-    return <ActionsNavbar {...props} />
-  }
-
-  // Default navbar for all other pages
-  return <HomepageNavbar {...props} />
+import React from 'react';
+import clsx from 'clsx';
+import {useThemeConfig} from '@docusaurus/theme-common';
+import {
+  useHideableNavbar,
+  useNavbarMobileSidebar,
+} from '@docusaurus/theme-common/internal';
+import {translate} from '@docusaurus/Translate';
+import NavbarMobileSidebar from '@theme/Navbar/MobileSidebar';
+import styles from './styles.module.css';
+function NavbarBackdrop(props) {
+  return (
+    <div
+      role="presentation"
+      {...props}
+      className={clsx('navbar-sidebar__backdrop', props.className)}
+    />
+  );
+}
+export default function NavbarLayout({children}) {
+  const {
+    navbar: {hideOnScroll, style},
+  } = useThemeConfig();
+  const mobileSidebar = useNavbarMobileSidebar();
+  const {navbarRef, isNavbarVisible} = useHideableNavbar(hideOnScroll);
+  return (
+    <nav
+      ref={navbarRef}
+      aria-label={translate({
+        id: 'theme.NavBar.navAriaLabel',
+        message: 'Main',
+        description: 'The ARIA label for the main navigation',
+      })}
+      className={clsx(
+        'navbar',
+        'navbar--fixed-top',
+        hideOnScroll && [
+          styles.navbarHideable,
+          !isNavbarVisible && styles.navbarHidden,
+        ],
+        {
+          'navbar--dark': style === 'dark',
+          'navbar--primary': style === 'primary',
+          'navbar-sidebar--show': mobileSidebar.shown,
+        },
+      )}>
+      {children}
+      <NavbarBackdrop onClick={mobileSidebar.toggle} />
+      <NavbarMobileSidebar />
+    </nav>
+  );
 }
