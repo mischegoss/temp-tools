@@ -286,3 +286,26 @@ body[data-pathname*='/forms/'] #docusaurus_skipToContent_fallback {
 .theme-back-to-top-button {
   display: none !important;
 }
+
+/* Hide footer on learning pages */
+body[data-pathname*='/learning/'] .footer {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Alternative selector in case the data-pathname approach doesn't work */
+html[class*='learning'] .footer,
+.footer[data-learning='true'] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+}
