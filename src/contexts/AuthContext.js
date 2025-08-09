@@ -28,9 +28,7 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
   const location = useLocation()
   const { db } = useFirebase()
 
-  // Use the form association hook to link anonymous submissions
-  useFormAssociation(db, user)
-
+  // FIXED: Always call hooks in the same order - move useCallback before useFormAssociation
   // Memoize company name function to prevent recreations
   const getCompanyName = useCallback(() => {
     if (user && user.displayName) {
@@ -38,6 +36,10 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
     }
     return getItem('companyName', '')
   }, [user])
+
+  // FIXED: Use the form association hook but ensure it's always called
+  // Pass null instead of undefined to maintain hook order
+  useFormAssociation(db || null, user)
 
   // Single auth listener with optimized logic
   useEffect(() => {

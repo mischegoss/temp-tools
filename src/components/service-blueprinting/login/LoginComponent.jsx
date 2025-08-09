@@ -564,7 +564,7 @@ export default function LoginComponent() {
                     fontWeight: '600',
                   }}
                 >
-                  Browse our free content
+                  Browse our public content
                 </span>
               </p>
             </div>

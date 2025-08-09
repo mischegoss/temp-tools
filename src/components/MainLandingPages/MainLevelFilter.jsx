@@ -1,8 +1,11 @@
+// Fixed MainLevelFilter with BrowserOnly wrapper to prevent hydration issues
+// src/components/MainLandingPages/MainLevelFilter.jsx
 import React from 'react'
+import BrowserOnly from '@docusaurus/BrowserOnly'
 
 /**
  * LevelFilter component - Renders buttons for filtering by skill level
- * Updated with brand-compliant styling
+ * Updated with BrowserOnly wrapper to fix button delay issues
  *
  * @param {Object} props Component props
  * @param {string} props.activeFilter Currently selected filter
@@ -11,6 +14,26 @@ import React from 'react'
  * @returns {JSX.Element} LevelFilter component
  */
 const LevelFilter = ({ activeFilter, setActiveFilter, totalByLevel = {} }) => {
+  return (
+    <BrowserOnly
+      fallback={
+        <div style={{ padding: '8px 16px', color: '#666' }}>
+          Loading filters...
+        </div>
+      }
+    >
+      {() => (
+        <LevelFilterClient
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
+          totalByLevel={totalByLevel}
+        />
+      )}
+    </BrowserOnly>
+  )
+}
+
+const LevelFilterClient = ({ activeFilter, setActiveFilter, totalByLevel }) => {
   // Get button style based on filter type and active state
   const getButtonStyle = filterType => {
     // Define brand gradients for each filter type
@@ -40,96 +63,55 @@ const LevelFilter = ({ activeFilter, setActiveFilter, totalByLevel = {} }) => {
       advanced: 'rgba(13, 22, 55, 0.2)',
     }
 
-    // Base style for all buttons
-    const baseStyle = {
-      padding: '0.6rem 1.2rem',
+    const isActive = activeFilter === filterType
+
+    return {
+      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+      fontWeight: '600',
+      fontSize: '0.85rem',
+      padding: '12px 24px',
+      border: `2px solid ${borderColors[filterType]}`,
       borderRadius: '6px',
-      cursor: 'pointer',
-      fontWeight: '500',
-      fontSize: '1.05rem',
       background: gradients[filterType],
       color: 'var(--brand-white)',
-      border: `2px solid ${borderColors[filterType]}`,
+      cursor: 'pointer',
+      userSelect: 'none',
+      pointerEvents: 'auto', // Ensure buttons are immediately responsive
       transition: 'all 0.3s ease-in-out',
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      boxShadow: `0 0 10px ${shadowColors[filterType]}, 0 2px 8px rgba(0, 0, 0, 0.1)`,
-      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+      boxShadow: isActive
+        ? `0 0 15px ${shadowColors[filterType]}, 0 2px 8px rgba(0, 0, 0, 0.2)`
+        : `0 0 8px ${shadowColors[filterType]}, 0 1px 4px rgba(0, 0, 0, 0.1)`,
+      transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
+      opacity: isActive ? 1 : 0.9,
     }
-
-    // Add active state styling
-    if (activeFilter === filterType) {
-      const activeGlowColors = {
-        all: 'rgba(13, 22, 55, 0.4)',
-        beginner: 'rgba(0, 212, 255, 0.4)',
-        intermediate: 'rgba(0, 80, 199, 0.4)',
-        advanced: 'rgba(13, 22, 55, 0.4)',
-      }
-
-      return {
-        ...baseStyle,
-        boxShadow: `0 0 0 3px var(--brand-white), 0 0 0 5px ${borderColors[filterType]}, 0 0 20px ${activeGlowColors[filterType]}`,
-        transform: 'translateY(-3px)',
-        borderColor: 'var(--brand-blue-400)',
-      }
-    }
-
-    return baseStyle
   }
 
-  // Button hover and mouse out handlers
+  // Handle filter click with immediate response
+  const handleFilterClick = filterType => {
+    console.log(`[MainLevelFilter] Filter clicked: ${filterType}`)
+    setActiveFilter(filterType)
+  }
+
+  // Mouse event handlers for hover effects
   const handleMouseOver = (e, filterType) => {
     if (activeFilter !== filterType) {
-      const shadowColors = {
-        all: 'rgba(13, 22, 55, 0.3)',
-        beginner: 'rgba(0, 212, 255, 0.3)',
-        intermediate: 'rgba(0, 80, 199, 0.3)',
-        advanced: 'rgba(13, 22, 55, 0.3)',
-      }
-
-      e.currentTarget.style.boxShadow = `0 0 15px ${shadowColors[filterType]}, 0 4px 12px rgba(0, 0, 0, 0.2)`
-      e.currentTarget.style.transform = 'translateY(-2px)'
+      e.currentTarget.style.transform = 'translateY(-3px)'
       e.currentTarget.style.borderColor = 'var(--brand-blue-400)'
     }
   }
 
   const handleMouseOut = (e, isActive, filterType) => {
     if (!isActive) {
-      const shadowColors = {
-        all: 'rgba(13, 22, 55, 0.2)',
-        beginner: 'rgba(0, 212, 255, 0.2)',
-        intermediate: 'rgba(0, 80, 199, 0.2)',
-        advanced: 'rgba(13, 22, 55, 0.2)',
-      }
-
-      const borderColors = {
-        all: 'var(--brand-black-700)',
-        beginner: 'var(--brand-aqua)',
-        intermediate: 'var(--brand-blue)',
-        advanced: 'var(--brand-black-700)',
-      }
-
-      e.currentTarget.style.boxShadow = `0 0 10px ${shadowColors[filterType]}, 0 2px 8px rgba(0, 0, 0, 0.1)`
       e.currentTarget.style.transform = 'translateY(0)'
-      e.currentTarget.style.borderColor = borderColors[filterType]
-    } else {
-      // Reset to active style
+
+      // Reset to original border color
       const borderColors = {
         all: 'var(--brand-black-700)',
         beginner: 'var(--brand-aqua)',
         intermediate: 'var(--brand-blue)',
         advanced: 'var(--brand-black-700)',
       }
-
-      const activeGlowColors = {
-        all: 'rgba(13, 22, 55, 0.4)',
-        beginner: 'rgba(0, 212, 255, 0.4)',
-        intermediate: 'rgba(0, 80, 199, 0.4)',
-        advanced: 'rgba(13, 22, 55, 0.4)',
-      }
-
-      e.currentTarget.style.boxShadow = `0 0 0 3px var(--brand-white), 0 0 0 5px ${borderColors[filterType]}, 0 0 20px ${activeGlowColors[filterType]}`
-      e.currentTarget.style.transform = 'translateY(-3px)'
-      e.currentTarget.style.borderColor = 'var(--brand-blue-400)'
+      e.currentTarget.style.borderColor = borderColors[filterType]
     }
   }
 
@@ -143,43 +125,55 @@ const LevelFilter = ({ activeFilter, setActiveFilter, totalByLevel = {} }) => {
       }}
     >
       <button
-        onClick={() => setActiveFilter('all')}
+        type='button'
+        onClick={() => handleFilterClick('all')}
         style={getButtonStyle('all')}
         onMouseOver={e => handleMouseOver(e, 'all')}
         onMouseOut={e => handleMouseOut(e, activeFilter === 'all', 'all')}
+        disabled={false}
+        tabIndex={0}
       >
         ALL
       </button>
 
       <button
-        onClick={() => setActiveFilter('beginner')}
+        type='button'
+        onClick={() => handleFilterClick('beginner')}
         style={getButtonStyle('beginner')}
         onMouseOver={e => handleMouseOver(e, 'beginner')}
         onMouseOut={e =>
           handleMouseOut(e, activeFilter === 'beginner', 'beginner')
         }
+        disabled={false}
+        tabIndex={0}
       >
         BEGINNER
       </button>
 
       <button
-        onClick={() => setActiveFilter('intermediate')}
+        type='button'
+        onClick={() => handleFilterClick('intermediate')}
         style={getButtonStyle('intermediate')}
         onMouseOver={e => handleMouseOver(e, 'intermediate')}
         onMouseOut={e =>
           handleMouseOut(e, activeFilter === 'intermediate', 'intermediate')
         }
+        disabled={false}
+        tabIndex={0}
       >
         INTERMEDIATE
       </button>
 
       <button
-        onClick={() => setActiveFilter('advanced')}
+        type='button'
+        onClick={() => handleFilterClick('advanced')}
         style={getButtonStyle('advanced')}
         onMouseOver={e => handleMouseOver(e, 'advanced')}
         onMouseOut={e =>
           handleMouseOut(e, activeFilter === 'advanced', 'advanced')
         }
+        disabled={false}
+        tabIndex={0}
       >
         ADVANCED
       </button>

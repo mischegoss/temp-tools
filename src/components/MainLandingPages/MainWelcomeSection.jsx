@@ -1,10 +1,6 @@
 // Universal WelcomeSection - Works for ALL pages (logout removed)
 // Can be used for both Service Blueprinting and Main Landing Pages
-// src/components/shared/WelcomeSection.jsx (new location)
-//
-// USAGE:
-// Service Blueprinting: import WelcomeSection from '@site/src/components/shared/WelcomeSection'
-// Main Landing Pages: import WelcomeSection from '@site/src/components/shared/WelcomeSection'
+// src/components/MainLandingPages/MainWelcomeSection.jsx
 
 import React, { useState } from 'react'
 import { useAuth } from '@site/src/contexts/AuthContext'
@@ -141,10 +137,10 @@ const WelcomeSectionClient = ({
       lineHeight: '1.5',
     },
     email: {
-      fontSize: '0.95rem',
-      color: 'var(--brand-grey-500)',
+      fontSize: '1.1rem', // FIXED: Increased from 0.95rem
+      color: 'var(--brand-black-700)', // FIXED: Changed from var(--brand-grey-500) to much darker
       margin: 0,
-      fontWeight: '500',
+      fontWeight: '600', // FIXED: Increased from 500 to make it bolder
     },
     guestTitle: {
       fontSize: '1.6rem',

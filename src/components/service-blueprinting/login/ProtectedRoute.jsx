@@ -13,14 +13,29 @@ export default function ProtectedRoute({ children }) {
   const history = useHistory()
   const [isLogoutHovered, setIsLogoutHovered] = useState(false)
 
-  // Simple path detection - no complex state management
+  // FIXED: Specific path detection that matches Root.js logic
   const currentPath = window.location.pathname
-  const isProtectedPath =
-    currentPath.startsWith('/learning/') && currentPath !== '/learning/login'
+
+  const isProtectedPath = () => {
+    // Login page is never protected
+    if (currentPath === '/learning/login') return false
+
+    // Public landing pages (exact matches)
+    if (currentPath === '/learning/service-blueprinting') return false
+    if (currentPath === '/learning/') return false
+    if (currentPath === '/learning') return false
+
+    // Protected: specific course sub-paths that have AuthContext
+    if (currentPath.startsWith('/learning/service-blueprinting/')) return true
+    if (currentPath.startsWith('/learning/automation-essentials')) return true
+
+    // All other /learning/* paths default to public
+    return false
+  }
 
   console.log('[ProtectedRoute] Simple check:', {
     currentPath,
-    isProtectedPath,
+    isProtectedPath: isProtectedPath(),
     loading,
     user: !!user,
   })
@@ -41,7 +56,7 @@ export default function ProtectedRoute({ children }) {
   }
 
   // Non-protected paths - just render children
-  if (!isProtectedPath) {
+  if (!isProtectedPath()) {
     console.log('[ProtectedRoute] Non-protected path, rendering children')
     return children
   }
@@ -205,7 +220,7 @@ export default function ProtectedRoute({ children }) {
         onMouseLeave={() => setIsLogoutHovered(false)}
         style={{
           position: 'fixed',
-          top: '80px',
+          top: '20px',
           right: '20px',
           backgroundColor: isLogoutHovered ? '#dc2626' : '#0066cc',
           color: 'white',
