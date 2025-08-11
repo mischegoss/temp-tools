@@ -1,8 +1,8 @@
 export const homePageStyles = {
-  // Main section container - Using dark aqua gradient
+  // Main section container - Using darker professional gradient
   sectionStyle: {
     background:
-      'linear-gradient(to bottom, #051414 0%, #02636f 40%, #00b8de 80%, var(--brand-aqua) 100%)',
+      'linear-gradient(to bottom, #000511 0%, #001024 40%, #001845 80%, var(--brand-blue) 100%)',
     padding: '100px 0 120px 0',
     minHeight: '70vh',
     width: '100%',
@@ -12,7 +12,7 @@ export const homePageStyles = {
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
   },
 
-  // Container for content
+  // Container for content - Following container proportions
   containerStyle: {
     maxWidth: '1440px',
     margin: '0 auto',
@@ -40,13 +40,7 @@ export const homePageStyles = {
     marginBottom: '80px',
   },
 
-  // Mobile header content
-  headerContentStyleMobile: {
-    textAlign: 'center',
-    marginBottom: '60px',
-  },
-
-  // Main title styling
+  // Main title styling - Following large heading scale
   mainTitleStyle: {
     fontSize: '4rem',
     fontWeight: '600',
@@ -68,7 +62,7 @@ export const homePageStyles = {
     textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
   },
 
-  // Subtitle styling
+  // Subtitle styling - Following description text scale with enhanced visibility
   subtitleStyle: {
     fontSize: '1.3rem',
     color: 'var(--brand-white)',
@@ -88,39 +82,20 @@ export const homePageStyles = {
     textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
   },
 
-  // Cards grid container - CSS Grid approach for guaranteed layout
-  cardsGridStyle: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)', // 2 columns on smaller screens
-    gap: '32px',
-    width: '100%',
-    '@media (min-width: 1200px)': {
-      gridTemplateColumns: 'repeat(4, 1fr)', // 4 columns on larger screens
-    },
-  },
-
-  // Mobile cards grid
-  cardsGridStyleMobile: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)', // Always 2 columns on mobile
-    gap: '24px',
-    width: '100%',
-  },
-
-  // Desktop cards grid
-  cardsGridStyleDesktop: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)', // Always 4 columns on desktop
-    gap: '32px',
-    width: '100%',
-  },
-
-  // Enhanced glow card style with triple border
-  enhancedGlowCardStyle: {
+  // Individual card styling - Enhanced double border effect matching the image
+  cardStyle: {
     background: 'var(--brand-white)',
     borderRadius: '16px',
     padding: '48px 36px',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.3s ease-in-out',
+    // Double border effect: outer glow + inner border
+    border: '2px solid var(--brand-blue-400)',
+    boxShadow: `
+      0 0 0 1px var(--brand-blue-400),
+      0 0 20px rgba(0, 102, 255, 0.4),
+      0 0 40px rgba(0, 102, 255, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.1)
+    `,
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -129,40 +104,24 @@ export const homePageStyles = {
     cursor: 'pointer',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
     position: 'relative',
-    textDecoration: 'none',
-    // Triple border: dark outer, white gap, aqua inner
-    boxShadow: `
-      0 0 0 2px var(--brand-aqua),
-      0 0 0 4px #FFFFFF,
-      0 0 0 6px #051414,
-      0 0 8px rgba(0, 184, 222, 0.08),
-      0 0 16px rgba(0, 184, 222, 0.04),
-      0 6px 25px rgba(0, 0, 0, 0.2)
-    `,
-    filter: 'drop-shadow(0 0 2px rgba(0, 184, 222, 0.05))',
+    // Add subtle glow animation
+    animation: 'borderGlow 2s ease-in-out infinite alternate',
   },
 
-  // Enhanced glow card hover style
-  enhancedGlowCardHoverStyle: {
-    boxShadow: `
-      0 0 0 2px var(--brand-aqua),
-      0 0 0 4px #FFFFFF,
-      0 0 0 6px #051414,
-      0 0 12px rgba(0, 184, 222, 0.12),
-      0 0 24px rgba(0, 184, 222, 0.08),
-      0 10px 30px rgba(0, 184, 222, 0.06)
-    `,
-    filter: 'drop-shadow(0 0 4px rgba(0, 184, 222, 0.08))',
-    transform: 'translateY(-8px)',
-    transition: 'all 0.3s ease',
-  },
-
-  // Mobile version of enhanced glow card
-  enhancedGlowCardStyleMobile: {
+  // Mobile version of card
+  cardStyleMobile: {
     background: 'var(--brand-white)',
     borderRadius: '16px',
     padding: '32px 24px',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.3s ease-in-out',
+    // Double border effect: outer glow + inner border
+    border: '2px solid var(--brand-blue-400)',
+    boxShadow: `
+      0 0 0 1px var(--brand-blue-400),
+      0 0 20px rgba(0, 102, 255, 0.4),
+      0 0 40px rgba(0, 102, 255, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.1)
+    `,
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -171,17 +130,8 @@ export const homePageStyles = {
     cursor: 'pointer',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
     position: 'relative',
-    textDecoration: 'none',
-    // Triple border: dark outer, white gap, aqua inner
-    boxShadow: `
-      0 0 0 2px var(--brand-aqua),
-      0 0 0 4px #FFFFFF,
-      0 0 0 6px #051414,
-      0 0 8px rgba(0, 184, 222, 0.08),
-      0 0 16px rgba(0, 184, 222, 0.04),
-      0 6px 25px rgba(0, 0, 0, 0.2)
-    `,
-    filter: 'drop-shadow(0 0 2px rgba(0, 184, 222, 0.05))',
+    // Add subtle glow animation
+    animation: 'borderGlow 2s ease-in-out infinite alternate',
   },
 
   // Icon container
@@ -192,20 +142,20 @@ export const homePageStyles = {
     alignItems: 'center',
   },
 
-  // Card title styling
+  // Card title styling - UPDATED with larger font size
   cardTitleStyle: {
-    fontSize: '1.5rem',
+    fontSize: '1.5rem', // Increased from 1.125rem to 1.5rem (24px)
     fontWeight: '600',
     color: 'var(--brand-black)',
-    marginBottom: '16px',
+    marginBottom: '16px', // Increased from 12px to 16px for better spacing
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
     margin: '0 0 16px 0',
-    lineHeight: '1.3',
+    lineHeight: '1.3', // Added for better readability
   },
 
-  // Card description styling
+  // Card description styling - Already at 1.25rem (20px)
   cardDescriptionStyle: {
-    fontSize: '1.25rem',
+    fontSize: '1.25rem', // Already updated to 1.25rem (20px)
     color: 'var(--brand-grey-600)',
     fontWeight: '500',
     lineHeight: '1.6',
@@ -213,7 +163,37 @@ export const homePageStyles = {
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
   },
 
-  // Gradient overlays
+  // Grid item responsive sizing - Better proportions for laptop
+  gridItemSize: {
+    xs: 12,
+    sm: 6,
+    md: 4,
+    lg: 3,
+    xl: 3,
+  },
+
+  // Enhanced hover effects - Intensified double border with stronger glow
+  cardHoverStyle: {
+    transform: 'translateY(-5px)',
+    boxShadow: `
+      0 0 0 1px var(--brand-blue-400),
+      0 0 30px rgba(0, 102, 255, 0.6),
+      0 0 60px rgba(0, 102, 255, 0.3),
+      0 8px 24px rgba(0, 102, 255, 0.2)
+    `,
+    borderColor: 'var(--brand-blue-400)',
+    transition: 'all 0.3s ease-in-out',
+    // Pause animation on hover for stronger effect
+    animationPlayState: 'paused',
+  },
+
+  // Active/Click effects - Following brand active pattern
+  cardActiveStyle: {
+    transform: 'translateY(-2px)',
+    transition: 'all 0.1s ease',
+  },
+
+  // Gradient overlays - Following brand overlay patterns
   gradientOverlayTopStyle: {
     position: 'absolute',
     top: 0,
@@ -221,7 +201,7 @@ export const homePageStyles = {
     width: '100%',
     height: '100%',
     background:
-      'radial-gradient(circle at 10% 20%, rgba(0, 184, 222, 0.05) 0%, transparent 50%)',
+      'radial-gradient(circle at 10% 20%, rgba(0, 80, 199, 0.05) 0%, transparent 50%)',
     pointerEvents: 'none',
     zIndex: 1,
   },
@@ -233,8 +213,87 @@ export const homePageStyles = {
     width: '100%',
     height: '100%',
     background:
-      'radial-gradient(circle at 90% 80%, rgba(0, 184, 222, 0.03) 0%, transparent 30%)',
+      'radial-gradient(circle at 90% 80%, rgba(0, 102, 255, 0.03) 0%, transparent 30%)',
     pointerEvents: 'none',
     zIndex: 1,
+  },
+
+  // Responsive styles for different screen sizes
+  responsive: {
+    // Mobile specific adjustments
+    mobile: {
+      headerContentStyleMobile: {
+        textAlign: 'center',
+        marginBottom: '60px',
+      },
+    },
+
+    // 1200px and up
+    large: {
+      containerStyleLarge: {
+        maxWidth: '1440px',
+        padding: '0 80px',
+      },
+      mainTitleStyleLarge: {
+        fontSize: '4.25rem',
+        fontWeight: '600',
+        color: 'var(--brand-white)',
+        marginBottom: '24px',
+        fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+        lineHeight: '1.2',
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+      },
+      cardStyleLarge: {
+        background: 'var(--brand-white)',
+        borderRadius: '16px',
+        padding: '56px 42px',
+        transition: 'all 0.3s ease-in-out',
+        // Enhanced double border effect for larger screens
+        border: '2px solid var(--brand-blue-400)',
+        boxShadow: `
+          0 0 0 1px var(--brand-blue-400),
+          0 0 25px rgba(0, 102, 255, 0.4),
+          0 0 50px rgba(0, 102, 255, 0.2),
+          0 4px 16px rgba(0, 0, 0, 0.1)
+        `,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        cursor: 'pointer',
+        fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+        position: 'relative',
+        animation: 'borderGlow 2s ease-in-out infinite alternate',
+      },
+    },
+
+    // 1440px and up
+    extraLarge: {
+      containerStyleExtraLarge: {
+        maxWidth: '1600px',
+        padding: '0 100px',
+      },
+      sectionStyleExtraLarge: {
+        background:
+          'linear-gradient(to bottom, #000511 0%, #001024 40%, #001845 80%, var(--brand-blue) 100%)',
+        minHeight: '75vh',
+        padding: '120px 0 140px 0',
+        width: '100%',
+        margin: 0,
+        position: 'relative',
+        overflow: 'hidden',
+        fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+      },
+      mainTitleStyleExtraLarge: {
+        fontSize: '4.5rem',
+        fontWeight: '600',
+        color: 'var(--brand-white)',
+        marginBottom: '24px',
+        fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+        lineHeight: '1.2',
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+      },
+    },
   },
 }

@@ -5,6 +5,55 @@ import styles from './styles.module.css'
 export default function NavigationDropdowns() {
   return (
     <>
+      {/* Documentation Dropdown */}
+      <div
+        className={`navbar__item dropdown dropdown--hoverable ${styles.dropdown}`}
+      >
+        <a
+          href='#'
+          aria-haspopup='true'
+          aria-expanded='false'
+          role='button'
+          className={`navbar__link ${styles.navbarLink}`}
+        >
+          Documentation
+        </a>
+        <ul className={`dropdown__menu ${styles.dropdownMenu}`}>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='/actions'
+            >
+              Actions
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='https://docs.resolve.io/pro'
+            >
+              Pro
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='https://docs.resolve.io/express'
+            >
+              Express
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='https://docs.resolve.io/insights'
+            >
+              Insights
+            </Link>
+          </li>
+        </ul>
+      </div>
+
       {/* Learning Dropdown */}
       <div
         className={`navbar__item dropdown dropdown--hoverable ${styles.dropdown}`}
@@ -16,13 +65,13 @@ export default function NavigationDropdowns() {
           role='button'
           className={`navbar__link ${styles.navbarLink}`}
         >
-          Learning
+          Training
         </a>
         <ul className={`dropdown__menu ${styles.dropdownMenu}`}>
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/learning/discover/'
+              to='https://training.resolve.io/learning/discover'
             >
               Discover Resolve
             </Link>
@@ -30,7 +79,7 @@ export default function NavigationDropdowns() {
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/learning/'
+              to='https://training.resolve.io/learning'
             >
               Learning Hub
             </Link>
@@ -38,17 +87,21 @@ export default function NavigationDropdowns() {
         </ul>
       </div>
 
-      {/* Customer Hub Link */}
-      <div className={`navbar__item ${styles.navbarItem}`}>
-        <a
-          href='https://help.resolve.io'
-          className={`navbar__link ${styles.navbarLink}`}
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Customer Hub
-        </a>
-      </div>
+      {/* Support Link */}
+      <Link
+        className={`navbar__item navbar__link ${styles.navbarLink}`}
+        to='https://support.resolve.io/'
+      >
+        Support
+      </Link>
+
+      {/* Automation Exchange Link */}
+      <Link
+        className={`navbar__item navbar__link ${styles.navbarLink}`}
+        to='https://exchange.resolve.io/'
+      >
+        Automation Exchange
+      </Link>
     </>
   )
 }
