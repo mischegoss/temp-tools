@@ -33,7 +33,7 @@ const VideoTemplate = ({
     button: button ||
       defaultData.button || {
         text: 'Learn More',
-        link: '',
+        link: '#',
         variant: 'primary',
       },
     videoUrl: videoUrl || defaultData.videoUrl || null,
