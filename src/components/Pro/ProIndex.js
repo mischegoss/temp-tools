@@ -1,52 +1,53 @@
 // @site/src/components/Pro/ProIndex.js
 
 import React, { useState, useMemo } from 'react'
-import Link from '@docusaurus/Link'
 import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsPro.js'
-import LandingPageCards from '@site/src/components/LandingPageLibrary/landingpagecards.js'
-import FilterSection from '@site/src/components/LandingPageLibrary/filtersection.js'
-import {
-  learningHubSectionStyle,
-  containerStyle,
-  headerStyle,
-  sectionTitleStyle,
-  subtitleStyle,
-  createAccentLineStyle,
-  createHelpSectionStyle,
-  helpTitleStyle,
-  helpDescriptionStyle,
-  createHelpLinkStyle,
-} from '@site/src/components/LandingPageLibrary/sharedStyles.js'
-import { getColorTheme } from '@site/src/components/LandingPageLibrary/colorThemes.js'
+// import { videoLibrary } from '@site/src/components/ProVideoLibrary/Data/VideoData.js' // Ready for future use
 
-// Get Pro color theme
-const proTheme = getColorTheme('pro')
-
-// Create themed styles
-const accentLineStyle = createAccentLineStyle(proTheme.primary)
-const helpSectionStyle = createHelpSectionStyle(proTheme.primary)
-const helpLinkStyle = createHelpLinkStyle(proTheme.primary)
-
-// Create filter section style that matches help section
-const filterSectionStyle = createHelpSectionStyle(proTheme.primary)
+// Import the shared modular components
+import WelcomeSection from '../LandingPageLibrary/WelcomeSection.js'
+// import FeaturedVideoSection from '../LandingPageLibrary/FeaturedVideoSection.js' // Ready for future use
+import MainFilterSection from '../LandingPageLibrary/MainFilterSection.js'
+import CardsSection from '../LandingPageLibrary/CardsSection.js'
+import HelpSection from '../LandingPageLibrary/HelpSection.js'
 
 /**
- * ProIndex component - Creates a brand-compliant landing page for Resolve Actions Pro
- * Following LearningHub/DiscoverPage design patterns
+ * ProIndex component - Pro landing page
+ *
+ * This component maintains exact styling compatibility with ActionsIndex
+ * but without the featured video section. The video section can be easily
+ * added later by uncommenting the imports and JSX.
+ *
+ * Structure:
+ * 1. Welcome Section
+ * 2. [Featured Video Section] - Ready to add when needed
+ * 3. Filter Section
+ * 4. Cards Section
+ * 5. Help Section
  */
 const ProIndex = ({
   // Welcome section props
   welcomeSectionProps = {
-    title: 'Welcome to Resolve Actions Pro Learning',
+    title: 'Welcome to Resolve Pro Learning',
     content:
-      "Explore our specialized learning paths designed to help you master Resolve Pro. Whether you're just getting started, managing the platform, or developing custom solutions, we have the perfect learning path for you.",
+      'Explore our specialized learning paths designed to help you master Resolve Pro. Get started with advanced workflow management and enterprise-grade solutions.',
   },
+
+  // Featured video section props (ready for future use)
+  // featuredVideoSectionProps = {
+  //   label: 'Featured Learning Video',
+  //   buttonText: 'View Full Video Gallery →',
+  //   buttonLink: '/learning/pro-videos',
+  //   showGalleryButton: false, // Set to true when video gallery is ready
+  // },
+
   // Filter section props
   filterSectionProps = {
     title: 'Explore Learning Paths',
     pathDescription:
       'Select a learning path by skill level or choose All Levels to browse all available learning paths.',
   },
+
   // Help section props
   helpSectionProps = {
     title: 'Need Help Getting Started?',
@@ -55,12 +56,15 @@ const ProIndex = ({
     email: 'training@resolve.io',
     additionalText: "and we'll get back to you within 24 hours.",
   },
-  // Resources
+
+  // Data sources
   resources = learningPaths,
+  // videoResources = videoLibrary, // Ready for future use
 }) => {
+  // State management (same as Actions)
   const [activeFilter, setActiveFilter] = useState('all')
 
-  // Calculate how many resources match each level
+  // Calculate how many learning paths match each level (using primaryLevel and secondaryLevel)
   const totalByLevel = useMemo(() => {
     const counts = {
       beginner: 0,
@@ -70,22 +74,22 @@ const ProIndex = ({
 
     resources.forEach(path => {
       // Count primary levels
-      if (path.primaryLevel?.toLowerCase() === 'beginner') counts.beginner++
-      if (path.primaryLevel?.toLowerCase() === 'intermediate')
-        counts.intermediate++
-      if (path.primaryLevel?.toLowerCase() === 'advanced') counts.advanced++
+      const primaryLevel = path.primaryLevel?.toLowerCase()
+      if (primaryLevel === 'beginner') counts.beginner++
+      if (primaryLevel === 'intermediate') counts.intermediate++
+      if (primaryLevel === 'advanced') counts.advanced++
 
       // Count secondary levels if they exist
-      if (path.secondaryLevel?.toLowerCase() === 'beginner') counts.beginner++
-      if (path.secondaryLevel?.toLowerCase() === 'intermediate')
-        counts.intermediate++
-      if (path.secondaryLevel?.toLowerCase() === 'advanced') counts.advanced++
+      const secondaryLevel = path.secondaryLevel?.toLowerCase()
+      if (secondaryLevel === 'beginner') counts.beginner++
+      if (secondaryLevel === 'intermediate') counts.intermediate++
+      if (secondaryLevel === 'advanced') counts.advanced++
     })
 
     return counts
   }, [resources])
 
-  // Filter learning paths based on selected level
+  // Filter learning paths based on selected level (using primaryLevel and secondaryLevel)
   const filteredPaths = useMemo(() => {
     if (activeFilter === 'all') return resources
 
@@ -96,98 +100,40 @@ const ProIndex = ({
     )
   }, [activeFilter, resources])
 
-  // Modified section styles with reduced spacing
-  const welcomeSectionStyleReduced = {
-    ...learningHubSectionStyle,
-    padding: '80px 0 0px 0', // Eliminated bottom padding
-  }
-
-  const filterSectionStyleReduced = {
-    ...learningHubSectionStyle,
-    padding: '0px 0 20px 0', // Eliminated top padding, kept bottom for cards spacing
-  }
-
-  const cardsSectionStyleReduced = {
-    ...learningHubSectionStyle,
-    padding: '40px 0 20px 0', // Reduced spacing above and below cards
-  }
-
-  const helpSectionStyleReduced = {
-    ...learningHubSectionStyle,
-    padding: '20px 0 80px 0', // Reduced top padding
-  }
+  // Get featured video (ready for future use)
+  // const featuredVideo = useMemo(() => {
+  //   if (!videoResources || videoResources.length === 0) return null
+  //   return videoResources[0]
+  // }, [videoResources])
 
   return (
     <>
       {/* Welcome Section */}
-      <section style={welcomeSectionStyleReduced} className='welcome-section'>
-        <div style={containerStyle}>
-          <div style={headerStyle}>
-            <h1 style={sectionTitleStyle}>{welcomeSectionProps.title}</h1>
-            <div style={accentLineStyle}></div>
-            <p style={subtitleStyle}>{welcomeSectionProps.content}</p>
-          </div>
-        </div>
-      </section>
+      <WelcomeSection welcomeSectionProps={welcomeSectionProps} />
 
-      {/* Filter Section with Frame */}
-      <section style={filterSectionStyleReduced} className='filter-section'>
-        <div style={containerStyle}>
-          <div style={filterSectionStyle}>
-            <h2 style={helpTitleStyle}>
-              <strong>Explore Learning Paths</strong>
-            </h2>
-            <p
-              style={{
-                ...helpDescriptionStyle,
-                fontSize: '1.25rem', // Larger font size as requested
-                marginBottom: '24px',
-              }}
-            >
-              Select a learning path by skill level or choose All Levels to
-              browse all available learning paths.
-            </p>
-            <FilterSection
-              title={filterSectionProps.title}
-              pathDescription={filterSectionProps.pathDescription}
-              activeFilter={activeFilter}
-              setActiveFilter={setActiveFilter}
-              totalByLevel={totalByLevel}
-              resources={resources}
-            />
-          </div>
-        </div>
-      </section>
+      {/* Featured Video Section - Ready to add when needed */}
+      {/* {featuredVideo && (
+        <FeaturedVideoSection
+          featuredVideo={featuredVideo}
+          sectionProps={featuredVideoSectionProps}
+        />
+      )} */}
+
+      {/* Filter Section */}
+      <MainFilterSection
+        filterSectionProps={filterSectionProps}
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+        totalByLevel={totalByLevel}
+        resources={resources}
+        productTheme='pro'
+      />
 
       {/* Cards Section */}
-      <section style={cardsSectionStyleReduced} className='cards-section'>
-        <div style={containerStyle}>
-          <LandingPageCards
-            resources={filteredPaths}
-            hideSection={true}
-            colorTheme={proTheme}
-          />
-        </div>
-      </section>
+      <CardsSection filteredPaths={filteredPaths} />
 
       {/* Help Section */}
-      <section style={helpSectionStyleReduced} className='help-section'>
-        <div style={containerStyle}>
-          <div style={helpSectionStyle}>
-            <h2 style={helpTitleStyle}>{helpSectionProps.title}</h2>
-            <p style={helpDescriptionStyle}>
-              {helpSectionProps.description}{' '}
-              <Link
-                to={`mailto:${helpSectionProps.email}`}
-                style={helpLinkStyle}
-              >
-                {helpSectionProps.email}
-              </Link>{' '}
-              {helpSectionProps.additionalText}
-            </p>
-          </div>
-        </div>
-      </section>
+      <HelpSection helpSectionProps={helpSectionProps} />
     </>
   )
 }
