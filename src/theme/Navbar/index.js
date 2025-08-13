@@ -1,21 +1,26 @@
 import React from 'react'
-import OriginalNavbar from '@theme-original/Navbar'
-import HomepageNavbar from '../Navbar/Layout/HomepageNavbar'
-import ActionsNavbar from '../Navbar/Layout/ActionsNavbar'
-import ProductsNavbar from '../Navbar/Layout/ProductNavbar'
-import { useLocation } from '@docusaurus/router'
+import NavbarLayout from '@theme/Navbar/Layout'
+import NavbarContent from '@theme/Navbar/Content'
+import CustomSearch from '@site/src/components/CustomSearch'
 
-export default function Navbar(props) {
-  const location = useLocation()
-  const pathname = location.pathname
+export default function Navbar() {
+  return (
+    <NavbarLayout>
+      {/* Render existing navbar content */}
+      <NavbarContent />
 
-  // Check for specific paths
-  if (pathname === '/') {
-    return <HomepageNavbar {...props} />
-  } else if (pathname.startsWith('/actions')) {
-    return <ActionsNavbar {...props} />
-  }
-
-  // Default navbar for all other pages
-  return <ProductsNavbar {...props} />
+      {/* Add custom search to the right side */}
+      <div
+        className='navbar__item navbar__item--right'
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          marginLeft: 'auto',
+          paddingRight: 'var(--ifm-navbar-padding-horizontal)',
+        }}
+      >
+        <CustomSearch />
+      </div>
+    </NavbarLayout>
+  )
 }
