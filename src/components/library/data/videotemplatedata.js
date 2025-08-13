@@ -16,7 +16,7 @@ const VideoTemplateData = {
     },
     button: {
       text: 'Learn More',
-      link: 'https://help.resolve.io/actions',
+      link: '/actions',
       variant: 'primary',
     },
     videoUrl: 'https://player.vimeo.com/video/1092572502',
@@ -58,7 +58,7 @@ const VideoTemplateData = {
     },
     button: {
       text: 'Get Started',
-      link: 'https://help.resolve.io/actions',
+      link: '/signup',
       variant: 'outline',
     },
     videoUrl: 'https://www.youtube.com/embed/ScMzIvxBSi4',

@@ -29,17 +29,17 @@ const Button = ({
 
   const variantStyles = {
     primary: {
-      background: 'var(--brand-aqua)',
+      background: 'var(--ifm-color-primary)',
       color: 'var(--color-text-white)',
     },
     secondary: {
       background: 'transparent',
-      color: 'var(--brand-aqua)',
+      color: 'var(--ifm-color-primary)',
       border: '2px solid var(--ifm-color-primary)',
     },
     outline: {
       background: 'transparent',
-      color: 'var(--brand-aqua)',
+      color: 'var(--color-text-primary)',
       border: '1px solid var(--color-border-light)',
     },
   }

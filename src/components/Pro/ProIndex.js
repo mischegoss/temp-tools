@@ -1,140 +1,24 @@
-// @site/src/components/Pro/ProIndex.js
+// src/components/Pro/ProIndex.js
+// Fixed import name to match the actual export
 
-import React, { useState, useMemo } from 'react'
-import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsPro.js'
-// import { videoLibrary } from '@site/src/components/ProVideoLibrary/Data/VideoData.js' // Ready for future use
+import React from 'react'
+import Hero1 from '../library/hero1-light.js'
+import DocsNavigation from '../library/docsnavigation.js'
+import ProductProvider from '../library/productprovider.js'
+import { proHeroData } from './data/herodata.js'
+import { proDocsNavData } from './data/prodocsdata.js'
 
-// Import the shared modular components
-import WelcomeSection from '../LandingPageLibrary/WelcomeSection.js'
-// import FeaturedVideoSection from '../LandingPageLibrary/FeaturedVideoSection.js' // Ready for future use
-import MainFilterSection from '../LandingPageLibrary/MainFilterSection.js'
-import CardsSection from '../LandingPageLibrary/CardsSection.js'
-import HelpSection from '../LandingPageLibrary/HelpSection.js'
-
-/**
- * ProIndex component - Pro landing page
- *
- * This component maintains exact styling compatibility with ActionsIndex
- * but without the featured video section. The video section can be easily
- * added later by uncommenting the imports and JSX.
- *
- * Structure:
- * 1. Welcome Section
- * 2. [Featured Video Section] - Ready to add when needed
- * 3. Filter Section
- * 4. Cards Section
- * 5. Help Section
- */
-const ProIndex = ({
-  // Welcome section props
-  welcomeSectionProps = {
-    title: 'Welcome to Resolve Pro Learning',
-    content:
-      'Explore our specialized learning paths designed to help you master Resolve Pro. Get started with advanced workflow management and enterprise-grade solutions.',
-  },
-
-  // Featured video section props (ready for future use)
-  // featuredVideoSectionProps = {
-  //   label: 'Featured Learning Video',
-  //   buttonText: 'View Full Video Gallery →',
-  //   buttonLink: '/learning/pro-videos',
-  //   showGalleryButton: false, // Set to true when video gallery is ready
-  // },
-
-  // Filter section props
-  filterSectionProps = {
-    title: 'Explore Learning Paths',
-    pathDescription:
-      'Select a learning path by skill level or choose All Levels to browse all available learning paths.',
-  },
-
-  // Help section props
-  helpSectionProps = {
-    title: 'Need Help Getting Started?',
-    description:
-      'Have questions about which course is right for you? Our team is here to help you choose the perfect learning path.',
-    email: 'training@resolve.io',
-    additionalText: "and we'll get back to you within 24 hours.",
-  },
-
-  // Data sources
-  resources = learningPaths,
-  // videoResources = videoLibrary, // Ready for future use
-}) => {
-  // State management (same as Actions)
-  const [activeFilter, setActiveFilter] = useState('all')
-
-  // Calculate how many learning paths match each level (using primaryLevel and secondaryLevel)
-  const totalByLevel = useMemo(() => {
-    const counts = {
-      beginner: 0,
-      intermediate: 0,
-      advanced: 0,
-    }
-
-    resources.forEach(path => {
-      // Count primary levels
-      const primaryLevel = path.primaryLevel?.toLowerCase()
-      if (primaryLevel === 'beginner') counts.beginner++
-      if (primaryLevel === 'intermediate') counts.intermediate++
-      if (primaryLevel === 'advanced') counts.advanced++
-
-      // Count secondary levels if they exist
-      const secondaryLevel = path.secondaryLevel?.toLowerCase()
-      if (secondaryLevel === 'beginner') counts.beginner++
-      if (secondaryLevel === 'intermediate') counts.intermediate++
-      if (secondaryLevel === 'advanced') counts.advanced++
-    })
-
-    return counts
-  }, [resources])
-
-  // Filter learning paths based on selected level (using primaryLevel and secondaryLevel)
-  const filteredPaths = useMemo(() => {
-    if (activeFilter === 'all') return resources
-
-    return resources.filter(
-      path =>
-        path.primaryLevel?.toLowerCase() === activeFilter ||
-        path.secondaryLevel?.toLowerCase() === activeFilter,
-    )
-  }, [activeFilter, resources])
-
-  // Get featured video (ready for future use)
-  // const featuredVideo = useMemo(() => {
-  //   if (!videoResources || videoResources.length === 0) return null
-  //   return videoResources[0]
-  // }, [videoResources])
-
+const ProIndex = () => {
   return (
-    <>
-      {/* Welcome Section */}
-      <WelcomeSection welcomeSectionProps={welcomeSectionProps} />
-
-      {/* Featured Video Section - Ready to add when needed */}
-      {/* {featuredVideo && (
-        <FeaturedVideoSection
-          featuredVideo={featuredVideo}
-          sectionProps={featuredVideoSectionProps}
-        />
-      )} */}
-
-      {/* Filter Section */}
-      <MainFilterSection
-        filterSectionProps={filterSectionProps}
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-        totalByLevel={totalByLevel}
-        resources={resources}
-        productTheme='pro'
+    <ProductProvider product='pro'>
+      <Hero1 heroData={proHeroData} />
+      <DocsNavigation
+        data={proDocsNavData}
+        sectionTitle={proDocsNavData.sectionTitle}
+        exploreButton={proDocsNavData.exploreButton}
+        navItems={proDocsNavData.navItems}
       />
-
-      {/* Cards Section */}
-      <CardsSection filteredPaths={filteredPaths} />
-
-      {/* Help Section */}
-      <HelpSection helpSectionProps={helpSectionProps} />
-    </>
+    </ProductProvider>
   )
 }
 
