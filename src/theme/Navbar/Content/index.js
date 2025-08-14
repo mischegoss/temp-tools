@@ -1,5 +1,10 @@
 import React from 'react';
-import {useThemeConfig, ErrorCauseBoundary} from '@docusaurus/theme-common';
+import clsx from 'clsx';
+import {
+  useThemeConfig,
+  ErrorCauseBoundary,
+  ThemeClassNames,
+} from '@docusaurus/theme-common';
 import {
   splitNavbarItems,
   useNavbarMobileSidebar,
@@ -38,8 +43,20 @@ ${JSON.stringify(item, null, 2)}`,
 function NavbarContentLayout({left, right}) {
   return (
     <div className="navbar__inner">
-      <div className="navbar__items">{left}</div>
-      <div className="navbar__items navbar__items--right">{right}</div>
+      <div
+        className={clsx(
+          ThemeClassNames.layout.navbar.containerLeft,
+          'navbar__items',
+        )}>
+        {left}
+      </div>
+      <div
+        className={clsx(
+          ThemeClassNames.layout.navbar.containerRight,
+          'navbar__items navbar__items--right',
+        )}>
+        {right}
+      </div>
     </div>
   );
 }
