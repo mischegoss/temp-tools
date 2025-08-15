@@ -13,7 +13,7 @@ export const learningHubData = {
           description:
             'Learn how to document, assess, and prepare your business processes for automation through service blueprinting.',
           available: true,
-          link: '/learning/service-blueprinting/courses/',
+          link: '/learning/discover',
         },
         {
           title: 'Technical Blueprinting',

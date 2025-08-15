@@ -5,7 +5,24 @@ import styles from './styles.module.css'
 export default function NavigationDropdowns() {
   return (
     <>
-      {/* Learning Dropdown */}
+      {/* Discover Platform Link */}
+      <div className={`navbar__item ${styles.navbarItem}`}>
+        <Link
+          className={`navbar__link ${styles.navbarLink}`}
+          to='/learning/discover'
+        >
+          Discover Platform
+        </Link>
+      </div>
+
+      {/* Learning Hub Link */}
+      <div className={`navbar__item ${styles.navbarItem}`}>
+        <Link className={`navbar__link ${styles.navbarLink}`} to='/learning/'>
+          Learning Hub
+        </Link>
+      </div>
+
+      {/* Product Learning Dropdown */}
       <div
         className={`navbar__item dropdown dropdown--hoverable ${styles.dropdown}`}
       >
@@ -16,23 +33,39 @@ export default function NavigationDropdowns() {
           role='button'
           className={`navbar__link ${styles.navbarLink}`}
         >
-          Learning
+          Product Learning
         </a>
         <ul className={`dropdown__menu ${styles.dropdownMenu}`}>
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/learning/discover/'
+              to='/learning/actions'
             >
-              Discover Resolve
+              Platform
             </Link>
           </li>
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/learning/'
+              to='/learning/pro'
             >
-              Learning Hub
+              Pro
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='/learning/express'
+            >
+              Express
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='/learning/insights'
+            >
+              Insights
             </Link>
           </li>
         </ul>

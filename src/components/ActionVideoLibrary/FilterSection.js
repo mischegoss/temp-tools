@@ -6,14 +6,10 @@ import {
   createFilterHoverStyle,
   createFilterActiveStyle,
 } from '@site/src/components/LandingPageLibrary/sharedStyles.js'
-import { getColorTheme } from '@site/src/components/LandingPageLibrary/colorThemes.js'
-
-// Get Actions color theme for filter styling
-const actionsTheme = getColorTheme('actions')
 
 /**
  * VideoFilterSection component - Filter buttons for video gallery
- * Matches the existing FilterSection component styling exactly
+ * Uses custom filter colors that match the Actions dark theme
  */
 const VideoFilterSection = ({
   activeFilter,
@@ -24,6 +20,43 @@ const VideoFilterSection = ({
   // Calculate total count
   const totalCount = resources.length
 
+  // Custom filter colors for video categories using Actions dark theme
+  const videoFilterColors = {
+    gradients: {
+      all: 'linear-gradient(to bottom, #05070f 0%, #0d1637 100%)',
+      integrations: 'linear-gradient(to bottom, #05070f 0%, #00b8de 100%)',
+      workflows: 'linear-gradient(to bottom, #05070f 0%, #0050c7 100%)',
+      'automation-design':
+        'linear-gradient(to bottom, #05070f 0%, #0066FF 100%)',
+      rita: 'linear-gradient(to bottom, #05070f 0%, #008B8B 100%)',
+      jarvis: 'linear-gradient(to bottom, #05070f 0%, #6B46C1 100%)',
+    },
+    borderColors: {
+      all: '#0d1637',
+      integrations: '#00b8de',
+      workflows: '#0050c7',
+      'automation-design': '#0066FF',
+      rita: '#008B8B',
+      jarvis: '#6B46C1',
+    },
+    shadowColors: {
+      all: 'rgba(13, 22, 55, 0.2)',
+      integrations: 'rgba(0, 184, 222, 0.2)',
+      workflows: 'rgba(0, 80, 199, 0.2)',
+      'automation-design': 'rgba(0, 102, 255, 0.2)',
+      rita: 'rgba(0, 139, 139, 0.2)',
+      jarvis: 'rgba(107, 70, 193, 0.2)',
+    },
+    activeGlowColors: {
+      all: 'rgba(13, 22, 55, 0.4)',
+      integrations: 'rgba(0, 184, 222, 0.4)',
+      workflows: 'rgba(0, 80, 199, 0.4)',
+      'automation-design': 'rgba(0, 102, 255, 0.4)',
+      rita: 'rgba(0, 139, 139, 0.4)',
+      jarvis: 'rgba(107, 70, 193, 0.4)',
+    },
+  }
+
   // Filter button container style
   const filterButtonsContainerStyle = {
     display: 'flex',
@@ -33,23 +66,20 @@ const VideoFilterSection = ({
     margin: '0 auto',
   }
 
-  // Create filter button styles using the theme
+  // Create filter button styles using the custom video filter colors
   const getFilterButtonStyle = (filterType, isActive) => {
-    const baseStyle = createFilterButtonStyle(
-      filterType,
-      actionsTheme.filterColors,
-    )
+    const baseStyle = createFilterButtonStyle(filterType, videoFilterColors)
     if (isActive) {
       return {
         ...baseStyle,
-        ...createFilterActiveStyle(filterType, actionsTheme.filterColors),
+        ...createFilterActiveStyle(filterType, videoFilterColors),
       }
     }
     return baseStyle
   }
 
   const getFilterHoverStyle = filterType =>
-    createFilterHoverStyle(filterType, actionsTheme.filterColors)
+    createFilterHoverStyle(filterType, videoFilterColors)
 
   // Button hover handlers
   const handleMouseEnter = (e, filterType) => {

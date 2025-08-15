@@ -1,3 +1,5 @@
+// @site/src/components/Homepage/homepageindex.js
+
 import React, { useState, useEffect } from 'react'
 import Link from '@docusaurus/Link'
 import { homePageData } from './data/homepagedata.js'
@@ -81,9 +83,11 @@ export default function HomePage() {
       {/* Main content */}
       <div style={getContainerStyle()}>
         <div style={getHeaderContentStyle()}>
-          <h1 style={getMainTitleStyle()}>Welcome to Our Learning Hub</h1>
+          <h1 style={getMainTitleStyle()}>
+            Welcome to the Resolve Learning Hub
+          </h1>
           <p style={getSubtitleStyle()}>
-            Everything you need to get started and succeed with Resolve
+            Your path to automation expertise starts here
           </p>
         </div>
 
@@ -98,7 +102,20 @@ export default function HomePage() {
               onMouseLeave={() => setHoveredCard(null)}
             >
               <div style={homePageStyles.iconContainerStyle}>{item.icon}</div>
-              <h3 style={homePageStyles.cardTitleStyle}>{item.title}</h3>
+
+              {/* Updated title section to handle two-line titles */}
+              <h3 style={homePageStyles.cardTitleStyle}>
+                {Array.isArray(item.title) ? (
+                  <>
+                    {item.title[0]}
+                    <br />
+                    {item.title[1]}
+                  </>
+                ) : (
+                  item.title
+                )}
+              </h3>
+
               <p style={homePageStyles.cardDescriptionStyle}>
                 {item.description}
               </p>

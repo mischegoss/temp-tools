@@ -3,6 +3,7 @@ title: Forms Library
 ---
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
+import Link from '@docusaurus/Link';
 import Navigation from '@site/src/components/service-blueprinting/Navigation';
 import HideChatbot from '@site/src/components/Forms/styles/hide-chatbot';
 import StylizedHeader from '@site/src/components/service-blueprinting/StylizedHeader';
@@ -159,83 +160,84 @@ import StylizedHeader from '@site/src/components/service-blueprinting/StylizedHe
 
   <div style={{height: '4px', background: 'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-aqua) 100%)', margin: '3rem 0'}}></div>
 
+  {/* ✅ FIXED: Contact section using Link component instead of nested anchors */}
   <div style={{padding: '1.5rem', borderRadius: '8px', border: '2px solid var(--brand-blue-400)', backgroundColor: 'var(--brand-white)', boxShadow: '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)', marginBottom: '2rem', fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif'}}>
-    <p style={{fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--brand-black)', fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif'}}>Have questions? Contact <a href="mailto:training@resolve.io" style={{color: 'var(--brand-aqua)', fontWeight: 'bold', textDecoration: 'none'}}>training@resolve.io</a>.</p>
+    <p style={{fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--brand-black)', fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif'}}>
+      Have questions? Contact <Link to="mailto:training@resolve.io" style={{color: 'var(--brand-aqua)', fontWeight: 'bold', textDecoration: 'none'}}>training@resolve.io</Link>.
+    </p>
   </div>
     
   <div style={{display: 'flex', justifyContent: 'center', marginTop: '1.5rem', gap: '1.5rem'}}>
     {/* Website Icon */}
-    <a href="https://resolve.io" target="_blank" rel="noopener noreferrer" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
+    <Link to="https://resolve.io" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="2" y1="12" x2="22" y2="12"></line>
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
       </svg>
-    </a>
+    </Link>
     
     {/* Twitter/X Icon */}
-    <a href="https://twitter.com/ResolveSystems" target="_blank" rel="noopener noreferrer" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
+    <Link to="https://twitter.com/ResolveSystems" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
       </svg>
-    </a>
+    </Link>
     
     {/* LinkedIn Icon */}
-    <a href="https://www.linkedin.com/company/resolve-systems/" target="_blank" rel="noopener noreferrer" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
+    <Link to="https://www.linkedin.com/company/resolvesystems/" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
         <rect x="2" y="9" width="4" height="12"></rect>
         <circle cx="4" cy="4" r="2"></circle>
       </svg>
-    </a>
+    </Link>
     
     {/* Blog Icon */}
-    <a href="https://resolve.io/blog" target="_blank" rel="noopener noreferrer" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
+    <Link to="https://resolve.io/blog" style={{color: 'var(--brand-aqua)', transition: 'transform 0.2s ease', display: 'inline-block'}} onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}>
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
       </svg>
-    </a>
+    </Link>
   </div>
-  
-  <div style={{height: '4px', background: 'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-aqua) 100%)', margin: '3rem 0'}}></div>
 </div>
 
 export const formsList = [
-{
-title: 'Understand Your Automation "Why"',
-description: 'Document your business goals, current challenges, and what success looks like for your automation initiative.',
-link: '/learning/service-blueprinting/forms/forms-library/why',
-icon: '🎯'
-},
-{
-title: 'Automation Potential Assessment',
-description: 'Evaluate which processes are the best candidates for automation and calculate potential time and cost savings.',
-link: '/learning/service-blueprinting/forms/forms-library/automation',
-icon: '📊'
-},
-{
-title: 'Process Documentation Worksheet',
-description: 'Document each step of your process, including decision points, systems used, and data flows.',
-link: '/learning/service-blueprinting/forms/forms-library/process',
-icon: '📝'
-},
-{
-title: 'Technical & People Readiness',
-description: 'Inventory your systems, document connection points, and assess team readiness for automation.',
-link: '/learning/service-blueprinting/forms/forms-library/technical',
-icon: '💻'
-},
-{
-title: 'Orchestration Potential',
-description: 'Evaluate opportunities to connect multiple processes across teams for end-to-end automation.',
-link: '/learning/service-blueprinting/forms/forms-library/orchestration',
-icon: '🔄'
-},
-{
-title: 'Automation Conversation Checklist',
-description: 'Prepare for successful conversations with technical teams about your automation needs.',
-link: '/learning/service-blueprinting/forms/forms-library/conversation',
-icon: '🗣️'
-}
+  {
+    title: 'Understand Your Automation "Why"',
+    description: 'Discover the business goals driving your automation journey and define what success looks like.',
+    link: '/learning/service-blueprinting/forms/forms-library/why',
+    icon: '🎯'
+  },
+  {
+    title: 'Automation Potential Assessment',
+    description: 'Evaluate which processes are the best candidates for automation and calculate potential time and cost savings.',
+    link: '/learning/service-blueprinting/forms/forms-library/automation',
+    icon: '📊'
+  },
+  {
+    title: 'Process Documentation Worksheet',
+    description: 'Document each step of your process, including decision points, systems used, and data flows.',
+    link: '/learning/service-blueprinting/forms/forms-library/process',
+    icon: '📝'
+  },
+  {
+    title: 'Technical & People Readiness',
+    description: 'Inventory your systems, document connection points, and assess team readiness for automation.',
+    link: '/learning/service-blueprinting/forms/forms-library/technical',
+    icon: '💻'
+  },
+  {
+    title: 'Orchestration Potential',
+    description: 'Evaluate opportunities to connect multiple processes across teams for end-to-end automation.',
+    link: '/learning/service-blueprinting/forms/forms-library/orchestration',
+    icon: '🔄'
+  },
+  {
+    title: 'Automation Conversation Checklist',
+    description: 'Prepare for successful conversations with technical teams about your automation needs.',
+    link: '/learning/service-blueprinting/forms/forms-library/conversation',
+    icon: '🗣️'
+  }
 ];

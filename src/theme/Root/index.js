@@ -9,7 +9,8 @@ import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
 const PROTECTED_PATH_STUBS = [
   '/learning/service-blueprinting/courses', // Protected: course catalog
   '/learning/service-blueprinting/modules', // Protected: all modules
-  '/learning/service-blueprinting/certificate', // FIXED: Protected: certificate pages
+  '/learning/service-blueprinting/forms', // Protected: forms library
+  '/learning/service-blueprinting/certificate', // Protected: certificate pages
   '/learning/automation-essentials', // Protected: all automation essentials
 ]
 
