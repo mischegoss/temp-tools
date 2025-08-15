@@ -1,13 +1,12 @@
-// ActionsNavbar.js - Fixed with working hamburger + Wider Search
+// ProductsNavbar.js - Renamed from Actions, removed CustomSearch
 import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
 import NavigationDropdowns from './NavigationDropdowns'
-import CustomSearch from '../../../components/CustomSearch/index.js'
 import MobileSidebar from './MobileSidebar' // Your custom component
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment'
 import styles from './styles.module.css'
 
-export default function ActionsNavbar(props) {
+export default function ProductsNavbar(props) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   const handleMobileRaniClick = () => {
@@ -91,9 +90,7 @@ export default function ActionsNavbar(props) {
           </div>
 
           {/* Right side items */}
-          <div className='navbar__items navbar__items--right'>
-            <CustomSearch />
-          </div>
+          <div className='navbar__items navbar__items--right'></div>
 
           {/* Mobile menu toggle - NOW WITH CLICK HANDLER */}
           <div

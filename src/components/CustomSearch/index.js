@@ -1,6 +1,6 @@
 /**
- * Enhanced Custom React Search Component with Advanced Phrase Matching
- * Now supports better multi-word searches like "test workflow" → "Testing Your Workflow"
+ * Simplified Custom React Search Component - Actions Only
+ * No more dynamic loading - everything imported at build time
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
@@ -18,71 +18,21 @@ import {
   Divider,
 } from '@mui/material'
 
-// Direct imports - no more async loading!
+// Direct imports - Actions only!
 import actionsLatest from '../../../static/data/enhanced-title-mappings-actions-latest.json'
-import expressOnPremise25 from '../../../static/data/enhanced-title-mappings-express-on-premise-2-5.json'
-import expressOnPremise24 from '../../../static/data/enhanced-title-mappings-express-on-premise-2-4.json'
-import expressOnPremise21 from '../../../static/data/enhanced-title-mappings-express-on-premise-2-1.json'
-import expressSaas from '../../../static/data/enhanced-title-mappings-express-saas.json'
-import insights110 from '../../../static/data/enhanced-title-mappings-insights-11-0.json'
-import insights94 from '../../../static/data/enhanced-title-mappings-insights-9-4.json'
-import insights96 from '../../../static/data/enhanced-title-mappings-insights-9-6.json'
-import pro80 from '../../../static/data/enhanced-title-mappings-pro-8-0.json'
-import pro75 from '../../../static/data/enhanced-title-mappings-pro-7-5.json'
-import pro76 from '../../../static/data/enhanced-title-mappings-pro-7-6.json'
-import pro77 from '../../../static/data/enhanced-title-mappings-pro-7-7.json'
-import pro78 from '../../../static/data/enhanced-title-mappings-pro-7-8.json'
-import pro79 from '../../../static/data/enhanced-title-mappings-pro-7-9.json'
 
-// Simple mapping object - no more complex caching
+// Simple mapping object - Actions only
 const ALL_MAPPINGS = {
   'actions-latest': actionsLatest,
-  'express-on-premise-2-5': expressOnPremise25,
-  'express-on-premise-2-4': expressOnPremise24,
-  'express-on-premise-2-1': expressOnPremise21,
-  'express-saas': expressSaas,
-  'insights-11-0': insights110,
-  'insights-9-4': insights94,
-  'insights-9-6': insights96,
-  'pro-8-0': pro80,
-  'pro-7-5': pro75,
-  'pro-7-6': pro76,
-  'pro-7-7': pro77,
-  'pro-7-8': pro78,
-  'pro-7-9': pro79,
 }
 
-// Current versions per product (file format)
+// Current versions per product - Actions only
 const CURRENT_VERSIONS = {
   actions: 'latest',
-  insights: '11-0',
-  express: 'on-premise-2-5',
-  pro: '8-0',
 }
 
-// Version mapping: URL format → File format (must match scan-titles.js)
+// Version mapping: URL format → File format - Actions only
 const VERSION_URL_TO_FILE = {
-  // Pro versions - COMPLETE LIST
-  '8.0': '8-0',
-  7.9: '7-9',
-  7.8: '7-8',
-  7.7: '7-7',
-  7.6: '7-6',
-  7.5: '7-5',
-  // Insights versions - ACTUAL PUBLISHED VERSIONS
-  '11.0': '11-0',
-  9.6: '9-6',
-  9.5: '9-5',
-  9.4: '9-4',
-  // Express versions
-  'On-Premise%202.5': 'on-premise-2-5',
-  'On-Premise 2.5': 'on-premise-2-5',
-  'On-Premise%202.4': 'on-premise-2-4',
-  'On-Premise 2.4': 'on-premise-2-4',
-  'On-Premise%202.1': 'on-premise-2-1',
-  'On-Premise 2.1': 'on-premise-2-1',
-  SaaS: 'saas',
-  // Actions (no version)
   null: 'latest',
   undefined: 'latest',
 }
@@ -91,340 +41,7 @@ const VERSION_URL_TO_FILE = {
 let processedSearchDataCache = {}
 let searchCategoriesCache = {}
 
-// ENHANCED PHRASE MATCHING FUNCTIONS
-
-// Simple stemming function to handle word variations
-const stemWord = word => {
-  const lowerWord = word.toLowerCase()
-
-  // Common suffixes to remove for better matching
-  const suffixes = [
-    'ing',
-    'ed',
-    'er',
-    'est',
-    'ly',
-    'tion',
-    'sion',
-    'ness',
-    'ment',
-    'ful',
-    'less',
-    's',
-  ]
-
-  // Remove common suffixes
-  for (const suffix of suffixes) {
-    if (lowerWord.endsWith(suffix) && lowerWord.length > suffix.length + 2) {
-      return lowerWord.slice(0, -suffix.length)
-    }
-  }
-
-  return lowerWord
-}
-
-// Enhanced tokenization that preserves word relationships
-const tokenizeQuery = query => {
-  const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean)
-
-  return {
-    originalWords: words,
-    stemmedWords: words.map(stemWord),
-    phrases: generatePhrases(words),
-    fullQuery: query.toLowerCase().trim(),
-  }
-}
-
-// Generate phrase combinations from query words
-const generatePhrases = words => {
-  const phrases = []
-
-  // Add individual words
-  words.forEach(word => phrases.push([word]))
-
-  // Add 2-word phrases
-  for (let i = 0; i < words.length - 1; i++) {
-    phrases.push([words[i], words[i + 1]])
-  }
-
-  // Add 3-word phrases if query is long enough
-  if (words.length >= 3) {
-    for (let i = 0; i < words.length - 2; i++) {
-      phrases.push([words[i], words[i + 1], words[i + 2]])
-    }
-  }
-
-  return phrases
-}
-
-// Levenshtein distance for fuzzy matching
-const levenshteinDistance = (str1, str2) => {
-  const matrix = []
-
-  for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i]
-  }
-
-  for (let j = 0; j <= str1.length; j++) {
-    matrix[0][j] = j
-  }
-
-  for (let i = 1; i <= str2.length; i++) {
-    for (let j = 1; j <= str1.length; j++) {
-      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1]
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1,
-        )
-      }
-    }
-  }
-
-  return matrix[str2.length][str1.length]
-}
-
-// Score how well a phrase matches in the text
-const scorePhraseMatch = (textWords, textStemmed, phraseWords) => {
-  if (phraseWords.length === 1) {
-    // Single word matching
-    const queryWord = phraseWords[0]
-    const queryStemmed = stemWord(queryWord)
-
-    for (let i = 0; i < textWords.length; i++) {
-      const textWord = textWords[i]
-      const textWordStemmed = textStemmed[i]
-
-      if (textWord === queryWord) {
-        return {
-          match: true,
-          score: 0.95,
-          type: 'exact_word',
-          matchedWords: [queryWord],
-        }
-      }
-      if (textWordStemmed === queryStemmed) {
-        return {
-          match: true,
-          score: 0.85,
-          type: 'stemmed_word',
-          matchedWords: [queryWord],
-        }
-      }
-      if (textWord.includes(queryWord)) {
-        return {
-          match: true,
-          score: 0.75,
-          type: 'contains_word',
-          matchedWords: [queryWord],
-        }
-      }
-    }
-  } else {
-    // Multi-word phrase matching
-    const phraseLength = phraseWords.length
-
-    for (let i = 0; i <= textWords.length - phraseLength; i++) {
-      const textSlice = textWords.slice(i, i + phraseLength)
-      const textSliceStemmed = textStemmed.slice(i, i + phraseLength)
-
-      // Check for exact phrase match
-      if (textSlice.join(' ').includes(phraseWords.join(' '))) {
-        return {
-          match: true,
-          score: 0.95,
-          type: 'exact_phrase',
-          matchedWords: phraseWords,
-        }
-      }
-
-      // Check for stemmed phrase match
-      const phraseStemmed = phraseWords.map(stemWord)
-      if (JSON.stringify(textSliceStemmed) === JSON.stringify(phraseStemmed)) {
-        return {
-          match: true,
-          score: 0.85,
-          type: 'stemmed_phrase',
-          matchedWords: phraseWords,
-        }
-      }
-
-      // Check for partial phrase match (most words match)
-      let matchCount = 0
-      for (let j = 0; j < phraseLength; j++) {
-        const queryWord = phraseWords[j]
-        const queryStemmed = stemWord(queryWord)
-        const textWord = textSlice[j]
-        const textWordStemmed = textSliceStemmed[j]
-
-        if (
-          textWord === queryWord ||
-          textWordStemmed === queryStemmed ||
-          textWord.includes(queryWord) ||
-          queryWord.includes(textWord)
-        ) {
-          matchCount++
-        }
-      }
-
-      const matchRatio = matchCount / phraseLength
-      if (matchRatio >= 0.6) {
-        // At least 60% of words match
-        return {
-          match: true,
-          score: 0.7 * matchRatio,
-          type: 'partial_phrase',
-          matchedWords: phraseWords.slice(0, matchCount),
-        }
-      }
-    }
-  }
-
-  return { match: false, score: 0, type: 'none', matchedWords: [] }
-}
-
-// Calculate proximity bonus when multiple query words appear near each other
-const calculateProximityBonus = wordMatches => {
-  if (wordMatches.length < 2) return 0
-
-  const positions = wordMatches
-    .map(match => match.position)
-    .sort((a, b) => a - b)
-  let proximityScore = 0
-
-  for (let i = 0; i < positions.length - 1; i++) {
-    const distance = positions[i + 1] - positions[i]
-
-    // Closer words get higher bonus
-    if (distance === 1) {
-      proximityScore += 0.3 // Adjacent words
-    } else if (distance <= 3) {
-      proximityScore += 0.2 // Words within 3 positions
-    } else if (distance <= 5) {
-      proximityScore += 0.1 // Words within 5 positions
-    }
-  }
-
-  return Math.min(proximityScore, 0.5) // Cap the proximity bonus
-}
-
-// Enhanced fuzzy matching that handles phrases better
-const enhancedFuzzyMatch = (text, queryTokens, threshold = 0.75) => {
-  const textLower = text.toLowerCase()
-  const textWords = textLower.split(/\s+/)
-  const textStemmed = textWords.map(stemWord)
-
-  let bestMatch = { match: false, score: 0, type: 'none', matchedWords: [] }
-
-  // 1. Exact phrase match (highest priority)
-  if (textLower.includes(queryTokens.fullQuery)) {
-    return {
-      match: true,
-      score: 1.0,
-      type: 'exact_phrase',
-      matchedWords: queryTokens.originalWords,
-    }
-  }
-
-  // 2. Check each phrase combination
-  for (const phrase of queryTokens.phrases) {
-    const phraseScore = scorePhraseMatch(textWords, textStemmed, phrase)
-    if (phraseScore.score > bestMatch.score) {
-      bestMatch = phraseScore
-    }
-  }
-
-  // 3. Individual word matching with proximity bonus
-  const wordMatches = []
-  let totalWordScore = 0
-
-  for (let i = 0; i < queryTokens.originalWords.length; i++) {
-    const queryWord = queryTokens.originalWords[i]
-    const queryStemmed = queryTokens.stemmedWords[i]
-
-    // Find best match for this word
-    let bestWordMatch = { score: 0, position: -1, type: 'none' }
-
-    textWords.forEach((textWord, pos) => {
-      const textStemmed = stemWord(textWord)
-
-      // Exact match
-      if (textWord === queryWord) {
-        bestWordMatch = { score: 1.0, position: pos, type: 'exact' }
-      }
-      // Stemmed match
-      else if (textStemmed === queryStemmed && bestWordMatch.score < 0.9) {
-        bestWordMatch = { score: 0.9, position: pos, type: 'stemmed' }
-      }
-      // Contains match
-      else if (textWord.includes(queryWord) && bestWordMatch.score < 0.8) {
-        bestWordMatch = { score: 0.8, position: pos, type: 'contains' }
-      }
-      // Prefix match
-      else if (
-        textWord.startsWith(queryWord) &&
-        queryWord.length >= 3 &&
-        bestWordMatch.score < 0.75
-      ) {
-        bestWordMatch = { score: 0.75, position: pos, type: 'prefix' }
-      }
-      // Fuzzy match using Levenshtein
-      else if (
-        queryWord.length >= 3 &&
-        textWord.length >= 3 &&
-        bestWordMatch.score < 0.7
-      ) {
-        const distance = levenshteinDistance(textWord, queryWord)
-        const similarity =
-          1 - distance / Math.max(textWord.length, queryWord.length)
-
-        if (similarity >= threshold) {
-          bestWordMatch = {
-            score: similarity * 0.7,
-            position: pos,
-            type: 'fuzzy',
-          }
-        }
-      }
-    })
-
-    if (bestWordMatch.score > 0) {
-      wordMatches.push(bestWordMatch)
-      totalWordScore += bestWordMatch.score
-    }
-  }
-
-  // Calculate proximity bonus for multi-word queries
-  if (wordMatches.length > 1) {
-    const proximityBonus = calculateProximityBonus(wordMatches)
-    totalWordScore += proximityBonus
-  }
-
-  // Calculate final word-based score
-  const averageWordScore =
-    wordMatches.length > 0
-      ? totalWordScore / queryTokens.originalWords.length
-      : 0
-  const wordCoverage = wordMatches.length / queryTokens.originalWords.length
-  const wordBasedScore = averageWordScore * wordCoverage
-
-  if (wordBasedScore > bestMatch.score) {
-    bestMatch = {
-      match: wordBasedScore > 0.3,
-      score: wordBasedScore,
-      type: 'word_combination',
-      matchedWords: wordMatches
-        .map((_, i) => queryTokens.originalWords[i])
-        .filter((_, i) => wordMatches[i]),
-    }
-  }
-
-  return bestMatch
-}
-
-// Helper functions (keeping existing ones that are still needed)
+// Helper functions
 function highlightMatch(text, query) {
   if (!query.trim()) return text
 
@@ -436,8 +53,8 @@ function highlightMatch(text, query) {
       <mark
         key={index}
         style={{
-          backgroundColor: 'var(--brand-orange)', // Using brand orange
-          color: 'var(--brand-white)', // Using brand white
+          backgroundColor: 'var(--brand-blue)', // #0050C7 - Actions primary blue
+          color: 'var(--brand-white)', // #FFFFFF - Brand white text
           padding: '0 2px',
           borderRadius: '2px',
         }}
@@ -451,40 +68,19 @@ function highlightMatch(text, query) {
 }
 
 function getProductColor(product) {
-  const colors = {
-    pro: 'var(--brand-green)', // #00B070
-    actions: 'var(--brand-blue)', // #0050C7
-    express: 'var(--brand-purple)', // #8F4AFF
-    insights: 'var(--brand-aqua)', // #00D4FF
-  }
-  return colors[product] || 'var(--brand-grey-600)'
+  return 'var(--brand-blue)' // #0050C7 - Actions primary blue
 }
 
 function getVersionBadgeColor(version) {
-  if (version === 'latest') return 'var(--brand-blue-100)' // #CBE0FF
-  if (version === 'saas') return 'var(--brand-blue-400)' // #0066FF
-  if (version === 'Previous') return 'var(--brand-blue-100)' // #CBE0FF
-  if (version.includes('on-premise')) return 'var(--brand-blue-100)' // #CBE0FF
-  if (version.match(/^[0-9\-]+$/)) return 'var(--brand-blue-100)' // #CBE0FF
-  return 'var(--brand-blue-100)' // #CBE0FF
+  return 'var(--brand-blue-100)' // #CBE0FF - Light blue background
 }
 
 function getVersionTextColor(version) {
-  if (version === 'saas') return 'var(--brand-white)' // #FFFFFF
-  return 'var(--brand-blue)' // #0050C7
+  return 'var(--brand-blue)' // #0050C7 - Primary blue text
 }
 
 function formatVersionForDisplay(version) {
-  if (version === 'latest') return 'latest'
-  if (version === 'saas') return 'SaaS'
-  if (version.includes('on-premise-')) {
-    const versionNumber = version.replace('on-premise-', '').replace('-', '.')
-    return `${versionNumber}`
-  }
-  if (version.match(/^[0-9\-]+$/)) {
-    return `v${version.replace('-', '.')}`
-  }
-  return version
+  return 'latest'
 }
 
 function escapeRegex(string) {
@@ -516,76 +112,72 @@ const getSelectedBackgroundColor = () => {
   return 'var(--brand-grey-200)' // Always light selection
 }
 
-// Simplified data access functions - no more async!
+// Simplified data access functions - Actions only!
 const getVersionMappings = (product, version) => {
   const key = `${product}-${version}`
-  return ALL_MAPPINGS[key] || {}
-}
+  const result = ALL_MAPPINGS[key] || {}
 
-const getAllVersionsForProduct = product => {
-  const productMappings = {}
-  let totalPages = 0
-  let totalHeaders = 0
-
-  Object.entries(ALL_MAPPINGS).forEach(([key, mappings]) => {
-    if (key.startsWith(`${product}-`)) {
-      const version = key.replace(`${product}-`, '')
-
-      Object.entries(mappings).forEach(([title, data]) => {
-        if (!title.startsWith('_')) {
-          // Create unique key to prevent overwrites
-          const uniqueKey = `${title}|||${version}`
-          productMappings[uniqueKey] = {
-            ...data,
-            title,
-            originalTitle: title,
-            version: version,
-          }
-        }
-      })
-
-      totalPages += mappings._TOTAL_PAGES || 0
-      totalHeaders += mappings._TOTAL_HEADERS || 0
-    }
+  console.log('🔍 getVersionMappings:', {
+    product,
+    version,
+    key,
+    hasResult: !!result && Object.keys(result).length > 0,
+    allMappingsKeys: Object.keys(ALL_MAPPINGS),
+    resultKeys: Object.keys(result).slice(0, 10), // First 10 keys only
   })
 
-  return {
-    ...productMappings,
-    _TOTAL_PAGES: totalPages,
-    _TOTAL_HEADERS: totalHeaders,
-    _PRODUCT: product,
-    _ALL_VERSIONS_COMBINED: true,
-  }
+  return result
 }
 
 const getCurrentVersions = () => {
-  const combinedMappings = {}
-  let totalPages = 0
-  let totalHeaders = 0
+  try {
+    const mappings = getVersionMappings('actions', 'latest')
 
-  Object.entries(CURRENT_VERSIONS).forEach(([product, version]) => {
-    const mappings = getVersionMappings(product, version)
-    if (mappings && Object.keys(mappings).length > 0) {
-      Object.entries(mappings).forEach(([key, value]) => {
-        if (!key.startsWith('_')) {
-          combinedMappings[key] = value
-        }
-      })
-      totalPages += mappings._TOTAL_PAGES || 0
-      totalHeaders += mappings._TOTAL_HEADERS || 0
+    console.log('🔍 getCurrentVersions - raw mappings:', {
+      mappings,
+      keys: Object.keys(mappings || {}),
+      hasData: !!mappings && Object.keys(mappings).length > 0,
+    })
+
+    if (!mappings || Object.keys(mappings).length === 0) {
+      console.warn('No mappings found for actions-latest')
+      return {}
     }
-  })
 
-  return {
-    ...combinedMappings,
-    _TOTAL_PAGES: totalPages,
-    _TOTAL_HEADERS: totalHeaders,
-    _PRODUCTS: Object.keys(CURRENT_VERSIONS),
-    _IS_HOMEPAGE_COMBINED: true,
+    const combinedMappings = {}
+    let totalPages = 0
+    let totalHeaders = 0
+
+    Object.entries(mappings).forEach(([key, value]) => {
+      if (!key.startsWith('_')) {
+        combinedMappings[key] = value
+      }
+    })
+
+    totalPages += mappings._TOTAL_PAGES || 0
+    totalHeaders += mappings._TOTAL_HEADERS || 0
+
+    const result = {
+      ...combinedMappings,
+      _TOTAL_PAGES: totalPages,
+      _TOTAL_HEADERS: totalHeaders,
+      _PRODUCTS: ['actions'],
+      _IS_HOMEPAGE_COMBINED: true,
+    }
+
+    console.log('🔍 getCurrentVersions - final result:', {
+      resultKeys: Object.keys(result),
+      totalMappings: Object.keys(combinedMappings).length,
+    })
+
+    return result
+  } catch (error) {
+    console.error('Error in getCurrentVersions:', error)
+    return {}
   }
 }
 
-// Enhanced search data processing (same as before)
+// Enhanced search data processing
 const processSearchData = (mappings, cacheKey) => {
   if (processedSearchDataCache[cacheKey])
     return processedSearchDataCache[cacheKey]
@@ -598,39 +190,56 @@ const processSearchData = (mappings, cacheKey) => {
     suggestions: new Set(),
   }
 
+  console.log('🔍 Processing search data:', { mappings, cacheKey })
+
   Object.entries(mappings).forEach(([uniqueKey, data]) => {
     if (uniqueKey.startsWith('_')) return // Skip metadata
 
-    // EXTRACT original title from versioned key
+    // Safety check for data structure
+    if (!data || typeof data !== 'object') {
+      console.warn('Invalid data for key:', uniqueKey, data)
+      return
+    }
+
     const title = uniqueKey.includes('|||')
       ? uniqueKey.split('|||')[0]
       : uniqueKey
 
-    const pathContext = extractPathContext(data.filePath)
+    // Ensure required properties exist with defaults
+    const safeData = {
+      filePath: '',
+      url: '',
+      headers: [],
+      product: 'actions',
+      id: '',
+      excerpt: '',
+      ...data, // Override with actual data if present
+    }
+
+    const pathContext = extractPathContext(safeData.filePath)
     const contentTypeInfo = analyzeContentType(
-      data.url,
-      data.filePath,
-      data.headers,
+      safeData.url,
+      safeData.filePath,
+      safeData.headers,
     )
     const searchableContent = buildEnhancedSearchableContent(
-      { title, ...data },
+      { title, ...safeData },
       pathContext,
       contentTypeInfo,
     )
 
-    // USE UNIQUE KEY for storage to prevent overwrites
     processed[uniqueKey] = {
-      ...data,
-      title, // Use original title for display
+      ...safeData,
+      title,
       pathContext,
       contentTypeInfo,
       searchableContent,
     }
 
-    // Build categories using original title
-    if (!categories.byProduct[data.product])
-      categories.byProduct[data.product] = []
-    categories.byProduct[data.product].push(uniqueKey)
+    // Build categories
+    if (!categories.byProduct[safeData.product])
+      categories.byProduct[safeData.product] = []
+    categories.byProduct[safeData.product].push(uniqueKey)
 
     if (!categories.bySection[pathContext.section])
       categories.bySection[pathContext.section] = []
@@ -641,17 +250,21 @@ const processSearchData = (mappings, cacheKey) => {
     categories.byActivityType[contentTypeInfo.type].push(uniqueKey)
 
     // Build suggestions from headers, titles, and ID keywords
-    data.headers.forEach(header => {
-      const words = header.split(/\s+/).filter(word => word.length > 3)
-      words.forEach(word => categories.suggestions.add(word))
-    })
+    if (Array.isArray(safeData.headers)) {
+      safeData.headers.forEach(header => {
+        if (typeof header === 'string') {
+          const words = header.split(/\s+/).filter(word => word.length > 3)
+          words.forEach(word => categories.suggestions.add(word))
+        }
+      })
+    }
 
     const titleWords = title.split(/\s+/).filter(word => word.length > 3)
     titleWords.forEach(word => categories.suggestions.add(word))
 
     // Add ID keywords to suggestions
-    if (data.id) {
-      const idWords = data.id.split('-').filter(word => word.length > 2)
+    if (safeData.id && typeof safeData.id === 'string') {
+      const idWords = safeData.id.split('-').filter(word => word.length > 2)
       idWords.forEach(word => categories.suggestions.add(word))
     }
   })
@@ -659,22 +272,40 @@ const processSearchData = (mappings, cacheKey) => {
   categories.suggestions = Array.from(categories.suggestions)
   processedSearchDataCache[cacheKey] = processed
   searchCategoriesCache[cacheKey] = categories
+
+  console.log('✅ Processed search data:', {
+    processedCount: Object.keys(processed).length,
+    categoriesCount: categories.suggestions.length,
+  })
+
   return processed
 }
 
-// Extract contextual data from file paths (same as before)
+// Extract contextual data from file paths
 const extractPathContext = filePath => {
+  // Safety check for undefined or null filePath
+  if (!filePath || typeof filePath !== 'string') {
+    console.warn('extractPathContext: Invalid filePath:', filePath)
+    return {
+      version: 'latest',
+      categories: [],
+      breadcrumbs: 'Actions',
+      pathTerms: [],
+      allSegments: ['Actions'],
+      depth: 0,
+      section: 'Actions',
+    }
+  }
+
   const pathParts = filePath.split('/')
 
-  // Extract version info
-  const versionMatch = filePath.match(/version-([^\/]+)/)
-  const version = versionMatch ? decodeURIComponent(versionMatch[1]) : 'latest'
+  const version = 'latest'
 
   // Extract ALL meaningful path segments
   const allSegments = pathParts.filter(
     part =>
       part &&
-      !part.endsWith('.md') &&
+      !part.endsWith('.mdx') &&
       !part.includes('_versioned_docs') &&
       !part.startsWith('version-'),
   )
@@ -690,7 +321,7 @@ const extractPathContext = filePath => {
 
   // Extract category hierarchy
   const productIndex = allSegments.findIndex(seg =>
-    ['actions', 'express', 'pro', 'insights'].includes(seg.toLowerCase()),
+    ['actions'].includes(seg.toLowerCase()),
   )
   const categories =
     productIndex >= 0 ? allSegments.slice(productIndex + 1) : allSegments
@@ -704,23 +335,23 @@ const extractPathContext = filePath => {
   return {
     version,
     categories,
-    breadcrumbs,
+    breadcrumbs: breadcrumbs || 'Actions',
     pathTerms,
-    allSegments: cleanedSegments,
+    allSegments: cleanedSegments.length > 0 ? cleanedSegments : ['Actions'],
     depth: categories.length,
-    section: cleanedSegments[0] ? cleanedSegments[0] : 'General',
+    section: cleanedSegments[0] ? cleanedSegments[0] : 'Actions',
   }
 }
 
-// Analyze URL patterns to detect content types (same as before)
+// Analyze URL patterns to detect content types - updated for hyphenated structure
 const analyzeContentType = (url, filePath, headers) => {
   const urlLower = url.toLowerCase()
   const pathLower = filePath.toLowerCase()
 
-  // Activity documentation patterns
+  // Activity-Repository patterns (main activities section)
   if (
-    urlLower.includes('/list%20of%20activities/') ||
-    urlLower.includes('/list of activities/')
+    urlLower.includes('/activity-repository/') ||
+    pathLower.includes('/activity-repository/')
   ) {
     return {
       type: 'activity',
@@ -730,24 +361,79 @@ const analyzeContentType = (url, filePath, headers) => {
     }
   }
 
-  // Configuration and setup patterns
-  if (urlLower.includes('/configuration/') || urlLower.includes('/config/')) {
+  // Support-and-Troubleshooting patterns
+  if (
+    urlLower.includes('/support-and-troubleshooting/') ||
+    pathLower.includes('/support-and-troubleshooting/')
+  ) {
     return {
-      type: 'configuration',
-      subtype: 'setup',
-      category: 'setup',
-      searchTerms: ['configuration', 'config', 'setup', 'settings'],
+      type: 'reference',
+      subtype: 'troubleshooting',
+      category: 'support',
+      searchTerms: ['support', 'troubleshooting', 'help', 'issues'],
     }
   }
 
-  // Getting started and tutorial patterns
+  // Creating-Self-Service-Forms patterns
   if (
-    urlLower.includes('/getting%20started/') ||
-    urlLower.includes('/getting started/')
+    urlLower.includes('/creating-self-service-forms/') ||
+    pathLower.includes('/creating-self-service-forms/')
   ) {
     return {
       type: 'tutorial',
-      subtype: 'guide',
+      subtype: 'self-service',
+      category: 'forms',
+      searchTerms: ['self-service', 'forms', 'create', 'tutorial'],
+    }
+  }
+
+  // Developing-Custom-Activities patterns
+  if (
+    urlLower.includes('/developing-custom-activities/') ||
+    pathLower.includes('/developing-custom-activities/')
+  ) {
+    return {
+      type: 'tutorial',
+      subtype: 'development',
+      category: 'development',
+      searchTerms: ['development', 'custom', 'activities', 'coding'],
+    }
+  }
+
+  // Automation-Use-Cases patterns
+  if (
+    urlLower.includes('/automation-use-cases/') ||
+    pathLower.includes('/automation-use-cases/')
+  ) {
+    return {
+      type: 'tutorial',
+      subtype: 'use-cases',
+      category: 'examples',
+      searchTerms: ['automation', 'use cases', 'examples', 'scenarios'],
+    }
+  }
+
+  // Building-Your-Workflow patterns
+  if (
+    urlLower.includes('/building-your-workflow/') ||
+    pathLower.includes('/building-your-workflow/')
+  ) {
+    return {
+      type: 'tutorial',
+      subtype: 'workflow-guide',
+      category: 'learning',
+      searchTerms: ['workflow', 'building', 'guide', 'tutorial'],
+    }
+  }
+
+  // Getting-Started patterns
+  if (
+    urlLower.includes('/getting-started/') ||
+    pathLower.includes('/getting-started/')
+  ) {
+    return {
+      type: 'tutorial',
+      subtype: 'getting-started',
       category: 'guide',
       searchTerms: [
         'tutorial',
@@ -759,43 +445,66 @@ const analyzeContentType = (url, filePath, headers) => {
     }
   }
 
-  // Builder and designer patterns
-  if (urlLower.includes('/builder/') || urlLower.includes('/designer/')) {
+  // Product-Navigation patterns
+  if (
+    urlLower.includes('/product-navigation/') ||
+    pathLower.includes('/product-navigation/')
+  ) {
     return {
-      type: 'builder',
-      subtype: 'tool',
-      category: 'tool',
-      searchTerms: ['builder', 'designer', 'create', 'design', 'tool'],
+      type: 'reference',
+      subtype: 'navigation',
+      category: 'interface',
+      searchTerms: ['navigation', 'interface', 'ui', 'product'],
     }
   }
 
-  // Insight and analytics patterns
-  if (urlLower.includes('/insight/') || urlLower.includes('/analytics/')) {
+  // Configuration patterns (general)
+  if (urlLower.includes('/configuration/') || urlLower.includes('/config/')) {
+    return {
+      type: 'configuration',
+      subtype: 'setup',
+      category: 'setup',
+      searchTerms: ['configuration', 'config', 'setup', 'settings'],
+    }
+  }
+
+  // Workflow-Designer patterns
+  if (
+    urlLower.includes('/workflow-designer/') ||
+    pathLower.includes('/workflow-designer/')
+  ) {
+    return {
+      type: 'builder',
+      subtype: 'workflow-designer',
+      category: 'tool',
+      searchTerms: [
+        'workflow',
+        'designer',
+        'builder',
+        'create',
+        'design',
+        'tool',
+      ],
+    }
+  }
+
+  // Repository patterns
+  if (urlLower.includes('/repository/')) {
+    return {
+      type: 'repository',
+      subtype: 'management',
+      category: 'organization',
+      searchTerms: ['repository', 'manage', 'organize', 'workflow', 'template'],
+    }
+  }
+
+  // Insight patterns
+  if (urlLower.includes('/insight/')) {
     return {
       type: 'insight',
       subtype: 'analytics',
       category: 'analytics',
       searchTerms: ['insight', 'analytics', 'report', 'dashboard', 'metrics'],
-    }
-  }
-
-  // Home page and portal patterns
-  if (urlLower.includes('/home%20page/') || urlLower.includes('/portal/')) {
-    return {
-      type: 'portal',
-      subtype: 'interface',
-      category: 'interface',
-      searchTerms: ['home', 'portal', 'dashboard', 'interface'],
-    }
-  }
-
-  // Integration and module patterns
-  if (urlLower.includes('/integration/') || urlLower.includes('/module/')) {
-    return {
-      type: 'integration',
-      subtype: 'connectivity',
-      category: 'connectivity',
-      searchTerms: ['integration', 'module', 'connector', 'api', 'connection'],
     }
   }
 
@@ -817,16 +526,6 @@ const analyzeContentType = (url, filePath, headers) => {
     }
   }
 
-  // Repository patterns
-  if (urlLower.includes('/repository/')) {
-    return {
-      type: 'repository',
-      subtype: 'management',
-      category: 'organization',
-      searchTerms: ['repository', 'manage', 'organize', 'workflow', 'template'],
-    }
-  }
-
   // Default content type
   return {
     type: 'reference',
@@ -836,55 +535,61 @@ const analyzeContentType = (url, filePath, headers) => {
   }
 }
 
-// Build comprehensive searchable content (same as before)
+// Build comprehensive searchable content
 const buildEnhancedSearchableContent = (
   entry,
   pathContext,
   contentTypeInfo,
 ) => {
-  const primaryText = entry.title
+  const primaryText = entry.title || ''
 
   // Extract searchable keywords from ID field
-  const idKeywords = entry.id
-    ? entry.id
-        .split('-')
-        .filter(word => word.length > 1)
-        .join(' ')
-    : ''
+  const idKeywords =
+    entry.id && typeof entry.id === 'string'
+      ? entry.id
+          .split('-')
+          .filter(word => word.length > 1)
+          .join(' ')
+      : ''
 
   // Use excerpt from scanner data
   const excerpt = entry.excerpt || ''
 
   // Extract metadata keywords
   const metadataTerms = []
-  if (entry.metadata) {
+  if (entry.metadata && typeof entry.metadata === 'object') {
     if (entry.metadata.description)
       metadataTerms.push(entry.metadata.description)
-    if (entry.metadata.keywords) metadataTerms.push(...entry.metadata.keywords)
-    if (entry.metadata.tags) metadataTerms.push(...entry.metadata.tags)
+    if (Array.isArray(entry.metadata.keywords))
+      metadataTerms.push(...entry.metadata.keywords)
+    if (Array.isArray(entry.metadata.tags))
+      metadataTerms.push(...entry.metadata.tags)
     if (entry.metadata.sidebar_label)
       metadataTerms.push(entry.metadata.sidebar_label)
     if (entry.metadata.category) metadataTerms.push(entry.metadata.category)
   }
 
-  // Include ALL searchable content
+  // Include ALL searchable content with safety checks
   const secondaryText = [
-    ...entry.headers,
-    ...pathContext.pathTerms,
-    ...pathContext.allSegments,
-    pathContext.breadcrumbs,
-    pathContext.section,
-    entry.product,
-    contentTypeInfo.type,
+    ...(Array.isArray(entry.headers) ? entry.headers : []),
+    ...(Array.isArray(pathContext.pathTerms) ? pathContext.pathTerms : []),
+    ...(Array.isArray(pathContext.allSegments) ? pathContext.allSegments : []),
+    pathContext.breadcrumbs || '',
+    pathContext.section || '',
+    entry.product || 'actions',
+    contentTypeInfo.type || '',
     contentTypeInfo.category || '',
     contentTypeInfo.subtype || '',
-    ...(contentTypeInfo.searchTerms || []),
+    ...(Array.isArray(contentTypeInfo.searchTerms)
+      ? contentTypeInfo.searchTerms
+      : []),
     idKeywords,
     excerpt,
     ...metadataTerms,
-    entry.filePath.replace(/[\/\-_\.]/g, ' '),
+    (entry.filePath || '').replace(/[\/\-_\.]/g, ' '),
   ]
     .filter(Boolean)
+    .filter(item => typeof item === 'string')
     .join(' ')
 
   return {
@@ -895,214 +600,219 @@ const buildEnhancedSearchableContent = (
       .toLowerCase()
       .split(/\s+/)
       .filter(Boolean),
-    pathSearchText: pathContext.allSegments.join(' ').toLowerCase(),
+    pathSearchText: (Array.isArray(pathContext.allSegments)
+      ? pathContext.allSegments.join(' ')
+      : ''
+    ).toLowerCase(),
     idSearchText: idKeywords.toLowerCase(),
     excerptSearchText: excerpt.toLowerCase(),
     metadataSearchText: metadataTerms.join(' ').toLowerCase(),
-    contentType: contentTypeInfo.type,
+    contentType: contentTypeInfo.type || 'reference',
     complexity: entry.complexity || 'simple',
   }
 }
 
-// Get version priority for sorting (higher number = higher priority)
-const getVersionPriority = (result, searchContext) => {
-  const resultVersion = result.version
-  const userVersion = searchContext.currentFileVersion
-  const currentVersion = CURRENT_VERSIONS[searchContext.currentProduct]
-  const product = searchContext.currentProduct
+// Fuzzy matching
+const levenshteinDistance = (str1, str2) => {
+  const matrix = []
 
-  // Exact version match gets highest priority
-  if (resultVersion === userVersion) {
-    return 1000 // Highest priority
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i]
   }
 
-  // Current version gets high priority (when user is on older version)
-  if (resultVersion === currentVersion && !searchContext.isCurrentVersion) {
-    return 900 // High priority
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j
   }
 
-  // For Express, SaaS gets lowest priority unless user is on SaaS
-  if (product === 'express' && resultVersion === 'saas') {
-    return userVersion === 'saas' ? 1000 : 100 // Lowest unless exact match
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1]
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1,
+        )
+      }
+    }
   }
 
-  // Version proximity - closer versions get higher priority
-  const proximity = calculateVersionProximity(
-    resultVersion,
-    userVersion,
-    product,
-  )
-  const proximityPriority = Math.max(100, 800 - proximity) // Scale: 100-800
-
-  return proximityPriority
+  return matrix[str2.length][str1.length]
 }
 
-// Calculate version proximity for intelligent sorting
-const calculateVersionProximity = (version1, version2, product) => {
-  // Handle identical versions
-  if (version1 === version2) return 0
+const fuzzyMatch = (text, query, threshold = 0.75) => {
+  const textLower = text.toLowerCase()
+  const queryLower = query.toLowerCase()
 
-  // Special handling for Express SaaS (always distant unless exact match)
-  if (product === 'express') {
-    if (version1 === 'saas' || version2 === 'saas') {
-      return version1 === version2 ? 0 : 1000 // Very high distance
+  // Exact match (highest score)
+  if (textLower.includes(queryLower)) {
+    return { match: true, score: 1.0, type: 'exact' }
+  }
+
+  // For very short queries, be more flexible
+  if (queryLower.length <= 2) {
+    if (queryLower.length === 2) {
+      const words = textLower.split(/\s+/)
+      for (const word of words) {
+        if (word.startsWith(queryLower)) {
+          return { match: true, score: 0.8, type: 'prefix' }
+        }
+      }
+    }
+    return { match: false, score: 0, type: 'none' }
+  }
+
+  // Word boundary match
+  const words = textLower.split(/\s+/)
+  for (const word of words) {
+    if (word.includes(queryLower)) {
+      return { match: true, score: 0.9, type: 'word' }
+    }
+
+    if (word.startsWith(queryLower) && queryLower.length >= 2) {
+      return { match: true, score: 0.85, type: 'prefix' }
     }
   }
 
-  // Handle latest/current versions
-  if (version1 === 'latest' || version2 === 'latest') {
-    return 100 // Moderate distance
+  // Fuzzy match for typos
+  if (queryLower.length >= 3) {
+    for (const word of words) {
+      if (word.length >= 3) {
+        const distance = levenshteinDistance(word, queryLower)
+        const similarity =
+          1 - distance / Math.max(word.length, queryLower.length)
+
+        if (similarity >= threshold) {
+          return { match: true, score: similarity * 0.75, type: 'fuzzy' }
+        }
+      }
+    }
   }
 
-  // Extract numerical versions for comparison
-  const extractNumber = version => {
-    if (product === 'express' && version.includes('on-premise-')) {
-      const match = version.match(/on-premise-(\d+)-(\d+)/)
-      return match ? parseFloat(`${match[1]}.${match[2]}`) : 0
-    }
-
-    if (product === 'pro' || product === 'insights') {
-      const match = version.match(/(\d+)-(\d+)/)
-      return match ? parseFloat(`${match[1]}.${match[2]}`) : 0
-    }
-
-    return 0
-  }
-
-  const num1 = extractNumber(version1)
-  const num2 = extractNumber(version2)
-
-  if (num1 === 0 || num2 === 0) return 500 // Unknown versions get moderate distance
-
-  return Math.abs(num1 - num2) * 10 // Scale the difference
+  return { match: false, score: 0, type: 'none' }
 }
 
-// ENHANCED relevance scoring with better phrase handling
-const enhancedCalculateRelevanceScore = (
-  uniqueKey,
-  processedData,
-  query,
-  context,
-) => {
+// Enhanced relevance scoring
+const calculateRelevanceScore = (uniqueKey, processedData, query, context) => {
   let score = 0
+  const lowerQuery = query.toLowerCase()
   const data = processedData[uniqueKey]
 
   if (!data) return 0
 
-  // Tokenize the query for better phrase matching
-  const queryTokens = tokenizeQuery(query)
-
-  // Skip very short queries that aren't meaningful
-  if (queryTokens.fullQuery.length < 2) return 0
-
   // Extract original title for scoring
   const title = data.title || uniqueKey.split('|||')[0]
 
-  // 1. Title matches (highest priority with phrase support)
-  const titleMatch = enhancedFuzzyMatch(title, queryTokens, 0.7)
+  // Title matches (highest priority)
+  const titleMatch = fuzzyMatch(title, query, 0.75)
   if (titleMatch.match) {
-    let titleScore = titleMatch.score * 100
-
-    // Bonus for phrase types
-    if (titleMatch.type === 'exact_phrase') titleScore += 30
-    else if (titleMatch.type === 'stemmed_phrase') titleScore += 25
-    else if (titleMatch.type === 'partial_phrase') titleScore += 20
-    else if (titleMatch.type === 'word_combination') titleScore += 15
-
-    // Bonus for coverage (how many query words matched)
-    const coverage =
-      titleMatch.matchedWords.length / queryTokens.originalWords.length
-    titleScore += coverage * 20
-
+    let titleScore = titleMatch.score * (titleMatch.type === 'exact' ? 100 : 75)
+    if (title.toLowerCase().startsWith(lowerQuery)) {
+      titleScore += 25
+    }
     score += titleScore
   } else {
-    // If no title match for multi-word queries, heavily penalize
-    if (queryTokens.originalWords.length > 1) {
+    if (query.length <= 2) {
       return 0
     }
   }
 
-  // 2. ID field matches with phrase support
+  // ID field matches
   if (data.searchableContent.idSearchText) {
-    const idMatch = enhancedFuzzyMatch(
-      data.searchableContent.idSearchText,
-      queryTokens,
-      0.7,
-    )
+    const idMatch = fuzzyMatch(data.searchableContent.idSearchText, query, 0.75)
     if (idMatch.match) {
-      score += idMatch.score * (idMatch.type.includes('phrase') ? 45 : 35)
+      score += idMatch.score * (idMatch.type === 'exact' ? 40 : 30)
     }
   }
 
-  // 3. Excerpt matches with phrase support
+  // Excerpt matches
   if (data.searchableContent.excerptSearchText) {
-    const excerptMatch = enhancedFuzzyMatch(
+    const excerptMatch = fuzzyMatch(
       data.searchableContent.excerptSearchText,
-      queryTokens,
-      0.7,
+      query,
+      0.75,
     )
     if (excerptMatch.match) {
-      score +=
-        excerptMatch.score * (excerptMatch.type.includes('phrase') ? 40 : 30)
+      score += excerptMatch.score * (excerptMatch.type === 'exact' ? 35 : 25)
     }
   }
 
-  // 4. Header matches with phrase support
+  // Header matches
   let headerScore = 0
-  data.headers.forEach(header => {
-    const headerMatch = enhancedFuzzyMatch(header, queryTokens, 0.7)
-    if (headerMatch.match) {
-      headerScore +=
-        headerMatch.score * (headerMatch.type.includes('phrase') ? 25 : 18)
-    }
-  })
-  score += Math.min(headerScore, 60) // Cap header score
+  if (Array.isArray(data.headers)) {
+    data.headers.forEach(header => {
+      if (typeof header === 'string') {
+        const headerMatch = fuzzyMatch(header, query, 0.75)
+        if (headerMatch.match) {
+          headerScore += headerMatch.score * 18
+        }
+      }
+    })
+  }
+  score += Math.min(headerScore, 50)
 
-  // 5. Metadata matches
+  // Metadata matches
   if (data.searchableContent.metadataSearchText) {
-    const metadataMatch = enhancedFuzzyMatch(
+    const metadataMatch = fuzzyMatch(
       data.searchableContent.metadataSearchText,
-      queryTokens,
-      0.7,
+      query,
+      0.75,
     )
     if (metadataMatch.match) {
-      score += metadataMatch.score * 25
+      score += metadataMatch.score * 20
     }
   }
 
-  // 6. Path matches with phrase support
-  const pathMatch = enhancedFuzzyMatch(
+  // Content type relevance
+  const contentTypeInfo = data.contentTypeInfo || data.contentType || {}
+  if (contentTypeInfo.searchTerms) {
+    const contentTypeMatch = fuzzyMatch(
+      contentTypeInfo.searchTerms.join(' '),
+      query,
+      0.7,
+    )
+    if (contentTypeMatch.match) {
+      score += contentTypeMatch.score * 15
+    }
+  }
+
+  // Path matches
+  const pathMatch = fuzzyMatch(
     data.searchableContent.pathSearchText,
-    queryTokens,
-    0.7,
+    query,
+    0.75,
   )
   if (pathMatch.match) {
-    score += pathMatch.score * 30
+    score += pathMatch.score * 25
   }
 
-  // 7. Individual path segment matches
-  data.pathContext.allSegments.forEach(segment => {
-    const segmentMatch = enhancedFuzzyMatch(segment, queryTokens, 0.7)
-    if (segmentMatch.match) {
-      score += segmentMatch.score * 25
-    }
-  })
+  // Specific path segment matches
+  if (Array.isArray(data.pathContext.allSegments)) {
+    data.pathContext.allSegments.forEach(segment => {
+      if (typeof segment === 'string') {
+        const segmentMatch = fuzzyMatch(segment, query, 0.75)
+        if (segmentMatch.match) {
+          score +=
+            segmentMatch.score * (segmentMatch.type === 'exact' ? 30 : 20)
+        }
+      }
+    })
+  }
 
-  // 8. Secondary content matches
-  const secondaryMatch = enhancedFuzzyMatch(
+  // Secondary content matches
+  const secondaryMatch = fuzzyMatch(
     data.searchableContent.secondaryText,
-    queryTokens,
-    0.7,
+    query,
+    0.75,
   )
   if (secondaryMatch.match) {
     score += secondaryMatch.score * 12
   }
 
-  // 9. Content type context boost
-  const contentTypeInfo = data.contentTypeInfo || data.contentType || {}
+  // Content type context boost
   const contentType = contentTypeInfo.type || 'reference'
   const subtype = contentTypeInfo.subtype || ''
-  const lowerQuery = queryTokens.fullQuery
 
   if (lowerQuery.includes('activity') && contentType === 'activity') {
     score += 25
@@ -1123,7 +833,7 @@ const enhancedCalculateRelevanceScore = (
     score += 20
   }
 
-  // 10. Complexity-based scoring
+  // Complexity-based scoring
   const complexity =
     data.complexity || data.searchableContent.complexity || 'simple'
   if (lowerQuery.includes('detailed') && complexity === 'detailed') {
@@ -1133,7 +843,7 @@ const enhancedCalculateRelevanceScore = (
     score += 15
   }
 
-  // 11. Content feature boosts
+  // Content feature boosts
   if (lowerQuery.includes('code') && data.hasCode) {
     score += 10
   }
@@ -1141,51 +851,31 @@ const enhancedCalculateRelevanceScore = (
     score += 10
   }
 
-  // Minimum score threshold - be more generous for phrase matches
-  const minThreshold = queryTokens.originalWords.length > 1 ? 20 : 10
-  if (score < minThreshold) {
+  // Minimum score threshold
+  if (score < 10) {
     return 0
   }
 
-  // 12. Product-specific boost
-  if (data.product === context.currentProduct) {
-    score += 45
+  // Content richness boost
+  let richnessScore = 0
+  if (Array.isArray(data.headers)) {
+    richnessScore = Math.min(data.headers.length * 1.5, 15)
   }
-
-  // 13. Version boosts
-  if (data.version === context.currentFileVersion) {
-    score += 25 // Small boost for exact match
-  }
-  // Current version gets small boost (if user is not on current)
-  else if (
-    data.version === CURRENT_VERSIONS[context.currentProduct] &&
-    !context.isCurrentVersion
-  ) {
-    score += 15 // Small boost for current version
-  }
-  // Small proximity boost
-  else {
-    const proximity = calculateVersionProximity(
-      data.version,
-      context.currentFileVersion,
-      context.currentProduct,
-    )
-    const proximityBoost = Math.max(0, 10 - proximity / 10)
-    score += proximityBoost
-  }
-
-  // 14. Content richness boost
-  let richnessScore = Math.min(data.headers.length * 1.5, 15)
 
   if (data.hasCode) richnessScore += 5
   if (data.hasImages) richnessScore += 3
-  if (data.excerpt && data.excerpt.length > 50) richnessScore += 5
+  if (
+    data.excerpt &&
+    typeof data.excerpt === 'string' &&
+    data.excerpt.length > 50
+  )
+    richnessScore += 5
   if (complexity === 'detailed') richnessScore += 8
   if (complexity === 'moderate') richnessScore += 4
 
   score += Math.min(richnessScore, 25)
 
-  // 15. Content type relevance (if filtering)
+  // Content type relevance (if filtering)
   if (context.contentTypeFilter && contentType === context.contentTypeFilter) {
     score += 22
   }
@@ -1193,31 +883,28 @@ const enhancedCalculateRelevanceScore = (
   return score
 }
 
-// Generate smart suggestions (same as before but could be enhanced for phrases)
+// Generate smart suggestions
 const generateSuggestions = (query, categories) => {
   if (!query || query.length < 2) return []
 
   const suggestions = new Set()
-  const queryTokens = tokenizeQuery(query)
+  const lowerQuery = query.toLowerCase()
 
   categories.suggestions.forEach(suggestion => {
-    const match = enhancedFuzzyMatch(suggestion, queryTokens, 0.6)
+    const match = fuzzyMatch(suggestion, query, 0.6)
     if (match.match && suggestion.length > query.length) {
       suggestions.add(suggestion)
     }
   })
 
-  Object.keys(categories.byProduct).forEach(product => {
-    const match = enhancedFuzzyMatch(product, queryTokens, 0.7)
-    if (match.match) {
-      suggestions.add(`${product} documentation`)
-      suggestions.add(`${product} activities`)
-    }
-  })
+  // Add actions-specific suggestions
+  if (fuzzyMatch('actions', query, 0.7).match) {
+    suggestions.add('actions documentation')
+    suggestions.add('actions activities')
+  }
 
   Object.keys(categories.bySection).forEach(section => {
-    const match = enhancedFuzzyMatch(section, queryTokens, 0.7)
-    if (match.match) {
+    if (fuzzyMatch(section, query, 0.7).match) {
       suggestions.add(section)
     }
   })
@@ -1225,54 +912,27 @@ const generateSuggestions = (query, categories) => {
   return Array.from(suggestions).slice(0, 5)
 }
 
-// Version detection (same as before)
+// Version detection simplified for Actions only
 const getCurrentSectionAndVersion = () => {
   const path = window.location.pathname
   const segments = path.split('/').filter(Boolean)
 
-  let currentProduct = 'default'
-  let currentUrlVersion = null
+  let currentProduct = 'actions'
   let currentFileVersion = 'latest'
-  let isCurrentVersion = false
+  let isCurrentVersion = true
 
-  // Find the product position in the segments array
-  const productIndex = segments.findIndex(seg =>
-    ['actions', 'express', 'pro', 'insights'].includes(seg.toLowerCase()),
+  // Check if we're in actions section
+  const productIndex = segments.findIndex(
+    seg => seg.toLowerCase() === 'actions',
   )
 
   if (productIndex >= 0) {
-    currentProduct = segments[productIndex].toLowerCase()
-
-    // Check the segment immediately after the product for version patterns
-    if (segments[productIndex + 1]) {
-      const versionSegment = decodeURIComponent(segments[productIndex + 1])
-
-      // Check if this segment looks like a version (not a regular doc path)
-      const isVersionSegment =
-        versionSegment.match(/^[0-9]+\.[0-9]+$/) || // x.y format (Pro/Insights)
-        versionSegment.startsWith('On-Premise') || // Express versions
-        versionSegment === 'SaaS' || // Express SaaS
-        versionSegment.includes('Premise') // URL encoded versions
-
-      if (isVersionSegment) {
-        currentUrlVersion = versionSegment
-        // Convert URL version to file version
-        currentFileVersion =
-          VERSION_URL_TO_FILE[versionSegment] ||
-          VERSION_URL_TO_FILE[versionSegment.replace(/%20/g, ' ')] ||
-          CURRENT_VERSIONS[currentProduct]
-        isCurrentVersion =
-          currentFileVersion === CURRENT_VERSIONS[currentProduct]
-      } else {
-        // Next segment is not a version = current version
-        currentFileVersion = CURRENT_VERSIONS[currentProduct]
-        isCurrentVersion = true
-      }
-    } else {
-      // No segment after product = current version
-      currentFileVersion = CURRENT_VERSIONS[currentProduct]
-      isCurrentVersion = true
-    }
+    currentProduct = 'actions'
+    currentFileVersion = 'latest'
+    isCurrentVersion = true
+  } else {
+    // Not in actions section, use default
+    currentProduct = 'default'
   }
 
   console.log('🔍 VERSION DETECTION:')
@@ -1283,7 +943,7 @@ const getCurrentSectionAndVersion = () => {
 
   return {
     currentProduct,
-    currentUrlVersion,
+    currentUrlVersion: null,
     currentFileVersion,
     isCurrentVersion,
   }
@@ -1296,7 +956,7 @@ const CustomSearch = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [currentProduct, setCurrentProduct] = useState('default')
+  const [currentProduct, setCurrentProduct] = useState('actions')
   const [currentFileVersion, setCurrentFileVersion] = useState('latest')
   const [isCurrentVersion, setIsCurrentVersion] = useState(true)
   const [filters, setFilters] = useState({
@@ -1311,10 +971,14 @@ const CustomSearch = () => {
   const history = useHistory()
   const location = useLocation()
 
-  // No more async loading needed!
+  // Actions mappings are always loaded!
   useEffect(() => {
-    console.log('✅ All mappings loaded via direct imports')
+    console.log('✅ Actions mappings loaded via direct imports')
     console.log('📊 Available mappings:', Object.keys(ALL_MAPPINGS))
+    console.log('📊 Actions latest sample:', {
+      keys: Object.keys(actionsLatest || {}),
+      sampleEntries: Object.entries(actionsLatest || {}).slice(0, 3),
+    })
   }, [])
 
   // Detect current product and version context from URL
@@ -1347,8 +1011,17 @@ const CustomSearch = () => {
     }
   }, [location.pathname])
 
-  // ENHANCED search function with phrase matching!
-  const performEnhancedSearchWithPhrases = useCallback(
+  // Re-run search when context changes (if there's an active query)
+  useEffect(() => {
+    if (query.trim() && isOpen) {
+      console.log('🔍 Context changed, re-running search for:', query)
+      setIsLoading(true)
+      performEnhancedSearch(query)
+    }
+  }, [currentProduct, currentFileVersion])
+
+  // Simplified search function - Actions only!
+  const performEnhancedSearch = useCallback(
     (searchQuery, context = {}) => {
       if (!searchQuery.trim()) {
         setResults([])
@@ -1357,185 +1030,135 @@ const CustomSearch = () => {
         return
       }
 
-      // Get mappings - no async needed!
-      let searchMappings
-      let cacheKey
+      try {
+        // Get Actions mappings - no async needed!
+        let searchMappings
+        let cacheKey
 
-      if (currentProduct === 'default') {
-        cacheKey = 'homepage-current'
-        searchMappings = getCurrentVersions()
-      } else {
-        cacheKey = `${currentProduct}-all-versions`
-        searchMappings = getAllVersionsForProduct(currentProduct)
-      }
+        if (currentProduct === 'default' || currentProduct === 'actions') {
+          cacheKey = 'actions-current'
+          searchMappings = getCurrentVersions()
+        } else {
+          // Fallback to actions
+          cacheKey = 'actions-current'
+          searchMappings = getCurrentVersions()
+        }
 
-      if (!searchMappings || Object.keys(searchMappings).length === 0) {
-        console.warn(`No mappings available for ${currentProduct}`)
+        console.log('🔍 Search mappings structure:', {
+          mappings: searchMappings,
+          keys: Object.keys(searchMappings || {}),
+          sampleEntry: Object.entries(searchMappings || {})[0],
+        })
+
+        if (!searchMappings || Object.keys(searchMappings).length === 0) {
+          console.warn(`No Actions mappings available`)
+          setResults([])
+          setSuggestions([])
+          setIsLoading(false)
+          return
+        }
+
+        // Process search data
+        const processedData = processSearchData(searchMappings, cacheKey)
+        const searchCategories = searchCategoriesCache[cacheKey]
+
+        // Build search context
+        const searchContext = {
+          currentProduct: 'actions',
+          currentFileVersion: 'latest',
+          isCurrentVersion: true,
+          contentTypeFilter: filters.contentType,
+          ...context,
+        }
+
+        console.log('🔍 SEARCH CONTEXT:', searchContext)
+
+        // Generate suggestions
+        if (searchCategories) {
+          const newSuggestions = generateSuggestions(
+            searchQuery,
+            searchCategories,
+          )
+          setSuggestions(newSuggestions)
+        }
+
+        // Get entries to search
+        const entries = Object.keys(processedData)
+
+        console.log(`🔍 Found ${entries.length} entries for search`)
+
+        // Calculate relevance scores
+        const allResults = entries
+          .map(uniqueKey => {
+            try {
+              const data = processedData[uniqueKey]
+              const score = calculateRelevanceScore(
+                uniqueKey,
+                processedData,
+                searchQuery,
+                searchContext,
+              )
+
+              if (score === 0) return null
+
+              // Extract original title
+              const title = data.title || uniqueKey.split('|||')[0]
+
+              return {
+                title,
+                product: data.product || 'actions',
+                version: data.version || 'latest',
+                url: data.url || '#',
+                breadcrumbs: data.pathContext?.breadcrumbs || 'Actions',
+                contentType: data.contentTypeInfo
+                  ? data.contentTypeInfo.type
+                  : 'reference',
+                subtype: data.contentTypeInfo
+                  ? data.contentTypeInfo.subtype
+                  : '',
+                complexity: data.complexity || 'simple',
+                excerpt: data.excerpt || '',
+                score,
+                isExactVersion: true,
+                isCurrentVersion: true,
+                versionPriority: 1000,
+                data,
+              }
+            } catch (error) {
+              console.error('Error processing result:', uniqueKey, error)
+              return null
+            }
+          })
+          .filter(Boolean)
+
+        // Sort by content score only (since everything is Actions latest)
+        const finalResults = allResults
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 8)
+
+        console.log('🔍 SEARCH RESULTS:')
+        finalResults.forEach((result, i) => {
+          console.log(`  ${i + 1}. ${result.title}`)
+        })
+
+        setResults(finalResults)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Search error:', error)
         setResults([])
         setSuggestions([])
         setIsLoading(false)
-        return
       }
-
-      // Process search data
-      const processedData = processSearchData(searchMappings, cacheKey)
-      const searchCategories = searchCategoriesCache[cacheKey]
-
-      // Build search context
-      const searchContext = {
-        currentProduct,
-        currentFileVersion,
-        isCurrentVersion:
-          currentFileVersion === CURRENT_VERSIONS[currentProduct],
-        contentTypeFilter: filters.contentType,
-        ...context,
-      }
-
-      console.log('🔍 ENHANCED SEARCH CONTEXT:', searchContext)
-
-      // Generate suggestions (enhanced with phrase support)
-      if (searchCategories) {
-        const newSuggestions = generateSuggestions(
-          searchQuery,
-          searchCategories,
-        )
-        setSuggestions(newSuggestions)
-      }
-
-      // Get entries to search
-      const entries = Object.keys(processedData).filter(uniqueKey => {
-        const data = processedData[uniqueKey]
-        // Homepage: current versions, Product pages: all versions of current product
-        if (currentProduct === 'default') return true
-        return data.product === currentProduct
-      })
-
-      console.log(
-        `🔍 Found ${entries.length} entries for enhanced phrase search`,
-      )
-
-      // Calculate relevance scores using ENHANCED phrase matching
-      const allResults = entries
-        .map(uniqueKey => {
-          const data = processedData[uniqueKey]
-          const score = enhancedCalculateRelevanceScore(
-            uniqueKey,
-            processedData,
-            searchQuery,
-            searchContext,
-          )
-
-          if (score === 0) return null
-
-          // Extract original title
-          const title = data.title || uniqueKey.split('|||')[0]
-
-          // Calculate version priority info
-          const isExactVersion =
-            data.version === searchContext.currentFileVersion
-          const isCurrentVersionResult =
-            data.version === CURRENT_VERSIONS[searchContext.currentProduct]
-          const versionPriority = getVersionPriority(
-            { version: data.version },
-            searchContext,
-          )
-
-          return {
-            title,
-            product: data.product,
-            version: data.version,
-            url: data.url,
-            breadcrumbs: data.pathContext.breadcrumbs,
-            contentType: data.contentTypeInfo
-              ? data.contentTypeInfo.type
-              : 'reference',
-            subtype: data.contentTypeInfo ? data.contentTypeInfo.subtype : '',
-            complexity: data.complexity || 'simple',
-            excerpt: data.excerpt || '',
-            score,
-            isExactVersion,
-            isCurrentVersion: isCurrentVersionResult,
-            versionPriority,
-            data,
-          }
-        })
-        .filter(Boolean)
-
-      let finalResults
-
-      if (currentProduct === 'default') {
-        // HOMEPAGE: Enhanced scoring first, then Actions first
-        finalResults = allResults
-          .sort((a, b) => {
-            // First, prioritize by relevance score (phrase matches will score MUCH higher)
-            if (Math.abs(a.score - b.score) > 15) {
-              return b.score - a.score
-            }
-            // Then Actions first on homepage
-            if (a.product === 'actions' && b.product !== 'actions') return -1
-            if (b.product === 'actions' && a.product !== 'actions') return 1
-            // Finally by score
-            return b.score - a.score
-          })
-          .slice(0, 8)
-      } else {
-        // PRODUCT PAGE: Enhanced scoring first, then version priority
-        finalResults = allResults
-          .sort((a, b) => {
-            // If one result has significantly higher relevance score, prioritize it
-            const scoreDiff = b.score - a.score
-            if (Math.abs(scoreDiff) > 30) {
-              // Increased threshold for phrase matches
-              return scoreDiff
-            }
-
-            // Otherwise use version priority
-            const aVersionPriority = getVersionPriority(a, searchContext)
-            const bVersionPriority = getVersionPriority(b, searchContext)
-
-            if (aVersionPriority !== bVersionPriority) {
-              return bVersionPriority - aVersionPriority
-            }
-
-            // Finally by relevance score
-            return b.score - a.score
-          })
-          .slice(0, 8)
-      }
-
-      console.log('🔍 ENHANCED PHRASE SEARCH RESULTS:')
-      finalResults.forEach((result, i) => {
-        console.log(
-          `  ${i + 1}. ${result.title} (v${
-            result.version
-          }) - Score: ${result.score.toFixed(2)}`,
-        )
-      })
-
-      setResults(finalResults)
-      setIsLoading(false)
     },
     [currentProduct, currentFileVersion, filters.contentType],
   )
 
-  // Re-run search when context changes (if there's an active query)
-  useEffect(() => {
-    if (query.trim() && isOpen) {
-      console.log(
-        '🔍 Context changed, re-running enhanced phrase search for:',
-        query,
-      )
-      setIsLoading(true)
-      performEnhancedSearchWithPhrases(query)
-    }
-  }, [currentProduct, currentFileVersion, performEnhancedSearchWithPhrases])
-
-  // Debounced search function with enhanced phrase matching
+  // Debounced search function
   const debouncedSearch = useCallback(
     debounce(searchQuery => {
-      performEnhancedSearchWithPhrases(searchQuery)
+      performEnhancedSearch(searchQuery)
     }, 300),
-    [performEnhancedSearchWithPhrases],
+    [performEnhancedSearch],
   )
 
   // Handle search input changes
@@ -1607,19 +1230,13 @@ const CustomSearch = () => {
   // Handle suggestion click
   const handleSuggestionClick = suggestion => {
     setQuery(suggestion)
-    performEnhancedSearchWithPhrases(suggestion)
+    performEnhancedSearch(suggestion)
     setSelectedIndex(-1)
   }
 
-  // Get product-specific focus color using brand colors
+  // Get Actions primary blue color
   const getProductFocusColor = () => {
-    const colors = {
-      express: 'var(--brand-purple)', // #8F4AFF
-      actions: 'var(--brand-blue)', // #0050C7
-      pro: 'var(--brand-green)', // #00B070
-      insights: 'var(--brand-aqua)', // #00D4FF
-    }
-    return colors[currentProduct] || 'var(--brand-blue)'
+    return 'var(--brand-blue)' // #0050C7 - Actions primary blue
   }
 
   // Close dropdown when clicking outside
@@ -1638,17 +1255,13 @@ const CustomSearch = () => {
     <div
       ref={searchRef}
       className='custom-search'
-      style={{ position: 'relative', width: '280px' }}
+      style={{ position: 'relative', width: '100%', maxWidth: '450px' }}
     >
       <div className='search-input-container' style={{ position: 'relative' }}>
         <input
           ref={inputRef}
           type='text'
-          placeholder={
-            currentProduct === 'default'
-              ? 'Search all docs...'
-              : `Search ${currentProduct}...`
-          }
+          placeholder='Search Actions...'
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -1656,7 +1269,7 @@ const CustomSearch = () => {
             if (query) setIsOpen(true)
             const focusColor = getProductFocusColor()
             e.target.style.borderColor = focusColor
-            e.target.style.boxShadow = `0 0 0 2px ${focusColor}33`
+            e.target.style.boxShadow = `0 0 0 2px ${focusColor}20` // 20 = 12.5% opacity
           }}
           onBlur={e => {
             setTimeout(() => {
@@ -1679,7 +1292,7 @@ const CustomSearch = () => {
             transition: 'all 0.2s ease',
             fontFamily: 'SeasonMix, var(--ifm-font-family-base)',
           }}
-          aria-label='Search documentation'
+          aria-label='Search Actions documentation'
           aria-expanded={isOpen}
           aria-autocomplete='list'
           aria-controls={isOpen ? 'search-results' : undefined}
@@ -1715,12 +1328,13 @@ const CustomSearch = () => {
             right: 0,
             zIndex: 9999,
             marginTop: '6px',
-            height: '300px',
+            maxHeight: '300px',
             overflow: 'hidden',
             borderRadius: '8px',
             backgroundColor: getBackgroundColor(),
             color: getTextColor(),
             border: `1px solid var(--brand-grey-400)`,
+            boxShadow: '0 4px 20px rgba(5, 7, 15, 0.1)', // Using brand black with opacity
           }}
         >
           {/* Loading State */}
@@ -1753,23 +1367,23 @@ const CustomSearch = () => {
               {results.length > 0 ? (
                 <List
                   sx={{
-                    height: '300px',
+                    maxHeight: '300px',
                     overflowY: 'scroll',
                     overflowX: 'hidden',
                     padding: 0,
                     '&::-webkit-scrollbar': {
-                      width: '8px',
+                      width: '6px',
                     },
                     '&::-webkit-scrollbar-track': {
-                      backgroundColor: 'var(--brand-grey-300)',
-                      borderRadius: '4px',
+                      backgroundColor: 'var(--brand-grey-200)',
+                      borderRadius: '3px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                      backgroundColor: 'var(--brand-grey-600)',
-                      borderRadius: '4px',
+                      backgroundColor: 'var(--brand-grey-500)',
+                      borderRadius: '3px',
                     },
                     '&::-webkit-scrollbar-thumb:hover': {
-                      backgroundColor: 'var(--brand-grey-500)',
+                      backgroundColor: 'var(--brand-blue)',
                     },
                   }}
                 >
@@ -1804,7 +1418,7 @@ const CustomSearch = () => {
                             },
                           }}
                         >
-                          {/* Top Row: Badges + Title */}
+                          {/* Top Row: Badge + Title */}
                           <Box
                             sx={{
                               display: 'flex',
@@ -1813,18 +1427,16 @@ const CustomSearch = () => {
                               width: '100%',
                             }}
                           >
-                            {/* Product Badge */}
+                            {/* Actions Badge */}
                             <Chip
-                              label={result.product.toUpperCase()}
+                              label='ACTIONS'
                               size='small'
                               sx={{
-                                backgroundColor: getProductColor(
-                                  result.product,
-                                ),
+                                backgroundColor: getProductColor('actions'),
                                 color: 'var(--brand-white)',
                                 fontSize: '9px',
                                 height: '20px',
-                                minWidth: '50px',
+                                minWidth: '60px',
                                 fontWeight: '600',
                                 fontFamily:
                                   'SeasonMix, var(--ifm-font-family-base)',
@@ -1834,34 +1446,7 @@ const CustomSearch = () => {
                               }}
                             />
 
-                            {/* Version Badge */}
-                            {result.version && result.version !== 'latest' && (
-                              <Chip
-                                label={formatVersionForDisplay(result.version)}
-                                size='small'
-                                variant='outlined'
-                                sx={{
-                                  backgroundColor: getVersionBadgeColor(
-                                    result.version,
-                                  ),
-                                  color: getVersionTextColor(result.version),
-                                  fontSize: '8px',
-                                  height: '18px',
-                                  maxWidth: '55px',
-                                  borderColor: getVersionBadgeColor(
-                                    result.version,
-                                  ),
-                                  fontFamily:
-                                    'SeasonMix, var(--ifm-font-family-base)',
-                                  '& .MuiChip-label': {
-                                    paddingX: '4px',
-                                  },
-                                }}
-                                title={result.version}
-                              />
-                            )}
-
-                            {/* Title with enhanced highlighting */}
+                            {/* Title */}
                             <Typography
                               variant='body2'
                               sx={{
@@ -1900,11 +1485,30 @@ const CustomSearch = () => {
                       </ListItem>
                       {index < results.length - 1 && (
                         <Divider
-                          sx={{ borderColor: 'var(--brand-grey-400)' }}
+                          sx={{ borderColor: 'var(--brand-grey-300)' }}
                         />
                       )}
                     </React.Fragment>
                   ))}
+
+                  {/* Footer */}
+                  <Divider sx={{ borderColor: 'var(--brand-grey-300)' }} />
+                  <ListItem>
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        textAlign: 'center',
+                        width: '100%',
+                        fontSize: '10px',
+                        padding: '4px 0',
+                        color: 'var(--brand-grey-600)',
+                        fontFamily: 'SeasonMix, var(--ifm-font-family-base)',
+                      }}
+                    >
+                      {results.length} result{results.length !== 1 ? 's' : ''} •
+                      Use ↑↓ arrows
+                    </Typography>
+                  </ListItem>
                 </List>
               ) : (
                 /* No Results */
@@ -1940,9 +1544,7 @@ const CustomSearch = () => {
                       fontFamily: 'SeasonMix, var(--ifm-font-family-base)',
                     }}
                   >
-                    {currentProduct !== 'default'
-                      ? `Try different terms or search all products`
-                      : 'Try different search terms'}
+                    Try different search terms
                   </Typography>
                 </Box>
               )}

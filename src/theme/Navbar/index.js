@@ -1,25 +1,21 @@
 import React from 'react'
-import NavbarLayout from '@theme/Navbar/Layout'
-import NavbarContent from '@theme/Navbar/Content'
+import OriginalNavbar from '@theme-original/Navbar'
+import HomepageNavbar from '../Navbar/Layout/HomepageNavbar'
+import ActionsNavbar from '../Navbar/Layout/ActionsNavbar'
+import ProductsNavbar from '../Navbar/Layout/ProductNavbar'
 import { useLocation } from '@docusaurus/router'
 
-export default function Navbar() {
+export default function Navbar(props) {
   const location = useLocation()
   const pathname = location.pathname
 
-  // Hide navbar on module pages and forms library
-  if (
-    pathname.startsWith('/learning/automation-essentials/modules/') ||
-    pathname.startsWith('/learning/service-blueprinting/modules/') ||
-    pathname.startsWith('/learning/service-blueprinting/forms/forms-library/')
-  ) {
-    return null
+  // Check for specific paths
+  if (pathname === '/') {
+    return <HomepageNavbar {...props} />
+  } else if (pathname.startsWith('/actions')) {
+    return <ActionsNavbar {...props} />
   }
 
-  // For all other pages, render the normal navbar
-  return (
-    <NavbarLayout>
-      <NavbarContent />
-    </NavbarLayout>
-  )
+  // Default navbar for all other pages
+  return <ProductsNavbar {...props} />
 }
