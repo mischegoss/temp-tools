@@ -8,8 +8,8 @@ import { docsProductsData } from './data/docsproductsdata.js'
 
 const DocsProducts = ({ data = docsProductsData }) => {
   const {
-    title = 'Product Documentation',
-    subtitle = 'Choose your Resolve platform to access comprehensive guides and references',
+    title = 'Or Explore our Trainings By Product',
+    subtitle = 'Choose your Resolve platform to access product-specific training.',
     products = [],
   } = data
 
@@ -42,10 +42,7 @@ const DocsProducts = ({ data = docsProductsData }) => {
   return (
     <section
       id='documentation'
-      style={{
-        ...docsProductsStyles.sectionStyle,
-        backgroundColor: 'var(--brand-neutral-200)',
-      }}
+      style={docsProductsStyles.sectionStyle}
       className='brand-font'
     >
       <div style={docsProductsStyles.containerStyle}>

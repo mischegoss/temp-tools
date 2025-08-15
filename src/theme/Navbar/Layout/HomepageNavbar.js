@@ -1,6 +1,7 @@
-// HomepageNavbar.js - Exact same except removed NavigationDropdowns
+// HomepageNavbar.js - Fixed with working hamburger
 import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
+import NavigationDropdowns from './NavigationDropdowns'
 import MobileSidebar from './MobileSidebar' // Your custom component
 import styles from './styles.module.css'
 
@@ -26,7 +27,7 @@ export default function HomepageNavbar(props) {
         </div>
 
         <div className='navbar__items'>
-          {/* Config-based dropdowns will appear here automatically */}
+          <NavigationDropdowns />
         </div>
 
         {/* Mobile menu toggle - NOW WITH CLICK HANDLER */}

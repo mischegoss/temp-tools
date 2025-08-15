@@ -1,7 +1,6 @@
 import React from 'react'
 import Link from '@docusaurus/Link'
 import { Grid, Box } from '@mui/material'
-import Button from './button'
 import {
   docsSectionStyle,
   containerStyle,
@@ -13,6 +12,8 @@ import {
   iconStyle,
   cardTitleStyle,
   cardDescriptionStyle,
+  learnMoreLinkStyle,
+  arrowStyle,
   gradientBorderCSS,
 } from '../library/styles/docsnavstyles.js'
 
@@ -20,20 +21,12 @@ const DocumentationNavigation = ({ data }) => {
   // Dynamic styles that respond to ProductProvider changes
   const navCardStyle = {
     ...baseNavCardStyle,
-    borderLeft: '4px solid var(--product-accent-color)',
+    borderLeft: '4px solid var(--product-accent-color)', // This will respond to ProductProvider
   }
 
   const dynamicIconStyle = {
     ...iconStyle,
-    color: 'var(--product-accent-color)',
-  }
-
-  // Enhanced card styling to ensure proper button positioning
-  const enhancedCardStyle = {
-    ...navCardStyle,
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
+    color: 'var(--product-accent-color)', // This will respond to ProductProvider
   }
 
   return (
@@ -43,19 +36,8 @@ const DocumentationNavigation = ({ data }) => {
         <div style={containerStyle}>
           <div style={headerStyle}>
             <h2 style={sectionTitleStyle}>{data.sectionTitle}</h2>
-            <Link
-              to={data.exploreButton.to}
-              style={exploreButtonStyle}
-              onMouseEnter={e => {
-                e.target.style.backgroundColor = 'var(--brand-blue-400)'
-                e.target.style.transform = 'translateY(-1px)'
-              }}
-              onMouseLeave={e => {
-                e.target.style.backgroundColor = 'var(--brand-blue)'
-                e.target.style.transform = 'translateY(0)'
-              }}
-            >
-              {data.exploreButton.text}
+            <Link to={data.exploreLink} style={exploreButtonStyle}>
+              {data.exploreText}
             </Link>
           </div>
 
@@ -70,7 +52,7 @@ const DocumentationNavigation = ({ data }) => {
                   lg: 6, // 2 columns on desktop
                 }}
               >
-                <Box style={enhancedCardStyle}>
+                <Box style={navCardStyle}>
                   <div style={iconContainerStyle}>
                     <svg
                       style={dynamicIconStyle}
@@ -89,16 +71,9 @@ const DocumentationNavigation = ({ data }) => {
                   </div>
                   <h3 style={cardTitleStyle}>{item.title}</h3>
                   <p style={cardDescriptionStyle}>{item.description}</p>
-
-                  {/* Use the existing Button component */}
-                  <Button
-                    to={item.link}
-                    variant='primary'
-                    size='medium'
-                    style={{ marginTop: 'auto' }}
-                  >
-                    Learn More →
-                  </Button>
+                  <Link to={item.link} style={learnMoreLinkStyle}>
+                    Learn More <span style={arrowStyle}>›</span>
+                  </Link>
                 </Box>
               </Grid>
             ))}
