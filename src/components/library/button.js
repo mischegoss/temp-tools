@@ -29,7 +29,7 @@ const Button = ({
 
   const variantStyles = {
     primary: {
-      background: 'var(--brand-aqua)',
+      background: '#008a9e', // CHANGED: Darker teal to match homepage gradient
       color: 'var(--color-text-white)',
     },
     secondary: {

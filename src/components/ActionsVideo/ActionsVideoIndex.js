@@ -1,4 +1,4 @@
-// @site/src/components/Actions/ActionsVideoIndex.js
+// @site/src/components/ActionsVideo/ActionsVideoIndex.js
 
 import React, { useState, useMemo } from 'react'
 import Link from '@docusaurus/Link'
@@ -45,7 +45,7 @@ const ActionsVideoIndex = ({
   filterSectionProps = {
     title: 'Browse Video Library',
     pathDescription:
-      'Filter videos by skill level or topic to find exactly what you need to learn.',
+      'Filter videos by category or topic to find exactly what you need to learn.',
   },
   // Help section props
   helpSectionProps = {
@@ -61,25 +61,29 @@ const ActionsVideoIndex = ({
   const [activeFilter, setActiveFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
 
-  // Calculate how many videos match each level
+  // Calculate how many videos match each category
   const totalByLevel = useMemo(() => {
     const counts = {
-      beginner: 0,
-      intermediate: 0,
-      advanced: 0,
+      integrations: 0,
+      workflows: 0,
+      'automation-design': 0,
+      rita: 0,
+      jarvis: 0,
     }
 
     resources.forEach(video => {
       const level = video.level?.toLowerCase()
-      if (level === 'beginner') counts.beginner++
-      if (level === 'intermediate') counts.intermediate++
-      if (level === 'advanced') counts.advanced++
+      if (level === 'integrations') counts.integrations++
+      if (level === 'workflows') counts.workflows++
+      if (level === 'automation-design') counts['automation-design']++
+      if (level === 'rita') counts.rita++
+      if (level === 'jarvis') counts.jarvis++
     })
 
     return counts
   }, [resources])
 
-  // Filter videos based on selected level
+  // Filter videos based on selected category
   const filteredVideos = useMemo(() => {
     if (activeFilter === 'all') return resources
 

@@ -1,4 +1,3 @@
-// Complete Bug-Fixed LoginComponent with all authentication issues resolved
 // src/components/service-blueprinting/login/LoginComponent.jsx
 
 import React, { useState, useEffect } from 'react'
@@ -293,8 +292,55 @@ export default function LoginComponent() {
     setResetEmail(isLogin ? email : '')
   }
 
-  // PREVENT RENDERING LOGIN FORM IF USER IS ALREADY AUTHENTICATED
+  // FIXED: HANDLE REDIRECT IMMEDIATELY WHEN USER IS AUTHENTICATED
+  // This fixes the direct navigation issue by executing redirect logic immediately
   if (user && !redirectAttempted) {
+    console.log(
+      '[LoginComponent] User authenticated, executing immediate redirect',
+    )
+
+    // Execute redirect logic immediately (moved from useEffect)
+    setTimeout(() => {
+      try {
+        setRedirectAttempted(true)
+
+        // Try the protected key first, then fall back to regular key
+        let redirectUrl =
+          getSessionItem('protectedPageRedirect', '') ||
+          getSessionItem('redirectUrl', '')
+        console.log(
+          '[LoginComponent] Raw redirectUrl from session:',
+          redirectUrl,
+        )
+
+        // Only default to discover if there's NO saved redirect URL at all
+        // OR if the saved URL is the login page itself (invalid redirect)
+        if (!redirectUrl || redirectUrl === '/learning/login') {
+          console.log(
+            '[LoginComponent] No valid redirectUrl found, using default',
+          )
+          redirectUrl = '/learning/discover/'
+        } else {
+          console.log('[LoginComponent] Using saved redirectUrl:', redirectUrl)
+        }
+
+        console.log('[LoginComponent] Final redirectUrl:', redirectUrl)
+
+        // Clear both redirect URLs
+        removeSessionItem('protectedPageRedirect')
+        removeSessionItem('redirectUrl')
+
+        // Immediate redirect for already-logged-in users
+        console.log('[LoginComponent] Executing redirect to:', redirectUrl)
+        history.push(redirectUrl)
+      } catch (error) {
+        console.error('[LoginComponent] Error during redirect:', error)
+        setLoading(false)
+        history.push('/learning/discover/')
+      }
+    }, 100) // Small delay to ensure state updates
+
+    // Show welcome message while redirect executes
     return (
       <div
         style={{
@@ -326,39 +372,42 @@ export default function LoginComponent() {
           Welcome back, {user.email}!
           <div
             style={{
-              marginTop: '0.5rem',
+              marginTop: '1rem',
               fontSize: '1rem',
               color: 'var(--brand-grey-600)',
             }}
           >
-            Redirecting you to the learning hub...
+            Redirecting you now...
           </div>
         </div>
       </div>
     )
   }
 
-  // Styles
-  const cardStyle = {
+  // Style definitions
+  const containerStyle = {
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    border: '2px solid var(--brand-blue-400)',
-    borderRadius: '12px',
-    background: 'white',
-    maxWidth: '450px',
-    width: '100%',
-    position: 'relative',
-    overflow: 'hidden',
-    boxShadow: '0 20px 40px rgba(0, 102, 255, 0.15)',
+    minHeight: '100vh',
+    background: 'var(--brand-secondary-white)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem',
   }
 
-  const gradientStyle = {
-    height: '6px',
-    background:
-      'linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-blue-400) 100%)',
+  const cardStyle = {
+    background: 'var(--brand-white)',
+    borderRadius: '16px',
+    border: '2px solid var(--brand-blue-400)',
+    boxShadow: '0 0 30px rgba(0, 102, 255, 0.15)',
+    padding: '0',
+    width: '100%',
+    maxWidth: '500px',
+    overflow: 'hidden',
   }
 
   const contentStyle = {
-    padding: '2.5rem 2rem 2rem',
+    padding: '3rem',
   }
 
   const headerStyle = {
@@ -367,134 +416,117 @@ export default function LoginComponent() {
   }
 
   const titleStyle = {
-    fontSize: '2rem',
-    fontWeight: '700',
     color: 'var(--brand-black-700)',
-    margin: '0 0 0.75rem 0',
-    lineHeight: '1.2',
+    margin: '0 0 1rem 0',
+    fontSize: '2.5rem',
+    fontWeight: '600',
   }
 
   const subtitleStyle = {
-    fontSize: '1rem',
     color: 'var(--brand-grey-600)',
-    lineHeight: '1.5',
     margin: '0',
+    fontSize: '1.2rem',
+    lineHeight: '1.6',
   }
 
   const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.25rem',
+    marginBottom: '2rem',
   }
 
   const inputGroupStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
+    marginBottom: '1.5rem',
   }
 
   const labelStyle = {
-    fontSize: '0.95rem',
-    fontWeight: '600',
+    display: 'block',
     color: 'var(--brand-black-700)',
+    marginBottom: '0.5rem',
+    fontSize: '1rem',
+    fontWeight: '500',
   }
 
   const inputStyle = {
-    padding: '0.875rem 1rem',
-    fontSize: '1rem',
-    border: '2px solid var(--brand-grey-200)',
+    width: '100%',
+    padding: '1rem',
+    border: '2px solid var(--brand-grey-300)',
     borderRadius: '8px',
+    fontSize: '1rem',
     fontFamily: 'inherit',
-    transition: 'border-color 0.2s ease',
-    outline: 'none',
+    transition: 'all 0.3s ease',
+    boxSizing: 'border-box',
   }
 
   const buttonStyle = {
-    backgroundColor: loading ? 'var(--brand-grey-400)' : 'var(--brand-blue)',
-    color: 'white',
-    padding: '1rem 1.5rem',
-    fontSize: '1.1rem',
-    fontWeight: '600',
+    width: '100%',
+    padding: '1rem',
+    backgroundColor: 'var(--brand-blue)',
+    color: 'var(--brand-white)',
     border: 'none',
     borderRadius: '8px',
-    cursor: loading ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
+    fontSize: '1.1rem',
     fontFamily: 'inherit',
-    opacity: loading ? 0.7 : 1,
-    boxShadow: loading
-      ? 'none'
-      : '0 4px 12px rgba(0, 102, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1)',
-  }
-
-  const errorStyle = {
-    color: 'var(--brand-red, #dc2626)',
-    fontSize: '0.95rem',
-    textAlign: 'center',
-    margin: '1rem 0 0 0',
-    padding: '0.75rem',
-    backgroundColor: 'rgba(220, 38, 38, 0.1)',
-    border: '1px solid rgba(220, 38, 38, 0.2)',
-    borderRadius: '6px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    marginTop: '1rem',
   }
 
   const toggleStyle = {
     textAlign: 'center',
     marginTop: '1.5rem',
-    fontSize: '0.95rem',
     color: 'var(--brand-grey-600)',
+    fontSize: '1rem',
   }
 
   const toggleLinkStyle = {
     color: 'var(--brand-blue)',
-    textDecoration: 'none',
-    fontWeight: '600',
     cursor: 'pointer',
+    textDecoration: 'none',
+    fontWeight: '500',
+  }
+
+  const errorStyle = {
+    backgroundColor: '#fee',
+    border: '1px solid #fcc',
+    borderRadius: '8px',
+    padding: '1rem',
+    color: '#c33',
+    fontSize: '0.95rem',
+    marginTop: '1rem',
+    textAlign: 'center',
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'var(--brand-secondary-white)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-      }}
-    >
+    <div style={containerStyle}>
       <div style={cardStyle}>
-        <div style={gradientStyle}></div>
-
         {resetEmailSent ? (
-          // Success message after reset email sent
-          <div style={{ ...contentStyle, textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
-            <h2 style={{ ...titleStyle, marginBottom: '1rem' }}>
-              Check Your Email
-            </h2>
-            <p style={{ ...subtitleStyle, marginBottom: '1rem' }}>
-              We've sent a password reset link to <strong>{resetEmail}</strong>
-            </p>
+          // Success message after password reset email sent
+          <div style={contentStyle}>
+            <div style={headerStyle}>
+              <div
+                style={{
+                  fontSize: '3rem',
+                  marginBottom: '1rem',
+                }}
+              >
+                ✅
+              </div>
+              <h1 style={titleStyle}>Check Your Email</h1>
+              <p style={subtitleStyle}>
+                We've sent a password reset link to {resetEmail}.
+              </p>
+            </div>
             <p
               style={{
-                ...subtitleStyle,
-                marginBottom: '1rem',
-                fontSize: '0.9rem',
-              }}
-            >
-              Click the link in the email to reset your password. The link will
-              expire in 1 hour.
-            </p>
-            <p
-              style={{
-                ...subtitleStyle,
-                marginBottom: '2rem',
-                fontSize: '0.85rem',
-                fontStyle: 'italic',
+                textAlign: 'center',
                 color: 'var(--brand-grey-600)',
+                fontSize: '1rem',
+                marginBottom: '2rem',
               }}
             >
-              💡 Don't see the email? Check your spam/junk folder.
+              The email may take a few minutes to arrive.
+              <br />
+              Check your spam/junk folder.
             </p>
             <button
               type='button'

@@ -1,4 +1,4 @@
-// @site/src/components/ActionVideoLibrary/VideoFilterSection.js
+// @site/src/components/ActionVideoLibrary/FilterSection.js
 
 import React from 'react'
 import {
@@ -74,31 +74,50 @@ const VideoFilterSection = ({
         All Videos ({totalCount})
       </button>
       <button
-        style={getFilterButtonStyle('beginner', activeFilter === 'beginner')}
-        onClick={() => setActiveFilter('beginner')}
-        onMouseEnter={e => handleMouseEnter(e, 'beginner')}
-        onMouseLeave={e => handleMouseLeave(e, 'beginner')}
+        style={getFilterButtonStyle(
+          'integrations',
+          activeFilter === 'integrations',
+        )}
+        onClick={() => setActiveFilter('integrations')}
+        onMouseEnter={e => handleMouseEnter(e, 'integrations')}
+        onMouseLeave={e => handleMouseLeave(e, 'integrations')}
       >
-        Beginner ({totalByLevel.beginner})
+        Integrations ({totalByLevel.integrations})
+      </button>
+      <button
+        style={getFilterButtonStyle('workflows', activeFilter === 'workflows')}
+        onClick={() => setActiveFilter('workflows')}
+        onMouseEnter={e => handleMouseEnter(e, 'workflows')}
+        onMouseLeave={e => handleMouseLeave(e, 'workflows')}
+      >
+        Workflows ({totalByLevel.workflows})
       </button>
       <button
         style={getFilterButtonStyle(
-          'intermediate',
-          activeFilter === 'intermediate',
+          'automation-design',
+          activeFilter === 'automation-design',
         )}
-        onClick={() => setActiveFilter('intermediate')}
-        onMouseEnter={e => handleMouseEnter(e, 'intermediate')}
-        onMouseLeave={e => handleMouseLeave(e, 'intermediate')}
+        onClick={() => setActiveFilter('automation-design')}
+        onMouseEnter={e => handleMouseEnter(e, 'automation-design')}
+        onMouseLeave={e => handleMouseLeave(e, 'automation-design')}
       >
-        Intermediate ({totalByLevel.intermediate})
+        Automation Design ({totalByLevel['automation-design']})
       </button>
       <button
-        style={getFilterButtonStyle('advanced', activeFilter === 'advanced')}
-        onClick={() => setActiveFilter('advanced')}
-        onMouseEnter={e => handleMouseEnter(e, 'advanced')}
-        onMouseLeave={e => handleMouseLeave(e, 'advanced')}
+        style={getFilterButtonStyle('rita', activeFilter === 'rita')}
+        onClick={() => setActiveFilter('rita')}
+        onMouseEnter={e => handleMouseEnter(e, 'rita')}
+        onMouseLeave={e => handleMouseLeave(e, 'rita')}
       >
-        Advanced ({totalByLevel.advanced})
+        RITA ({totalByLevel.rita})
+      </button>
+      <button
+        style={getFilterButtonStyle('jarvis', activeFilter === 'jarvis')}
+        onClick={() => setActiveFilter('jarvis')}
+        onMouseEnter={e => handleMouseEnter(e, 'jarvis')}
+        onMouseLeave={e => handleMouseLeave(e, 'jarvis')}
+      >
+        Jarvis ({totalByLevel.jarvis})
       </button>
     </div>
   )

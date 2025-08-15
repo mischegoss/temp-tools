@@ -1,4 +1,7 @@
-// Icon components - Updated with consistent style and brand aqua color
+// @site/src/components/Homepage/data/homepagedata.js
+
+import React from 'react'
+
 const DocumentationIcon = () => (
   <svg
     width='48'
@@ -8,7 +11,7 @@ const DocumentationIcon = () => (
     xmlns='http://www.w3.org/2000/svg'
   >
     <path
-      d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z'
+      d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'
       fill='#00b8de'
       stroke='#00b8de'
       strokeWidth='2'
@@ -17,8 +20,8 @@ const DocumentationIcon = () => (
     />
     <polyline
       points='14,2 14,8 20,8'
-      fill='white'
-      stroke='#00b8de'
+      fill='none'
+      stroke='#ffffff'
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
@@ -28,7 +31,7 @@ const DocumentationIcon = () => (
       y1='13'
       x2='8'
       y2='13'
-      stroke='white'
+      stroke='#ffffff'
       strokeWidth='2'
       strokeLinecap='round'
     />
@@ -37,13 +40,14 @@ const DocumentationIcon = () => (
       y1='17'
       x2='8'
       y2='17'
-      stroke='white'
+      stroke='#ffffff'
       strokeWidth='2'
       strokeLinecap='round'
     />
     <polyline
       points='10,9 9,9 8,9'
-      stroke='white'
+      fill='none'
+      stroke='#ffffff'
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
@@ -60,25 +64,17 @@ const LearningIcon = () => (
     xmlns='http://www.w3.org/2000/svg'
   >
     <path
-      d='M12 2l10 6-10 6L2 8l10-6z'
+      d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'
       fill='#00b8de'
       stroke='#00b8de'
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
     />
-    <path
-      d='M2 17l10 5 10-5'
+    <polyline
+      points='9,22 9,12 15,12 15,22'
       fill='none'
-      stroke='#00b8de'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    />
-    <path
-      d='M6 12v7c0 1 2 2 6 2s6-1 6-2v-7'
-      fill='none'
-      stroke='#00b8de'
+      stroke='#ffffff'
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
@@ -94,19 +90,14 @@ const AutomationIcon = () => (
     fill='none'
     xmlns='http://www.w3.org/2000/svg'
   >
-    <circle
-      cx='12'
-      cy='12'
-      r='3'
-      fill='#00b8de'
-      stroke='#00b8de'
-      strokeWidth='2'
-    />
+    <circle cx='12' cy='12' r='3' fill='#00b8de' stroke='#00b8de' />
     <path
-      d='M12 1v6m0 10v6m11-7h-6m-10 0H1'
+      d='m12 1 3 6 6-3-3 6 6 3-6 3 3 6-6-3-3 6-3-6-6 3 3-6-6-3 6-3-3-6 6 3z'
+      fill='none'
       stroke='#00b8de'
       strokeWidth='2'
       strokeLinecap='round'
+      strokeLinejoin='round'
     />
     <path
       d='M20.49 20.49L16.24 16.24m-8.48 0L3.51 20.49M20.49 3.51L16.24 7.76m-8.48 0L3.51 3.51'
@@ -117,7 +108,7 @@ const AutomationIcon = () => (
   </svg>
 )
 
-const DeviceIcon = () => (
+const LearningHubIcon = () => (
   <svg
     width='48'
     height='48'
@@ -125,38 +116,29 @@ const DeviceIcon = () => (
     fill='none'
     xmlns='http://www.w3.org/2000/svg'
   >
-    <rect
-      x='2'
-      y='4'
-      width='20'
-      height='16'
-      rx='2'
+    <path
+      d='M12 2L2 7l10 5 10-5-10-5z'
       fill='#00b8de'
       stroke='#00b8de'
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
     />
-    <circle cx='7' cy='10' r='1' fill='white' />
-    <circle cx='12' cy='10' r='1' fill='white' />
-    <circle cx='17' cy='10' r='1' fill='white' />
-    <line
-      x1='6'
-      y1='14'
-      x2='18'
-      y2='14'
-      stroke='white'
+    <path
+      d='m2 17 10 5 10-5'
+      fill='none'
+      stroke='#00b8de'
       strokeWidth='2'
       strokeLinecap='round'
+      strokeLinejoin='round'
     />
-    <line
-      x1='9'
-      y1='17'
-      x2='15'
-      y2='17'
-      stroke='white'
+    <path
+      d='m2 12 10 5 10-5'
+      fill='none'
+      stroke='#00b8de'
       strokeWidth='2'
       strokeLinecap='round'
+      strokeLinejoin='round'
     />
   </svg>
 )
@@ -181,9 +163,9 @@ export const homePageData = [
     link: '/learning/actions/',
   },
   {
-    title: 'Device Discovery and Management',
-    description: 'Discover and manage devices',
-    icon: <DeviceIcon />,
+    title: 'Learning Hub',
+    description: 'All product training',
+    icon: <LearningHubIcon />,
     link: '/learning/discover/',
   },
 ]

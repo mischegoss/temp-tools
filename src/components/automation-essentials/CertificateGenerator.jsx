@@ -69,50 +69,63 @@ const CertificateGenerator = () => {
         }}
       >
         {!showCertificate ? (
+          // Name Input Section
           <div
-            className='card no-print'
             style={{
               backgroundColor: 'var(--brand-white)',
-              borderRadius: '8px',
+              borderRadius: '12px',
               border: '2px solid var(--brand-blue-400)',
               boxShadow:
                 '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
               overflow: 'hidden',
               padding: '30px',
-              fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+              position: 'relative',
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+            <h2
+              style={{
+                textAlign: 'center',
+                color: 'var(--brand-black-700)',
+                marginBottom: '25px',
+                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+                fontSize: '1.8rem',
+                fontWeight: '600',
+              }}
+            >
+              Generate Your Certificate
+            </h2>
+            <div style={{ textAlign: 'center' }}>
               <label
-                htmlFor='certificate-name'
+                htmlFor='recipientName'
                 style={{
                   display: 'block',
                   marginBottom: '10px',
-                  fontWeight: 'bold',
-                  textAlign: 'left',
-                  color: 'var(--brand-black)',
-                  fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+                  fontWeight: '500',
+                  color: 'var(--brand-black-700)',
+                  fontSize: '1.1rem',
                 }}
               >
-                Enter your name as you'd like it to appear on the certificate:
+                Enter your full name as it should appear on the certificate:
               </label>
               <input
-                id='certificate-name'
+                id='recipientName'
                 type='text'
                 value={name}
                 onChange={handleNameChange}
-                placeholder='Your Full Name'
+                placeholder='e.g., John Smith'
                 style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '16px',
-                  border: '2px solid var(--brand-grey-400)',
-                  borderRadius: '4px',
-                  marginBottom: '20px',
                   fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-                  transition: 'border-color 0.3s ease',
-                  boxSizing: 'border-box',
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '16px',
+                  border: '2px solid var(--brand-grey-300)',
+                  borderRadius: '8px',
+                  marginBottom: '20px',
+                  backgroundColor: 'var(--brand-white)',
+                  color: 'var(--brand-black)',
+                  transition: 'all 0.3s ease',
+                  outline: 'none',
                 }}
                 onFocus={e =>
                   (e.target.style.borderColor = 'var(--brand-blue-400)')
@@ -166,6 +179,7 @@ const CertificateGenerator = () => {
                 boxSizing: 'border-box',
               }}
             >
+              {/* Certificate Content */}
               <div
                 className='title-section'
                 style={{
@@ -220,63 +234,106 @@ const CertificateGenerator = () => {
                   This certifies that
                 </p>
 
-                <h2
+                <div
                   style={{
-                    fontSize: '28px',
+                    fontSize: '36px',
+                    fontWeight: 'bold',
                     color: 'var(--brand-black-700)',
                     margin: '20px 0',
-                    fontStyle: 'italic',
+                    padding: '10px 0',
+                    borderBottom: '2px solid var(--brand-aqua)',
                     fontFamily:
                       'SeasonMix, system-ui, -apple-system, sans-serif',
                   }}
                 >
                   {name}
-                </h2>
+                </div>
 
                 <p
                   style={{
                     fontSize: '16px',
                     margin: '20px 0',
-                    lineHeight: '1.6',
                     fontFamily:
                       'SeasonMix, system-ui, -apple-system, sans-serif',
                     color: 'var(--brand-black)',
                   }}
                 >
-                  has successfully completed the course
-                  <br />
-                  <span
-                    style={{
-                      fontSize: '20px',
-                      fontWeight: 'bold',
-                      color: 'var(--brand-black-700)',
-                      fontFamily:
-                        'SeasonMix, system-ui, -apple-system, sans-serif',
-                    }}
-                  >
-                    Automation Essentials
-                  </span>
+                  has successfully completed
                 </p>
+
+                <h3
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: 'var(--brand-black-700)',
+                    margin: '20px 0',
+                    fontFamily:
+                      'SeasonMix, system-ui, -apple-system, sans-serif',
+                  }}
+                >
+                  Automation Essentials
+                </h3>
 
                 <p
                   style={{
                     fontSize: '14px',
-                    margin: '30px 0 20px',
+                    margin: '30px 0',
                     fontFamily:
                       'SeasonMix, system-ui, -apple-system, sans-serif',
-                    color: 'var(--brand-grey-600)',
+                    color: 'var(--brand-black)',
                   }}
                 >
-                  Issued on {currentDate}
+                  Course completed on {currentDate}
                 </p>
 
+                {/* Footer with logo and seal */}
                 <div
                   style={{
                     display: 'flex',
-                    justifyContent: 'center',
-                    marginTop: '30px',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: '20px',
+                    borderTop: '1px solid var(--brand-grey-300)',
+                    position: 'absolute',
+                    bottom: '20px',
+                    left: '20px',
+                    right: '20px',
                   }}
                 >
+                  <div style={{ textAlign: 'left', width: '40%' }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: '14px',
+                        fontFamily:
+                          'SeasonMix, system-ui, -apple-system, sans-serif',
+                        color: 'var(--brand-black)',
+                      }}
+                    >
+                      Issued by Resolve
+                    </p>
+                  </div>
+
+                  <div style={{ textAlign: 'center', width: '20%' }}>
+                    <div
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--brand-aqua)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto',
+                        color: 'var(--brand-white)',
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      ✓
+                    </div>
+                  </div>
+
                   <div style={{ textAlign: 'center', width: '40%' }}>
                     <div className='pdf-only-logo-container'>
                       <img
@@ -329,43 +386,27 @@ const CertificateGenerator = () => {
                   border: 'none',
                   borderRadius: '4px',
                   cursor: isGenerating ? 'not-allowed' : 'pointer',
-                  opacity: isGenerating ? 0.7 : 1,
-                  textDecoration: 'underline',
+                  opacity: isGenerating ? 0.5 : 1,
                   fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-                  transition: 'color 0.3s ease',
+                  textDecoration: 'underline',
                 }}
-                onMouseEnter={e =>
-                  (e.target.style.color = 'var(--brand-blue-400)')
-                }
-                onMouseLeave={e =>
-                  (e.target.style.color = 'var(--brand-grey-600)')
-                }
               >
-                Edit your name
+                Edit Name
               </button>
             </div>
 
-            <div
-              className='card no-print'
-              style={{
-                backgroundColor: 'var(--brand-grey-100)',
-                borderRadius: '8px',
-                border: '2px solid var(--brand-grey-300)',
-                boxShadow:
-                  '0 0 15px rgba(0, 102, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)',
-                padding: '20px',
-                textAlign: 'center',
-              }}
-            >
+            {/* Download and Share Section */}
+            <div className='no-print' style={{ textAlign: 'center' }}>
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '15px',
+                  gap: '20px',
+                  maxWidth: '500px',
+                  margin: '0 auto',
                 }}
               >
-                {/* Download Button - Large and prominent with download emoji */}
                 <button
                   onClick={handleDownload}
                   disabled={isGenerating}
@@ -374,8 +415,7 @@ const CertificateGenerator = () => {
                     fontSize: '18px',
                     width: '100%',
                     maxWidth: '350px',
-                    background:
-                      'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-aqua) 100%)',
+                    backgroundColor: 'var(--brand-aqua)',
                     color: 'var(--brand-white)',
                     border: '2px solid var(--brand-aqua)',
                     borderRadius: '8px',
@@ -414,7 +454,7 @@ const CertificateGenerator = () => {
                   </span>
                 </button>
 
-                {/* LinkedIn Share Button - Only show if certificate has been generated */}
+                {/* LinkedIn Share Button - ONLY UPDATED THE MESSAGE */}
                 {pdfGenerated && (
                   <button
                     onClick={() => {

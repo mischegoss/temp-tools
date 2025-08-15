@@ -1,8 +1,10 @@
-export const homePageStyles = {
-  // Main section container - Using dark aqua gradient
+// @site/src/components/Homepage/styles/homepagestyles.js
+
+const homePageStyles = {
+  // Main section container - Updated gradient: darker longer, less pure teal
   sectionStyle: {
     background:
-      'linear-gradient(to bottom, #051414 0%, #02636f 40%, #00b8de 80%, var(--brand-aqua) 100%)',
+      'linear-gradient(to bottom, #051414 0%, #02636f 60%, #008a9e 85%, #00a8c0 100%)',
     padding: '100px 0 120px 0',
     minHeight: '70vh',
     width: '100%',
@@ -12,7 +14,7 @@ export const homePageStyles = {
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
   },
 
-  // Container for content
+  // Container for content (ORIGINAL)
   containerStyle: {
     maxWidth: '1440px',
     margin: '0 auto',
@@ -23,7 +25,7 @@ export const homePageStyles = {
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
   },
 
-  // Mobile version of container
+  // Mobile version of container (ORIGINAL)
   containerStyleMobile: {
     maxWidth: '1440px',
     margin: '0 auto',
@@ -34,19 +36,19 @@ export const homePageStyles = {
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
   },
 
-  // Header content area
+  // Header content area (ORIGINAL)
   headerContentStyle: {
     textAlign: 'center',
     marginBottom: '80px',
   },
 
-  // Mobile header content
+  // Mobile header content (ORIGINAL)
   headerContentStyleMobile: {
     textAlign: 'center',
     marginBottom: '60px',
   },
 
-  // Main title styling
+  // Main title styling (ORIGINAL)
   mainTitleStyle: {
     fontSize: '4rem',
     fontWeight: '600',
@@ -57,7 +59,7 @@ export const homePageStyles = {
     textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
   },
 
-  // Mobile version of main title
+  // Mobile version of main title (ORIGINAL)
   mainTitleStyleMobile: {
     fontSize: '2.75rem',
     fontWeight: '600',
@@ -68,7 +70,7 @@ export const homePageStyles = {
     textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
   },
 
-  // Subtitle styling
+  // Subtitle styling (ORIGINAL)
   subtitleStyle: {
     fontSize: '1.3rem',
     color: 'var(--brand-white)',
@@ -78,7 +80,7 @@ export const homePageStyles = {
     textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
   },
 
-  // Mobile version of subtitle
+  // Mobile version of subtitle (ORIGINAL)
   subtitleStyleMobile: {
     fontSize: '1.2rem',
     color: 'var(--brand-white)',
@@ -88,7 +90,7 @@ export const homePageStyles = {
     textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
   },
 
-  // Cards grid container - CSS Grid approach for guaranteed layout
+  // Cards grid container - REVERTED to original 4-card layout
   cardsGridStyle: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)', // 2 columns on smaller screens
@@ -99,7 +101,7 @@ export const homePageStyles = {
     },
   },
 
-  // Mobile cards grid
+  // Mobile cards grid - REVERTED to original 2-column
   cardsGridStyleMobile: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)', // Always 2 columns on mobile
@@ -107,7 +109,7 @@ export const homePageStyles = {
     width: '100%',
   },
 
-  // Desktop cards grid
+  // Desktop cards grid - REVERTED to original 4-column
   cardsGridStyleDesktop: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)', // Always 4 columns on desktop
@@ -115,21 +117,24 @@ export const homePageStyles = {
     width: '100%',
   },
 
-  // Enhanced glow card style with triple border
+  // Enhanced glow card style (ORIGINAL)
   enhancedGlowCardStyle: {
     background: 'var(--brand-white)',
-    borderRadius: '16px',
-    padding: '48px 36px',
-    transition: 'all 0.3s ease',
-    height: '100%',
+    borderRadius: '20px',
+    padding: '40px 32px',
+    textAlign: 'center',
+    textDecoration: 'none',
+    color: 'inherit',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.3s ease-in-out',
+    cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    textAlign: 'center',
-    cursor: 'pointer',
+    justifyContent: 'center',
+    minHeight: '320px',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
-    position: 'relative',
-    textDecoration: 'none',
     // Triple border: dark outer, white gap, aqua inner
     boxShadow: `
       0 0 0 2px var(--brand-aqua),
@@ -142,36 +147,24 @@ export const homePageStyles = {
     filter: 'drop-shadow(0 0 2px rgba(0, 184, 222, 0.05))',
   },
 
-  // Enhanced glow card hover style
-  enhancedGlowCardHoverStyle: {
-    boxShadow: `
-      0 0 0 2px var(--brand-aqua),
-      0 0 0 4px #FFFFFF,
-      0 0 0 6px #051414,
-      0 0 12px rgba(0, 184, 222, 0.12),
-      0 0 24px rgba(0, 184, 222, 0.08),
-      0 10px 30px rgba(0, 184, 222, 0.06)
-    `,
-    filter: 'drop-shadow(0 0 4px rgba(0, 184, 222, 0.08))',
-    transform: 'translateY(-8px)',
-    transition: 'all 0.3s ease',
-  },
-
-  // Mobile version of enhanced glow card
+  // Mobile enhanced glow card style (ORIGINAL)
   enhancedGlowCardStyleMobile: {
     background: 'var(--brand-white)',
     borderRadius: '16px',
     padding: '32px 24px',
-    transition: 'all 0.3s ease',
-    height: '100%',
+    textAlign: 'center',
+    textDecoration: 'none',
+    color: 'inherit',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.3s ease-in-out',
+    cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    textAlign: 'center',
-    cursor: 'pointer',
+    justifyContent: 'center',
+    minHeight: '280px',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
-    position: 'relative',
-    textDecoration: 'none',
     // Triple border: dark outer, white gap, aqua inner
     boxShadow: `
       0 0 0 2px var(--brand-aqua),
@@ -184,7 +177,22 @@ export const homePageStyles = {
     filter: 'drop-shadow(0 0 2px rgba(0, 184, 222, 0.05))',
   },
 
-  // Icon container
+  // Enhanced hover effect (ORIGINAL)
+  enhancedGlowCardHoverStyle: {
+    transform: 'translateY(-8px) scale(1.02)',
+    // Enhanced triple border: dark outer, white gap, aqua inner
+    boxShadow: `
+      0 0 0 2px var(--brand-aqua),
+      0 0 0 4px #FFFFFF,
+      0 0 0 6px #051414,
+      0 0 8px rgba(0, 184, 222, 0.08),
+      0 0 16px rgba(0, 184, 222, 0.04),
+      0 6px 25px rgba(0, 0, 0, 0.2)
+    `,
+    filter: 'drop-shadow(0 0 2px rgba(0, 184, 222, 0.05))',
+  },
+
+  // Icon container (ORIGINAL)
   iconContainerStyle: {
     marginBottom: '28px',
     display: 'flex',
@@ -192,7 +200,7 @@ export const homePageStyles = {
     alignItems: 'center',
   },
 
-  // Card title styling
+  // Card title styling (ORIGINAL)
   cardTitleStyle: {
     fontSize: '1.5rem',
     fontWeight: '600',
@@ -203,7 +211,7 @@ export const homePageStyles = {
     lineHeight: '1.3',
   },
 
-  // Card description styling
+  // Card description styling (ORIGINAL)
   cardDescriptionStyle: {
     fontSize: '1.25rem',
     color: 'var(--brand-grey-600)',
@@ -213,7 +221,7 @@ export const homePageStyles = {
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
   },
 
-  // Gradient overlays
+  // Gradient overlays (ORIGINAL)
   gradientOverlayTopStyle: {
     position: 'absolute',
     top: 0,
@@ -238,3 +246,5 @@ export const homePageStyles = {
     zIndex: 1,
   },
 }
+
+export { homePageStyles }

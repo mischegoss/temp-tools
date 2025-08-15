@@ -94,10 +94,10 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 `}
 </style>
 
-<BrowserOnly>
-{() => {
-  return (
-    <ProtectedRoute>
+<ProtectedRoute>
+  <BrowserOnly fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading certificate...</div>}>
+  {() => {
+    return (
       <div>
         <StylizedHeader title="Achievement Unlocked!" />
         <div className="certificate-container">
@@ -107,8 +107,8 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
           <CertificateGenerator />
         </div>
       </div>
-    </ProtectedRoute>
-  );
-}}
-</BrowserOnly>
+    );
+  }}
+  </BrowserOnly>
+</ProtectedRoute>
 

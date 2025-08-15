@@ -2,25 +2,24 @@
 
 import React, { useState, useMemo } from 'react'
 import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsExpress.js'
-// import { videoLibrary } from '@site/src/components/ExpressVideoLibrary/Data/VideoData.js' // Ready for future use
+import { videoLibrary } from '@site/src/components/ActionVideoLibrary/Data/VideoData.js' // Now active
 
 // Import the shared modular components
 import WelcomeSection from '../LandingPageLibrary/WelcomeSection.js'
-// import FeaturedVideoSection from '../LandingPageLibrary/FeaturedVideoSection.js' // Ready for future use
+import FeaturedVideoSection from '../LandingPageLibrary/FeaturedVideoSection.js' // Now active
 import MainFilterSection from '../LandingPageLibrary/MainFilterSection.js'
 import CardsSection from '../LandingPageLibrary/CardsSection.js'
 import HelpSection from '../LandingPageLibrary/HelpSection.js'
 
 /**
- * ExpressIndex component - Express landing page
+ * ExpressIndex component - Express landing page with featured video section
  *
  * This component maintains exact styling compatibility with ActionsIndex
- * but without the featured video section. The video section can be easily
- * added later by uncommenting the imports and JSX.
+ * and now includes the featured video section with gallery button turned off.
  *
  * Structure:
  * 1. Welcome Section
- * 2. [Featured Video Section] - Ready to add when needed
+ * 2. Featured Video Section (NEW - showcases video from gallery)
  * 3. Filter Section
  * 4. Cards Section
  * 5. Help Section
@@ -33,13 +32,13 @@ const ExpressIndex = ({
       'Explore our specialized learning paths designed to help you master Resolve Express. Get started with rapid incident resolution and streamlined workflows.',
   },
 
-  // Featured video section props (ready for future use)
-  // featuredVideoSectionProps = {
-  //   label: 'Featured Learning Video',
-  //   buttonText: 'View Full Video Gallery →',
-  //   buttonLink: '/learning/express-videos',
-  //   showGalleryButton: false, // Set to true when video gallery is ready
-  // },
+  // Featured video section props
+  featuredVideoSectionProps = {
+    label: 'Featured Learning Video',
+    buttonText: 'View Full Video Gallery →',
+    buttonLink: '/learning/express-videos',
+    showGalleryButton: false, // Gallery button turned off as requested
+  },
 
   // Filter section props
   filterSectionProps = {
@@ -59,7 +58,7 @@ const ExpressIndex = ({
 
   // Data sources
   resources = learningPaths,
-  // videoResources = videoLibrary, // Ready for future use
+  videoResources = videoLibrary, // Now active
 }) => {
   // State management (same as Actions)
   const [activeFilter, setActiveFilter] = useState('all')
@@ -100,24 +99,24 @@ const ExpressIndex = ({
     )
   }, [activeFilter, resources])
 
-  // Get featured video (ready for future use)
-  // const featuredVideo = useMemo(() => {
-  //   if (!videoResources || videoResources.length === 0) return null
-  //   return videoResources[0]
-  // }, [videoResources])
+  // Get featured video
+  const featuredVideo = useMemo(() => {
+    if (!videoResources || videoResources.length === 0) return null
+    return videoResources[0]
+  }, [videoResources])
 
   return (
     <>
       {/* Welcome Section */}
       <WelcomeSection welcomeSectionProps={welcomeSectionProps} />
 
-      {/* Featured Video Section - Ready to add when needed */}
-      {/* {featuredVideo && (
+      {/* Featured Video Section */}
+      {featuredVideo && (
         <FeaturedVideoSection
           featuredVideo={featuredVideo}
           sectionProps={featuredVideoSectionProps}
         />
-      )} */}
+      )}
 
       {/* Filter Section */}
       <MainFilterSection

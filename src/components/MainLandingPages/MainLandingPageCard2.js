@@ -1,153 +1,184 @@
-import React, { useState } from 'react'
+// Optimized MainLandingPageCard2 - Instant button response, minimal JavaScript
+// src/components/MainLandingPages/MainLandingPageCard2.js
+
+import React, { useState, useEffect } from 'react'
 import Link from '@docusaurus/Link'
 
+// CSS-in-JS styles for instant hover effects
+const injectMainLandingStyles = () => {
+  const styleId = 'main-landing-cards-styles'
+
+  // Check if styles already exist
+  if (document.getElementById(styleId)) return
+
+  const styles = `
+    .main-landing-card {
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
+    }
+    
+    .main-landing-card:hover:not(.disabled) {
+      transform: translateY(-5px) !important;
+      box-shadow: 0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2) !important;
+    }
+    
+    .main-landing-button {
+      transition: all 0.2s ease !important;
+      pointer-events: auto !important;
+      user-select: none !important;
+    }
+    
+    .main-landing-button:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3) !important;
+      border-color: var(--brand-blue-400) !important;
+      background: var(--brand-blue-400) !important;
+      text-decoration: none !important;
+      color: var(--brand-white) !important;
+    }
+    
+    .main-landing-button:active:not(:disabled) {
+      transform: translateY(0) !important;
+    }
+    
+    .main-landing-button:disabled {
+      pointer-events: none !important;
+      transform: none !important;
+    }
+    
+    .main-landing-button:focus {
+      outline: 2px solid var(--brand-blue) !important;
+      outline-offset: 2px !important;
+    }
+    
+    @media (max-width: 768px) {
+      .main-landing-card:hover:not(.disabled) {
+        transform: translateY(-2px) !important;
+      }
+      
+      .main-landing-button:hover:not(:disabled) {
+        transform: translateY(-1px) !important;
+      }
+    }
+  `
+
+  const styleSheet = document.createElement('style')
+  styleSheet.id = styleId
+  styleSheet.textContent = styles
+  document.head.appendChild(styleSheet)
+}
+
 const MainLandingPageCards = ({ resources = [] }) => {
-  // Check if resources is valid before rendering
-  if (!resources || !Array.isArray(resources) || resources.length === 0) {
+  // Inject CSS styles on component mount
+  useEffect(() => {
+    injectMainLandingStyles()
+  }, [])
+
+  // Early validation with minimal processing
+  if (!resources?.length) {
     return (
       <div
         style={{
-          padding: '1.5rem',
+          padding: '40px',
           backgroundColor: 'var(--brand-grey-100)',
-          borderRadius: '8px',
+          borderRadius: '12px',
           textAlign: 'center',
-          margin: '2rem 0',
-          border: '2px solid var(--brand-grey-300)',
-          boxShadow:
-            '0 0 10px rgba(0, 80, 199, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05)',
-          fontFamily: 'var(--ifm-font-family-base)',
+          border: '1px solid var(--brand-grey-300)',
         }}
       >
         <p
           style={{
-            fontSize: '1.1rem',
+            fontSize: '1.25rem',
             fontFamily: 'var(--ifm-font-family-base)',
-            color: 'var(--brand-black)',
+            color: 'var(--brand-grey-600)',
+            margin: '0',
           }}
         >
-          No resources to display. Please provide a valid array of resources.
+          No resources available.
         </p>
       </div>
     )
   }
 
-  // State to track which cards have expanded details
+  // Only track expanded state - remove hoveredCards entirely
   const [expandedCards, setExpandedCards] = useState({})
 
-  // State to track which cards are being hovered
-  const [hoveredCards, setHoveredCards] = useState({})
-
   // Toggle expanded details for a specific card
-  const toggleCardDetails = resourceId => {
+  const toggleCardDetails = index => {
     setExpandedCards(prev => ({
       ...prev,
-      [resourceId]: !prev[resourceId],
+      [index]: !prev[index],
     }))
   }
 
-  // Set card hover state
-  const setCardHover = (resourceId, isHovered) => {
-    setHoveredCards(prev => ({
-      ...prev,
-      [resourceId]: isHovered,
-    }))
-  }
-
-  // Get the level badge background color using professional blue/teal palette
-  const getLevelBadgeColor = level => {
-    switch (level?.toLowerCase()) {
-      case 'beginner':
-        return 'var(--brand-blue)' // Professional blue
-      case 'intermediate':
-        return 'var(--brand-blue-400)' // Slightly lighter blue
-      case 'advanced':
-        return 'var(--brand-black-700)' // Dark professional
-      default:
-        return 'var(--brand-grey-600)' // Professional grey
-    }
-  }
-
-  // Get border color based on level
+  // Helper functions (simplified, no complex processing)
   const getBorderColor = level => {
     switch (level?.toLowerCase()) {
       case 'beginner':
         return 'var(--brand-blue)'
       case 'intermediate':
-        return 'var(--brand-blue-400)'
+        return 'var(--brand-blue-600)'
       case 'advanced':
-        return 'var(--brand-black-700)'
+        return 'var(--brand-blue-800)'
       default:
-        return 'var(--brand-grey-600)'
+        return 'var(--brand-blue)'
     }
   }
 
-  // Get content type from resource
-  const getContentType = resource => {
-    // First check for primaryLevel
-    if (resource.primaryLevel) {
-      return resource.primaryLevel.toLowerCase()
+  const getLevelBadgeColor = level => {
+    switch (level?.toLowerCase()) {
+      case 'beginner':
+        return 'var(--brand-blue)'
+      case 'intermediate':
+        return 'var(--brand-blue-600)'
+      case 'advanced':
+        return 'var(--brand-blue-800)'
+      default:
+        return 'var(--brand-blue)'
     }
-
-    // Check for explicit contentType property
-    if (resource.contentType) {
-      return resource.contentType.toLowerCase()
-    }
-    // Check for featureType property
-    if (resource.featureType) {
-      return resource.featureType.toLowerCase()
-    }
-
-    // Check for resourceType property
-    if (resource.resourceType) {
-      return resource.resourceType.toLowerCase()
-    }
-
-    // Return a default value
-    return 'learning resource'
   }
 
-  // Helper function to format level for display
   const formatLevelDisplay = level => {
     if (!level) return ''
-    return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase()
+    return level.toUpperCase()
   }
 
-  // Button styles
+  // Base button styles (no hover - handled by CSS)
   const baseButtonStyle = {
     background: 'var(--brand-blue)',
     color: 'var(--brand-white)',
     border: '2px solid var(--brand-blue)',
     borderRadius: '6px',
-    padding: '12px 28px',
-    fontSize: '1.1rem',
+    padding: '12px 24px',
+    fontSize: '1rem',
     fontFamily: 'var(--ifm-font-family-base)',
+    fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.3s ease-in-out',
     boxShadow: '0 0 15px rgba(0, 80, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-    textDecoration: 'none',
-    display: 'inline-block',
   }
 
   const disabledButtonStyle = {
-    ...baseButtonStyle,
-    background: 'var(--brand-grey-400)',
+    background: 'var(--brand-grey-300)',
     color: 'var(--brand-grey-600)',
-    border: '2px solid var(--brand-grey-400)',
+    border: '2px solid var(--brand-grey-300)',
+    borderRadius: '6px',
+    padding: '12px 24px',
+    fontSize: '1rem',
+    fontFamily: 'var(--ifm-font-family-base)',
+    fontWeight: '600',
     cursor: 'not-allowed',
-    opacity: 0.6,
+    boxShadow: 'none',
   }
 
-  // Card component for individual resources
+  // Individual card component (simplified)
   const ResourceCard = ({ resource, index }) => {
-    const isExpanded = expandedCards[index]
-    const isHovered = hoveredCards[index]
-    const isDisabled = resource.available === false
-    const primaryLevel = resource.primaryLevel || resource.level || 'beginner'
+    const isExpanded = expandedCards[index] || false
+    const isDisabled = resource.disabled === true
+    const primaryLevel = resource.primaryLevel || 'Beginner'
 
     const titleStyle = {
       fontFamily: 'var(--ifm-font-family-base)',
-      fontSize: '1.5rem',
-      fontWeight: '600',
+      fontWeight: '700',
+      fontSize: '1.4rem',
       color: isDisabled ? 'var(--brand-grey-500)' : 'var(--brand-black-700)',
       margin: '0 0 16px 0',
     }
@@ -162,25 +193,19 @@ const MainLandingPageCards = ({ resources = [] }) => {
 
     return (
       <div
+        className={`main-landing-card ${isDisabled ? 'disabled' : ''}`}
         style={{
           border: `2px solid ${getBorderColor(primaryLevel)}`,
           borderRadius: '8px',
           overflow: 'hidden',
           backgroundColor: 'var(--brand-white)',
           boxShadow:
-            isHovered && !isDisabled
-              ? '0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2)'
-              : '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-          transition: 'all 0.3s ease-in-out',
-          transform:
-            isHovered && !isDisabled ? 'translateY(-5px)' : 'translateY(0)',
+            '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
           marginBottom: '1.5rem',
           position: 'relative',
           cursor: isDisabled ? 'default' : 'pointer',
           fontFamily: 'var(--ifm-font-family-base)',
         }}
-        onMouseEnter={() => !isDisabled && setCardHover(index, true)}
-        onMouseLeave={() => !isDisabled && setCardHover(index, false)}
       >
         {/* Coming Soon Banner for disabled cards */}
         {isDisabled && (
@@ -245,26 +270,12 @@ const MainLandingPageCards = ({ resources = [] }) => {
               <div style={{ display: 'flex', gap: '12px' }}>
                 {!isDisabled && (
                   <button
+                    className='main-landing-button'
                     onClick={() => toggleCardDetails(index)}
                     style={{
                       ...baseButtonStyle,
                       padding: '10px 20px',
                       fontSize: '0.95rem',
-                    }}
-                    onMouseOver={e => {
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow =
-                        '0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3)'
-                      e.currentTarget.style.borderColor =
-                        'var(--brand-blue-400)'
-                      e.currentTarget.style.background = 'var(--brand-blue-400)'
-                    }}
-                    onMouseOut={e => {
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow =
-                        baseButtonStyle.boxShadow
-                      e.currentTarget.style.borderColor = 'var(--brand-blue)'
-                      e.currentTarget.style.background = 'var(--brand-blue)'
                     }}
                   >
                     View Details
@@ -280,23 +291,8 @@ const MainLandingPageCards = ({ resources = [] }) => {
                 ) : (
                   <Link to={resource.link} style={{ textDecoration: 'none' }}>
                     <button
+                      className='main-landing-button'
                       style={baseButtonStyle}
-                      onMouseOver={e => {
-                        e.currentTarget.style.transform = 'translateY(-2px)'
-                        e.currentTarget.style.boxShadow =
-                          '0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3)'
-                        e.currentTarget.style.borderColor =
-                          'var(--brand-blue-400)'
-                        e.currentTarget.style.background =
-                          'var(--brand-blue-400)'
-                      }}
-                      onMouseOut={e => {
-                        e.currentTarget.style.transform = 'translateY(0)'
-                        e.currentTarget.style.boxShadow =
-                          baseButtonStyle.boxShadow
-                        e.currentTarget.style.borderColor = 'var(--brand-blue)'
-                        e.currentTarget.style.background = 'var(--brand-blue)'
-                      }}
                     >
                       {resource.resourceType === 'module'
                         ? 'Get Started'
@@ -310,86 +306,124 @@ const MainLandingPageCards = ({ resources = [] }) => {
         ) : (
           // Expanded Card View
           <div style={{ padding: '32px' }}>
-            <h3 style={titleStyle}>{resource.title}</h3>
-            <p style={descriptionStyle}>{resource.description}</p>
-
-            {/* Detailed content */}
             <div
               style={{
-                marginTop: '24px',
-                borderTop: '1px solid var(--brand-grey-300)',
-                paddingTop: '24px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '20px',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '32px',
-                  alignItems: 'flex-start',
-                }}
-              >
-                {/* Left column - Course list */}
-                <div style={{ flex: 1 }}>
-                  <h4
-                    style={{
-                      fontFamily: 'var(--ifm-font-family-base)',
-                      fontSize: '1.3rem',
-                      fontWeight: '600',
-                      margin: '0 0 16px 0',
-                      color: isDisabled
-                        ? 'var(--brand-grey-500)'
-                        : 'var(--brand-black-700)',
-                    }}
-                  >
-                    {resource.resourceType === 'module'
-                      ? 'What you will learn:'
-                      : 'Courses included:'}
-                  </h4>
-                  <div
-                    style={{
-                      fontSize: '1.1rem',
-                      lineHeight: '1.6',
-                      color: isDisabled
-                        ? 'var(--brand-grey-500)'
-                        : 'var(--brand-black)',
-                    }}
-                  >
-                    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-                      {resource.courses &&
-                        resource.courses.map((course, i) => (
-                          <li key={i} style={{ marginBottom: '0.5rem' }}>
-                            {course}
-                          </li>
-                        ))}
-                    </ul>
-                    {resource.usageInstructions && (
-                      <p style={{ marginTop: '0.75rem' }}>
-                        {resource.usageInstructions}
-                      </p>
-                    )}
-                  </div>
-                </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={titleStyle}>{resource.title}</h3>
+                <p style={descriptionStyle}>{resource.description}</p>
 
-                {/* Right column - Level badge */}
-                {primaryLevel && (
-                  <div
-                    style={{
-                      background: getLevelBadgeColor(primaryLevel),
-                      color: 'var(--brand-white)',
-                      padding: '12px 20px',
-                      borderRadius: '25px',
-                      fontSize: '1rem',
-                      fontFamily: 'var(--ifm-font-family-base)',
-                      fontWeight: '600',
-                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                      whiteSpace: 'nowrap',
-                      opacity: isDisabled ? 0.7 : 1,
-                    }}
-                  >
-                    {formatLevelDisplay(primaryLevel)}
+                {resource.extendedDescription && (
+                  <div style={{ marginTop: '16px' }}>
+                    <h4
+                      style={{
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        color: 'var(--brand-black-700)',
+                        margin: '0 0 8px 0',
+                      }}
+                    >
+                      Overview
+                    </h4>
+                    <p
+                      style={{
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        color: 'var(--brand-black)',
+                        fontSize: '1rem',
+                        lineHeight: '1.6',
+                        margin: '0 0 16px 0',
+                      }}
+                    >
+                      {resource.extendedDescription}
+                    </p>
+                  </div>
+                )}
+
+                {resource.usageInstructions && (
+                  <div style={{ marginTop: '16px' }}>
+                    <h4
+                      style={{
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        color: 'var(--brand-black-700)',
+                        margin: '0 0 8px 0',
+                      }}
+                    >
+                      What You'll Learn
+                    </h4>
+                    <p
+                      style={{
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        color: 'var(--brand-black)',
+                        fontSize: '1rem',
+                        lineHeight: '1.6',
+                        margin: '0',
+                      }}
+                    >
+                      {resource.usageInstructions}
+                    </p>
+                  </div>
+                )}
+
+                {resource.courses && resource.courses.length > 0 && (
+                  <div style={{ marginTop: '20px' }}>
+                    <h4
+                      style={{
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        color: 'var(--brand-black-700)',
+                        margin: '0 0 12px 0',
+                      }}
+                    >
+                      Course Modules
+                    </h4>
+                    <ul
+                      style={{
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        color: 'var(--brand-black)',
+                        fontSize: '1rem',
+                        lineHeight: '1.6',
+                        margin: '0',
+                        paddingLeft: '20px',
+                      }}
+                    >
+                      {resource.courses.map((course, idx) => (
+                        <li key={idx} style={{ marginBottom: '4px' }}>
+                          {course}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
+
+              {/* Level badge on right side for expanded view */}
+              {primaryLevel && (
+                <div
+                  style={{
+                    background: getLevelBadgeColor(primaryLevel),
+                    color: 'var(--brand-white)',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '0.9rem',
+                    fontFamily: 'var(--ifm-font-family-base)',
+                    fontWeight: '600',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                    marginLeft: '20px',
+                    opacity: isDisabled ? 0.7 : 1,
+                  }}
+                >
+                  {formatLevelDisplay(primaryLevel)}
+                </div>
+              )}
             </div>
 
             {/* Buttons in center of expanded card */}
@@ -402,21 +436,9 @@ const MainLandingPageCards = ({ resources = [] }) => {
               }}
             >
               <button
+                className='main-landing-button'
                 onClick={() => toggleCardDetails(index)}
                 style={baseButtonStyle}
-                onMouseOver={e => {
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow =
-                    '0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3)'
-                  e.currentTarget.style.borderColor = 'var(--brand-blue-400)'
-                  e.currentTarget.style.background = 'var(--brand-blue-400)'
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = baseButtonStyle.boxShadow
-                  e.currentTarget.style.borderColor = 'var(--brand-blue)'
-                  e.currentTarget.style.background = 'var(--brand-blue)'
-                }}
               >
                 Close Details
               </button>
@@ -430,22 +452,8 @@ const MainLandingPageCards = ({ resources = [] }) => {
               ) : (
                 <Link to={resource.link} style={{ textDecoration: 'none' }}>
                   <button
+                    className='main-landing-button'
                     style={baseButtonStyle}
-                    onMouseOver={e => {
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow =
-                        '0 0 25px rgba(0, 80, 199, 0.4), 0 4px 16px rgba(0, 80, 199, 0.3)'
-                      e.currentTarget.style.borderColor =
-                        'var(--brand-blue-400)'
-                      e.currentTarget.style.background = 'var(--brand-blue-400)'
-                    }}
-                    onMouseOut={e => {
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow =
-                        baseButtonStyle.boxShadow
-                      e.currentTarget.style.borderColor = 'var(--brand-blue)'
-                      e.currentTarget.style.background = 'var(--brand-blue)'
-                    }}
                   >
                     {resource.resourceType === 'module'
                       ? 'Get Started'
@@ -456,73 +464,6 @@ const MainLandingPageCards = ({ resources = [] }) => {
             </div>
           </div>
         )}
-
-        {/* Footer with level indicator */}
-        {resource.secondaryLevel ? (
-          // Dual level footer
-          <div
-            style={{
-              padding: '12px 20px',
-              background: `linear-gradient(135deg, ${getLevelBadgeColor(
-                primaryLevel,
-              )} 0%, ${getLevelBadgeColor(resource.secondaryLevel)} 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              opacity: isDisabled ? 0.7 : 1,
-            }}
-          >
-            <span
-              style={{
-                color: 'var(--brand-white)',
-                fontSize: '1.05rem',
-                fontFamily: 'var(--ifm-font-family-base)',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-                fontWeight: '600',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {formatLevelDisplay(primaryLevel)}
-            </span>
-            <span
-              style={{
-                color: 'var(--brand-white)',
-                fontSize: '1.05rem',
-                fontFamily: 'var(--ifm-font-family-base)',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-                fontWeight: '600',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {formatLevelDisplay(resource.secondaryLevel)}
-            </span>
-          </div>
-        ) : (
-          // Single level footer
-          <div
-            style={{
-              padding: '12px 20px',
-              backgroundColor: getLevelBadgeColor(primaryLevel),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: isDisabled ? 0.7 : 1,
-            }}
-          >
-            <span
-              style={{
-                color: 'var(--brand-white)',
-                fontSize: '1.05rem',
-                fontFamily: 'var(--ifm-font-family-base)',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-                fontWeight: '600',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {formatLevelDisplay(primaryLevel)}
-            </span>
-          </div>
-        )}
       </div>
     )
   }
@@ -530,15 +471,14 @@ const MainLandingPageCards = ({ resources = [] }) => {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
         gap: '2rem',
-        margin: '2rem 0',
-        fontFamily: 'var(--ifm-font-family-base)',
+        padding: '2rem 0',
       }}
     >
-      {resources.map((resource, idx) => (
-        <ResourceCard key={idx} resource={resource} index={idx} />
+      {resources.map((resource, index) => (
+        <ResourceCard key={index} resource={resource} index={index} />
       ))}
     </div>
   )

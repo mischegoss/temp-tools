@@ -1,4 +1,4 @@
-// @site/src/components/Actions/Data/VideoLibraryData.js
+// @site/src/components/ActionVideoLibrary/Data/VideoData.js
 
 export const videoLibrary = [
   {
@@ -9,7 +9,7 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '15:32',
-    level: 'BEGINNER',
+    level: 'Workflows',
     category: 'Platform Overview',
     tags: ['basics', 'getting-started', 'workflow'],
     publishDate: '2024-01-15',
@@ -55,7 +55,7 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '22:48',
-    level: 'INTERMEDIATE',
+    level: 'Automation Design',
     category: 'Workflow Development',
     tags: ['workflows', 'conditional-logic', 'advanced'],
     publishDate: '2024-02-10',
@@ -71,355 +71,65 @@ export const videoLibrary = [
         step: 2,
         title: 'Implement Conditional Logic',
         content:
-          'Add conditional branches using If/Else blocks. Configure the conditions based on data values, API responses, or user inputs. Test each branch thoroughly.',
+          'Use conditional blocks to create decision points in your workflow. Configure if-then-else logic based on data values, API responses, or user inputs to create dynamic automation paths.',
       },
       {
         step: 3,
-        title: 'Use Loops and Iterations',
-        content:
-          'Implement For Each loops to process arrays of data. Set up While loops for conditional iterations. Always include exit conditions to prevent infinite loops.',
-      },
-      {
-        step: 4,
         title: 'Handle Parallel Processing',
         content:
-          'Use parallel execution blocks when tasks can run simultaneously. This improves performance but requires careful synchronization of results.',
+          'Set up parallel execution branches when you need to perform multiple actions simultaneously. Use synchronization points to wait for all parallel branches to complete before proceeding.',
       },
       {
-        step: 5,
+        step: 4,
         title: 'Implement Error Handling',
         content:
-          'Add Try/Catch blocks around potentially failing operations. Configure retry logic, timeout settings, and fallback procedures for robust workflow execution.',
-      },
-    ],
-  },
-  {
-    id: 'integration-best-practices',
-    title: 'Integration Best Practices',
-    description:
-      'Master the art of connecting Actions with external systems and APIs.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '18:15',
-    level: 'BEGINNER',
-    category: 'Integrations',
-    tags: ['integrations', 'apis', 'connections'],
-    publishDate: '2024-03-05',
-    thumbnailUrl: null,
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Understand API Documentation',
-        content:
-          "Before creating integrations, thoroughly read the target system's API documentation. Note authentication methods, rate limits, data formats, and available endpoints.",
-      },
-      {
-        step: 2,
-        title: 'Set Up Authentication',
-        content:
-          "Configure the appropriate authentication method (API keys, OAuth, basic auth). Store credentials securely using the platform's credential management system.",
-      },
-      {
-        step: 3,
-        title: 'Create Connection Templates',
-        content:
-          'Build reusable connection templates for frequently used systems. Include proper error handling, timeout settings, and retry mechanisms in your templates.',
-      },
-      {
-        step: 4,
-        title: 'Test API Endpoints',
-        content:
-          'Use the built-in API testing tools to verify connectivity and data formats. Test both success and failure scenarios to ensure robust integration.',
+          'Add try-catch blocks and error handling logic to make your workflows resilient. Define fallback actions, retry mechanisms, and notification systems for when things go wrong.',
       },
       {
         step: 5,
-        title: 'Implement Data Mapping',
+        title: 'Test Complex Scenarios',
         content:
-          'Map data between your workflow and the external system. Use transformation functions to convert data formats and handle missing or null values appropriately.',
+          'Thoroughly test your workflow with various input scenarios, including edge cases and error conditions. Use the debugging tools to step through execution and verify each decision point.',
       },
     ],
-  },
-  {
-    id: 'error-handling-debugging',
-    title: 'Error Handling and Debugging',
-    description:
-      'Learn how to troubleshoot workflows and implement robust error handling strategies.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '20:07',
-    level: 'INTERMEDIATE',
-    category: 'Troubleshooting',
-    tags: ['debugging', 'error-handling', 'troubleshooting'],
-    publishDate: '2024-03-20',
-    thumbnailUrl: null,
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Understanding Common Error Types',
-        content:
-          'Familiarize yourself with the most common error types in Actions: connection timeouts, authentication failures, data mapping errors, and API rate limits. Each error type has specific indicators in the execution logs that help identify the root cause.',
-      },
-      {
-        step: 2,
-        title: 'Setting Up Error Monitoring',
-        content:
-          'Configure workflow monitoring by adding logging actions at key points in your workflow. Set up email notifications for critical failures and create dashboards to track error patterns over time.',
-      },
-      {
-        step: 3,
-        title: 'Implementing Try-Catch Blocks',
-        content:
-          'Wrap potentially failing actions in Try-Catch blocks. In the Try section, place your main workflow logic. In the Catch section, define how to handle specific error scenarios - whether to retry, skip, or escalate the error.',
-      },
-      {
-        step: 4,
-        title: 'Creating Retry Logic',
-        content:
-          'Implement exponential backoff retry strategies for transient failures. Configure maximum retry attempts and delay intervals. Use conditional logic to determine which errors should trigger retries versus immediate failure.',
-      },
-      {
-        step: 5,
-        title: 'Building Fallback Procedures',
-        content:
-          'Design alternative execution paths for when primary actions fail. This might include using backup APIs, queuing items for manual processing, or switching to degraded functionality modes.',
-      },
-      {
-        step: 6,
-        title: 'Advanced Debugging Techniques',
-        content:
-          'Use variable inspection tools to examine data state at each workflow step. Implement conditional breakpoints and step-through debugging for complex workflows. Create test scenarios that reproduce specific error conditions.',
-      },
-    ],
-  },
-  {
-    id: 'automation-design-patterns',
-    title: 'Automation Design Patterns',
-    description:
-      'Explore proven design patterns and architectural approaches for scalable automations.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '28:33',
-    level: 'ADVANCED',
-    category: 'Architecture',
-    tags: ['design-patterns', 'architecture', 'scalability'],
-    publishDate: '2024-04-12',
-    thumbnailUrl: null,
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'The Modular Workflow Pattern',
-        content:
-          'Break complex automations into smaller, reusable workflow modules. Each module should have a single responsibility and well-defined inputs/outputs. This approach improves maintainability and enables code reuse across different automations.',
-      },
-      {
-        step: 2,
-        title: 'Event-Driven Architecture',
-        content:
-          'Design workflows that respond to events rather than running on fixed schedules. Set up event listeners for system changes, file uploads, database updates, or API webhooks. This creates more responsive and efficient automations.',
-      },
-      {
-        step: 3,
-        title: 'State Machine Patterns',
-        content:
-          'Implement workflows as state machines for complex business processes. Define clear states (pending, processing, approved, rejected) and valid transitions between states. This ensures data consistency and provides clear audit trails.',
-      },
-      {
-        step: 4,
-        title: 'Pipeline Processing Pattern',
-        content:
-          'Create data processing pipelines that transform data through multiple stages. Each stage validates, enriches, or filters the data before passing it to the next stage. Include quality gates and validation checkpoints throughout the pipeline.',
-      },
-      {
-        step: 5,
-        title: 'Circuit Breaker Pattern',
-        content:
-          'Implement circuit breakers to prevent cascading failures when external services are unavailable. Configure failure thresholds and automatic recovery mechanisms. This protects your workflows from being overwhelmed by failing dependencies.',
-      },
-      {
-        step: 6,
-        title: 'Saga Pattern for Long-Running Processes',
-        content:
-          'For workflows that span multiple systems and may take hours or days to complete, implement the Saga pattern. Break the process into compensatable transactions with rollback capabilities if any step fails.',
-      },
-      {
-        step: 7,
-        title: 'Performance Optimization Patterns',
-        content:
-          'Apply optimization patterns like parallel processing for independent operations, batch processing for bulk operations, and caching for frequently accessed data. Monitor execution times and optimize bottlenecks systematically.',
-      },
-    ],
-  },
-  {
-    id: 'platform-overview-demo',
-    title: 'Platform Overview Demo',
-    description:
-      'A comprehensive walkthrough of the Actions platform features and capabilities.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '12:45',
-    level: 'BEGINNER',
-    category: 'Platform Overview',
-    tags: ['overview', 'demo', 'features'],
-    publishDate: '2024-01-08',
-    thumbnailUrl: null,
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Navigate the Dashboard',
-        content:
-          'Start by exploring the main dashboard. Locate the key navigation areas: Projects panel on the left, main workspace in the center, and properties panel on the right. Familiarize yourself with the toolbar and menu options.',
-      },
-      {
-        step: 2,
-        title: 'Explore the Action Library',
-        content:
-          'Open the Action Library from the left panel. Browse through different categories like Connectors, Logic, Data Transformation, and Utilities. Use the search function to find specific actions quickly. Notice how actions are organized by system and function type.',
-      },
-      {
-        step: 3,
-        title: 'Understanding the Workflow Canvas',
-        content:
-          'Learn how to use the central workflow canvas. Practice dragging actions from the library onto the canvas. Understand how to connect actions using flow lines and how to arrange your workflow for optimal readability.',
-      },
-      {
-        step: 4,
-        title: 'Configure Action Properties',
-        content:
-          'Click on any action block to open the properties panel. See how each action has different configuration options. Practice setting up a simple HTTP request action by configuring the URL, method, and headers.',
-      },
-      {
-        step: 5,
-        title: 'Test and Debug Features',
-        content:
-          'Discover the testing capabilities built into the platform. Learn how to run individual actions in test mode, view execution results, and use the debugger to step through workflow execution. Practice using breakpoints and variable inspection.',
-      },
-    ],
-  },
-  {
-    id: 'workflow-optimization',
-    title: 'Workflow Optimization Techniques',
-    description:
-      'Learn advanced techniques to optimize your automation workflows for better performance.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '19:42',
-    level: 'INTERMEDIATE',
-    category: 'Optimization',
-    tags: ['optimization', 'performance', 'efficiency'],
-    publishDate: '2024-04-25',
-    thumbnailUrl: null,
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Performance Profiling and Metrics',
-        content:
-          'Set up comprehensive monitoring for your workflows. Track execution time, memory usage, API call frequency, and error rates. Use the built-in analytics dashboard to identify performance bottlenecks and establish baseline metrics for optimization efforts.',
-      },
-      {
-        step: 2,
-        title: 'Parallel Processing Implementation',
-        content:
-          'Identify operations that can run simultaneously and implement parallel execution branches. Use the Parallel Gateway action to split workflow execution and the Converging Gateway to synchronize results. This dramatically reduces total execution time for independent operations.',
-      },
-      {
-        step: 3,
-        title: 'Efficient Data Handling',
-        content:
-          'Optimize data processing by minimizing data transformations and reducing payload sizes. Use streaming for large datasets instead of loading everything into memory. Implement data filtering early in the workflow to reduce processing overhead downstream.',
-      },
-      {
-        step: 4,
-        title: 'Caching Strategies',
-        content:
-          'Implement intelligent caching for frequently accessed data. Set up temporary storage for API responses, database queries, and computed values. Configure appropriate cache expiration times based on data volatility and business requirements.',
-      },
-      {
-        step: 5,
-        title: 'Batch Processing Optimization',
-        content:
-          'Group similar operations into batches to reduce API overhead. Instead of making individual API calls for each record, accumulate records and process them in bulk. Configure optimal batch sizes based on API limits and memory constraints.',
-      },
-    ],
-  },
-  {
-    id: 'security-best-practices',
-    title: 'Security Best Practices',
-    description:
-      'Essential security considerations when building and deploying automation workflows.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '16:28',
-    level: 'ADVANCED',
-    category: 'Security',
-    tags: ['security', 'best-practices', 'deployment'],
-    publishDate: '2024-05-15',
-    thumbnailUrl: null,
-  },
-  {
-    id: 'monitoring-analytics',
-    title: 'Monitoring and Analytics',
-    description:
-      'Set up monitoring and analytics to track the performance of your automation workflows.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '24:16',
-    level: 'INTERMEDIATE',
-    category: 'Monitoring',
-    tags: ['monitoring', 'analytics', 'performance'],
-    publishDate: '2024-06-01',
-    thumbnailUrl: null,
-  },
-  {
-    id: 'advanced-scripting',
-    title: 'Advanced Scripting Techniques',
-    description:
-      'Master advanced scripting capabilities within the Actions platform for custom solutions.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '31:22',
-    level: 'ADVANCED',
-    category: 'Scripting',
-    tags: ['scripting', 'custom-solutions', 'advanced'],
-    publishDate: '2024-06-20',
-    thumbnailUrl: null,
   },
   {
     id: 'team-collaboration',
     title: 'Team Collaboration Features',
     description:
-      'Learn how to effectively collaborate with your team using Actions platform features.',
+      'Learn how to work effectively with your team using Actions collaborative features.',
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
-    duration: '14:55',
-    level: 'BEGINNER',
+    duration: '18:25',
+    level: 'RITA',
     category: 'Collaboration',
-    tags: ['collaboration', 'teamwork', 'sharing'],
-    publishDate: '2024-07-10',
+    tags: ['team', 'collaboration', 'sharing'],
+    publishDate: '2024-03-18',
     thumbnailUrl: null,
     tutorialSteps: [
       {
         step: 1,
-        title: 'Setting Up Team Workspaces',
+        title: 'Set Up Team Workspaces',
         content:
-          "Create dedicated workspaces for different teams or projects. Configure workspace permissions to control who can view, edit, or execute workflows. Set up folder structures that reflect your team's organizational needs and naming conventions.",
+          'Create shared workspaces for your team projects. Configure access permissions and role-based security to ensure team members have appropriate access levels.',
       },
       {
         step: 2,
-        title: 'Version Control and Branching',
+        title: 'Share Workflows and Templates',
         content:
-          'Learn how to use the built-in version control system. Create branches for experimental features, merge changes back to main, and handle conflicts when multiple team members edit the same workflow. Practice creating tags for production releases.',
+          'Learn how to share workflows with team members and create reusable templates. Set up approval processes for workflow changes and establish version control practices.',
       },
       {
         step: 3,
-        title: 'Collaborative Editing Features',
+        title: 'Implement Review Processes',
         content:
-          'Use real-time collaboration features to work on workflows simultaneously with team members. See live cursors and changes from other editors. Practice using comments and annotations to communicate design decisions and provide feedback on workflow implementations.',
+          'Establish code review and workflow review processes within your team. Use commenting and annotation features to provide feedback and track changes.',
       },
       {
         step: 4,
-        title: 'Code Review and Approval Workflows',
+        title: 'Monitor Team Activity',
         content:
-          'Set up approval processes for workflow deployments. Configure review requirements, assign reviewers based on workflow complexity or business impact, and use the built-in diff viewer to understand changes before approval.',
+          'Use the team dashboard to monitor workflow executions, track performance metrics, and identify collaboration opportunities. Set up team notifications and alerts.',
       },
       {
         step: 5,
@@ -437,10 +147,66 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '26:38',
-    level: 'ADVANCED',
+    level: 'Integrations',
     category: 'Deployment',
     tags: ['deployment', 'production', 'strategies'],
     publishDate: '2024-07-25',
+    thumbnailUrl: null,
+  },
+  {
+    id: 'api-integrations-guide',
+    title: 'API Integrations Deep Dive',
+    description:
+      'Master API integrations and data transformations in your automation workflows.',
+    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
+    videoId: 'Kb2JXreU4B8',
+    duration: '31:15',
+    level: 'Integrations',
+    category: 'API Development',
+    tags: ['api', 'integrations', 'data-transformation'],
+    publishDate: '2024-04-12',
+    thumbnailUrl: null,
+  },
+  {
+    id: 'jarvis-ai-automation',
+    title: 'AI-Powered Automation with Jarvis',
+    description:
+      'Leverage Jarvis AI capabilities to create intelligent, self-adapting automation workflows.',
+    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
+    videoId: 'Kb2JXreU4B8',
+    duration: '24:50',
+    level: 'Jarvis',
+    category: 'AI Automation',
+    tags: ['ai', 'jarvis', 'machine-learning', 'intelligent-automation'],
+    publishDate: '2024-05-30',
+    thumbnailUrl: null,
+  },
+  {
+    id: 'workflow-optimization',
+    title: 'Workflow Performance Optimization',
+    description:
+      'Techniques for optimizing workflow performance and reducing execution time.',
+    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
+    videoId: 'Kb2JXreU4B8',
+    duration: '19:33',
+    level: 'Workflows',
+    category: 'Performance',
+    tags: ['optimization', 'performance', 'efficiency'],
+    publishDate: '2024-06-14',
+    thumbnailUrl: null,
+  },
+  {
+    id: 'automation-design-patterns',
+    title: 'Automation Design Patterns',
+    description:
+      'Learn proven design patterns and best practices for scalable automation solutions.',
+    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
+    videoId: 'Kb2JXreU4B8',
+    duration: '28:42',
+    level: 'Automation Design',
+    category: 'Design Patterns',
+    tags: ['design-patterns', 'architecture', 'scalability'],
+    publishDate: '2024-08-08',
     thumbnailUrl: null,
   },
 ]

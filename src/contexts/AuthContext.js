@@ -1,4 +1,4 @@
-// AuthContext with ONLY 3 minimal fixes for button responsiveness
+// AuthContext with navigation loading state fix
 // src/contexts/AuthContext.js
 import React, {
   createContext,
@@ -39,7 +39,7 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
   // FIX 3: Conditionally call useFormAssociation only when user exists
   useFormAssociation(user ? db : null, user)
 
-  // Single auth listener with optimized logic
+  // FIXED: Single auth listener that doesn't re-initialize on navigation
   useEffect(() => {
     console.log(
       '[AuthContext] Setting up auth listener for:',
@@ -100,7 +100,7 @@ export function AuthProvider({ children, skipAuthCheck = false }) {
       console.log('[AuthContext] Cleaning up auth listener')
       unsubscribe()
     }
-  }, [skipAuthCheck, location.pathname]) // Removed authInitialized dependency
+  }, [skipAuthCheck]) // FIXED: Removed location.pathname dependency to prevent re-initialization on navigation
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(

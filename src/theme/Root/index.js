@@ -1,4 +1,4 @@
-// Secure by Default Root provider - Only protected paths need AuthContext
+// Secure by Default Root provider - Fixed certificate path protection
 // src/theme/Root/index.js
 import React, { useMemo } from 'react'
 import { useLocation } from '@docusaurus/router'
@@ -9,6 +9,7 @@ import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
 const PROTECTED_PATH_STUBS = [
   '/learning/service-blueprinting/courses', // Protected: course catalog
   '/learning/service-blueprinting/modules', // Protected: all modules
+  '/learning/service-blueprinting/certificate', // FIXED: Protected: certificate pages
   '/learning/automation-essentials', // Protected: all automation essentials
 ]
 

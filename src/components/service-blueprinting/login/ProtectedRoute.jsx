@@ -1,17 +1,44 @@
-// Clean Enhanced ProtectedRoute - Built from scratch
+// Enhanced ProtectedRoute with state persistence fix
 // src/components/service-blueprinting/login/ProtectedRoute.jsx
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory } from '@docusaurus/router'
 import { useAuth } from '@site/src/contexts/AuthContext'
 import { auth } from '@site/src/firebase/firebase'
 import { signOut } from 'firebase/auth'
 import Link from '@docusaurus/Link'
+import { getItem } from '@site/src/components/Forms/utils/BrowserStorage'
 
 export default function ProtectedRoute({ children }) {
   const { loading, user } = useAuth()
   const history = useHistory()
   const [isLogoutHovered, setIsLogoutHovered] = useState(false)
+
+  // FIXED: Add state to track if user was recently authenticated
+  const [wasRecentlyAuthenticated, setWasRecentlyAuthenticated] =
+    useState(false)
+
+  // FIXED: Check browser storage for recent authentication
+  useEffect(() => {
+    const userEmail = getItem('userEmail', '')
+    const userId = getItem('userId', '')
+
+    if (userEmail && userId) {
+      setWasRecentlyAuthenticated(true)
+      console.log(
+        '[ProtectedRoute] Found recent authentication in storage:',
+        userEmail,
+      )
+    }
+  }, [])
+
+  // FIXED: Update state when user changes
+  useEffect(() => {
+    if (user) {
+      setWasRecentlyAuthenticated(true)
+      console.log('[ProtectedRoute] User authenticated:', user.email)
+    }
+  }, [user])
 
   // FIXED: Specific path detection that matches Root.js logic
   const currentPath = window.location.pathname
@@ -33,17 +60,19 @@ export default function ProtectedRoute({ children }) {
     return false
   }
 
-  console.log('[ProtectedRoute] Simple check:', {
+  console.log('[ProtectedRoute] Enhanced check:', {
     currentPath,
     isProtectedPath: isProtectedPath(),
     loading,
     user: !!user,
+    wasRecentlyAuthenticated,
   })
 
   // Handle logout
   const handleLogout = async () => {
     try {
       console.log('[ProtectedRoute] Logout clicked')
+      setWasRecentlyAuthenticated(false)
       await signOut(auth)
       console.log(
         '[ProtectedRoute] Logout successful, redirecting to Learning Hub',
@@ -64,9 +93,59 @@ export default function ProtectedRoute({ children }) {
   // Protected paths - check authentication
   console.log('[ProtectedRoute] Protected path detected')
 
-  // Still loading authentication
+  // FIXED: If still loading BUT we know user was recently authenticated, show loading instead of login
   if (loading) {
-    console.log('[ProtectedRoute] Loading authentication...')
+    if (wasRecentlyAuthenticated) {
+      console.log(
+        '[ProtectedRoute] Loading but recently authenticated, showing loading...',
+      )
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '200px',
+            fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+          }}
+        >
+          <div>Loading authentication...</div>
+        </div>
+      )
+    } else {
+      console.log(
+        '[ProtectedRoute] Loading with no recent auth, showing loading...',
+      )
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '200px',
+            fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+          }}
+        >
+          <div>Loading authentication...</div>
+        </div>
+      )
+    }
+  }
+
+  // FIXED: If no user but we know they were recently authenticated, give it a moment
+  if (!user && wasRecentlyAuthenticated) {
+    console.log(
+      '[ProtectedRoute] No user but recently authenticated, showing brief loading...',
+    )
+
+    // Give it a brief moment for auth to resolve, then show login if still no user
+    setTimeout(() => {
+      if (!user) {
+        console.log('[ProtectedRoute] Auth timeout, clearing recent auth flag')
+        setWasRecentlyAuthenticated(false)
+      }
+    }, 2000) // 2 second grace period
+
     return (
       <div
         style={{
@@ -77,7 +156,7 @@ export default function ProtectedRoute({ children }) {
           fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
         }}
       >
-        <div>Loading authentication...</div>
+        <div>Verifying authentication...</div>
       </div>
     )
   }
