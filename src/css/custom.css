@@ -488,3 +488,138 @@ h6,
   content: none !important;
   display: none !important;
 }
+
+/* ============================================ */
+/* PROFESSIONAL NAVBAR DROPDOWN */
+/* ============================================ */
+
+/* Ensure dropdown container has proper positioning */
+.navbar__item.dropdown {
+  position: relative !important;
+}
+
+/* Professional dropdown menu styling */
+.navbar__item.dropdown .dropdown__menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+  margin-top: 0 !important;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  transition: all 0.15s ease;
+  pointer-events: none;
+
+  /* Clean professional styling */
+  background: #ffffff !important;
+  border: 1px solid #e1e5e9 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  min-width: 180px !important;
+  padding: 8px 0 !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Show dropdown on hover */
+.navbar__item.dropdown:hover .dropdown__menu,
+.navbar__item.dropdown .dropdown__menu:hover {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Invisible bridge to prevent dropdown from closing */
+.navbar__item.dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: transparent;
+  z-index: 999;
+}
+
+/* Ensure navbar has proper z-index */
+.navbar {
+  z-index: 1000 !important;
+  position: relative !important;
+}
+
+/* Override Docusaurus default dropdown behavior */
+.navbar__item.dropdown--hoverable:hover .dropdown__menu {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Clean dropdown links */
+.navbar__item.dropdown .dropdown__menu .dropdown__link {
+  display: block !important;
+  padding: 10px 16px !important;
+  color: #333333 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  background: none !important;
+  border: none !important;
+  transition: background-color 0.1s ease !important;
+  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+}
+
+.navbar__item.dropdown .dropdown__menu .dropdown__link:hover {
+  background: #f8f9fa !important;
+  color: #333333 !important;
+  text-decoration: none !important;
+}
+
+/* Dark theme / homepage navbar styling */
+.navbarHomepageGradient .navbar__item.dropdown .dropdown__menu {
+  background: #ffffff !important;
+  border: 1px solid #e1e5e9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.navbarHomepageGradient .navbar__item.dropdown .dropdown__menu .dropdown__link {
+  color: #333333 !important;
+}
+
+.navbarHomepageGradient
+  .navbar__item.dropdown
+  .dropdown__menu
+  .dropdown__link:hover {
+  background: #f8f9fa !important;
+  color: #333333 !important;
+}
+
+/* Handle cascade layers if they exist */
+@layer base {
+  .navbar__item.dropdown .dropdown__menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+  }
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 996px) {
+  .navbar__item.dropdown .dropdown__menu {
+    position: static !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    margin-top: 8px !important;
+    box-shadow: none !important;
+    border: 1px solid #e1e5e9 !important;
+  }
+
+  .navbar__item.dropdown::after {
+    display: none;
+  }
+}

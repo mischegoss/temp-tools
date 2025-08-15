@@ -74,7 +74,7 @@ export default function LoginComponent() {
   useEffect(() => {
     console.log('[LoginComponent] Mounted')
 
-    // FIXED: Cleanup function to reset states when component unmounts
+    // Cleanup function to reset states when component unmounts
     return () => {
       console.log('[LoginComponent] Unmounted')
       setLoading(false)
@@ -82,7 +82,7 @@ export default function LoginComponent() {
     }
   }, [])
 
-  // Handle redirect after successful authentication
+  // FIXED: Single redirect handler using useEffect only (removed duplicate immediate redirect)
   useEffect(() => {
     if (user && !redirectAttempted) {
       console.log('[LoginComponent] User authenticated, preparing redirect')
@@ -115,7 +115,7 @@ export default function LoginComponent() {
         removeSessionItem('protectedPageRedirect')
         removeSessionItem('redirectUrl')
 
-        // Immediate redirect for already-logged-in users
+        // Execute redirect
         console.log('[LoginComponent] Executing redirect to:', redirectUrl)
         history.push(redirectUrl)
       } catch (error) {
@@ -196,15 +196,15 @@ export default function LoginComponent() {
         '[LoginComponent] Company name stored in user profile displayName',
       )
 
-      // Also store in browserStorage for easy access
+      // Also store in browserStorage for immediate access
       setItem('companyName', companyName)
       console.log('[LoginComponent] Company name stored in browserStorage')
 
-      // Force Firebase to refresh the current user and trigger listeners
+      // Refresh auth state to pick up displayName
       await auth.currentUser.reload()
       console.log(
         '[LoginComponent] Auth state refreshed, current user:',
-        auth.currentUser?.email,
+        auth.currentUser.email,
       )
 
       // Don't set loading to false here - let the redirect useEffect handle it
@@ -237,7 +237,7 @@ export default function LoginComponent() {
     }
   }
 
-  // FIXED: Consistent error message function
+  // Error message helper
   const getErrorMessage = error => {
     switch (error.code) {
       case 'auth/email-already-in-use':
@@ -261,86 +261,39 @@ export default function LoginComponent() {
     }
   }
 
-  // FIXED: Complete state reset when toggling modes
+  // Complete state reset when toggling modes
   const toggleMode = () => {
     setIsLogin(!isLogin)
     setIsPasswordReset(false)
     setResetEmailSent(false)
     setResetEmail('')
-    setError(null) // FIXED: Clear error state
+    setError(null)
     setEmail('')
     setPassword('')
     setCompanyName('')
-    setLoading(false) // FIXED: Clear loading state
+    setLoading(false)
   }
 
-  // FIXED: Complete password reset flow cleanup
+  // Complete password reset flow cleanup
   const resetPasswordFlow = () => {
     setIsPasswordReset(false)
     setResetEmailSent(false)
     setResetEmail('')
     setError(null)
-    setLoading(false) // FIXED: Clear loading state
+    setLoading(false)
   }
 
-  // FIXED: Only pre-fill email if in login mode
+  // Only pre-fill email if in login mode
   const startPasswordReset = () => {
     setIsPasswordReset(true)
     setError(null)
-    setLoading(false) // FIXED: Clear loading state
+    setLoading(false)
     // Only pre-fill with email if user was in login mode
     setResetEmail(isLogin ? email : '')
   }
 
-  // FIXED: HANDLE REDIRECT IMMEDIATELY WHEN USER IS AUTHENTICATED
-  // This fixes the direct navigation issue by executing redirect logic immediately
+  // Show welcome message if user is already authenticated and redirect is in progress
   if (user && !redirectAttempted) {
-    console.log(
-      '[LoginComponent] User authenticated, executing immediate redirect',
-    )
-
-    // Execute redirect logic immediately (moved from useEffect)
-    setTimeout(() => {
-      try {
-        setRedirectAttempted(true)
-
-        // Try the protected key first, then fall back to regular key
-        let redirectUrl =
-          getSessionItem('protectedPageRedirect', '') ||
-          getSessionItem('redirectUrl', '')
-        console.log(
-          '[LoginComponent] Raw redirectUrl from session:',
-          redirectUrl,
-        )
-
-        // Only default to discover if there's NO saved redirect URL at all
-        // OR if the saved URL is the login page itself (invalid redirect)
-        if (!redirectUrl || redirectUrl === '/learning/login') {
-          console.log(
-            '[LoginComponent] No valid redirectUrl found, using default',
-          )
-          redirectUrl = '/learning/discover/'
-        } else {
-          console.log('[LoginComponent] Using saved redirectUrl:', redirectUrl)
-        }
-
-        console.log('[LoginComponent] Final redirectUrl:', redirectUrl)
-
-        // Clear both redirect URLs
-        removeSessionItem('protectedPageRedirect')
-        removeSessionItem('redirectUrl')
-
-        // Immediate redirect for already-logged-in users
-        console.log('[LoginComponent] Executing redirect to:', redirectUrl)
-        history.push(redirectUrl)
-      } catch (error) {
-        console.error('[LoginComponent] Error during redirect:', error)
-        setLoading(false)
-        history.push('/learning/discover/')
-      }
-    }, 100) // Small delay to ensure state updates
-
-    // Show welcome message while redirect executes
     return (
       <div
         style={{
