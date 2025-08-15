@@ -146,25 +146,25 @@ const LearningHubIcon = () => (
 export const homePageData = [
   {
     title: ['Discover', 'Platform'],
-    description: 'New to Platform? Start here.',
+    description: 'New to Platform? Get started here.',
     icon: <DocumentationIcon />,
     link: '/learning/discover',
   },
   {
     title: ['Automation', 'Design'],
-    description: 'Master service blueprints',
+    description: 'AI-guided service blueprinting',
     icon: <LearningIcon />,
     link: '/learning/service-blueprinting/',
   },
   {
     title: ['Automation', 'Development'],
-    description: 'Build powerful automations',
+    description: 'Learn to build powerful automations',
     icon: <AutomationIcon />,
     link: '/learning/actions/',
   },
   {
     title: ['Learning', 'Hub'],
-    description: 'All product training',
+    description: 'Explore all Resolve product training',
     icon: <LearningHubIcon />,
     link: '/learning/',
   },

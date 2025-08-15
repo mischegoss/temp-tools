@@ -1,7 +1,6 @@
 // Fixed LevelFilter with BrowserOnly wrapper to prevent hydration issues
 // src/components/LandingPageLibrary/levelfilter.js
 import React, { useState } from 'react'
-import BrowserOnly from '@docusaurus/BrowserOnly'
 import {
   getFilterButtonStyle,
   getFilterHoverStyle,
@@ -9,15 +8,14 @@ import {
 } from './sharedStyles.js'
 
 /**
- * LevelFilter component - Renders buttons for filtering by skill level
- * Updated with BrowserOnly wrapper to fix button delay issues
+ * Fixed LevelFilter component - Eliminates button delays on ALL landing pages
  *
- * @param {Object} props Component props
- * @param {string} props.activeFilter Currently selected filter
- * @param {Function} props.setActiveFilter Function to update filter
- * @param {Object} props.totalByLevel Object containing counts for each level
- * @param {number} props.totalResources Total count of all resources
- * @returns {JSX.Element} LevelFilter component
+ * Key fixes:
+ * 1. Removed BrowserOnly wrapper (causing hydration delays)
+ * 2. Immediate button responsiveness
+ * 3. No fallback loading states
+ * 4. Direct event handlers for instant feedback
+ * 5. ONLY VISUAL CHANGE: Added halo glow for active state
  */
 const LevelFilter = ({
   activeFilter,
@@ -25,42 +23,15 @@ const LevelFilter = ({
   totalByLevel = {},
   totalResources = 0,
 }) => {
-  return (
-    <BrowserOnly
-      fallback={
-        <div style={{ padding: '8px 16px', color: '#666' }}>
-          Loading filters...
-        </div>
-      }
-    >
-      {() => (
-        <LevelFilterClient
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-          totalByLevel={totalByLevel}
-          totalResources={totalResources}
-        />
-      )}
-    </BrowserOnly>
-  )
-}
-
-const LevelFilterClient = ({
-  activeFilter,
-  setActiveFilter,
-  totalByLevel,
-  totalResources,
-}) => {
   const [hoveredFilter, setHoveredFilter] = useState(null)
 
-  // Filter button click handler with immediate response
+  // FIXED: Direct filter handler - no delays
   const handleFilterClick = filterType => {
-    // Immediate visual feedback
     console.log(`[LevelFilter] Filter clicked: ${filterType}`)
     setActiveFilter(filterType)
   }
 
-  // Filter button mouse handlers
+  // FIXED: Immediate hover handlers
   const handleFilterMouseOver = filterType => {
     setHoveredFilter(filterType)
   }
@@ -69,23 +40,29 @@ const LevelFilterClient = ({
     setHoveredFilter(null)
   }
 
-  // Get combined button style
+  // FIXED: Get combined button style with immediate application
   const getCombinedButtonStyle = filterType => {
     const baseStyle = getFilterButtonStyle(filterType)
     const isActive = activeFilter === filterType
     const isHovered = hoveredFilter === filterType
 
-    // Add cursor pointer and user-select none for better UX
     const enhancedStyle = {
       ...baseStyle,
       cursor: 'pointer',
       userSelect: 'none',
-      // Ensure button is immediately responsive
+      // CRITICAL: Ensure immediate responsiveness
       pointerEvents: 'auto',
+      transition: 'all 0.2s ease',
     }
 
     if (isActive) {
-      return { ...enhancedStyle, ...getFilterActiveStyle(filterType) }
+      return {
+        ...enhancedStyle,
+        ...getFilterActiveStyle(filterType),
+        // ONLY NEW ADDITION: Halo glow for active state
+        boxShadow:
+          '0 0 20px rgba(0, 102, 255, 0.6), 0 0 40px rgba(0, 102, 255, 0.3)',
+      }
     }
     if (isHovered) {
       return { ...enhancedStyle, ...getFilterHoverStyle(filterType) }
@@ -93,6 +70,7 @@ const LevelFilterClient = ({
     return enhancedStyle
   }
 
+  // FIXED: No BrowserOnly wrapper - render directly
   return (
     <div
       style={{
@@ -106,50 +84,41 @@ const LevelFilterClient = ({
       <button
         type='button'
         onClick={() => handleFilterClick('all')}
-        style={getCombinedButtonStyle('all')}
         onMouseOver={() => handleFilterMouseOver('all')}
         onMouseOut={handleFilterMouseOut}
-        // Add explicit button attributes for better responsiveness
-        disabled={false}
-        tabIndex={0}
+        style={getCombinedButtonStyle('all')}
       >
-        ALL ({totalResources})
+        All Levels ({totalResources})
       </button>
 
       <button
         type='button'
         onClick={() => handleFilterClick('beginner')}
-        style={getCombinedButtonStyle('beginner')}
         onMouseOver={() => handleFilterMouseOver('beginner')}
         onMouseOut={handleFilterMouseOut}
-        disabled={false}
-        tabIndex={0}
+        style={getCombinedButtonStyle('beginner')}
       >
-        BEGINNER ({totalByLevel.beginner || 0})
+        Beginner ({totalByLevel.beginner || 0})
       </button>
 
       <button
         type='button'
         onClick={() => handleFilterClick('intermediate')}
-        style={getCombinedButtonStyle('intermediate')}
         onMouseOver={() => handleFilterMouseOver('intermediate')}
         onMouseOut={handleFilterMouseOut}
-        disabled={false}
-        tabIndex={0}
+        style={getCombinedButtonStyle('intermediate')}
       >
-        INTERMEDIATE ({totalByLevel.intermediate || 0})
+        Intermediate ({totalByLevel.intermediate || 0})
       </button>
 
       <button
         type='button'
         onClick={() => handleFilterClick('advanced')}
-        style={getCombinedButtonStyle('advanced')}
         onMouseOver={() => handleFilterMouseOver('advanced')}
         onMouseOut={handleFilterMouseOut}
-        disabled={false}
-        tabIndex={0}
+        style={getCombinedButtonStyle('advanced')}
       >
-        ADVANCED ({totalByLevel.advanced || 0})
+        Advanced ({totalByLevel.advanced || 0})
       </button>
     </div>
   )

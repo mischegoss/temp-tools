@@ -23,7 +23,13 @@ const COMPLETELY_PUBLIC_PATHS = [
   '/learning/discover', // Discovery page
   '/learning/actions', // Public documentation
   '/learning/contact-us', // Public contact
-  '/learning/service-blueprinting', // Public: service blueprinting landing page
+  '/learning/service-blueprinting', // Public: service blueprinting landing page ONLY
+  '/learning/automation-essentials', // Public: automation essentials landing page ONLY
+  '/learning/pro', // Public: pro landing page
+  '/learning/insights', // Public: insights landing page
+  '/learning/express', // Public: express landing page
+  '/learning/', // Learning hub root
+  '/learning', // Learning hub root (without trailing slash)
 ]
 
 // Check if page is protected (needs AuthContext with auth checks)
@@ -41,20 +47,21 @@ const isCompletelyPublicPage = pathname => {
   // First check if it's explicitly in the public paths list
   if (
     COMPLETELY_PUBLIC_PATHS.some(path => {
-      if (path === '/' || path === '/learning/') {
+      // EXACT matches for all specific pages
+      if (path === '/' || path === '/learning/' || path === '/learning') {
         return pathname === path // Exact match for these
       }
-      // FIXED: Exact match for service-blueprinting landing page too
-      if (path === '/learning/service-blueprinting') {
-        return pathname === path // Exact match only
+      // EXACT match for all landing pages - NO sub-paths included
+      if (path.startsWith('/learning/')) {
+        return pathname === path // Exact match only - /learning/service-blueprinting does NOT match /learning/service-blueprinting/anything
       }
-      return pathname.startsWith(path) // Starts with for others
+      return pathname.startsWith(path) // Starts with for others (like homepage)
     })
   ) {
     return true
   }
 
-  // Handle learning root as exact match
+  // Handle learning root as exact match (redundant but explicit)
   if (pathname === '/learning/' || pathname === '/learning') {
     return true
   }

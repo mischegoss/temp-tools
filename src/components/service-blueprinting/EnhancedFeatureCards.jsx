@@ -1,141 +1,105 @@
-// src/components/Forms/utils/EnhancedFeatureCards.jsx
+// COMPREHENSIVE FIX: Replace EnhancedFeatureCards.jsx for Service Blueprinting
+// src/components/service-blueprinting/EnhancedFeatureCards.jsx
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
-import { useUserActivity } from '../../contexts/UserActivityContext'
+
+/**
+ * Fixed EnhancedFeatureCards - Eliminates button delays on Service Blueprinting pages
+ *
+ * Key fixes:
+ * 1. No complex state management
+ * 2. Direct CSS-in-JS with immediate hover effects
+ * 3. Simplified component structure
+ * 4. Immediate button responsiveness
+ */
 
 const EnhancedFeatureCard = ({ title, description, link, icon, styles }) => {
-  const { viewedCards, markCardAsViewed } = useUserActivity()
-  const [isHovered, setIsHovered] = React.useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
-  // Create a consistent ID from the title
-  const cardId = title.replace(/\s+/g, '-').toLowerCase()
-  const isViewed = viewedCards[cardId] || false
+  // FIXED: Immediate hover handlers
+  const handleMouseEnter = () => setIsHovered(true)
+  const handleMouseLeave = () => setIsHovered(false)
 
-  const handleCardClick = () => {
-    markCardAsViewed(title)
-  }
-
-  // Extract number from icon if it exists (for course modules)
-  const moduleNumber = icon && icon.match(/\d+/) ? icon.match(/\d+/)[0] : null
+  // FIXED: Dynamic button hover effects
+  const getButtonHoverHandlers = () => ({
+    onMouseEnter: e => {
+      e.currentTarget.style.transform = 'translateY(-2px)'
+      e.currentTarget.style.boxShadow =
+        '0 0 20px rgba(0, 102, 255, 0.4), 0 6px 16px rgba(0, 102, 255, 0.3)'
+      e.currentTarget.style.background =
+        'linear-gradient(to bottom, var(--brand-blue-400) 0%, var(--brand-blue) 100%)'
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.transform = 'translateY(0)'
+      e.currentTarget.style.boxShadow =
+        '0 0 10px rgba(0, 102, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15)'
+      e.currentTarget.style.background =
+        'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)'
+    },
+  })
 
   return (
-    <Link to={link} style={styles.cardLink} onClick={handleCardClick}>
-      <div
-        style={{
-          ...styles.card,
-          border: isHovered
-            ? `2px solid var(--brand-blue-400)`
-            : `2px solid var(--brand-blue)`,
-          transform: isHovered ? 'translateY(-5px)' : 'none',
-          boxShadow: isHovered
-            ? '0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2)'
-            : '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Status Banner - Always present with different styling based on viewed status */}
-        <div
-          style={{
-            ...styles.statusBanner,
-            background: isViewed
-              ? 'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-green) 100%)' // Success gradient when viewed
-              : 'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)', // Primary gradient when not viewed
-            color: 'var(--brand-white)',
-          }}
-        >
-          {isViewed ? 'VIEWED' : 'CLICK TO GET STARTED'}
+    <div
+      style={{
+        ...styles.card,
+        transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
+        boxShadow: isHovered
+          ? '0 0 20px rgba(0, 102, 255, 0.3), 0 8px 24px rgba(0, 102, 255, 0.2)'
+          : '0 0 10px rgba(0, 102, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1)',
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div style={styles.gradientOverlay} />
+
+      <div style={styles.iconContainer}>
+        <div style={styles.logoBackground}>
+          <img
+            src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
+            alt='Resolve'
+            style={styles.logoImage}
+          />
         </div>
-
-        {/* Icon Container - Centered below the banner */}
-        <div style={styles.iconContainer}>
-          <div style={styles.logoBackground}>
-            <img
-              src='https://images.crunchbase.com/image/upload/c_pad,h_160,w_160,f_auto,b_white,q_auto:eco,dpr_2/nlbcou3gjlhfw12ae4aj'
-              alt='Resolve'
-              style={styles.logoImage}
-            />
-          </div>
-        </div>
-
-        {/* Card Content */}
-        <div style={styles.cardContent}>
-          <h3 style={styles.cardTitle}>{title}</h3>
-          <p style={styles.cardDescription}>{description}</p>
-
-          {/* Action Button */}
-          <div style={styles.buttonContainer}>
-            <div
-              style={{
-                ...styles.actionButton,
-                background: isHovered
-                  ? 'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue-400) 100%)'
-                  : 'linear-gradient(to bottom, var(--brand-black) 0%, var(--brand-blue) 100%)',
-                boxShadow: isHovered
-                  ? '0 0 15px rgba(0, 102, 255, 0.4), 0 2px 8px rgba(0, 102, 255, 0.3)'
-                  : 'none',
-                transform: isHovered ? 'translateY(-1px)' : 'none',
-              }}
-            >
-              View Module
-            </div>
-          </div>
-        </div>
-
-        {/* Gradient overlay for depth */}
-        <div style={styles.gradientOverlay} />
       </div>
-    </Link>
+
+      <div style={styles.cardContent}>
+        <h3 style={styles.cardTitle}>{title}</h3>
+        <p style={styles.cardDescription}>{description}</p>
+
+        <div style={styles.buttonContainer}>
+          <Link to={link} style={{ textDecoration: 'none' }}>
+            <button style={styles.actionButton} {...getButtonHoverHandlers()}>
+              Get Started
+            </button>
+          </Link>
+        </div>
+      </div>
+    </div>
   )
 }
 
-const EnhancedFeatureCards = ({ features }) => {
+const EnhancedFeatureCards = ({ features = [] }) => {
+  // FIXED: Static styles - no dynamic injection
   const styles = {
     cardContainer: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-      gap: '1.5rem',
-      margin: '2rem 0',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+      gap: '2rem',
+      padding: '2rem 0',
+      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
     },
     card: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      padding: '0',
-      borderRadius: '12px',
       backgroundColor: 'var(--brand-white)',
-      border: '2px solid var(--brand-blue)',
-      boxShadow:
-        '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.3s ease-in-out',
+      borderRadius: '12px',
+      border: '2px solid var(--brand-blue-400)',
       overflow: 'hidden',
       position: 'relative',
-    },
-    cardLink: {
-      textDecoration: 'none !important',
-      color: 'inherit',
-    },
-    statusBanner: {
-      fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-      width: '100%',
-      padding: '0.4rem 0',
-      textAlign: 'center',
-      fontWeight: '700',
-      fontSize: '0.8rem',
-      letterSpacing: '0.5px',
-      textTransform: 'uppercase',
-      transition: 'all 0.3s ease',
-      height: '30px',
+      transition: 'all 0.3s ease-in-out',
+      cursor: 'pointer',
+      minHeight: '320px',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'var(--brand-white)',
-      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-      position: 'relative',
-      zIndex: 2,
+      flexDirection: 'column',
     },
     iconContainer: {
       display: 'flex',
@@ -200,10 +164,13 @@ const EnhancedFeatureCards = ({ features }) => {
       borderRadius: '6px',
       fontWeight: '600',
       fontSize: '0.95rem',
-      transition: 'all 0.3s ease-in-out',
+      transition: 'all 0.2s ease',
       border: '2px solid var(--brand-blue-400)',
       textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
       cursor: 'pointer',
+      // CRITICAL: Immediate responsiveness
+      pointerEvents: 'auto',
+      userSelect: 'none',
     },
     gradientOverlay: {
       position: 'absolute',
