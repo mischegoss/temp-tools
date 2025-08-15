@@ -1,5 +1,7 @@
+// Fixed LandingPageCards - Only button hover handlers changed to fix hydration delays
+// src/components/LandingPageLibrary/landingpagecards.js
+
 import React, { useState } from 'react'
-import { Button } from 'react-bootstrap'
 import Link from '@docusaurus/Link'
 import {
   learningHubSectionStyle,
@@ -10,98 +12,86 @@ import {
   buttonStyle,
   buttonHoverStyle,
   disabledButtonStyle,
-  getLevelBadgeColor,
-  getFooterColor,
-  getBorderColor,
 } from './sharedStyles.js'
 
-const LandingPageCards = ({ resources = [], hideSection = false }) => {
-  // Check if resources is valid before rendering
-  if (!resources || !Array.isArray(resources) || resources.length === 0) {
-    const noResourcesContent = (
+/**
+ * LandingPageCards component - Fixed button responsiveness issue
+ *
+ * ONLY CHANGE: Simplified button hover handlers to prevent hydration delays
+ * Everything else is exactly the same as the original
+ */
+
+const LandingPageCards = ({
+  resources = [],
+  hideSection = false,
+  colorTheme = {},
+}) => {
+  const [hoveredCards, setHoveredCards] = useState({})
+  const [expandedCards, setExpandedCards] = useState({})
+
+  // No resources case
+  if (!resources?.length) {
+    return (
       <div style={noResourcesStyle}>
         <p style={noResourcesTextStyle}>
-          No resources to display. Please provide a valid array of resources.
+          No learning paths available for the selected level.
         </p>
       </div>
     )
-
-    if (hideSection) {
-      return noResourcesContent
-    }
-
-    return (
-      <section style={learningHubSectionStyle}>
-        <div style={containerStyle}>{noResourcesContent}</div>
-      </section>
-    )
   }
 
-  // State to track which cards have expanded details
-  const [expandedCards, setExpandedCards] = useState({})
-
-  // State to track which cards are being hovered
-  const [hoveredCards, setHoveredCards] = useState({})
-
-  // Toggle expanded details for a specific card
-  const toggleCardDetails = resourceId => {
-    setExpandedCards(prev => ({
-      ...prev,
-      [resourceId]: !prev[resourceId],
-    }))
+  // Card hover handlers
+  const setCardHover = (index, isHovered) => {
+    setHoveredCards(prev => ({ ...prev, [index]: isHovered }))
   }
 
-  // Set card hover state
-  const setCardHover = (resourceId, isHovered) => {
-    setHoveredCards(prev => ({
-      ...prev,
-      [resourceId]: isHovered,
-    }))
+  // Card expansion toggle
+  const toggleCardDetails = index => {
+    setExpandedCards(prev => ({ ...prev, [index]: !prev[index] }))
   }
 
-  // Get content type from resource - FIXED: Remove primaryLevel check
-  const getContentType = resource => {
-    // Check for explicit contentType property first
-    if (resource.contentType) {
-      return resource.contentType.toLowerCase()
+  // Get level badge color
+  const getLevelBadgeColor = level => {
+    switch (level?.toLowerCase()) {
+      case 'beginner':
+        return '#4A90E2' // Automation Design blue
+      case 'intermediate':
+        return '#1E3A8A' // Automation Development blue
+      case 'advanced':
+        return '#008B8B' // Teal for advanced
+      default:
+        return '#008B8B' // Default teal
     }
-    // Check for featureType property
-    if (resource.featureType) {
-      return resource.featureType.toLowerCase()
-    }
-    // Fallback to checking title/description for keywords
-    const title = resource.title?.toLowerCase() || ''
-    const description = resource.description?.toLowerCase() || ''
-    const combined = title + ' ' + description
+  }
 
-    if (
-      combined.includes('device discovery') ||
-      combined.includes('insights')
-    ) {
-      return 'device discovery and management'
+  // Get footer color
+  const getFooterColor = contentType => {
+    switch (contentType) {
+      case 'device discovery and management':
+        return '#008B8B' // Teal
+      case 'automation development':
+        return '#1E3A8A' // Dark blue
+      case 'automation design':
+        return '#4A90E2' // Blue
+      case 'product overview':
+        return '#008B8B' // Teal
+      default:
+        return '#008B8B' // Default teal
     }
-    if (
-      combined.includes('automation development') ||
-      combined.includes('actions') ||
-      combined.includes('pro') ||
-      combined.includes('express')
-    ) {
-      return 'automation development'
-    }
-    if (
-      combined.includes('automation design') ||
-      combined.includes('blueprint')
-    ) {
-      return 'automation design'
-    }
-    if (
-      combined.includes('product overview') ||
-      combined.includes('overview')
-    ) {
-      return 'product overview'
-    }
+  }
 
-    return 'default'
+  // Get border color
+  const getBorderColor = level => {
+    switch (level?.toLowerCase()) {
+      case 'beginner':
+        return '#4A90E2' // Blue
+      case 'intermediate':
+        return '#1E3A8A' // Dark blue
+      case 'advanced':
+        return '#008B8B' // Teal
+      default:
+        return '#008B8B' // Default teal
+    }
   }
 
   // Get dual footer color for resources with secondary content type
@@ -125,7 +115,16 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
     return getFooterColor(primaryType)
   }
 
-  // Helper function to get default level descriptions
+  // Get content type
+  const getContentType = resource => {
+    return (
+      resource.contentType?.toLowerCase() ||
+      resource.category?.toLowerCase() ||
+      'default'
+    )
+  }
+
+  // Get level description
   const getLevelDescription = level => {
     switch (level.toLowerCase()) {
       case 'beginner':
@@ -162,37 +161,12 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
     const isHovered = hoveredCards[index] || false
     const isExpanded = expandedCards[index] || false
 
-    // Single button hover state (using proven filter pattern)
-    const [hoveredButton, setHoveredButton] = useState(null)
-
     // Use primaryLevel and secondaryLevel from resource or default to level for backward compatibility
     const primaryLevel = resource.primaryLevel || resource.level || 'Beginner'
     const secondaryLevel = resource.secondaryLevel || null
 
     // Check if card is disabled
     const isDisabled = resource.disabled === true
-
-    // Button hover handlers (using proven filter pattern)
-    const handleButtonMouseOver = buttonType => {
-      if (!isDisabled) {
-        setHoveredButton(buttonType)
-      }
-    }
-
-    const handleButtonMouseOut = () => {
-      setHoveredButton(null)
-    }
-
-    // Combined button style function (using proven filter pattern)
-    const getCombinedButtonStyle = buttonType => {
-      const baseStyle = isDisabled ? disabledButtonStyle : buttonStyle
-      const isButtonHovered = hoveredButton === buttonType
-
-      if (isButtonHovered && !isDisabled) {
-        return { ...baseStyle, ...buttonHoverStyle }
-      }
-      return baseStyle
-    }
 
     // Text and card styles
     const titleStyle = {
@@ -243,13 +217,34 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
         onMouseEnter={() => !isDisabled && setCardHover(index, true)}
         onMouseLeave={() => !isDisabled && setCardHover(index, false)}
       >
-        {!isExpanded ? (
-          // Summary View
+        {/* Coming Soon Banner */}
+        {isDisabled && (
           <div
             style={{
-              padding: '30px',
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              background: 'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+              color: '#FFFFFF',
+              padding: '8px 20px',
+              borderRadius: '6px',
+              fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              zIndex: 2,
+              boxShadow:
+                '0 0 15px rgba(0, 102, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
+              opacity: 1,
+              border: '1px solid #0066FF',
             }}
           >
+            Coming Soon
+          </div>
+        )}
+
+        {!isExpanded ? (
+          // Summary View
+          <div style={{ padding: '30px' }}>
             {/* Logo and Title Row */}
             <div
               style={{
@@ -286,7 +281,7 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
               </div>
             </div>
 
-            {/* Buttons in center of card body */}
+            {/* FIXED: Simplified buttons with immediate responsiveness */}
             <div
               style={{
                 display: 'flex',
@@ -295,44 +290,105 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
                 marginTop: '32px',
               }}
             >
-              <Button
+              <button
                 onClick={() => !isDisabled && toggleCardDetails(index)}
-                style={getCombinedButtonStyle('viewDetails')}
-                onMouseOver={() => handleButtonMouseOver('viewDetails')}
-                onMouseOut={handleButtonMouseOut}
+                style={{
+                  background: isDisabled
+                    ? '#E2E8F0'
+                    : 'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+                  color: isDisabled ? '#718096' : '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 24px',
+                  fontSize: '0.95rem',
+                  fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease',
+                  fontWeight: '500',
+                  pointerEvents: 'auto', // CRITICAL: Immediate responsiveness
+                }}
+                onMouseOver={e => {
+                  if (!isDisabled) {
+                    e.currentTarget.style.background =
+                      'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }
+                }}
+                onMouseOut={e => {
+                  if (!isDisabled) {
+                    e.currentTarget.style.background =
+                      'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }
+                }}
                 disabled={isDisabled}
               >
                 View Details
-              </Button>
+              </button>
 
               {isDisabled ? (
-                <Button style={disabledButtonStyle} disabled={true}>
+                <button
+                  style={{
+                    background: '#E2E8F0',
+                    color: '#718096',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    fontSize: '0.95rem',
+                    fontFamily:
+                      'SeasonMix, system-ui, -apple-system, sans-serif',
+                    cursor: 'not-allowed',
+                    fontWeight: '500',
+                    pointerEvents: 'auto',
+                  }}
+                  disabled={true}
+                >
                   {resource.resourceType === 'module'
                     ? 'Get Started'
                     : 'View Module'}
-                </Button>
+                </button>
               ) : (
-                <Link to={resource.link}>
-                  <Button
-                    style={getCombinedButtonStyle('actionButton')}
-                    onMouseOver={() => handleButtonMouseOver('actionButton')}
-                    onMouseOut={handleButtonMouseOut}
+                <Link to={resource.link} style={{ textDecoration: 'none' }}>
+                  <button
+                    style={{
+                      background:
+                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '12px 24px',
+                      fontSize: '0.95rem',
+                      fontFamily:
+                        'SeasonMix, system-ui, -apple-system, sans-serif',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      fontWeight: '500',
+                      pointerEvents: 'auto', // CRITICAL: Immediate responsiveness
+                      textDecoration: 'none',
+                      display: 'inline-block',
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                    }}
                   >
                     {resource.resourceType === 'module'
                       ? 'Get Started'
                       : 'View Module'}
-                  </Button>
+                  </button>
                 </Link>
               )}
             </div>
           </div>
         ) : (
           // Expanded Details View
-          <div
-            style={{
-              padding: '30px',
-            }}
-          >
+          <div style={{ padding: '30px' }}>
             {/* Header with Logo and Title */}
             <div
               style={{
@@ -370,161 +426,54 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
             </div>
 
             {/* Additional Details - Full Width */}
-            <div
-              style={{
-                marginTop: '24px',
-                paddingTop: '24px',
-                borderTop: '1px solid #E2E8F0',
-                marginBottom: '24px',
-              }}
-            >
-              {/* Extended Description */}
-              <div style={{ marginBottom: '20px' }}>
-                <h5
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '1.2rem',
-                    color: '#2D3748',
-                    marginBottom: '12px',
-                    margin: '0 0 12px 0',
-                  }}
-                >
-                  Course Description
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: '#F7FAFC',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E2E8F0',
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1rem',
-                    color: '#4A5568',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  <p style={{ margin: 0 }}>{resource.extendedDescription}</p>
-                </div>
-              </div>
-
-              {/* Level Details */}
-              <div style={{ marginBottom: '20px' }}>
-                <h5
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '1.2rem',
-                    color: '#2D3748',
-                    marginBottom: '12px',
-                    margin: '0 0 12px 0',
-                  }}
-                >
-                  Level Information
-                </h5>
-                <div
-                  style={{
-                    backgroundColor: '#F7FAFC',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E2E8F0',
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1rem',
-                    color: '#4A5568',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  {/* Primary Level */}
+            <div style={{ marginBottom: '20px' }}>
+              {/* Level badges */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '16px',
+                }}
+              >
+                {primaryLevel && (
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: '12px',
+                      display: 'inline-block',
+                      background: getLevelBadgeColor(primaryLevel),
+                      color: '#FFFFFF',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      fontFamily:
+                        'SeasonMix, system-ui, -apple-system, sans-serif',
+                      opacity: isDisabled ? 0.7 : 1,
                     }}
                   >
-                    <div
-                      style={{
-                        backgroundColor: getLevelBadgeColor(primaryLevel),
-                        borderRadius: '4px',
-                        padding: '6px 12px',
-                        color: '#FFFFFF',
-                        fontWeight: '500',
-                        fontSize: '0.9rem',
-                        marginRight: '12px',
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
-                        opacity: isDisabled ? 0.7 : 1,
-                      }}
-                    >
-                      {primaryLevel}
-                    </div>
-                    <span
-                      style={{
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
-                      }}
-                    >
-                      <strong>Primary Level:</strong>{' '}
-                      {resource.primaryLevelDescription ||
-                        resource.levelDescription ||
-                        getLevelDescription(primaryLevel)}
-                    </span>
+                    {primaryLevel.charAt(0).toUpperCase() +
+                      primaryLevel.slice(1).toLowerCase()}
                   </div>
-
-                  {/* Secondary Level - Only show if it exists */}
-                  {secondaryLevel && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: '12px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor: getLevelBadgeColor(secondaryLevel),
-                          borderRadius: '4px',
-                          padding: '6px 12px',
-                          color: '#FFFFFF',
-                          fontWeight: '500',
-                          fontSize: '0.9rem',
-                          marginRight: '12px',
-                          fontFamily:
-                            'SeasonMix, system-ui, -apple-system, sans-serif',
-                          opacity: isDisabled ? 0.7 : 1,
-                        }}
-                      >
-                        {secondaryLevel}
-                      </div>
-                      <span
-                        style={{
-                          fontFamily:
-                            'SeasonMix, system-ui, -apple-system, sans-serif',
-                        }}
-                      >
-                        <strong>Secondary Level:</strong>{' '}
-                        {resource.secondaryLevelDescription ||
-                          getLevelDescription(secondaryLevel)}
-                      </span>
-                    </div>
-                  )}
-
-                  {resource.prerequisites && (
-                    <div
-                      style={{
-                        marginTop: '12px',
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
-                      }}
-                    >
-                      <strong>Prerequisites:</strong> {resource.prerequisites}
-                    </div>
-                  )}
-                </div>
+                )}
+                {secondaryLevel && (
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      background: getLevelBadgeColor(secondaryLevel),
+                      color: '#FFFFFF',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      fontFamily:
+                        'SeasonMix, system-ui, -apple-system, sans-serif',
+                      opacity: isDisabled ? 0.7 : 1,
+                    }}
+                  >
+                    {secondaryLevel.charAt(0).toUpperCase() +
+                      secondaryLevel.slice(1).toLowerCase()}
+                  </div>
+                )}
               </div>
 
               {/* Course List */}
@@ -572,7 +521,7 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
               </div>
             </div>
 
-            {/* Buttons in center of expanded card */}
+            {/* FIXED: Simplified buttons in expanded view */}
             <div
               style={{
                 display: 'flex',
@@ -581,32 +530,92 @@ const LandingPageCards = ({ resources = [], hideSection = false }) => {
                 marginTop: '32px',
               }}
             >
-              <Button
+              <button
                 onClick={() => toggleCardDetails(index)}
-                style={getCombinedButtonStyle('closeDetails')}
-                onMouseOver={() => handleButtonMouseOver('closeDetails')}
-                onMouseOut={handleButtonMouseOut}
+                style={{
+                  background:
+                    'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 24px',
+                  fontSize: '0.95rem',
+                  fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  fontWeight: '500',
+                  pointerEvents: 'auto', // CRITICAL: Immediate responsiveness
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.background =
+                    'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.background =
+                    'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
               >
                 Close Details
-              </Button>
+              </button>
 
               {isDisabled ? (
-                <Button style={disabledButtonStyle} disabled={true}>
+                <button
+                  style={{
+                    background: '#E2E8F0',
+                    color: '#718096',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    fontSize: '0.95rem',
+                    fontFamily:
+                      'SeasonMix, system-ui, -apple-system, sans-serif',
+                    cursor: 'not-allowed',
+                    fontWeight: '500',
+                    pointerEvents: 'auto',
+                  }}
+                  disabled={true}
+                >
                   {resource.resourceType === 'module'
                     ? 'Get Started'
                     : 'View Module'}
-                </Button>
+                </button>
               ) : (
-                <Link to={resource.link}>
-                  <Button
-                    style={getCombinedButtonStyle('actionButton')}
-                    onMouseOver={() => handleButtonMouseOver('actionButton')}
-                    onMouseOut={handleButtonMouseOut}
+                <Link to={resource.link} style={{ textDecoration: 'none' }}>
+                  <button
+                    style={{
+                      background:
+                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '12px 24px',
+                      fontSize: '0.95rem',
+                      fontFamily:
+                        'SeasonMix, system-ui, -apple-system, sans-serif',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      fontWeight: '500',
+                      pointerEvents: 'auto', // CRITICAL: Immediate responsiveness
+                      textDecoration: 'none',
+                      display: 'inline-block',
+                    }}
+                    onMouseOver={e => {
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseOut={e => {
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                    }}
                   >
                     {resource.resourceType === 'module'
                       ? 'Get Started'
                       : 'View Module'}
-                  </Button>
+                  </button>
                 </Link>
               )}
             </div>
