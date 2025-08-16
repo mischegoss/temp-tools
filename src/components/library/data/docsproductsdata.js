@@ -13,6 +13,12 @@ export const docsProductsData = {
       link: '/actions/',
     },
     {
+      id: 'insights',
+      title: 'Resolve Insights Documentation',
+      description: 'Our Discovery and Dependency Mapping (DDM) product.',
+      link: '/insights/',
+    },
+    {
       id: 'pro',
       title: 'Resolve Actions Pro Documentation',
       description:
@@ -25,12 +31,6 @@ export const docsProductsData = {
       description:
         'Drag-and-drop, no-code IT automation with a large built-in library of automation actions.',
       link: '/express/',
-    },
-    {
-      id: 'insights',
-      title: 'Resolve Insights Documentation',
-      description: 'Our Discovery and Dependency Mapping (DDM) product.',
-      link: '/insights/',
     },
   ],
 }
