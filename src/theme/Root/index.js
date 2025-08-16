@@ -1,6 +1,6 @@
-// Secure by Default Root provider - Fixed certificate path protection
+// ROBUST Root Fix - Prevents ALL DOM Shifts and Extension Interference
 // src/theme/Root/index.js
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect, useRef } from 'react'
 import { useLocation } from '@docusaurus/router'
 import { AuthProvider } from '@site/src/contexts/AuthContext'
 import { FirebaseProvider } from '@site/src/contexts/FirebaseContext'
@@ -31,6 +31,88 @@ const COMPLETELY_PUBLIC_PATHS = [
   '/learning/', // Learning hub root
   '/learning', // Learning hub root (without trailing slash)
 ]
+
+// Enhanced loading component that blocks ALL external interference
+const RobustLoadingScreen = () => {
+  // Inject protective styles immediately to block extension interference
+  useEffect(() => {
+    const protectiveStyles = `
+      /* Block browser extensions from modifying DOM during hydration */
+      .extension-protection {
+        pointer-events: none !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+      }
+      
+      /* Prevent Grammarly and other extensions from targeting elements */
+      [data-gr-c-s-loaded], [data-gramm], [data-gramm_editor] {
+        display: none !important;
+      }
+      
+      /* Hide all grammarly UI during hydration */
+      grammarly-extension, grammark-chrome-extension {
+        display: none !important;
+      }
+    `
+
+    const styleSheet = document.createElement('style')
+    styleSheet.textContent = protectiveStyles
+    document.head.appendChild(styleSheet)
+
+    // Add protection class to body
+    document.body.classList.add('extension-protection')
+
+    return () => {
+      document.body.classList.remove('extension-protection')
+    }
+  }, [])
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 999999, // Higher than any extension
+        fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+        // Block all interaction during loading
+        pointerEvents: 'auto',
+        userSelect: 'none',
+      }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid #f3f3f3',
+            borderTop: '3px solid #0066FF',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px',
+          }}
+        />
+        <p style={{ color: '#4A5568', fontSize: '1rem', margin: 0 }}>
+          Loading...
+        </p>
+      </div>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
 
 // Check if page is protected (needs AuthContext with auth checks)
 const isProtectedPage = pathname => {
@@ -66,53 +148,124 @@ const isCompletelyPublicPage = pathname => {
     return true
   }
 
-  // If not protected and not login, it's public (secure by default)
-  return !isProtectedPage(pathname) && !isLoginPage(pathname)
+  // Default to public for any non-matching paths (secure by default for public access)
+  return true
 }
 
-export default function Root({ children }) {
+// Main Root component with ROBUST protection against all DOM shifts
+const Root = ({ children }) => {
   const location = useLocation()
-  const pathname = location.pathname
+  const [isReady, setIsReady] = useState(false)
+  const [pageConfig, setPageConfig] = useState(null)
+  const stableConfigRef = useRef(null)
 
-  // ALWAYS call useMemo to avoid Rules of Hooks violation
-  const authConfig = useMemo(() => {
-    const isProtected = isProtectedPage(pathname)
-    const isLogin = isLoginPage(pathname)
-    const isCompletelyPublic = isCompletelyPublicPage(pathname)
+  // PHASE 1: Determine page type ONCE and cache it
+  useEffect(() => {
+    const pathname = location.pathname
 
-    // Login page needs AuthProvider but skips auth checks
-    // Protected pages need AuthProvider with auth checks
-    const skipAuthCheck = isLogin
+    // Only calculate config if it hasn't been set or path changed
+    if (
+      !stableConfigRef.current ||
+      stableConfigRef.current.pathname !== pathname
+    ) {
+      console.log(`[Root] Analyzing page: ${pathname}`)
 
-    return {
-      skipAuthCheck,
-      isCompletelyPublic,
-      isProtected,
-      isLogin,
+      let config
+      if (isCompletelyPublicPage(pathname)) {
+        console.log(
+          `[Root] Public page detected (secure by default), rendering without auth providers: ${pathname}`,
+        )
+        config = {
+          type: 'public',
+          needsAuth: false,
+          needsFirebase: false,
+          pathname,
+        }
+      } else if (isLoginPage(pathname)) {
+        console.log(
+          `[Root] Login page detected, rendering with AuthProvider only: ${pathname}`,
+        )
+        config = {
+          type: 'login',
+          needsAuth: true,
+          needsFirebase: true,
+          pathname,
+        }
+      } else if (isProtectedPage(pathname)) {
+        console.log(
+          `[Root] Protected page detected, rendering with full auth: ${pathname}`,
+        )
+        config = {
+          type: 'protected',
+          needsAuth: true,
+          needsFirebase: true,
+          pathname,
+        }
+      } else {
+        // Fallback to public (secure by default for unknown paths)
+        console.log(`[Root] Unknown path defaulting to public: ${pathname}`)
+        config = {
+          type: 'public',
+          needsAuth: false,
+          needsFirebase: false,
+          pathname,
+        }
+      }
+
+      stableConfigRef.current = config
+      setPageConfig(config)
     }
-  }, [pathname])
+  }, [location.pathname])
 
-  // Early return for completely public pages - no auth providers at all
-  if (authConfig.isCompletelyPublic) {
-    console.log(
-      '[Root] Public page detected (secure by default), rendering without auth providers:',
-      pathname,
-    )
-    return children
+  // PHASE 2: Wait for stable DOM and extension settling
+  useEffect(() => {
+    if (!pageConfig) return
+
+    // Use longer delay to ensure:
+    // 1. React hydration completes
+    // 2. Browser extensions finish loading
+    // 3. DOM is completely stable
+    const stabilityTimer = setTimeout(() => {
+      // Additional check: ensure page hasn't changed during loading
+      if (stableConfigRef.current?.pathname === location.pathname) {
+        setIsReady(true)
+      }
+    }, 200) // Longer delay for complete stability
+
+    return () => clearTimeout(stabilityTimer)
+  }, [pageConfig, location.pathname])
+
+  // PHASE 3: Show loading until everything is stable
+  if (!isReady || !pageConfig) {
+    return <RobustLoadingScreen />
   }
 
-  // For protected and login pages, provide auth context
-  console.log('[Root] Providing auth context for:', pathname, {
-    isProtected: authConfig.isProtected,
-    isLogin: authConfig.isLogin,
-    skipAuthCheck: authConfig.skipAuthCheck,
-  })
+  // PHASE 4: Render based on page type - DOM is now completely stable
+  if (pageConfig.type === 'public') {
+    // Public pages: no auth providers needed
+    return <>{children}</>
+  }
 
-  return (
-    <FirebaseProvider>
-      <AuthProvider skipAuthCheck={authConfig.skipAuthCheck}>
-        {children}
-      </AuthProvider>
-    </FirebaseProvider>
-  )
+  if (pageConfig.type === 'login') {
+    // Login pages: AuthProvider only, no auth enforcement
+    return (
+      <FirebaseProvider>
+        <AuthProvider requireAuth={false}>{children}</AuthProvider>
+      </FirebaseProvider>
+    )
+  }
+
+  if (pageConfig.type === 'protected') {
+    // Protected pages: full auth stack with enforcement
+    return (
+      <FirebaseProvider>
+        <AuthProvider requireAuth={true}>{children}</AuthProvider>
+      </FirebaseProvider>
+    )
+  }
+
+  // Fallback (should never reach here)
+  return <>{children}</>
 }
+
+export default Root

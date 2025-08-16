@@ -1,4 +1,5 @@
-// @site/src/components/LandingPageLibrary/FeaturedVideoSection.js
+// Complete Fixed FeaturedVideoSection.js with Hydration Safety
+// src/components/LandingPageLibrary/FeaturedVideoSection.js
 
 import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
@@ -76,8 +77,8 @@ const FeaturedVideoSection = ({
     width: '80px',
     height: '80px',
     background: isVideoHovered
-      ? 'rgba(74, 144, 226, 0.95)'
-      : 'rgba(0, 0, 0, 0.7)',
+      ? 'rgba(0, 102, 255, 0.9)'
+      : 'rgba(0, 102, 255, 0.8)',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
@@ -87,14 +88,16 @@ const FeaturedVideoSection = ({
   }
 
   const playIconStyle = {
-    color: 'white',
     fontSize: '28px',
-    marginLeft: '4px',
+    color: 'white',
+    marginLeft: '4px', // Slight offset for visual centering
   }
 
   // Video content styles
   const videoContentStyle = {
-    padding: '0 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   }
 
   const featuredLabelStyle = {
@@ -103,53 +106,56 @@ const FeaturedVideoSection = ({
     color: actionsTheme.primary,
     textTransform: 'uppercase',
     letterSpacing: '1px',
-    marginBottom: '16px',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const videoTitleStyle = {
-    fontSize: '2.2rem',
+    fontSize: '2.5rem',
     fontWeight: '700',
-    color: 'var(--color-text-primary)',
+    color: '#2D3748',
     lineHeight: '1.2',
-    margin: '0 0 16px 0',
+    margin: '0',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const videoDescriptionStyle = {
-    fontSize: '1.1rem',
-    color: 'var(--color-text-secondary)',
+    fontSize: '1.125rem',
+    color: '#4A5568',
     lineHeight: '1.6',
-    margin: '0 0 24px 0',
-    fontFamily: 'var(--ifm-font-family-base)',
+    margin: '0',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const videoMetaStyle = {
     display: 'flex',
     gap: '12px',
-    alignItems: 'center',
-    marginBottom: '24px',
+    flexWrap: 'wrap',
+    marginTop: '8px',
   }
 
   const metaBadgeStyle = {
-    padding: '6px 14px',
-    borderRadius: '20px',
-    fontSize: '0.9rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '6px 12px',
+    borderRadius: '6px',
+    fontSize: '0.875rem',
     fontWeight: '500',
-    fontFamily: 'var(--ifm-font-family-base)',
+    background: '#E2E8F0',
+    color: '#4A5568',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const durationBadgeStyle = {
     ...metaBadgeStyle,
-    background: 'var(--brand-grey-100)',
-    color: 'var(--brand-grey-600)',
+    background: '#FED7D7',
+    color: '#C53030',
   }
 
-  // Helper function for level badge colors
+  // Dynamic level badge color
   const getLevelBadgeColor = level => {
     switch (level?.toLowerCase()) {
       case 'beginner':
-        return '#4A90E2' // Actions blue
+        return '#00D4FF' // Light blue
       case 'intermediate':
         return '#1E3A8A' // Darker blue
       case 'advanced':
@@ -189,18 +195,39 @@ const FeaturedVideoSection = ({
     <section style={featuredVideoSectionStyle}>
       <div style={containerStyle}>
         <div style={featuredVideoGridStyle}>
-          {/* Video Player */}
-          <BrowserOnly fallback={<div style={videoContainerStyle} />}>
+          {/* Video Player - HYDRATION-SAFE */}
+          <BrowserOnly
+            fallback={
+              <div
+                style={{
+                  ...videoContainerStyle,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f0f0f0',
+                  color: '#666',
+                }}
+              >
+                <p>Loading video player...</p>
+              </div>
+            }
+          >
             {() => {
-              // Generate YouTube embed URL - only runs in browser
+              // HYDRATION-SAFE: Generate YouTube embed URL safely
               const getEmbedUrl = videoId => {
-                return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`
+                // Use fallback for origin during SSR
+                const origin =
+                  typeof window !== 'undefined'
+                    ? window.location.origin
+                    : 'https://resolve.io' // Use your actual domain
+
+                return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${origin}`
               }
 
-              // Handle video click - navigate to video landing page
+              // HYDRATION-SAFE: Handle video click safely
               const handleVideoClick = () => {
-                if (featuredVideo?.id) {
-                  window.location.href = `/learning/actions-videos/videos?video=${featuredVideo.id}`
+                if (featuredVideo?.videoId && typeof window !== 'undefined') {
+                  window.location.href = `/learning/actions-videos/videos?video=${featuredVideo.videoId}`
                 }
               }
 
