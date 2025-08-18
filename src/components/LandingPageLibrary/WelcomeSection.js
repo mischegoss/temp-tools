@@ -1,4 +1,4 @@
-// @site/src/components/Actions/ActionsWelcomeSection.js
+// @site/src/components/LandingPageLibrary/WelcomeSection.js
 
 import React from 'react'
 import {
@@ -7,19 +7,11 @@ import {
   headerStyle,
   sectionTitleStyle,
   subtitleStyle,
-  createAccentLineStyle,
 } from '@site/src/components/LandingPageLibrary/sharedStyles.js'
-import { getColorTheme } from '@site/src/components/LandingPageLibrary/colorThemes.js'
-
-// Get Actions color theme
-const actionsTheme = getColorTheme('actions')
-
-// Create themed accent line
-const accentLineStyle = createAccentLineStyle(actionsTheme.primary)
 
 /**
- * ActionsWelcomeSection component - Welcome section for Actions landing page
- * Uses the exact same styling as the existing ActionsIndex welcome section
+ * WelcomeSection component - Welcome section with product-specific colors
+ * Uses product colors for the accent line to match brand identity
  */
 const WelcomeSection = ({
   welcomeSectionProps = {
@@ -27,7 +19,18 @@ const WelcomeSection = ({
     content:
       'Explore our specialized learning paths designed to help you master Resolve Actions. Our Learning Paths will quickly get you started in exploring our latest automation platform.',
   },
+  productColors = {
+    accent: 'var(--brand-blue)', // Default to Actions blue
+  },
 }) => {
+  // Create accent line with product-specific color
+  const accentLineStyle = {
+    width: '100px',
+    height: '3px',
+    background: productColors.accent,
+    margin: '40px auto 24px auto', // Fixed spacing between line and paragraph
+  }
+
   // Modified section style with reduced spacing (matches ActionsIndex)
   const welcomeSectionStyleReduced = {
     ...learningHubSectionStyle,

@@ -204,7 +204,7 @@ export const createAccentLineStyle = (accentColor = '#008B8B') => ({
   width: '100px',
   height: '3px',
   background: accentColor,
-  margin: '40px auto 0 auto',
+  margin: '40px auto 24px auto', // ✅ Added 24px bottom margin
 })
 
 /**

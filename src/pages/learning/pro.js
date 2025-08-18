@@ -1,10 +1,10 @@
 import React from 'react'
 import Layout from '@theme/Layout'
-import ActionsIndex from '../../components/Pro/ProIndex.js'
+import ProIndexNoFilter from '../../components/Pro/ProIndexNoFilter.js'
 export default function DocsHomePage() {
   return (
     <Layout title='Documentation Homepage' description='Documentation Homepage'>
-      <ActionsIndex />
+      <ProIndexNoFilter />
     </Layout>
   )
 }

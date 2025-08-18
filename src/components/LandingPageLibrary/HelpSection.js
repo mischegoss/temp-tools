@@ -1,27 +1,17 @@
-// @site/src/components/Actions/ActionsHelpSection.js
+// @site/src/components/LandingPageLibrary/HelpSection.js
 
 import React from 'react'
 import Link from '@docusaurus/Link'
 import {
   learningHubSectionStyle,
   containerStyle,
-  createHelpSectionStyle,
   helpTitleStyle,
   helpDescriptionStyle,
-  createHelpLinkStyle,
 } from '@site/src/components/LandingPageLibrary/sharedStyles.js'
-import { getColorTheme } from '@site/src/components/LandingPageLibrary/colorThemes.js'
-
-// Get Actions color theme
-const actionsTheme = getColorTheme('actions')
-
-// Create themed styles
-const helpSectionStyle = createHelpSectionStyle(actionsTheme.primary)
-const helpLinkStyle = createHelpLinkStyle(actionsTheme.primary)
 
 /**
- * ActionsHelpSection component - Help section for Actions landing page
- * Uses the exact same styling and structure as the existing ActionsIndex help section
+ * HelpSection component - Help section with product-specific colors
+ * Uses product colors for the frame border to match brand identity
  */
 const HelpSection = ({
   helpSectionProps = {
@@ -31,7 +21,26 @@ const HelpSection = ({
     email: 'training@resolve.io',
     additionalText: "and we'll get back to you within 24 hours.",
   },
+  productColors = {
+    accent: 'var(--brand-blue)', // Default to Actions blue
+  },
 }) => {
+  // Create help section frame with product-specific border color
+  const helpSectionStyle = {
+    background: '#F7FAFC',
+    borderRadius: '12px',
+    padding: '40px',
+    textAlign: 'center',
+    border: `1px solid ${productColors.accent}`, // Product-specific border color
+  }
+
+  // Create help link with product-specific color
+  const helpLinkStyle = {
+    color: productColors.accent, // Product-specific link color
+    textDecoration: 'underline',
+    transition: 'color 0.3s ease',
+  }
+
   // Modified section style with reduced spacing (matches ActionsIndex)
   const helpSectionStyleReduced = {
     ...learningHubSectionStyle,

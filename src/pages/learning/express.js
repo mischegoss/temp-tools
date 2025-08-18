@@ -1,10 +1,10 @@
 import React from 'react'
 import Layout from '@theme/Layout'
-import ExpressIndex from '../../components/Express/expressindex'
+import ExpressIndexNoFilter from '../../components/Express/ExpressIndexNoFilter.js'
 export default function DocsHomePage() {
   return (
     <Layout title='Documentation Homepage' description='Documentation Homepage'>
-      <ExpressIndex />
+      <ExpressIndexNoFilter />
     </Layout>
   )
 }

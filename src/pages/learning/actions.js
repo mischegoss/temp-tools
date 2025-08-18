@@ -1,10 +1,10 @@
 import React from 'react'
 import Layout from '@theme/Layout'
-import ActionsIndex from '../../components/Actions/actionsindex'
+import ActionsIndexNoFilter from '../../components/Actions/ActionsIndexNoFilter'
 export default function DocsHomePage() {
   return (
     <Layout title='Documentation Homepage' description='Documentation Homepage'>
-      <ActionsIndex />
+      <ActionsIndexNoFilter />
     </Layout>
   )
 }
