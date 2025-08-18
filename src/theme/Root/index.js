@@ -1,4 +1,4 @@
-// ROBUST Root Fix - Prevents ALL DOM Shifts and Extension Interference
+// FIXED: Complete Root.js with correct imports and classification order
 // src/theme/Root/index.js
 import React, { useMemo, useState, useEffect, useRef } from 'react'
 import { useLocation } from '@docusaurus/router'
@@ -37,35 +37,30 @@ const RobustLoadingScreen = () => {
   // Inject protective styles immediately to block extension interference
   useEffect(() => {
     const protectiveStyles = `
-      /* Block browser extensions from modifying DOM during hydration */
-      .extension-protection {
-        pointer-events: none !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-      }
-      
-      /* Prevent Grammarly and other extensions from targeting elements */
-      [data-gr-c-s-loaded], [data-gramm], [data-gramm_editor] {
+      /* Block browser extension interference */
+      body::before, body::after {
         display: none !important;
       }
       
-      /* Hide all grammarly UI during hydration */
-      grammarly-extension, grammark-chrome-extension {
+      /* Stabilize layout during loading */
+      html, body {
+        overflow-x: hidden !important;
+      }
+      
+      /* Block external scripts during initial load */
+      script[src*="extension"], script[src*="chrome"] {
         display: none !important;
       }
     `
 
-    const styleSheet = document.createElement('style')
-    styleSheet.textContent = protectiveStyles
-    document.head.appendChild(styleSheet)
-
-    // Add protection class to body
-    document.body.classList.add('extension-protection')
+    const styleElement = document.createElement('style')
+    styleElement.textContent = protectiveStyles
+    document.head.appendChild(styleElement)
 
     return () => {
-      document.body.classList.remove('extension-protection')
+      if (styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement)
+      }
     }
   }, [])
 
@@ -75,35 +70,31 @@ const RobustLoadingScreen = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: '#ffffff',
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#FFFFFF',
         display: 'flex',
-        alignItems: 'center',
+        flexDirection: 'column',
         justifyContent: 'center',
-        zIndex: 999999, // Higher than any extension
+        alignItems: 'center',
+        zIndex: 999999,
         fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-        // Block all interaction during loading
-        pointerEvents: 'auto',
-        userSelect: 'none',
       }}
     >
-      <div style={{ textAlign: 'center' }}>
-        <div
-          style={{
-            width: '40px',
-            height: '40px',
-            border: '3px solid #f3f3f3',
-            borderTop: '3px solid #0066FF',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 16px',
-          }}
-        />
-        <p style={{ color: '#4A5568', fontSize: '1rem', margin: 0 }}>
-          Loading...
-        </p>
-      </div>
+      <div
+        style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #E2E8F0',
+          borderTop: '4px solid #0066CC',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          marginBottom: '1rem',
+        }}
+      />
+      <p style={{ color: '#4A5568', fontSize: '1rem', margin: 0 }}>
+        Loading...
+      </p>
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -124,7 +115,7 @@ const isLoginPage = pathname => {
   return LOGIN_PATHS.some(path => pathname === path) // EXACT match only for login
 }
 
-// SECURE BY DEFAULT: If it's not explicitly protected or login, it's public
+// FIXED: Check if page is explicitly public (NO fallback to true)
 const isCompletelyPublicPage = pathname => {
   // First check if it's explicitly in the public paths list
   if (
@@ -148,8 +139,8 @@ const isCompletelyPublicPage = pathname => {
     return true
   }
 
-  // Default to public for any non-matching paths (secure by default for public access)
-  return true
+  // FIXED: Don't default to public - let the classification order handle it
+  return false
 }
 
 // Main Root component with ROBUST protection against all DOM shifts
@@ -159,7 +150,7 @@ const Root = ({ children }) => {
   const [pageConfig, setPageConfig] = useState(null)
   const stableConfigRef = useRef(null)
 
-  // PHASE 1: Determine page type ONCE and cache it
+  // PHASE 1: Determine page type ONCE and cache it - FIXED ORDER
   useEffect(() => {
     const pathname = location.pathname
 
@@ -171,17 +162,9 @@ const Root = ({ children }) => {
       console.log(`[Root] Analyzing page: ${pathname}`)
 
       let config
-      if (isCompletelyPublicPage(pathname)) {
-        console.log(
-          `[Root] Public page detected (secure by default), rendering without auth providers: ${pathname}`,
-        )
-        config = {
-          type: 'public',
-          needsAuth: false,
-          needsFirebase: false,
-          pathname,
-        }
-      } else if (isLoginPage(pathname)) {
+
+      // FIXED: Check login FIRST (most specific)
+      if (isLoginPage(pathname)) {
         console.log(
           `[Root] Login page detected, rendering with AuthProvider only: ${pathname}`,
         )
@@ -191,7 +174,9 @@ const Root = ({ children }) => {
           needsFirebase: true,
           pathname,
         }
-      } else if (isProtectedPage(pathname)) {
+      }
+      // THEN check protected (specific paths)
+      else if (isProtectedPage(pathname)) {
         console.log(
           `[Root] Protected page detected, rendering with full auth: ${pathname}`,
         )
@@ -201,8 +186,21 @@ const Root = ({ children }) => {
           needsFirebase: true,
           pathname,
         }
-      } else {
-        // Fallback to public (secure by default for unknown paths)
+      }
+      // THEN check explicitly public (known public paths)
+      else if (isCompletelyPublicPage(pathname)) {
+        console.log(
+          `[Root] Public page detected (secure by default), rendering without auth providers: ${pathname}`,
+        )
+        config = {
+          type: 'public',
+          needsAuth: false,
+          needsFirebase: false,
+          pathname,
+        }
+      }
+      // FALLBACK: Unknown paths default to public
+      else {
         console.log(`[Root] Unknown path defaulting to public: ${pathname}`)
         config = {
           type: 'public',
