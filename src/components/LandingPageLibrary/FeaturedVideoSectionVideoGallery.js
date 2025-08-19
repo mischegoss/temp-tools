@@ -1,7 +1,6 @@
 // @site/src/components/LandingPageLibrary/FeaturedVideoSection-VideoGallery.js
 
 import React, { useState } from 'react'
-import Link from '@docusaurus/Link'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 
 /**
@@ -21,6 +20,8 @@ const FeaturedVideoSectionVideoGallery = ({
     buttonLink: '/learning/actions-videos',
   },
 }) => {
+  // Ensure we have a valid button link
+  const buttonLink = sectionProps?.buttonLink || '/learning/video-gallery'
   const [isVideoHovered, setIsVideoHovered] = useState(false)
 
   // Section wrapper styles (same as other sections)
@@ -164,18 +165,32 @@ const FeaturedVideoSectionVideoGallery = ({
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
+  // FIXED: Gallery button style - oval and blue
   const galleryButtonStyle = {
-    background: 'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
+    backgroundColor: '#0066FF',
     color: '#FFFFFF',
     padding: '12px 24px',
-    borderRadius: '8px',
+    borderRadius: '25px', // Oval shape
     fontSize: '0.95rem',
     fontWeight: '600',
+    border: 'none',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
     textDecoration: 'none',
-    display: 'inline-block',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    transition: 'all 0.3s ease',
+    minWidth: '200px',
+    height: '44px',
+    lineHeight: '1',
+  }
+
+  // Handle button click
+  const handleGalleryButtonClick = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = buttonLink
+    }
   }
 
   // Don't render if no featured video
@@ -268,7 +283,7 @@ const FeaturedVideoSectionVideoGallery = ({
               }}
             </BrowserOnly>
 
-            {/* Video Content - With gallery button */}
+            {/* Video Content - With fixed gallery button */}
             <div style={videoContentStyle}>
               <div style={featuredLabelStyle}>{sectionProps.label}</div>
               <h2 style={videoTitleStyle}>{featuredVideo.title}</h2>
@@ -279,10 +294,22 @@ const FeaturedVideoSectionVideoGallery = ({
                 <span style={levelBadgeStyle}>{featuredVideo.level}</span>
               </div>
 
-              {/* Gallery button */}
-              <Link to={sectionProps.buttonLink} style={galleryButtonStyle}>
-                {sectionProps.buttonText}
-              </Link>
+              {/* FIXED: Simple HTML button - oval and blue */}
+              <button
+                style={galleryButtonStyle}
+                onClick={handleGalleryButtonClick}
+                onMouseEnter={e => {
+                  e.target.style.backgroundColor = '#0052CC'
+                  e.target.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={e => {
+                  e.target.style.backgroundColor = '#0066FF'
+                  e.target.style.transform = 'translateY(0)'
+                }}
+                type='button'
+              >
+                {sectionProps.buttonText || 'View Full Video Gallery →'}
+              </button>
             </div>
           </div>
         </div>

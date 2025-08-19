@@ -1,6 +1,9 @@
 // @site/src/components/ActionVideoLibrary/Data/VideoData.js
 
 export const videoLibrary = [
+  // ==========================================
+  // ACTIONS FEATURED VIDEO (Current video)
+  // ==========================================
   {
     id: 'getting-started-actions',
     title: 'Getting Started with Actions Platform',
@@ -9,11 +12,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '15:32',
-    level: 'Workflows',
+    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
     category: 'Platform Overview',
     tags: ['basics', 'getting-started', 'workflow'],
     publishDate: '2024-01-15',
     thumbnailUrl: null, // Will use YouTube auto-generated thumbnail
+    product: 'actions', // NEW: Product assignment
+    featured: true, // NEW: Featured video for Actions
     tutorialSteps: [
       {
         step: 1,
@@ -47,6 +52,70 @@ export const videoLibrary = [
       },
     ],
   },
+
+  // ==========================================
+  // PRO FEATURED VIDEO (New)
+  // ==========================================
+  {
+    id: 'pro-featured-video',
+    title: 'Resolve Pro Advanced Features',
+    description:
+      'Discover the advanced capabilities of Resolve Pro for enterprise workflow management and automation.',
+    videoUrl: 'https://www.youtube.com/watch?v=bJL_c08aElQ',
+    videoId: 'bJL_c08aElQ', // Extracted from your Pro iframe URL
+    duration: '18:45',
+    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
+    category: 'Enterprise Features',
+    tags: ['pro', 'enterprise', 'advanced-features'],
+    publishDate: '2024-08-15',
+    thumbnailUrl: null,
+    product: 'pro', // NEW: Product assignment
+    featured: true, // NEW: Featured video for Pro
+  },
+
+  // ==========================================
+  // EXPRESS FEATURED VIDEO (Updated)
+  // ==========================================
+  {
+    id: 'express-featured-video',
+    title: 'Express Quick Start Guide',
+    description:
+      'Get started with Resolve Express for rapid incident resolution and streamlined workflows.',
+    videoUrl: 'https://www.youtube.com/watch?v=6W9AdnRHlzk',
+    videoId: '6W9AdnRHlzk', // NEW: Updated Express video ID
+    duration: '12:30',
+    level: 'automation-design', // FIXED: Changed from 'Authomation Design' to 'automation-design' (also fixed typo)
+    category: 'Quick Start',
+    tags: ['express', 'incident-resolution', 'workflows'],
+    publishDate: '2024-08-10',
+    thumbnailUrl: null,
+    product: 'express', // NEW: Product assignment
+    featured: true, // NEW: Featured video for Express
+  },
+
+  // ==========================================
+  // INSIGHTS FEATURED VIDEO (New)
+  // ==========================================
+  {
+    id: 'insights-featured-video',
+    title: 'Resolve Insights Analytics Deep Dive',
+    description:
+      'Master advanced analytics and reporting capabilities in Resolve Insights for comprehensive data analysis.',
+    videoUrl: 'https://www.youtube.com/watch?v=vkhMGGa5h80',
+    videoId: 'vkhMGGa5h80', // Extracted from your Insights URL
+    duration: '22:15',
+    level: 'integrations', // FIXED: Changed from 'Device Discovery' to 'integrations' (assuming this fits better)
+    category: 'Analytics',
+    tags: ['insights', 'analytics', 'reporting'],
+    publishDate: '2024-08-12',
+    thumbnailUrl: null,
+    product: 'insights', // NEW: Product assignment
+    featured: true, // NEW: Featured video for Insights
+  },
+
+  // ==========================================
+  // EXISTING ACTIONS VIDEOS (Updated with product field)
+  // ==========================================
   {
     id: 'building-complex-workflows',
     title: 'Building Complex Workflows',
@@ -55,11 +124,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '22:48',
-    level: 'Automation Design',
+    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
     category: 'Workflow Development',
     tags: ['workflows', 'conditional-logic', 'advanced'],
     publishDate: '2024-02-10',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured (Actions already has featured video)
     tutorialSteps: [
       {
         step: 1,
@@ -101,11 +172,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '18:25',
-    level: 'RITA',
+    level: 'rita', // FIXED: Changed from 'RITA' to 'rita'
     category: 'Collaboration',
     tags: ['team', 'collaboration', 'sharing'],
     publishDate: '2024-03-18',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured
     tutorialSteps: [
       {
         step: 1,
@@ -147,11 +220,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '26:38',
-    level: 'Integrations',
+    level: 'integrations', // FIXED: Changed from 'Integrations' to 'integrations'
     category: 'Deployment',
     tags: ['deployment', 'production', 'strategies'],
     publishDate: '2024-07-25',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured
   },
   {
     id: 'api-integrations-guide',
@@ -161,11 +236,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '31:15',
-    level: 'Integrations',
+    level: 'integrations', // FIXED: Changed from 'Integrations' to 'integrations'
     category: 'API Development',
     tags: ['api', 'integrations', 'data-transformation'],
     publishDate: '2024-04-12',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured
   },
   {
     id: 'jarvis-ai-automation',
@@ -175,11 +252,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '24:50',
-    level: 'Jarvis',
+    level: 'jarvis', // FIXED: Changed from 'Jarvis' to 'jarvis'
     category: 'AI Automation',
     tags: ['ai', 'jarvis', 'machine-learning', 'intelligent-automation'],
     publishDate: '2024-05-30',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured
   },
   {
     id: 'workflow-optimization',
@@ -189,11 +268,13 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '19:33',
-    level: 'Workflows',
+    level: 'workflows', // FIXED: Changed from 'Automation Development' to 'workflows'
     category: 'Performance',
     tags: ['optimization', 'performance', 'efficiency'],
     publishDate: '2024-06-14',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured
   },
   {
     id: 'automation-design-patterns',
@@ -203,10 +284,12 @@ export const videoLibrary = [
     videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
     videoId: 'Kb2JXreU4B8',
     duration: '28:42',
-    level: 'Automation Design',
+    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
     category: 'Design Patterns',
     tags: ['design-patterns', 'architecture', 'scalability'],
     publishDate: '2024-08-08',
     thumbnailUrl: null,
+    product: 'actions', // NEW: Product assignment
+    featured: false, // NEW: Not featured
   },
 ]

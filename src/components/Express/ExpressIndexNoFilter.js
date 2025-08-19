@@ -6,7 +6,7 @@ import { videoLibrary } from '@site/src/components/ActionVideoLibrary/Data/Video
 
 // Import the shared modular components (excluding filter) + hydration-safe cards
 import WelcomeSection from '../LandingPageLibrary/WelcomeSection.js'
-import FeaturedVideoSectionYouTube from '../LandingPageLibrary/FeaturedVideoSectionYouTube.js'
+import FeaturedVideoSectionVideoGallery from '../LandingPageLibrary/FeaturedVideoSectionVideoGallery.js'
 import HydrationSafeCards from '../LandingPageLibrary/HydrationSafeCards.js'
 import HelpSection from '../LandingPageLibrary/HelpSection.js'
 
@@ -22,7 +22,7 @@ import HelpSection from '../LandingPageLibrary/HelpSection.js'
  *
  * Structure:
  * 1. Welcome Section
- * 2. Featured Video Section (YouTube version)
+ * 2. Featured Video Section
  * 3. Hydration-Safe Cards Section (NO FILTER - shows all paths)
  * 4. Help Section
  */
@@ -34,7 +34,7 @@ const ExpressIndexNoFilter = ({
       'Explore our specialized learning paths designed to help you master Resolve Express. Get started with rapid incident resolution and streamlined workflows.',
   },
 
-  // Featured video section props (simplified for YouTube version)
+  // Featured video section props
   featuredVideoSectionProps = {
     label: 'Featured Learning Video',
   },
@@ -62,7 +62,12 @@ const ExpressIndexNoFilter = ({
   // Get featured video (memoized for performance)
   const featuredVideo = useMemo(() => {
     if (!videoResources || videoResources.length === 0) return null
-    return videoResources[0]
+
+    // Look for Express featured video
+    const expressFeatured = videoResources.find(
+      v => v.product === 'express' && v.featured === true,
+    )
+    return expressFeatured || videoResources[0] // fallback
   }, [videoResources])
 
   // All learning paths (no filtering applied)
@@ -78,9 +83,9 @@ const ExpressIndexNoFilter = ({
         productColors={{ accent: productInfo.accent }}
       />
 
-      {/* Featured Video Section - YouTube Version with product colors */}
+      {/* Featured Video Section with product colors */}
       {featuredVideo && (
-        <FeaturedVideoSectionYouTube
+        <FeaturedVideoSectionVideoGallery
           featuredVideo={featuredVideo}
           sectionProps={featuredVideoSectionProps}
           productColors={{ accent: productInfo.accent }}
@@ -90,7 +95,7 @@ const ExpressIndexNoFilter = ({
       {/* Hydration-Safe Cards Section - NO FILTER, shows all paths */}
       <HydrationSafeCards
         resources={allPaths}
-        productInfo={{ product: 'actions' }} // Add this
+        productInfo={{ product: 'express' }}
       />
 
       {/* Help Section with product colors */}

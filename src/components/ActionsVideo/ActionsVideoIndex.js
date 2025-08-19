@@ -37,9 +37,9 @@ const ITEMS_PER_PAGE = 6
 const ActionsVideoIndex = ({
   // Welcome section props
   welcomeSectionProps = {
-    title: 'Actions Video Learning Library',
+    title: 'Video Learning Library',
     content:
-      'Watch our comprehensive video tutorials designed to help you master Resolve Actions. From basic concepts to advanced techniques, learn at your own pace with expert-guided content.',
+      'Watch our comprehensive video tutorials designed to help you master Resolve. From basic concepts to advanced techniques, learn at your own pace with expert-guided content.',
   },
   // Filter section props
   filterSectionProps = {
