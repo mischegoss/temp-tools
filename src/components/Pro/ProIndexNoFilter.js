@@ -86,7 +86,10 @@ const ProIndexNoFilter = ({
       )}
 
       {/* Hydration-Safe Cards Section - NO FILTER, shows all paths */}
-      <HydrationSafeCards resources={allPaths} />
+      <HydrationSafeCards
+        resources={allPaths}
+        productInfo={{ product: 'actions' }} // Add this
+      />
 
       {/* Help Section with product colors */}
       <HelpSection

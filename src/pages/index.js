@@ -4,7 +4,7 @@ import HomePage from '../components/Homepage/homepageindex.js'
 import VideoTemplate from '../components/library/videotemplate.js'
 export default function DocsHomePage() {
   return (
-    <Layout title='Documentation Homepage' description='Documentation Homepage'>
+    <Layout title='Resolve Training' description='Resolve Training'>
       <HomePage />
       <VideoTemplate />
     </Layout>

@@ -1,11 +1,13 @@
+// @site/src/components/Discover/discoverindex.js
+
 import React from 'react'
 import Link from '@docusaurus/Link'
 // CONTENT UPDATE POINT 1: Import the learning paths data
 // To change available courses, update the data in this file
 import { learningPaths } from './data/LearningPathsDiscover.js'
 
-// Import our LearningHub-styled components and styles
-import DiscoverCards from './discovercards' // This should be the transformed version
+// Import our LearningHub-styled components and styles - UPDATED to use HydrationSafeCards
+import HydrationSafeCards from '../LandingPageLibrary/HydrationSafeCards.js' // CHANGED from DiscoverCards
 import {
   learningHubSectionStyle,
   containerStyle,
@@ -23,7 +25,7 @@ import {
 
 /**
  * DiscoverPage component - Creates a brand-compliant landing page for discovery
- * Now using LearningHub design system with headers at specific positions
+ * Now using HydrationSafeCards for consistent functionality across all pages
  */
 const DiscoverPage = ({
   // Props with default values
@@ -56,9 +58,14 @@ const DiscoverPage = ({
     additionalText: "and we'll get back to you within 24 hours.",
   },
 }) => {
+  // Product info for discover page - mixed content gets general category
+  const productInfo = {
+    product: 'discover', // Custom product type for discover page
+  }
+
   return (
     <>
-      {/* Welcome Section - LearningHub Style */}
+      {/* Header Section - LearningHub Style */}
       <section style={learningHubSectionStyle} className='learning-hub-section'>
         <div style={containerStyle}>
           <div style={headerStyle}>
@@ -67,32 +74,20 @@ const DiscoverPage = ({
             <div style={accentLineStyle}></div>
           </div>
 
-          {/* Cards with Headers at specific positions */}
-          <div style={cardsContainerStyle}>
-            {resources.map((resource, index) => (
-              <div key={index} style={{ marginBottom: '50px' }}>
-                {' '}
-                {/* Increased spacing between cards */}
-                {/* Service Blueprinting Header above first card */}
-                {index === 0 && (
-                  <div style={{ marginBottom: '30px' }}>
-                    <h2 style={categoryTitleStyle}>Service Blueprinting</h2>
-                  </div>
-                )}
-                {/* Automation Essentials Header above third card */}
-                {index === 2 && (
-                  <div style={{ marginBottom: '30px', marginTop: '60px' }}>
-                    <h2 style={categoryTitleStyle}>Automation Essentials</h2>
-                  </div>
-                )}
-                <DiscoverCards resources={[resource]} hideSection={true} />
-              </div>
-            ))}
+          {/* Learning Paths Section */}
+          <div style={{ marginBottom: '60px' }}>
+            <h2 style={categoryTitleStyle}>Learning Paths</h2>
+
+            {/* UPDATED: Use HydrationSafeCards instead of DiscoverCards */}
+            <HydrationSafeCards
+              resources={resources}
+              productInfo={productInfo}
+            />
           </div>
 
           {/* Help Section */}
           <div style={helpSectionStyle}>
-            <h2 style={helpTitleStyle}>{helpSectionProps.title}</h2>
+            <h3 style={helpTitleStyle}>{helpSectionProps.title}</h3>
             <p style={helpDescriptionStyle}>
               {helpSectionProps.description}{' '}
               <Link
@@ -115,17 +110,23 @@ const DiscoverPage = ({
  *
  * 1. Page Header Text: Look for headerTitle = "DISCOVER PAGE"
  * 2. Learning Hub Data: Import from learningPaths in LearningPathsDiscover.js
- *    - Main title: learningHubData.title
- *    - Subtitle: learningHubData.subtitle
- *    - Description: learningHubData.description
- * 3. Categories: learningHubData.categories array
- *    - Each category has name and courses array
+ *    - Main title: welcomeSectionProps.title
+ *    - Subtitle: welcomeSectionProps.content
+ *    - Description: welcomeSectionProps.description
+ * 3. Categories: learningPaths array - mixed content from different categories
  * 4. Course Cards: To modify course cards, update the LearningPathsDiscover.js file
- * 5. Help Section: learningHubData.helpSection
+ * 5. Help Section: helpSectionProps
  *    - Title: title property
  *    - Description: description property
  *    - Email: email property
  *    - Additional text: additionalText property
+ *
+ * CHANGES MADE:
+ * - Replaced DiscoverCards with HydrationSafeCards
+ * - Added productInfo for consistent footer handling
+ * - Simplified structure while maintaining exact same layout
+ * - Removed CSS injection complexity
+ * - No more React Bootstrap dependencies
  */
 
 export default DiscoverPage

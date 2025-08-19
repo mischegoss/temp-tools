@@ -1,29 +1,144 @@
 // @site/src/components/LandingPageLibrary/HydrationSafeCards.js
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from '@docusaurus/Link'
 
 /**
- * HydrationSafeCards - Completely hydration-safe card component
- *
- * FIXES ALL ISSUES:
- * 1. No AuthProvider dependency
- * 2. No complex event handlers
- * 3. No react-bootstrap Button conflicts
- * 4. No CSS injection
- * 5. No navigation-safe complexity
- * 6. Simple state management
- * 7. Native button elements
- * 8. Static styles only
+ * HydrationSafeCards - Best of both worlds:
+ * 1. DiscoverCards' simple, working expand/collapse logic
+ * 2. NO React Bootstrap - pure HTML buttons + Docusaurus Links
+ * 3. Learning Hub footer colors
+ * 4. Clean CSS-only interactions
  */
 const HydrationSafeCards = ({
   resources = [],
-  productInfo = { accent: '#008B8B', contentTypeDisplay: 'General' },
+  productInfo = {
+    product: 'general',
+    accent: '#008B8B',
+    contentTypeDisplay: 'General',
+  },
 }) => {
-  // Simple state - no refs, no complex management
+  // Simple state management - exactly like DiscoverCards
   const [expandedCards, setExpandedCards] = useState({})
 
-  // Simple toggle function
+  // CSS injection for working buttons - no React Bootstrap needed
+  useEffect(() => {
+    const styleId = 'clean-working-cards-styles'
+
+    if (document.getElementById(styleId)) return
+
+    const styles = `
+      .clean-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        border: 2px solid #008B8B;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 139, 139, 0.1);
+        transition: all 0.15s ease;
+        position: relative;
+        width: 100%;
+        margin-bottom: 30px;
+      }
+      
+      .clean-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 139, 139, 0.15);
+        transform: translateY(-4px);
+      }
+      
+      /* Clean button styles - no Bootstrap conflicts */
+      .clean-btn {
+        background: linear-gradient(135deg, #0066FF 0%, #00B8DE 100%);
+        color: #FFFFFF !important;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        font-family: SeasonMix, system-ui, -apple-system, sans-serif;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none !important;
+        display: inline-block;
+        text-align: center;
+        line-height: 1.2;
+        transition: all 0.2s ease !important;
+        pointer-events: auto !important;
+        user-select: none !important;
+      }
+      
+      .clean-btn:hover {
+        background: linear-gradient(135deg, #0052CC 0%, #0099B8 100%) !important;
+        transform: translateY(-1px) !important;
+        text-decoration: none !important;
+        color: #FFFFFF !important;
+      }
+      
+      .clean-btn:active {
+        transform: translateY(0) !important;
+      }
+      
+      .clean-btn:focus {
+        outline: 2px solid #0066FF !important;
+        outline-offset: 2px !important;
+      }
+      
+      .clean-btn-secondary {
+        background: linear-gradient(135deg, #718096 0%, #4A5568 100%);
+        color: #FFFFFF !important;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        font-family: SeasonMix, system-ui, -apple-system, sans-serif;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none !important;
+        display: inline-block;
+        text-align: center;
+        line-height: 1.2;
+        transition: all 0.2s ease !important;
+        pointer-events: auto !important;
+        user-select: none !important;
+      }
+      
+      .clean-btn-secondary:hover {
+        background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%) !important;
+        transform: translateY(-1px) !important;
+        text-decoration: none !important;
+        color: #FFFFFF !important;
+      }
+      
+      .clean-btn:disabled {
+        background: #E2E8F0 !important;
+        color: #718096 !important;
+        cursor: not-allowed;
+        transform: none !important;
+        pointer-events: none !important;
+      }
+      
+      .clean-btn:disabled:hover {
+        transform: none !important;
+        background: #E2E8F0 !important;
+      }
+      
+      @media (max-width: 768px) {
+        .clean-card:hover {
+          transform: none !important;
+        }
+        
+        .clean-btn:hover,
+        .clean-btn-secondary:hover {
+          transform: none !important;
+        }
+      }
+    `
+
+    const styleSheet = document.createElement('style')
+    styleSheet.id = styleId
+    styleSheet.textContent = styles
+    document.head.appendChild(styleSheet)
+  }, [])
+
+  // Simple toggle function - exactly like DiscoverCards
   const toggleCard = index => {
     setExpandedCards(prev => ({
       ...prev,
@@ -31,7 +146,7 @@ const HydrationSafeCards = ({
     }))
   }
 
-  // Use the exact same styles as original cards
+  // Static styles matching current appearance
   const learningHubSectionStyle = {
     background: '#FFFFFF',
     padding: '80px 0',
@@ -47,23 +162,6 @@ const HydrationSafeCards = ({
     margin: '0 auto',
     padding: '0 40px',
     width: '100%',
-  }
-
-  const cardStyle = {
-    background: '#FFFFFF',
-    borderRadius: '12px',
-    border: '2px solid #008B8B',
-    overflow: 'hidden',
-    boxShadow: '0 4px 12px rgba(0, 139, 139, 0.1)',
-    transition: 'all 0.15s ease',
-    position: 'relative',
-    width: '100%', // Take full container width like Help section
-  }
-
-  const cardHoverStyle = {
-    ...cardStyle,
-    boxShadow: '0 8px 24px rgba(0, 139, 139, 0.15)',
-    transform: 'translateY(-4px)',
   }
 
   const headerStyle = {
@@ -86,17 +184,6 @@ const HydrationSafeCards = ({
     margin: '0',
   }
 
-  const badgeStyle = {
-    position: 'absolute',
-    top: '16px',
-    right: '16px',
-    padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    color: '#FFFFFF',
-  }
-
   const buttonContainerStyle = {
     padding: '0 24px 24px 24px',
     display: 'flex',
@@ -104,33 +191,12 @@ const HydrationSafeCards = ({
     justifyContent: 'center',
   }
 
-  // Native button styles - no react-bootstrap
-  const primaryButtonStyle = {
-    background: 'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)',
-    color: '#FFFFFF',
-    border: 'none',
+  const expandedContentStyle = {
+    backgroundColor: '#F7FAFC',
+    padding: '16px',
     borderRadius: '8px',
-    padding: '12px 24px',
-    fontSize: '0.95rem',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    cursor: 'pointer',
-    fontWeight: '500',
-    textDecoration: 'none',
-    display: 'inline-block',
-    textAlign: 'center',
-    transition: 'all 0.15s ease',
-  }
-
-  const secondaryButtonStyle = {
-    ...primaryButtonStyle,
-    background: 'linear-gradient(135deg, #718096 0%, #4A5568 100%)',
-  }
-
-  const disabledButtonStyle = {
-    ...primaryButtonStyle,
-    background: '#E2E8F0',
-    color: '#718096',
-    cursor: 'not-allowed',
+    border: '1px solid #E2E8F0',
+    margin: '16px 24px 0 24px',
   }
 
   const footerStyle = {
@@ -138,315 +204,327 @@ const HydrationSafeCards = ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    fontSize: '0.9rem',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    fontWeight: '500',
+    color: '#FFFFFF',
   }
 
-  const expandedContentStyle = {
-    padding: '0 24px 24px 24px',
-    borderTop: '1px solid #E2E8F0',
-    backgroundColor: '#F7FAFC',
-  }
-
-  // Get level-specific colors using product accent
-  const getLevelBadgeColor = level => {
-    switch (level?.toLowerCase()) {
-      case 'beginner':
-        return '#4A90E2' // Keep original blue for consistency
-      case 'intermediate':
-        return '#1E3A8A' // Keep original blue for consistency
-      case 'advanced':
-        return '#008B8B' // Keep original teal for consistency
+  // Footer color logic - Learning Hub colors
+  const getFooterColor = product => {
+    switch (product?.toLowerCase()) {
+      case 'actions':
+      case 'pro':
+      case 'express':
+        return '#1E3A8A' // Automation Development - Dark Blue
+      case 'insights':
+        return '#008B8B' // Device Discovery and Management - Teal
+      case 'service-blueprinting':
+        return '#4A90E2' // Automation Design - Blue
       default:
-        return productInfo.accent // Use product accent as fallback
+        return '#008B8B' // Default teal
     }
   }
 
-  const getContentTypeColor = resource => {
-    const contentType = resource.contentType?.toLowerCase() || 'general'
-    switch (contentType) {
-      case 'device discovery and management':
-        return '#008B8B'
-      case 'automation development':
-        return '#1E3A8A'
-      case 'automation design':
-        return '#4A90E2'
-      case 'product overview':
-        return '#008B8B'
+  // Content type display logic
+  const getContentTypeDisplay = product => {
+    // Debug logging to see what we're receiving
+    console.log('Footer product value:', product)
+
+    switch (product?.toLowerCase()) {
+      case 'actions':
+      case 'pro':
+      case 'express':
+        return 'Automation Development'
+      case 'insights':
+        return 'Device Discovery and Management'
+      case 'service-blueprinting':
+      case 'service blueprinting':
+        return 'Automation Design'
       default:
-        return '#008B8B'
+        // More descriptive default based on common patterns
+        return 'Product Overview'
     }
   }
 
-  const getBorderColor = level => {
-    return getLevelBadgeColor(level)
+  // Early validation
+  if (!resources?.length) {
+    return (
+      <section style={learningHubSectionStyle}>
+        <div style={containerStyleOriginal}>
+          <div
+            style={{
+              padding: '40px',
+              backgroundColor: '#F7FAFC',
+              borderRadius: '12px',
+              textAlign: 'center',
+              border: '1px solid #008B8B',
+            }}
+          >
+            <p
+              style={{
+                fontSize: '1.25rem',
+                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+                color: '#4A5568',
+                margin: '0',
+              }}
+            >
+              No resources to display. Please provide a valid array of
+              resources.
+            </p>
+          </div>
+        </div>
+      </section>
+    )
   }
 
-  // Individual card component - fully static
+  // ResourceCard component - clean and simple like DiscoverCards
   const ResourceCard = ({ resource, index }) => {
-    const isExpanded = expandedCards[index] || false
-    const isDisabled = resource.disabled === true
-    const level = resource.primaryLevel || resource.level || 'Beginner'
+    const isExpanded = expandedCards[index] // Simple check, no hydration complexity
+    const isDisabled = resource.disabled || resource.comingSoon
 
-    const cardStyleWithBorder = {
-      ...cardStyle,
-      borderLeft: `6px solid ${getBorderColor(level)}`,
-      opacity: isDisabled ? 0.7 : 1,
+    // Debug logging for Service Blueprinting
+    console.log(
+      'Resource:',
+      resource.title,
+      'disabled:',
+      resource.disabled,
+      'comingSoon:',
+      resource.comingSoon,
+      'isDisabled:',
+      isDisabled,
+    )
+
+    // Get footer color with resource-specific logic for discover page
+    const getResourceSpecificColor = (product, resource) => {
+      // Debug logging for discover page
+      if (product?.toLowerCase() === 'discover') {
+        console.log('Discover page - Resource title:', resource?.title)
+        console.log(
+          'Title includes service blueprinting:',
+          resource?.title?.toLowerCase().includes('service blueprinting'),
+        )
+        console.log(
+          'Title includes blueprinting:',
+          resource?.title?.toLowerCase().includes('blueprinting'),
+        )
+      }
+
+      // Special handling for discover page
+      if (product?.toLowerCase() === 'discover') {
+        // Check if this is a Service Blueprinting card
+        if (
+          resource?.title?.toLowerCase().includes('service blueprinting') ||
+          resource?.title?.toLowerCase().includes('blueprinting')
+        ) {
+          console.log('Using blue color for Service Blueprinting card')
+          return '#4A90E2' // Automation Design - Blue (same as service-blueprinting pages)
+        }
+        // Default for other discover content (including Automation Essentials)
+        console.log('Using teal color for other discover content')
+        return '#008B8B' // Teal
+      }
+
+      // For non-discover pages, use the standard logic
+      return getFooterColor(product)
+    }
+    const getResourceSpecificDisplay = (product, resource) => {
+      // Special handling for discover page
+      if (product?.toLowerCase() === 'discover') {
+        // Check if this is the Automation Essentials card
+        if (resource?.title?.toLowerCase().includes('automation essentials')) {
+          return 'Discover Actions'
+        }
+        // Check if this is a Service Blueprinting card
+        if (
+          resource?.title?.toLowerCase().includes('service blueprinting') ||
+          resource?.title?.toLowerCase().includes('blueprinting')
+        ) {
+          return 'Automation Design'
+        }
+        // Default for other discover content
+        return 'Learning Path'
+      }
+
+      // For non-discover pages, use the standard logic
+      return getContentTypeDisplay(product)
     }
 
     return (
       <div
-        style={cardStyleWithBorder}
-        onMouseEnter={e => {
-          if (!isDisabled) {
-            Object.assign(e.currentTarget.style, cardHoverStyle)
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isDisabled) {
-            Object.assign(e.currentTarget.style, cardStyleWithBorder)
-          }
+        className='clean-card'
+        style={{
+          opacity: isDisabled ? 0.6 : 1,
+          filter: isDisabled ? 'grayscale(20%)' : 'none',
+          pointerEvents: isDisabled ? 'none' : 'auto',
         }}
       >
-        {/* Badge */}
-        <div
-          style={{
-            ...badgeStyle,
-            backgroundColor: getLevelBadgeColor(level),
-          }}
-        >
-          {level}
-        </div>
-
         {/* Header */}
         <div style={headerStyle}>
-          <h3 style={titleStyle}>{resource.title}</h3>
-          <p style={descriptionStyle}>{resource.description}</p>
+          <h3
+            style={{
+              ...titleStyle,
+              color: isDisabled ? '#9CA3AF' : titleStyle.color,
+            }}
+          >
+            {resource.title}
+          </h3>
+          <p
+            style={{
+              ...descriptionStyle,
+              color: isDisabled ? '#9CA3AF' : descriptionStyle.color,
+            }}
+          >
+            {resource.description}
+          </p>
         </div>
 
-        {/* Expanded Content */}
-        {isExpanded && (
+        {/* Expanded content - only render when needed, like DiscoverCards */}
+        {isExpanded && resource.extendedDescription && !isDisabled && (
           <div style={expandedContentStyle}>
-            {resource.extendedDescription && (
-              <div style={{ marginBottom: '16px' }}>
-                <h4
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    color: '#2D3748',
-                    margin: '0 0 8px 0',
-                  }}
-                >
-                  Overview
-                </h4>
-                <p
-                  style={{
-                    fontFamily:
-                      'SeasonMix, system-ui, -apple-system, sans-serif',
-                    color: '#4A5568',
-                    fontSize: '1rem',
-                    lineHeight: '1.6',
-                    margin: '0',
-                  }}
-                >
-                  {resource.extendedDescription}
-                </p>
-              </div>
-            )}
+            <h5
+              style={{
+                margin: '0 0 12px 0',
+                fontWeight: 600,
+                color: '#2D3748',
+                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+              }}
+            >
+              Overview
+            </h5>
+            <p
+              style={{
+                color: '#4A5568',
+                fontSize: '1rem',
+                lineHeight: '1.6',
+                margin: '0 0 16px 0',
+                fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+              }}
+            >
+              {resource.extendedDescription}
+            </p>
 
+            {/* Courses list if available */}
             {resource.courses && resource.courses.length > 0 && (
-              <div style={{ marginBottom: '16px' }}>
-                <h4
+              <>
+                <h5
                   style={{
+                    margin: '0 0 12px 0',
+                    fontWeight: 600,
+                    color: '#2D3748',
                     fontFamily:
                       'SeasonMix, system-ui, -apple-system, sans-serif',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    color: '#2D3748',
-                    margin: '0 0 8px 0',
                   }}
                 >
                   What's Included:
-                </h4>
-                <div
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E2E8F0',
-                  }}
-                >
-                  <ul style={{ margin: 0, paddingLeft: '24px' }}>
-                    {resource.courses.map((course, i) => (
-                      <li
-                        key={i}
-                        style={{
-                          marginBottom: '8px',
-                          fontFamily:
-                            'SeasonMix, system-ui, -apple-system, sans-serif',
-                          color: '#4A5568',
-                          lineHeight: '1.6',
-                        }}
-                      >
-                        {course}
-                      </li>
-                    ))}
-                  </ul>
-                  {resource.usageInstructions && (
-                    <p
+                </h5>
+                <ul style={{ margin: 0, paddingLeft: '24px' }}>
+                  {resource.courses.map((course, i) => (
+                    <li
+                      key={i}
                       style={{
-                        marginTop: '12px',
-                        marginBottom: 0,
-                        fontFamily:
-                          'SeasonMix, system-ui, -apple-system, sans-serif',
+                        marginBottom: '8px',
                         color: '#4A5568',
                         lineHeight: '1.6',
+                        fontFamily:
+                          'SeasonMix, system-ui, -apple-system, sans-serif',
                       }}
                     >
-                      {resource.usageInstructions}
-                    </p>
-                  )}
-                </div>
-              </div>
+                      {course}
+                    </li>
+                  ))}
+                </ul>
+                {resource.usageInstructions && (
+                  <p
+                    style={{
+                      marginTop: '12px',
+                      marginBottom: 0,
+                      color: '#4A5568',
+                      lineHeight: '1.6',
+                      fontFamily:
+                        'SeasonMix, system-ui, -apple-system, sans-serif',
+                    }}
+                  >
+                    {resource.usageInstructions}
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
 
-        {/* Buttons */}
+        {/* Buttons - Clean HTML buttons + Docusaurus Links */}
         <div style={buttonContainerStyle}>
-          {isExpanded ? (
+          {!isDisabled && isExpanded ? (
+            // Expanded state buttons (only when not disabled)
             <>
               <button
-                style={secondaryButtonStyle}
+                type='button'
+                className='clean-btn-secondary'
                 onClick={() => toggleCard(index)}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background =
-                    'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background =
-                    'linear-gradient(135deg, #718096 0%, #4A5568 100%)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
               >
                 Close Details
               </button>
-              {isDisabled ? (
-                <button style={disabledButtonStyle} disabled>
-                  {resource.resourceType === 'module'
-                    ? 'Get Started'
-                    : 'View Module'}
-                </button>
-              ) : (
-                <Link to={resource.link} style={{ textDecoration: 'none' }}>
-                  <button
-                    style={primaryButtonStyle}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }}
-                  >
-                    {resource.resourceType === 'module'
-                      ? 'Get Started'
-                      : 'View Module'}
-                  </button>
-                </Link>
-              )}
+              <Link to={resource.link} className='clean-btn'>
+                {resource.resourceType === 'module'
+                  ? 'Get Started'
+                  : 'View Module'}
+              </Link>
             </>
-          ) : (
+          ) : !isDisabled ? (
+            // Collapsed state buttons (only when not disabled)
             <>
               <button
-                style={secondaryButtonStyle}
+                type='button'
+                className='clean-btn-secondary'
                 onClick={() => toggleCard(index)}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background =
-                    'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background =
-                    'linear-gradient(135deg, #718096 0%, #4A5568 100%)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
               >
                 View Details
               </button>
-              {isDisabled ? (
-                <button style={disabledButtonStyle} disabled>
-                  {resource.resourceType === 'module'
-                    ? 'Get Started'
-                    : 'View Module'}
-                </button>
-              ) : (
-                <Link to={resource.link} style={{ textDecoration: 'none' }}>
-                  <button
-                    style={primaryButtonStyle}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0052CC 0%, #0099B8 100%)'
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, #0066FF 0%, #00B8DE 100%)'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }}
-                  >
-                    {resource.resourceType === 'module'
-                      ? 'Get Started'
-                      : 'View Module'}
-                  </button>
-                </Link>
-              )}
+              <Link to={resource.link} className='clean-btn'>
+                {resource.resourceType === 'module'
+                  ? 'Get Started'
+                  : 'View Module'}
+              </Link>
             </>
+          ) : (
+            // Disabled state - single button only
+            <button type='button' className='clean-btn' disabled>
+              Coming Soon
+            </button>
           )}
         </div>
 
-        {/* Footer - Uses product-specific content type */}
+        {/* Footer with Learning Hub colors */}
         <div
           style={{
             ...footerStyle,
-            backgroundColor: productInfo.accent, // Use product accent color
+            backgroundColor: getResourceSpecificColor(
+              productInfo.product,
+              resource,
+            ),
+            opacity: isDisabled ? 0.7 : 1,
           }}
         >
-          <span
-            style={{
-              color: '#FFFFFF',
-              fontSize: '0.9rem',
-              fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-              fontWeight: '500',
-              textAlign: 'center',
-            }}
-          >
-            {productInfo.contentTypeDisplay}{' '}
-            {/* Use product-specific content type */}
-          </span>
+          {getResourceSpecificDisplay(productInfo.product, resource)}
         </div>
       </div>
     )
   }
 
-  // Static styles - cards in single column (original layout)
-  const containerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '30px',
-    margin: 0,
-    padding: 0,
-  }
-
-  // Always return with section wrapper - exact same structure as original
+  // Main render
   return (
     <section style={learningHubSectionStyle}>
       <div style={containerStyleOriginal}>
-        <div style={containerStyle}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0px',
+            margin: 0,
+            padding: 0,
+          }}
+        >
           {resources.map((resource, index) => (
             <ResourceCard
               key={`${resource.title || 'resource'}-${index}`}

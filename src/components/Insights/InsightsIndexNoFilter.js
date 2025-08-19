@@ -88,7 +88,10 @@ const InsightsIndexNoFilter = ({
       )}
 
       {/* Hydration-Safe Cards Section - NO FILTER, shows all paths */}
-      <HydrationSafeCards resources={allPaths} productInfo={productInfo} />
+      <HydrationSafeCards
+        resources={allPaths}
+        productInfo={{ product: 'actions' }} // Add this
+      />
 
       {/* Help Section with product colors */}
       <HelpSection
