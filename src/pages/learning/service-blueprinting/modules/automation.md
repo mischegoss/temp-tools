@@ -5,6 +5,7 @@ title: Identify Your Automation Potential Module
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import ProtectedRoute from '@site/src/components/service-blueprinting/login/ProtectedRoute';
 import FormNavigation from '@site/src/components/service-blueprinting/Navigation';
+import ChatbotButton from '@site/src/components/service-blueprinting/ChatbotButton';
 import { useAuth } from '@site/src/contexts/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -77,6 +78,7 @@ setIsLoading(false);
 return (
 <>
 <FormNavigation />
+<ChatbotButton />
 
       <div
         style={{

@@ -623,3 +623,23 @@ h6,
     display: none;
   }
 }
+/* ============================================ */
+/* SIMPLE CHATBOT VISIBILITY CONTROL */
+/* ============================================ */
+
+/* Hide the original chatbot button by default on ALL pages */
+html > body > button.ainiro {
+  display: none !important;
+}
+
+/* Only show the original chatbot button on service blueprinting module pages */
+/* Use CSS attribute selectors to detect the current page */
+body[data-current-route*='/learning/service-blueprinting/modules']
+  button.ainiro,
+html[data-route*='/learning/service-blueprinting/modules'] button.ainiro {
+  display: block !important;
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 9999 !important;
+}
