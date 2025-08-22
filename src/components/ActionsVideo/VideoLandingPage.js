@@ -4,34 +4,33 @@ import React from 'react'
 import Layout from '@theme/Layout'
 import Link from '@docusaurus/Link'
 import BrowserOnly from '@docusaurus/BrowserOnly'
-import {
-  learningHubSectionStyle,
-  containerStyle,
-} from '@site/src/components/LandingPageLibrary/sharedStyles.js'
 
 /**
- * VideoLandingPage component - Individual video landing page
- * Fixed for SSR compatibility using BrowserOnly
+ * VideoLandingPage component - Individual video page with player and tutorial
+ * FIXED: Updated all navigation links to /learning/video-gallery/
  */
 const VideoLandingPage = ({ videoData }) => {
-  // Handle missing video data
+  // Show loading or error state if no video data
   if (!videoData) {
     return (
-      <Layout
-        title='Video Not Found'
-        description='The requested video could not be found.'
-      >
-        <div style={containerStyle}>
-          <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+      <Layout title='Video Not Found' description='Video content not available'>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            textAlign: 'center',
+            padding: '40px',
+          }}
+        >
+          <div>
             <h1>Video Not Found</h1>
-            <p>The requested video could not be found.</p>
+            <p>Sorry, we couldn't find the video you're looking for.</p>
             <Link
-              to='/learning/actions-videos'
+              to='/learning/video-gallery'
               style={{
-                background: 'var(--brand-blue)',
-                color: 'white',
-                padding: '12px 24px',
-                borderRadius: '8px',
+                color: '#0066FF',
                 textDecoration: 'none',
                 fontWeight: '600',
               }}
@@ -44,162 +43,148 @@ const VideoLandingPage = ({ videoData }) => {
     )
   }
 
-  // Styles
+  // Shared container style
+  const containerStyle = {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 40px',
+    width: '100%',
+  }
+
+  // Navigation section styles
   const navigationStyle = {
-    background: 'var(--brand-grey-100)',
+    background: '#F7FAFC',
     padding: '20px 0',
-    borderBottom: '1px solid var(--color-border-light)',
+    borderBottom: '1px solid #E2E8F0',
   }
 
   const breadcrumbStyle = {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    fontSize: '0.95rem',
-    color: 'var(--brand-grey-600)',
+    gap: '8px',
+    fontSize: '0.875rem',
+    color: '#4A5568',
     fontFamily: 'var(--ifm-font-family-base)',
   }
 
   const backLinkStyle = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    background: 'var(--brand-blue)',
-    color: 'white',
-    borderRadius: '6px',
+    color: '#0066FF',
     textDecoration: 'none',
-    fontSize: '0.95rem',
+    fontSize: '0.875rem',
     fontWeight: '500',
-    transition: 'all 0.2s ease',
   }
 
+  // Content section styles
   const contentSectionStyle = {
+    background: '#FFFFFF',
     padding: '60px 0',
-    background: 'var(--color-bg-card-light)',
   }
 
   const sectionTitleStyle = {
     fontSize: '2.5rem',
     fontWeight: '700',
-    color: 'var(--color-text-primary)',
-    margin: '0 0 16px 0',
+    color: '#2D3748',
+    margin: 0,
+    lineHeight: '1.2',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const accentLineStyle = {
     width: '60px',
     height: '4px',
-    background: 'var(--brand-blue)',
-    margin: '0 auto 24px auto',
+    background: '#008B8B',
+    margin: '16px auto 24px',
+    borderRadius: '2px',
   }
 
   const subtitleStyle = {
-    fontSize: '1.2rem',
-    color: 'var(--color-text-secondary)',
-    lineHeight: '1.5',
-    margin: '0 0 40px 0',
+    fontSize: '1.25rem',
+    color: '#4A5568',
+    lineHeight: '1.6',
     maxWidth: '800px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    margin: '0 auto',
     fontFamily: 'var(--ifm-font-family-base)',
   }
 
   const videoPlayerStyle = {
-    position: 'relative',
-    width: '100%',
     maxWidth: '900px',
-    margin: '0 auto 40px auto',
-    paddingBottom: '50.625%', // 16:9 aspect ratio
-    background: '#000',
+    margin: '40px auto',
+    position: 'relative',
     borderRadius: '12px',
     overflow: 'hidden',
-    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
   }
 
   const iframeStyle = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
     width: '100%',
-    height: '100%',
+    height: '506px', // 16:9 ratio for 900px width
     border: 'none',
+    display: 'block',
   }
 
   const metaInfoStyle = {
     display: 'flex',
     justifyContent: 'center',
     gap: '16px',
+    marginTop: '24px',
     flexWrap: 'wrap',
-    marginBottom: '40px',
-  }
-
-  const metaBadgeStyle = {
-    padding: '8px 16px',
-    borderRadius: '25px',
-    fontSize: '0.95rem',
-    fontWeight: '500',
-    fontFamily: 'var(--ifm-font-family-base)',
   }
 
   const durationBadgeStyle = {
-    ...metaBadgeStyle,
-    background: 'var(--brand-grey-100)',
-    color: 'var(--brand-grey-600)',
-  }
-
-  const categoryBadgeStyle = {
-    ...metaBadgeStyle,
-    background: 'var(--brand-blue-100)',
-    color: 'var(--brand-blue)',
-  }
-
-  // Helper function for level badge colors
-  function getLevelBadgeColor(level) {
-    switch (level?.toLowerCase()) {
-      case 'beginner':
-        return '#4A90E2'
-      case 'intermediate':
-        return '#1E3A8A'
-      case 'advanced':
-        return '#008B8B'
-      default:
-        return '#008B8B'
-    }
+    background: '#E2E8F0',
+    color: '#2D3748',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.875rem',
+    fontWeight: '500',
   }
 
   const levelBadgeStyle = {
-    ...metaBadgeStyle,
-    background: getLevelBadgeColor(videoData.level),
+    background: '#008B8B',
     color: 'white',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+  }
+
+  const categoryBadgeStyle = {
+    background: '#0066FF',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.875rem',
+    fontWeight: '500',
   }
 
   // Tutorial section styles
   const tutorialSectionStyle = {
+    background: '#F7FAFC',
     padding: '80px 0',
-    background: 'var(--brand-grey-50)',
   }
 
   const tutorialTitleStyle = {
     fontSize: '2rem',
     fontWeight: '700',
-    color: 'var(--color-text-primary)',
+    color: '#2D3748',
     textAlign: 'center',
-    margin: '0 0 50px 0',
+    marginBottom: '48px',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const stepsContainerStyle = {
-    maxWidth: '900px',
+    maxWidth: '800px',
     margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '32px',
   }
 
   const stepStyle = {
     background: 'white',
+    padding: '32px',
     borderRadius: '12px',
-    padding: '30px',
-    marginBottom: '24px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
     border: '1px solid var(--color-border-light)',
   }
 
@@ -243,19 +228,19 @@ const VideoLandingPage = ({ videoData }) => {
 
   return (
     <Layout title={videoData.title} description={videoData.description}>
-      {/* Navigation/Breadcrumb */}
+      {/* Navigation/Breadcrumb - FIXED: Updated all links to video-gallery */}
       <section style={navigationStyle}>
         <div style={containerStyle}>
           <div style={breadcrumbStyle}>
             <Link
-              to='/learning/actions-videos'
+              to='/learning/video-gallery'
               style={{ color: 'var(--brand-blue)' }}
             >
-              Actions Learning
+              Video Gallery
             </Link>
             <span>›</span>
             <Link
-              to='/learning/actions-videos'
+              to='/learning/video-gallery'
               style={{ color: 'var(--brand-blue)' }}
             >
               Video Library
@@ -264,7 +249,7 @@ const VideoLandingPage = ({ videoData }) => {
             <span>{videoData.title}</span>
           </div>
           <div style={{ marginTop: '16px' }}>
-            <Link to='/learning/actions-videos' style={backLinkStyle}>
+            <Link to='/learning/video-gallery' style={backLinkStyle}>
               ← Back to Video Gallery
             </Link>
           </div>

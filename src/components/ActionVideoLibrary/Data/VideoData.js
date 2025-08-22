@@ -6,290 +6,216 @@ export const videoLibrary = [
   // ==========================================
   {
     id: 'getting-started-actions',
-    title: 'Getting Started with Actions Platform',
+    title: 'How to Get Started with Workflow Designer',
     description:
-      'Learn the fundamentals of Resolve Actions and create your first automation workflow.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '15:32',
-    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
+      'Master the visual workflow designer in Resolve Actions Express, from building workflows with drag-and-drop activities to implementing flow controls and testing your automations.',
+    videoUrl: 'https://www.youtube.com/watch?v=WvqMUsNTBtY',
+    videoId: 'WvqMUsNTBtY',
+    duration: '7:15',
+    level: 'automation-design',
     category: 'Platform Overview',
     tags: ['basics', 'getting-started', 'workflow'],
     publishDate: '2024-01-15',
     thumbnailUrl: null, // Will use YouTube auto-generated thumbnail
-    product: 'actions', // NEW: Product assignment
-    featured: true, // NEW: Featured video for Actions
+    product: 'actions',
+    featured: true,
+    platform: 'youtube',
     tutorialSteps: [
       {
         step: 1,
-        title: 'Access the Actions Platform',
+        title: 'Navigate the Workflow Designer Interface',
         content:
-          "Navigate to your Resolve Actions dashboard. If you don't have access yet, contact your system administrator to get the necessary permissions and login credentials.",
+          'Open the workflow designer inside Resolve Actions Express and familiarize yourself with the visual canvas. Use the zoom and map features to navigate through complex workflows and understand how visual activities serve as building blocks for your automation processes.',
       },
       {
         step: 2,
-        title: 'Create Your First Project',
+        title: 'Build Your Workflow with Pre-built Activities',
         content:
-          'Click on "New Project" in the top navigation. Give your project a descriptive name like "My First Automation" and select the appropriate workspace for your organization.',
+          'Drag and drop activities from the activity library onto your workflow canvas. Each activity produces output that passes downstream to the next step. Give activities custom names and organize them logically to create a clear automation flow.',
       },
       {
         step: 3,
-        title: 'Design Your Workflow',
+        title: 'Configure Integrations and Connections',
         content:
-          'Use the drag-and-drop interface to add action blocks to your workflow canvas. Start with a trigger event, then add the actions you want to automate. Connect the blocks by dragging lines between them.',
+          'Set up activity configurations by selecting service instances and leveraging autodiscovery features. For ITSM integrations like ServiceNow, choose from vanilla or custom tables, then select from automatically discovered standard and custom fields, including inherited enums and dropdown values.',
       },
       {
         step: 4,
-        title: 'Configure Action Parameters',
+        title: 'Implement Logic Controls and Decision Making',
         content:
-          'Click on each action block to configure its settings. Fill in the required parameters such as connection details, input values, and output mappings. Use the test feature to validate your configuration.',
+          'Add if-else branches, while loops, and other flow controls to create intelligent automation. Build formulas to evaluate specific output types and direct workflow execution down multiple paths based on conditional logic and decision criteria.',
       },
       {
         step: 5,
-        title: 'Test and Deploy',
+        title: 'Test, Document, and Manage Workflow Lifecycle',
         content:
-          'Run a test execution of your workflow to ensure it works as expected. Review the execution logs and make any necessary adjustments. Once satisfied, deploy your workflow to production.',
+          'Test workflows with input parameters to simulate external triggers like alerts or tickets. Add activity notes for team collaboration, create rich documentation with graphics, apply tags for organization, and use built-in version control to manage changes and rollbacks.',
       },
     ],
   },
 
   // ==========================================
-  // PRO FEATURED VIDEO (New)
+  // PRO FEATURED VIDEO
   // ==========================================
   {
     id: 'pro-featured-video',
-    title: 'Resolve Pro Advanced Features',
+    title: 'Welcome to Resolve Actions Pro',
     description:
-      'Discover the advanced capabilities of Resolve Pro for enterprise workflow management and automation.',
+      'Get introduced to the enterprise-class IT automation and orchestration platform, including third-party integrations, the Automation Exchange, and flexible development approaches.',
     videoUrl: 'https://www.youtube.com/watch?v=bJL_c08aElQ',
-    videoId: 'bJL_c08aElQ', // Extracted from your Pro iframe URL
-    duration: '18:45',
-    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
+    videoId: 'bJL_c08aElQ',
+    duration: '2:25',
+    level: 'automation-design',
     category: 'Enterprise Features',
     tags: ['pro', 'enterprise', 'advanced-features'],
     publishDate: '2024-08-15',
     thumbnailUrl: null,
-    product: 'pro', // NEW: Product assignment
-    featured: true, // NEW: Featured video for Pro
+    product: 'pro',
+    featured: true,
+    platform: 'youtube',
+    tutorialSteps: [
+      {
+        step: 1,
+        title: 'Set Up Enterprise IT Automation Platform',
+        content:
+          'Deploy Resolve Actions Pro in either cloud or on-premise environments to handle enterprise-class IT automation and orchestration. Configure the platform to intercept and process incidents from third-party tools like ServiceNow automatically.',
+      },
+      {
+        step: 2,
+        title: 'Build Comprehensive Automation Workflows',
+        content:
+          'Create automations using drag-and-drop building blocks to handle complex scenarios including server provisioning, user account management, network diagnostics, firewall rule configuration, and database operations. Leverage both simple and advanced automation capabilities.',
+      },
+      {
+        step: 3,
+        title: 'Integrate with Enterprise IT Services',
+        content:
+          'Connect Resolve Actions Pro with your existing IT infrastructure and services. Configure integrations to automatically trigger automations from service requests, incidents, or alerts, enabling hands-off auto-remediation within seconds.',
+      },
+      {
+        step: 4,
+        title: 'Leverage the Automation Exchange',
+        content:
+          'Access pre-built use cases, templates, and automations from the Automation Exchange to accelerate deployment. Download and customize proven automation patterns for common enterprise scenarios and use cases.',
+      },
+      {
+        step: 5,
+        title: 'Customize with Low-Code and Custom Code Approaches',
+        content:
+          'Build runbooks using Action tasks and workflow elements through low-code/no-code methods, or bring your own custom code to create specialized building blocks. Design automations that handle previously non-automatable scenarios using flexible development approaches.',
+      },
+    ],
   },
 
   // ==========================================
-  // EXPRESS FEATURED VIDEO (Updated)
+  // EXPRESS FEATURED VIDEO
   // ==========================================
   {
     id: 'express-featured-video',
-    title: 'Express Quick Start Guide',
+    title: 'Resolve Actions Express - Scheduled Script Execution',
     description:
-      'Get started with Resolve Express for rapid incident resolution and streamlined workflows.',
+      'Learn to build data-driven workflow templates for automated script execution from GitHub repositories, including scheduling, credential management, and comprehensive reporting.',
     videoUrl: 'https://www.youtube.com/watch?v=6W9AdnRHlzk',
-    videoId: '6W9AdnRHlzk', // NEW: Updated Express video ID
-    duration: '12:30',
-    level: 'automation-design', // FIXED: Changed from 'Authomation Design' to 'automation-design' (also fixed typo)
+    videoId: '6W9AdnRHlzk',
+    duration: '10:03',
+    level: 'automation-design',
     category: 'Quick Start',
     tags: ['express', 'incident-resolution', 'workflows'],
     publishDate: '2024-08-10',
     thumbnailUrl: null,
-    product: 'express', // NEW: Product assignment
-    featured: true, // NEW: Featured video for Express
+    product: 'express',
+    featured: true,
+    platform: 'youtube',
+    tutorialSteps: [
+      {
+        step: 1,
+        title: 'Configure Data-Driven Workflow Tables',
+        content:
+          'Set up tables to define which scripts to execute and where they are located. Create a scripts table with columns for location (GitHub), script type (PowerShell, Python), file path, repository owner, and repository name. Build a hosts table listing target machines with comma-separated script IDs to control which scripts run on which hosts.',
+      },
+      {
+        step: 2,
+        title: 'Create Scheduled Automation Policies',
+        content:
+          'Navigate to the Policy Actions page and create new schedules using the plus sign. Configure schedule names, descriptions, and select target workflows. Set up execution logging to specific folders for easy filtering and review. Define cadence options including hourly, daily, weekly, or monthly intervals with custom time ranges.',
+      },
+      {
+        step: 3,
+        title: 'Integrate with Credential Management Systems',
+        content:
+          'Configure secure credential retrieval using built-in integrations with password vaults like Azure Key Vault, CyberArk, HashiCorp, or BeyondTrust. Set up service account authentication for remote host access during script execution, ensuring credentials are retrieved dynamically in real-time.',
+      },
+      {
+        step: 4,
+        title: 'Build Dynamic Script Execution Workflows',
+        content:
+          'Design workflows that loop through host tables, parse data, and execute child workflows with parameters. Configure GitHub integration to retrieve the most up-to-date scripts in real-time. Set up conditional branching for different script types (PowerShell vs Python) and implement remote code execution against target hosts.',
+      },
+      {
+        step: 5,
+        title: 'Implement Reporting and Result Management',
+        content:
+          'Configure automated reporting through email, spreadsheet generation, PDF creation, or database population. Set up execution logging with verbose results and script previews. Design comprehensive reports showing host execution summaries, script counts, types, sources, and detailed execution results for monitoring and compliance.',
+      },
+    ],
   },
 
   // ==========================================
-  // INSIGHTS FEATURED VIDEO (New)
+  // INSIGHTS FEATURED VIDEO - VIMEO
   // ==========================================
   {
     id: 'insights-featured-video',
-    title: 'Resolve Insights Analytics Deep Dive',
+    title: 'Introduction to Insights',
     description:
-      'Master advanced analytics and reporting capabilities in Resolve Insights for comprehensive data analysis.',
-    videoUrl: 'https://www.youtube.com/watch?v=vkhMGGa5h80',
-    videoId: 'vkhMGGa5h80', // Extracted from your Insights URL
-    duration: '22:15',
-    level: 'integrations', // FIXED: Changed from 'Device Discovery' to 'integrations' (assuming this fits better)
+      'Learn how to install and set up Resolve Insights on your virtual machines with step-by-step instructions for deployment and configuration.',
+    videoUrl: 'https://vimeo.com/1111422908',
+    videoId: '1111422908',
+    duration: '2:15',
+    level: 'integrations',
     category: 'Analytics',
     tags: ['insights', 'analytics', 'reporting'],
     publishDate: '2024-08-12',
     thumbnailUrl: null,
-    product: 'insights', // NEW: Product assignment
-    featured: true, // NEW: Featured video for Insights
-  },
-
-  // ==========================================
-  // EXISTING ACTIONS VIDEOS (Updated with product field)
-  // ==========================================
-  {
-    id: 'building-complex-workflows',
-    title: 'Building Complex Workflows',
-    description:
-      'Advanced techniques for creating sophisticated automation workflows with conditional logic.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '22:48',
-    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
-    category: 'Workflow Development',
-    tags: ['workflows', 'conditional-logic', 'advanced'],
-    publishDate: '2024-02-10',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured (Actions already has featured video)
+    product: 'insights',
+    featured: true,
+    platform: 'vimeo',
     tutorialSteps: [
       {
         step: 1,
-        title: 'Plan Your Complex Workflow',
+        title: 'Prepare Virtual Machines for Installation',
         content:
-          'Before building, map out your workflow on paper or a flowchart tool. Identify decision points, parallel processing opportunities, and error handling requirements.',
+          'Follow the prerequisite checklist to prepare your virtual machines for Insights installation. Ensure all system requirements are met and necessary dependencies are in place before proceeding with the installation process.',
       },
       {
         step: 2,
-        title: 'Implement Conditional Logic',
+        title: 'Obtain Verified Installation Files',
         content:
-          'Use conditional blocks to create decision points in your workflow. Configure if-then-else logic based on data values, API responses, or user inputs to create dynamic automation paths.',
+          'Contact your Resolve representative to obtain the latest Insights installation file. All installation files are verified and digitally signed to ensure security and authenticity before deployment.',
       },
       {
         step: 3,
-        title: 'Handle Parallel Processing',
+        title: 'Upload and Extract Installation Files',
         content:
-          'Set up parallel execution branches when you need to perform multiple actions simultaneously. Use synchronization points to wait for all parallel branches to complete before proceeding.',
+          'Upload the installation file to each node in your deployment and extract the contents. Ensure proper file permissions and verify the integrity of extracted files on all target nodes.',
       },
       {
         step: 4,
-        title: 'Implement Error Handling',
+        title: 'Configure Installation Settings',
         content:
-          'Add try-catch blocks and error handling logic to make your workflows resilient. Define fallback actions, retry mechanisms, and notification systems for when things go wrong.',
+          'Update the configuration file on each node according to the provided installation instructions. Customize settings based on your environment requirements and network topology.',
       },
       {
         step: 5,
-        title: 'Test Complex Scenarios',
+        title: 'Execute Installation in Proper Sequence',
         content:
-          'Thoroughly test your workflow with various input scenarios, including edge cases and error conditions. Use the debugging tools to step through execution and verify each decision point.',
+          'Run the installation file on each node following the specified order outlined in the installation guide. Monitor the installation progress and verify successful completion on each node.',
+      },
+      {
+        step: 6,
+        title: 'Begin Using Insights',
+        content:
+          'Once installation is complete across all nodes, start using Insights for analytics and reporting. Verify system functionality and begin configuring your analytics workflows and dashboards.',
       },
     ],
-  },
-  {
-    id: 'team-collaboration',
-    title: 'Team Collaboration Features',
-    description:
-      'Learn how to work effectively with your team using Actions collaborative features.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '18:25',
-    level: 'rita', // FIXED: Changed from 'RITA' to 'rita'
-    category: 'Collaboration',
-    tags: ['team', 'collaboration', 'sharing'],
-    publishDate: '2024-03-18',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Set Up Team Workspaces',
-        content:
-          'Create shared workspaces for your team projects. Configure access permissions and role-based security to ensure team members have appropriate access levels.',
-      },
-      {
-        step: 2,
-        title: 'Share Workflows and Templates',
-        content:
-          'Learn how to share workflows with team members and create reusable templates. Set up approval processes for workflow changes and establish version control practices.',
-      },
-      {
-        step: 3,
-        title: 'Implement Review Processes',
-        content:
-          'Establish code review and workflow review processes within your team. Use commenting and annotation features to provide feedback and track changes.',
-      },
-      {
-        step: 4,
-        title: 'Monitor Team Activity',
-        content:
-          'Use the team dashboard to monitor workflow executions, track performance metrics, and identify collaboration opportunities. Set up team notifications and alerts.',
-      },
-      {
-        step: 5,
-        title: 'Knowledge Sharing and Documentation',
-        content:
-          'Create comprehensive documentation for your workflows using the built-in documentation tools. Set up team wikis, maintain workflow catalogs, and establish standards for naming conventions and code comments to ensure knowledge transfer.',
-      },
-    ],
-  },
-  {
-    id: 'deployment-strategies',
-    title: 'Deployment Strategies',
-    description:
-      'Best practices for deploying automation workflows to production environments.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '26:38',
-    level: 'integrations', // FIXED: Changed from 'Integrations' to 'integrations'
-    category: 'Deployment',
-    tags: ['deployment', 'production', 'strategies'],
-    publishDate: '2024-07-25',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured
-  },
-  {
-    id: 'api-integrations-guide',
-    title: 'API Integrations Deep Dive',
-    description:
-      'Master API integrations and data transformations in your automation workflows.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '31:15',
-    level: 'integrations', // FIXED: Changed from 'Integrations' to 'integrations'
-    category: 'API Development',
-    tags: ['api', 'integrations', 'data-transformation'],
-    publishDate: '2024-04-12',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured
-  },
-  {
-    id: 'jarvis-ai-automation',
-    title: 'AI-Powered Automation with Jarvis',
-    description:
-      'Leverage Jarvis AI capabilities to create intelligent, self-adapting automation workflows.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '24:50',
-    level: 'jarvis', // FIXED: Changed from 'Jarvis' to 'jarvis'
-    category: 'AI Automation',
-    tags: ['ai', 'jarvis', 'machine-learning', 'intelligent-automation'],
-    publishDate: '2024-05-30',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured
-  },
-  {
-    id: 'workflow-optimization',
-    title: 'Workflow Performance Optimization',
-    description:
-      'Techniques for optimizing workflow performance and reducing execution time.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '19:33',
-    level: 'workflows', // FIXED: Changed from 'Automation Development' to 'workflows'
-    category: 'Performance',
-    tags: ['optimization', 'performance', 'efficiency'],
-    publishDate: '2024-06-14',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured
-  },
-  {
-    id: 'automation-design-patterns',
-    title: 'Automation Design Patterns',
-    description:
-      'Learn proven design patterns and best practices for scalable automation solutions.',
-    videoUrl: 'https://www.youtube.com/watch?v=Kb2JXreU4B8',
-    videoId: 'Kb2JXreU4B8',
-    duration: '28:42',
-    level: 'automation-design', // FIXED: Changed from 'Automation Design' to 'automation-design'
-    category: 'Design Patterns',
-    tags: ['design-patterns', 'architecture', 'scalability'],
-    publishDate: '2024-08-08',
-    thumbnailUrl: null,
-    product: 'actions', // NEW: Product assignment
-    featured: false, // NEW: Not featured
   },
 ]

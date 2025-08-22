@@ -8,8 +8,10 @@ import BrowserOnly from '@docusaurus/BrowserOnly'
  *
  * Full-featured version with gallery integration:
  * - Has "View Full Video Gallery" button
- * - Smart fallback: Gallery first, then YouTube
+ * - Smart fallback: Gallery first, then YouTube/Vimeo
  * - Checks if video exists in gallery
+ * - Supports both YouTube and Vimeo videos
+ * FIXED: Updated all routing to /learning/video-gallery/
  */
 const FeaturedVideoSectionVideoGallery = ({
   featuredVideo,
@@ -17,10 +19,10 @@ const FeaturedVideoSectionVideoGallery = ({
   sectionProps = {
     label: 'Featured Learning Video',
     buttonText: 'View Full Video Gallery →',
-    buttonLink: '/learning/actions-videos',
+    buttonLink: '/learning/video-gallery',
   },
 }) => {
-  // Ensure we have a valid button link
+  // Ensure we have a valid button link - FIXED: Updated default
   const buttonLink = sectionProps?.buttonLink || '/learning/video-gallery'
   const [isVideoHovered, setIsVideoHovered] = useState(false)
 
@@ -98,18 +100,21 @@ const FeaturedVideoSectionVideoGallery = ({
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 102, 255, 0.3)',
+    pointerEvents: 'none',
   }
 
   const playIconStyle = {
-    color: '#FFFFFF',
-    fontSize: '24px',
-    marginLeft: '4px',
+    color: 'white',
+    fontSize: '28px',
+    marginLeft: '4px', // Slight offset for visual centering
+    fontFamily: 'Arial, sans-serif',
   }
 
   // Video content styles
   const videoContentStyle = {
-    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   }
 
   const featuredLabelStyle = {
@@ -117,73 +122,66 @@ const FeaturedVideoSectionVideoGallery = ({
     fontWeight: '600',
     color: '#008B8B',
     textTransform: 'uppercase',
-    letterSpacing: '1px',
-    marginBottom: '12px',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    letterSpacing: '0.05em',
+    margin: 0,
   }
 
   const videoTitleStyle = {
-    fontSize: '1.75rem',
-    fontWeight: '600',
+    fontSize: '2rem',
+    fontWeight: '700',
     color: '#2D3748',
-    marginBottom: '16px',
+    margin: 0,
+    lineHeight: '1.2',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    lineHeight: '1.3',
   }
 
   const videoDescriptionStyle = {
-    fontSize: '1rem',
+    fontSize: '1.125rem',
     color: '#4A5568',
     lineHeight: '1.6',
-    marginBottom: '24px',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    margin: 0,
   }
 
   const videoMetaStyle = {
     display: 'flex',
     gap: '12px',
-    marginBottom: '24px',
+    flexWrap: 'wrap',
+    alignItems: 'center',
   }
 
   const durationBadgeStyle = {
-    backgroundColor: '#008B8B',
-    color: '#FFFFFF',
-    padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
+    background: '#E2E8F0',
+    color: '#2D3748',
+    padding: '6px 12px',
+    borderRadius: '20px',
+    fontSize: '0.875rem',
     fontWeight: '500',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const levelBadgeStyle = {
-    backgroundColor: '#0066FF',
-    color: '#FFFFFF',
-    padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
+    background: '#008B8B',
+    color: 'white',
+    padding: '6px 12px',
+    borderRadius: '20px',
+    fontSize: '0.875rem',
     fontWeight: '500',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
-  // FIXED: Gallery button style - oval and blue
+  // FIXED: Gallery button styles
   const galleryButtonStyle = {
-    backgroundColor: '#0066FF',
-    color: '#FFFFFF',
-    padding: '12px 24px',
-    borderRadius: '25px', // Oval shape
-    fontSize: '0.95rem',
-    fontWeight: '600',
+    background: '#0066FF',
+    color: 'white',
     border: 'none',
+    padding: '12px 32px',
+    borderRadius: '50px', // Oval shape
+    fontSize: '1rem',
+    fontWeight: '600',
     cursor: 'pointer',
-    textDecoration: 'none',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
     transition: 'all 0.3s ease',
-    minWidth: '200px',
-    height: '44px',
-    lineHeight: '1',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    textDecoration: 'none',
+    display: 'inline-block',
+    marginTop: '8px',
   }
 
   // Handle button click
@@ -203,7 +201,7 @@ const FeaturedVideoSectionVideoGallery = ({
       <div style={containerStyle}>
         <div style={videoFrameStyle}>
           <div style={featuredVideoGridStyle}>
-            {/* Video Player - Smart gallery/YouTube fallback */}
+            {/* Video Player - Smart gallery/YouTube/Vimeo fallback */}
             <BrowserOnly
               fallback={
                 <div
@@ -221,16 +219,30 @@ const FeaturedVideoSectionVideoGallery = ({
               }
             >
               {() => {
-                const getEmbedUrl = videoId => {
+                // Generate embed URL based on platform
+                const getEmbedUrl = (videoId, platform) => {
                   const origin =
                     typeof window !== 'undefined'
                       ? window.location.origin
                       : 'https://resolve.io'
 
+                  if (platform === 'vimeo') {
+                    return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
+                  }
+                  // Default to YouTube
                   return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${origin}`
                 }
 
-                // SMART FALLBACK: Gallery first, then YouTube
+                // Get external video URL for fallback
+                const getExternalVideoUrl = (videoId, platform) => {
+                  if (platform === 'vimeo') {
+                    return `https://vimeo.com/${videoId}`
+                  }
+                  // Default to YouTube
+                  return `https://www.youtube.com/watch?v=${videoId}`
+                }
+
+                // SMART FALLBACK: Gallery first, then YouTube/Vimeo - FIXED ROUTING
                 const handleVideoClick = () => {
                   if (!featuredVideo?.videoId || typeof window === 'undefined')
                     return
@@ -244,13 +256,16 @@ const FeaturedVideoSectionVideoGallery = ({
                       : false
 
                   if (videoExistsInGallery) {
-                    // Video found in gallery - go to gallery page
-                    const galleryUrl = `/learning/actions-videos/videos?video=${featuredVideo.videoId}`
+                    // FIXED: Video found in gallery - go to NEW gallery page
+                    const galleryUrl = `/learning/video-gallery/videos?video=${featuredVideo.id}`
                     window.location.href = galleryUrl
                   } else {
-                    // Video not in gallery - go directly to YouTube
-                    const youtubeUrl = `https://www.youtube.com/watch?v=${featuredVideo.videoId}`
-                    window.open(youtubeUrl, '_blank')
+                    // Video not in gallery - go directly to YouTube or Vimeo
+                    const externalUrl = getExternalVideoUrl(
+                      featuredVideo.videoId,
+                      featuredVideo.platform,
+                    )
+                    window.open(externalUrl, '_blank')
                   }
                 }
 
@@ -270,8 +285,22 @@ const FeaturedVideoSectionVideoGallery = ({
                     }}
                   >
                     <iframe
-                      src={getEmbedUrl(featuredVideo.videoId)}
+                      src={getEmbedUrl(
+                        featuredVideo.videoId,
+                        featuredVideo.platform,
+                      )}
                       style={videoIframeStyle}
+                      frameBorder='0'
+                      allow={
+                        featuredVideo.platform === 'vimeo'
+                          ? 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share'
+                          : 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                      }
+                      referrerPolicy={
+                        featuredVideo.platform === 'vimeo'
+                          ? 'strict-origin-when-cross-origin'
+                          : undefined
+                      }
                       allowFullScreen
                       title={featuredVideo.title}
                     />

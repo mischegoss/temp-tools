@@ -37,6 +37,8 @@ const ProIndexNoFilter = ({
   // Featured video section props
   featuredVideoSectionProps = {
     label: 'Featured Learning Video',
+    buttonText: 'View Full Video Gallery →',
+    buttonLink: '/learning/video-gallery',
   },
 
   // Help section props
@@ -81,12 +83,12 @@ const ProIndexNoFilter = ({
         productColors={productColors}
       />
 
-      {/* Featured Video Section with product colors */}
+      {/* Featured Video Section */}
       {featuredVideo && (
         <FeaturedVideoSectionVideoGallery
           featuredVideo={featuredVideo}
+          videoGallery={videoResources}
           sectionProps={featuredVideoSectionProps}
-          productColors={productColors}
         />
       )}
 

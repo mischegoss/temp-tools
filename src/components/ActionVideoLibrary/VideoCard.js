@@ -7,6 +7,7 @@ import BrowserOnly from '@docusaurus/BrowserOnly'
 /**
  * VideoCard component - Individual video card for the gallery
  * Fixed for SSR compatibility using BrowserOnly
+ * Supports both YouTube and Vimeo videos
  */
 const VideoCard = ({ video, index, colorTheme }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -147,15 +148,30 @@ const VideoCard = ({ video, index, colorTheme }) => {
         <div style={thumbnailStyle}>
           <BrowserOnly fallback={<div style={iframeStyle} />}>
             {() => {
-              // Generate YouTube embed URL - only runs in browser
-              const getEmbedUrl = videoId => {
+              // Generate embed URL based on platform
+              const getEmbedUrl = (videoId, platform) => {
+                if (platform === 'vimeo') {
+                  return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
+                }
+                // Default to YouTube
                 return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`
               }
 
               return (
                 <iframe
-                  src={getEmbedUrl(video.videoId)}
+                  src={getEmbedUrl(video.videoId, video.platform)}
                   style={iframeStyle}
+                  frameBorder='0'
+                  allow={
+                    video.platform === 'vimeo'
+                      ? 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share'
+                      : 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                  }
+                  referrerPolicy={
+                    video.platform === 'vimeo'
+                      ? 'strict-origin-when-cross-origin'
+                      : undefined
+                  }
                   allowFullScreen
                   title={video.title}
                 />

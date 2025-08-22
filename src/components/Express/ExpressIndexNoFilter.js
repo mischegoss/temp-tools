@@ -37,6 +37,8 @@ const ExpressIndexNoFilter = ({
   // Featured video section props
   featuredVideoSectionProps = {
     label: 'Featured Learning Video',
+    buttonText: 'View Full Video Gallery →',
+    buttonLink: '/learning/video-gallery',
   },
 
   // Help section props
@@ -83,12 +85,11 @@ const ExpressIndexNoFilter = ({
         productColors={{ accent: productInfo.accent }}
       />
 
-      {/* Featured Video Section with product colors */}
+      {/* Featured Video Section */}
       {featuredVideo && (
         <FeaturedVideoSectionVideoGallery
           featuredVideo={featuredVideo}
           sectionProps={featuredVideoSectionProps}
-          productColors={{ accent: productInfo.accent }}
         />
       )}
 

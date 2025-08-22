@@ -37,6 +37,8 @@ const ActionsIndexNoFilter = ({
   // Featured video section props
   featuredVideoSectionProps = {
     label: 'Featured Learning Video',
+    buttonText: 'View Full Video Gallery →',
+    buttonLink: '/learning/video-gallery',
   },
 
   // Help section props
@@ -77,6 +79,7 @@ const ActionsIndexNoFilter = ({
       {featuredVideo && (
         <FeaturedVideoSectionVideoGallery
           featuredVideo={featuredVideo}
+          videoGallery={videoResources}
           sectionProps={featuredVideoSectionProps}
         />
       )}
