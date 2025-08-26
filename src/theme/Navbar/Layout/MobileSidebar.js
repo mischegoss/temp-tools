@@ -50,22 +50,22 @@ export default function MobileSidebar({
               </a>
               <ul className={styles.menuList}>
                 <li className={styles.menuListItem}>
-                  <Link className={styles.menuLink} to='/docs/actions'>
+                  <Link className={styles.menuLink} to='/actions'>
                     Actions
                   </Link>
                 </li>
                 <li className={styles.menuListItem}>
-                  <Link className={styles.menuLink} to='/docs/pro'>
+                  <Link className={styles.menuLink} to='/pro'>
                     Pro
                   </Link>
                 </li>
                 <li className={styles.menuListItem}>
-                  <Link className={styles.menuLink} to='/docs/express'>
+                  <Link className={styles.menuLink} to='/express'>
                     Express
                   </Link>
                 </li>
                 <li className={styles.menuListItem}>
-                  <Link className={styles.menuLink} to='/docs/insights'>
+                  <Link className={styles.menuLink} to='/insights'>
                     Insights
                   </Link>
                 </li>
@@ -83,13 +83,16 @@ export default function MobileSidebar({
                 <li className={styles.menuListItem}>
                   <Link
                     className={styles.menuLink}
-                    to='/learning/discover-resolve'
+                    to='https://training.resolve.io/learning/discover/'
                   >
                     Discover Resolve
                   </Link>
                 </li>
                 <li className={styles.menuListItem}>
-                  <Link className={styles.menuLink} to='/learning/hub'>
+                  <Link
+                    className={styles.menuLink}
+                    to='https://training.resolve.io/learning/'
+                  >
                     Learning Hub
                   </Link>
                 </li>
@@ -97,13 +100,19 @@ export default function MobileSidebar({
             </li>
 
             <li className={styles.menuListItem}>
-              <Link className={styles.menuLink} to='/support'>
+              <Link
+                className={styles.menuLink}
+                to='https://support.resolve.io/'
+              >
                 Support
               </Link>
             </li>
 
             <li className={styles.menuListItem}>
-              <Link className={styles.menuLink} to='/automation-exchange'>
+              <Link
+                className={styles.menuLink}
+                to='https://exchange.resolve.io/'
+              >
                 Automation Exchange
               </Link>
             </li>
