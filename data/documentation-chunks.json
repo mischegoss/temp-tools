@@ -1,0 +1,26 @@
+{
+  "_generated": "2025-08-26T19:11:48.503494",
+  "_total_chunks": 1,
+  "chunks": [
+    {
+      "id": "test_1",
+      "content": "How to create workflows in the automation system",
+      "original_content": "# How to create workflows",
+      "header": "Getting Started",
+      "source_url": "/actions/getting-started/workflows/",
+      "page_title": "Create Workflows",
+      "content_type": {
+        "type": "tutorial",
+        "category": "getting-started"
+      },
+      "complexity": "simple",
+      "tokens": 50,
+      "metadata": {
+        "tags": [
+          "workflow",
+          "tutorial"
+        ]
+      }
+    }
+  ]
+}
