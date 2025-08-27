@@ -120,11 +120,9 @@ const HomePage = () => {
 
       <div style={homePageStyles.containerStyle} className='homepage-container'>
         <div style={homePageStyles.headerContentStyle}>
-          <h1 style={homePageStyles.mainTitleStyle} className='homepage-title'>
-            Customer
-            <br />
-            Resource Hub
-          </h1>
+          <h2 style={homePageStyles.mainTitleStyle} className='homepage-title'>
+            Customer Resource Hub
+          </h2>
           <p style={homePageStyles.subtitleStyle}>How can we help?</p>
         </div>
 

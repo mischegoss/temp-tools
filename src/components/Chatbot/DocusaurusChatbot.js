@@ -1,19 +1,46 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useChatbot } from '../../hooks/useChatbot'
 
 const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hi, I am RANI, Resolve's AI Support Technician. How may I help you today?",
-      sender: 'bot',
-      timestamp: new Date(),
-    },
-  ])
-  const [inputValue, setInputValue] = useState('')
+  // Use the custom hook for all chat logic
+  const {
+    // State
+    messages,
+    inputValue,
+    setInputValue,
+    isLoading,
+    isTyping,
+    isExpanded,
+    serverStatus,
+    wakeUpProgress,
+
+    // Refs
+    messagesEndRef,
+    inputRef,
+
+    // Actions
+    sendMessage,
+    retryMessage,
+    toggleExpanded,
+    generateChatSummary,
+    handleKeyPress,
+    focusInput,
+
+    // Computed
+    canSendMessage,
+  } = useChatbot()
+
+  // Toast notifications (keeping this in component since it's UI-specific)
   const [showToast, setShowToast] = useState(false)
-  const messagesEndRef = useRef(null)
-  const inputRef = useRef(null)
+  const [toastMessage, setToastMessage] = useState('')
+
+  // Focus input when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      focusInput()
+    }
+  }, [isOpen, focusInput])
 
   const handleClose = () => {
     console.log('Close button clicked')
@@ -22,38 +49,17 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
     }
   }
 
-  const botResponses = [
-    "That's a great question about Resolve Actions! Let me help you with that.",
-    "I understand what you're looking for in Actions. Here's what I can tell you...",
-    'Thanks for reaching out! Based on our Resolve Actions documentation...',
-    "I'd be happy to help with that Actions feature. You might want to check our user guide...",
-    "That's covered in our Actions guides. Let me point you in the right direction...",
-    'Great question! You can find more details in our Actions API reference for that feature.',
-    "I see what you're asking about. This is a common question about Actions functionality.",
-  ]
+  const showToastNotification = (message, type = 'success') => {
+    setToastMessage(message)
+    setShowToast(true)
 
-  // Debug logging
-  useEffect(() => {
-    console.log('DocusaurusChatbot render - isOpen:', isOpen)
-  }, [isOpen])
-
-  const generateChatSummary = () => {
-    const timestamp = new Date().toLocaleString()
-    let summary = `Chat Summary for Support Ticket\n`
-    summary += `Generated: ${timestamp}\n`
-    summary += `Platform: Resolve Actions (via RANI AI Support Technician)\n\n`
-    summary += `Conversation History:\n`
-    summary += `------------------------\n`
-
-    messages.forEach((message, index) => {
-      const sender = message.sender === 'bot' ? 'RANI' : 'User'
-      summary += `${sender}: ${message.text}\n\n`
-    })
-
-    summary += `------------------------\n`
-    summary += `End of chat summary. Please use this context when responding to the support ticket.`
-
-    return summary
+    setTimeout(
+      () => {
+        setShowToast(false)
+        setToastMessage('')
+      },
+      type === 'error' ? 5000 : 3000,
+    )
   }
 
   const handleSupportClick = async () => {
@@ -71,72 +77,38 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
         document.body.removeChild(textArea)
       }
 
-      setShowToast(true)
+      showToastNotification(
+        'Chat summary copied to clipboard! Opening support portal...',
+        'success',
+      )
 
       setTimeout(() => {
-        setShowToast(false)
         window.open('https://support.resolve.io', '_blank')
-      }, 3000)
+      }, 2000)
     } catch (err) {
       console.error('Failed to copy to clipboard:', err)
-      setShowToast(true)
+      showToastNotification('Opening support portal...', 'info')
       setTimeout(() => {
-        setShowToast(false)
         window.open('https://support.resolve.io', '_blank')
-      }, 3000)
+      }, 2000)
     }
   }
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isOpen])
-
-  const sendMessage = () => {
-    const message = inputValue.trim()
-    if (!message) return
-
-    const newMessage = {
-      id: messages.length + 1,
-      text: message,
-      sender: 'user',
-      timestamp: new Date(),
-    }
-
-    setMessages(prev => [...prev, newMessage])
-    setInputValue('')
-
-    // Simulate bot response
-    setTimeout(() => {
-      const randomResponse =
-        botResponses[Math.floor(Math.random() * botResponses.length)]
-      const botMessage = {
-        id: messages.length + 2,
-        text: randomResponse,
-        sender: 'bot',
-        timestamp: new Date(),
+  // Dynamic sizing based on expanded state
+  const getWindowSize = () => {
+    if (isExpanded) {
+      return {
+        width: '600px',
+        height: '700px',
       }
-      setMessages(prev => [...prev, botMessage])
-    }, 1000)
-  }
-
-  const handleKeyPress = e => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      sendMessage()
+    }
+    return {
+      width: '380px',
+      height: '550px',
     }
   }
 
-  // CSS styles with higher z-index and fixed positioning
+  // CSS styles with dynamic sizing
   const styles = {
     overlay: {
       position: 'fixed',
@@ -144,20 +116,19 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 9999, // Very high z-index to ensure visibility
+      zIndex: 9999,
       pointerEvents: isOpen ? 'auto' : 'none',
     },
     container: {
       position: 'fixed',
       bottom: '20px',
       right: '20px',
-      zIndex: 10000, // Even higher z-index
+      zIndex: 10000,
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
     },
     chatWindow: {
-      width: '380px',
-      height: '550px',
+      ...getWindowSize(),
       background: 'white',
       borderRadius: '16px',
       boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
@@ -169,8 +140,7 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       overflow: 'hidden',
       border: '1px solid #e1e5e9',
       pointerEvents: 'auto',
-      // Add visible background for debugging
-      backgroundColor: isOpen ? 'white' : 'transparent',
+      backgroundColor: 'white',
     },
     header: {
       background: 'linear-gradient(135deg, #17a2b8 0%, #20c997 100%)',
@@ -178,6 +148,12 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       padding: '20px',
       textAlign: 'center',
       position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerContent: {
+      flex: 1,
     },
     headerTitle: {
       margin: 0,
@@ -189,14 +165,19 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       opacity: 0.9,
       fontSize: '14px',
     },
-    closeButton: {
+    headerButtons: {
       position: 'absolute',
-      top: '15px',
       right: '15px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      display: 'flex',
+      gap: '8px',
+    },
+    headerButton: {
       background: 'none',
       border: 'none',
       color: 'white',
-      fontSize: '20px',
+      fontSize: '18px',
       cursor: 'pointer',
       padding: '5px',
       borderRadius: '50%',
@@ -207,8 +188,16 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       alignItems: 'center',
       justifyContent: 'center',
     },
+    serverStatus: {
+      position: 'absolute',
+      left: '15px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      fontSize: '12px',
+      opacity: 0.8,
+    },
     messagesContainer: {
-      height: '280px',
+      height: isExpanded ? '420px' : '280px',
       overflowY: 'auto',
       padding: '20px',
       background: '#f8f9fa',
@@ -217,6 +206,7 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       marginBottom: '15px',
       display: 'flex',
       alignItems: 'flex-start',
+      position: 'relative',
     },
     messageBubble: {
       maxWidth: '80%',
@@ -224,6 +214,7 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       borderRadius: '18px',
       fontSize: '14px',
       lineHeight: 1.4,
+      position: 'relative',
     },
     botMessage: {
       background: 'white',
@@ -237,6 +228,60 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       color: 'white',
       borderBottomRightRadius: '4px',
       marginLeft: 'auto',
+    },
+    errorMessage: {
+      background: '#fff3cd',
+      color: '#856404',
+      border: '1px solid #ffeaa7',
+      borderBottomLeftRadius: '4px',
+      marginRight: 'auto',
+    },
+    messageStatus: {
+      fontSize: '10px',
+      opacity: 0.6,
+      position: 'absolute',
+      bottom: '-15px',
+      right: '8px',
+    },
+    retryButton: {
+      background: 'none',
+      border: 'none',
+      color: '#dc3545',
+      fontSize: '10px',
+      cursor: 'pointer',
+      position: 'absolute',
+      bottom: '-15px',
+      right: '8px',
+      textDecoration: 'underline',
+    },
+    typingIndicator: {
+      display: 'flex',
+      alignItems: 'center',
+      background: 'white',
+      padding: '12px 16px',
+      borderRadius: '18px',
+      borderBottomLeftRadius: '4px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+      marginRight: 'auto',
+      marginBottom: '15px',
+    },
+    typingDots: {
+      display: 'flex',
+      gap: '4px',
+    },
+    typingDot: {
+      width: '6px',
+      height: '6px',
+      borderRadius: '50%',
+      background: '#17a2b8',
+      animation: 'typing 1.4s infinite',
+    },
+    wakeUpStatus: {
+      textAlign: 'center',
+      padding: '20px',
+      color: '#6c757d',
+      fontSize: '14px',
+      background: '#f8f9fa',
     },
     inputContainer: {
       padding: '20px',
@@ -254,15 +299,21 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       outline: 'none',
       fontSize: '14px',
       transition: 'border-color 0.2s',
+      resize: 'none',
+      maxHeight: '100px',
     },
     sendButton: {
       width: '40px',
       height: '40px',
-      background: 'linear-gradient(135deg, #17a2b8 0%, #20c997 100%)',
+      background:
+        canSendMessage && serverStatus !== 'waking'
+          ? 'linear-gradient(135deg, #17a2b8 0%, #20c997 100%)'
+          : '#6c757d',
       border: 'none',
       borderRadius: '50%',
       color: 'white',
-      cursor: 'pointer',
+      cursor:
+        canSendMessage && serverStatus !== 'waking' ? 'pointer' : 'not-allowed',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -296,7 +347,11 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       position: 'fixed',
       top: '20px',
       right: '20px',
-      background: '#28a745',
+      background: showToast
+        ? toastMessage.includes('error') || toastMessage.includes('failed')
+          ? '#dc3545'
+          : '#28a745'
+        : '#28a745',
       color: 'white',
       padding: '16px 24px',
       borderRadius: '8px',
@@ -310,22 +365,18 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       transform: showToast ? 'translateY(0)' : 'translateY(-100px)',
       opacity: showToast ? 1 : 0,
       transition: 'all 0.3s ease',
+      maxWidth: '400px',
     },
   }
 
-  // CSS for hover effects and responsive design
+  // Enhanced CSS with animations
   const cssString = `
-    .chatbot-close-button:hover {
+    .chatbot-header-button:hover {
       background: rgba(255, 255, 255, 0.2) !important;
     }
     
-    .chatbot-send-button:hover {
+    .chatbot-send-button:hover:not(:disabled) {
       transform: scale(1.05);
-    }
-    
-    .chatbot-send-button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
     }
     
     .chatbot-support-button:hover {
@@ -354,6 +405,15 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
       background: #a8b2c1;
     }
     
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
+    }
+    
+    .chatbot-typing-dot:nth-child(1) { animation-delay: 0ms; }
+    .chatbot-typing-dot:nth-child(2) { animation-delay: 200ms; }
+    .chatbot-typing-dot:nth-child(3) { animation-delay: 400ms; }
+    
     @media (max-width: 420px) {
       .chatbot-window {
         width: calc(100vw - 40px) !important;
@@ -361,11 +421,104 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
         left: 20px !important;
       }
     }
+    
+    @media (max-width: 680px) {
+      .chatbot-window {
+        width: calc(100vw - 40px) !important;
+        height: ${isExpanded ? '80vh' : '70vh'} !important;
+      }
+    }
   `
 
-  console.log('DocusaurusChatbot rendering, isOpen:', isOpen)
+  const renderServerStatusIndicator = () => {
+    const statusIcons = {
+      ready: '🟢',
+      sleeping: '😴',
+      waking: '⏳',
+      error: '🔴',
+      unknown: '❓',
+    }
 
-  // Create portal target
+    return (
+      <div style={styles.serverStatus}>
+        {statusIcons[serverStatus]} {wakeUpProgress || serverStatus}
+      </div>
+    )
+  }
+
+  const renderTypingIndicator = () => {
+    if (!isTyping) return null
+
+    return (
+      <div style={styles.typingIndicator}>
+        <div style={styles.typingDots}>
+          <div
+            style={{ ...styles.typingDot, animationDelay: '0ms' }}
+            className='chatbot-typing-dot'
+          ></div>
+          <div
+            style={{ ...styles.typingDot, animationDelay: '200ms' }}
+            className='chatbot-typing-dot'
+          ></div>
+          <div
+            style={{ ...styles.typingDot, animationDelay: '400ms' }}
+            className='chatbot-typing-dot'
+          ></div>
+        </div>
+        <span style={{ marginLeft: '8px', fontSize: '12px', color: '#6c757d' }}>
+          RANI is typing...
+        </span>
+      </div>
+    )
+  }
+
+  const renderMessage = message => {
+    const isBot = message.sender === 'bot'
+    const isError = message.isError || false
+
+    let messageStyle = { ...styles.messageBubble }
+    if (isBot && isError) {
+      messageStyle = { ...messageStyle, ...styles.errorMessage }
+    } else if (isBot) {
+      messageStyle = { ...messageStyle, ...styles.botMessage }
+    } else {
+      messageStyle = { ...messageStyle, ...styles.userMessage }
+    }
+
+    return (
+      <div key={message.id} style={styles.message}>
+        <div style={messageStyle}>
+          {message.text}
+
+          {/* Message status */}
+          {message.status && message.sender === 'user' && (
+            <div style={styles.messageStatus}>
+              {message.status === 'sending' && '📤'}
+              {message.status === 'sent' && '✓'}
+              {message.status === 'delivered' && '✓✓'}
+              {message.status === 'failed' && (
+                <button
+                  style={styles.retryButton}
+                  onClick={() => retryMessage(message.id)}
+                  title='Retry message'
+                >
+                  Retry
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  console.log(
+    '🚀 DocusaurusChatbot rendering, isOpen:',
+    isOpen,
+    'serverStatus:',
+    serverStatus,
+  )
+
   const getPortalTarget = () => {
     let portalTarget = document.getElementById('chatbot-portal')
     if (!portalTarget) {
@@ -387,111 +540,89 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
     <>
       <style>{cssString}</style>
 
-      {/* DEBUG: Always visible test button - positioned in main content area */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '100px',
-          right: '20px', // Position on the right side of main content
-          zIndex: 99999,
-          background: 'red',
-          color: 'white',
-          padding: '10px',
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          borderRadius: '4px',
-          pointerEvents: 'auto',
-        }}
-      >
-        Chatbot Loaded - isOpen: {isOpen ? 'true' : 'false'}
-        <br />
-        <button
-          onClick={() => {
-            if (isOpen) {
-              onClose && onClose()
-            } else {
-              // Open it via global state
-              if (
-                window.globalChatbotState &&
-                window.globalChatbotState.setIsOpen
-              ) {
-                window.globalChatbotState.setIsOpen(true)
-              }
-            }
-          }}
-          style={{ marginTop: '5px', padding: '5px' }}
-        >
-          {isOpen ? 'Close' : 'Open'} Test
-        </button>
-      </div>
-
       {/* Toast Notification */}
       {showToast && (
         <div style={styles.toast}>
-          ✅ Chat summary copied to clipboard! Opening support portal...
+          {toastMessage.includes('error') || toastMessage.includes('failed')
+            ? '❌'
+            : '✅'}{' '}
+          {toastMessage}
         </div>
       )}
 
-      {/* Chatbot widget with proper positioning */}
       <div
-        style={{
-          ...styles.overlay,
-          pointerEvents: isOpen ? 'auto' : 'none',
-        }}
+        style={{ ...styles.overlay, pointerEvents: isOpen ? 'auto' : 'none' }}
       >
         <div style={styles.container}>
           <div style={styles.chatWindow} className='chatbot-window'>
+            {/* Enhanced Header */}
             <div style={styles.header}>
-              <button
-                style={styles.closeButton}
-                className='chatbot-close-button'
-                onClick={handleClose}
-                aria-label='Close chat'
-              >
-                ×
-              </button>
-              <h3 style={styles.headerTitle}>Ask RANI about Resolve Actions</h3>
-              <p style={styles.headerSubtitle}>How can I help you today?</p>
+              {renderServerStatusIndicator()}
+              <div style={styles.headerContent}>
+                <h3 style={styles.headerTitle}>
+                  Ask RANI about Resolve Actions
+                </h3>
+                <p style={styles.headerSubtitle}>How can I help you today?</p>
+              </div>
+              <div style={styles.headerButtons}>
+                <button
+                  style={styles.headerButton}
+                  className='chatbot-header-button'
+                  onClick={toggleExpanded}
+                  aria-label={isExpanded ? 'Collapse chat' : 'Expand chat'}
+                  title={isExpanded ? 'Collapse chat' : 'Expand chat'}
+                >
+                  {isExpanded ? '⤡' : '⤢'}
+                </button>
+                <button
+                  style={styles.headerButton}
+                  className='chatbot-header-button'
+                  onClick={handleClose}
+                  aria-label='Close chat'
+                >
+                  ×
+                </button>
+              </div>
             </div>
 
+            {/* Messages Area */}
             <div style={styles.messagesContainer} className='chatbot-messages'>
-              {messages.map(message => (
-                <div key={message.id} style={styles.message}>
-                  <div
-                    style={{
-                      ...styles.messageBubble,
-                      ...(message.sender === 'bot'
-                        ? styles.botMessage
-                        : styles.userMessage),
-                    }}
-                  >
-                    {message.text}
+              {serverStatus === 'waking' && wakeUpProgress && (
+                <div style={styles.wakeUpStatus}>
+                  <div>🚀 Starting AI Assistant...</div>
+                  <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                    {wakeUpProgress}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {messages.map(renderMessage)}
+              {renderTypingIndicator()}
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Input Area */}
             <div style={styles.inputContainer}>
-              <input
+              <textarea
                 ref={inputRef}
-                type='text'
                 placeholder='Type your message...'
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 style={styles.messageInput}
                 className='chatbot-message-input'
-                maxLength={500}
+                maxLength={2000}
+                rows={1}
+                disabled={isLoading || isTyping || serverStatus === 'waking'}
               />
               <button
                 style={styles.sendButton}
                 className='chatbot-send-button'
-                onClick={sendMessage}
-                disabled={!inputValue.trim()}
+                onClick={() => sendMessage()}
+                disabled={!canSendMessage || serverStatus === 'waking'}
                 aria-label='Send message'
               >
-                ➤
+                {isLoading || isTyping ? '⏳' : '➤'}
               </button>
             </div>
 
@@ -511,7 +642,6 @@ const DocusaurusChatbot = ({ isOpen = false, onClose }) => {
     </>
   )
 
-  // Use portal to render at document body level
   if (typeof window !== 'undefined') {
     return createPortal(widgetContent, getPortalTarget())
   }
