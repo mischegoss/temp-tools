@@ -421,21 +421,11 @@ html > body > button.ainiro {
   }
 }
 
-/* Dropdown menu styling for homepage navbar - DARK THEME */
-.navbarHomepageGradient .dropdownMenu {
-  background: var(--brand-black-700) !important;
-  border: 1px solid var(--brand-grey-600) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+/* For homepage dark navbar */
+.navbarHomepageGradient .navbarToggle {
+  color: var(--brand-white);
 }
 
-.navbarHomepageGradient .dropdownLink {
-  color: var(--brand-white) !important; /* White text on dark background */
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  font-family: var(--ifm-font-family-base) !important;
-}
-
-.navbarHomepageGradient .dropdownLink:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: var(--brand-blue-400) !important;
+.navbarHomepageGradient .navbarToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
