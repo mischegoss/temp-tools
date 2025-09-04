@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deploy script with warmup functionality
+# Deploy script for Actions Chatbot API
 PROJECT_ID="actions-chatbot-470114"
 SERVICE_NAME="actions-chatbot-api"
 REGION="us-central1"
@@ -16,7 +16,7 @@ gcloud run deploy $SERVICE_NAME \
   --source=. \
   --region=$REGION \
   --allow-unauthenticated \
-  --memory=2Gi \
+  --memory=4Gi \
   --cpu=1 \
   --timeout=900 \
   --max-instances=10 \
@@ -38,28 +38,28 @@ if [ $? -eq 0 ]; then
     echo "🔍 Testing health endpoint..."
     curl -s "$SERVICE_URL/health" | jq '.' || echo "Health check response received (jq not available for formatting)"
     
-    # Warmup the service
-    echo "🔥 Warming up the service..."
-    curl -s "$SERVICE_URL/warmup" | jq '.' || echo "Warmup response received (jq not available for formatting)"
-    
-    # Test status endpoint
-    echo "📊 Checking detailed status..."
-    curl -s "$SERVICE_URL/status" | jq '.' || echo "Status response received (jq not available for formatting)"
+    # Test root endpoint
+    echo "🏠 Testing root endpoint..."
+    curl -s "$SERVICE_URL/" | jq '.' || echo "Root response received (jq not available for formatting)"
     
     echo ""
     echo "🎉 Deployment completed successfully!"
     echo "Service is now ready at: $SERVICE_URL"
     echo ""
     echo "Available endpoints:"
+    echo "  Root: $SERVICE_URL/"
     echo "  Health: $SERVICE_URL/health"
-    echo "  Warmup: $SERVICE_URL/warmup"
-    echo "  Status: $SERVICE_URL/status"
-    echo "  Search: $SERVICE_URL/search (POST)"
-    echo "  Chat: $SERVICE_URL/chat (POST)"
+    echo "  Chat: $SERVICE_URL/api/v1/chat (POST)"
+    echo "  Search: $SERVICE_URL/api/v1/search (POST)"
     echo ""
     echo "🧪 Test with curl:"
     echo "  curl $SERVICE_URL/health"
-    echo "  curl $SERVICE_URL/warmup"
+    echo "  curl $SERVICE_URL/"
+    echo ""
+    echo "💬 Test chat endpoint:"
+    echo "  curl -X POST $SERVICE_URL/api/v1/chat \\"
+    echo "    -H \"Content-Type: application/json\" \\"
+    echo "    -d '{\"message\": \"How do I create a workflow?\", \"conversation_id\": \"test-123\"}'"
     
 else
     echo "❌ Deployment failed!"
