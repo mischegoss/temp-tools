@@ -19,7 +19,6 @@ import {
 } from '@mui/material'
 
 // Direct imports - no more async loading!
-import actionsLatest from '../../../static/data/enhanced-title-mappings-actions-latest.json'
 import expressOnPremise25 from '../../../static/data/enhanced-title-mappings-express-on-premise-2-5.json'
 import expressOnPremise24 from '../../../static/data/enhanced-title-mappings-express-on-premise-2-4.json'
 import expressOnPremise21 from '../../../static/data/enhanced-title-mappings-express-on-premise-2-1.json'
@@ -36,7 +35,6 @@ import pro79 from '../../../static/data/enhanced-title-mappings-pro-7-9.json'
 
 // Simple mapping object - no more complex caching
 const ALL_MAPPINGS = {
-  'actions-latest': actionsLatest,
   'express-on-premise-2-5': expressOnPremise25,
   'express-on-premise-2-4': expressOnPremise24,
   'express-on-premise-2-1': expressOnPremise21,
@@ -54,7 +52,6 @@ const ALL_MAPPINGS = {
 
 // Current versions per product (file format)
 const CURRENT_VERSIONS = {
-  actions: 'latest',
   insights: '11-0',
   express: 'on-premise-2-5',
   pro: '8-0',

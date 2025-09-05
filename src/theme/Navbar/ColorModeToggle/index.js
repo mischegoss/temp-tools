@@ -4,9 +4,9 @@ import ColorModeToggle from '@theme/ColorModeToggle';
 import styles from './styles.module.css';
 export default function NavbarColorModeToggle({className}) {
   const navbarStyle = useThemeConfig().navbar.style;
-  const {disableSwitch, respectPrefersColorScheme} = useThemeConfig().colorMode;
-  const {colorModeChoice, setColorMode} = useColorMode();
-  if (disableSwitch) {
+  const disabled = useThemeConfig().colorMode.disableSwitch;
+  const {colorMode, setColorMode} = useColorMode();
+  if (disabled) {
     return null;
   }
   return (
@@ -15,8 +15,7 @@ export default function NavbarColorModeToggle({className}) {
       buttonClassName={
         navbarStyle === 'dark' ? styles.darkNavbarColorModeToggle : undefined
       }
-      respectPrefersColorScheme={respectPrefersColorScheme}
-      value={colorModeChoice}
+      value={colorMode}
       onChange={setColorMode}
     />
   );

@@ -4,11 +4,11 @@
  * work well for content-centric websites.
  */
 
-/* Font Definitions */
+/* Import SeasonMix font */
 @font-face {
   font-family: 'SeasonMix';
   src: url('/fonts/SeasonMix-Regular.ttf') format('truetype');
-  font-weight: 400;
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
@@ -16,7 +16,7 @@
 @font-face {
   font-family: 'SeasonMix';
   src: url('/fonts/SeasonMix-RegularItalic.ttf') format('truetype');
-  font-weight: 400;
+  font-weight: normal;
   font-style: italic;
   font-display: swap;
 }
@@ -24,6 +24,7 @@
 /* Import Inter font for documentation content */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* You can override the default Infima variables here. */
 :root {
   /* Brand Colors - Primary */
   --brand-white: #ffffff;
@@ -40,7 +41,7 @@
   --brand-black-700: #0d1637;
   --brand-aqua-800: #051414;
   --brand-aqua-600: #02636f;
-  --brand-grey-600: #1a1a1a;
+  --brand-grey-600: #8792a3;
   --brand-grey-500: #cbd1da;
   --brand-grey-400: #d4d4d4;
   --brand-grey-300: #dadada;
@@ -49,127 +50,39 @@
   --brand-grey-100: #f6f6f6;
   --brand-secondary-white: #f6f6f6;
 
-  /* Brand Colors - Extended (Missing colors added) */
-  --brand-purple-light: #b894ff; /* Lighter purple for subtle accents */
-  --brand-purple-pale: #d4c4ff; /* Very light purple for backgrounds */
-  --brand-green-light: #33c085; /* Lighter green variation */
-  --brand-green-pale: #b3e5d1; /* Very light green for backgrounds */
-  --brand-orange-light: #ffb333; /* Lighter orange variation */
-  --brand-orange-pale: #ffe0b3; /* Very light orange for backgrounds */
-  --brand-aqua-light: #33dbff; /* Lighter aqua variation */
-  --brand-aqua-pale: #b3f0ff; /* Very light aqua for backgrounds */
+  /* Regular theme - using blues */
+  --ifm-color-primary: var(--brand-blue); /* Blue */
+  --ifm-color-primary-dark: var(--brand-black-700); /* Black 700 */
+  --ifm-color-primary-darker: var(--brand-black); /* Black */
+  --ifm-color-primary-darkest: var(--brand-black); /* Black */
+  --ifm-color-primary-light: var(--brand-blue-400); /* Blue 400 */
+  --ifm-color-primary-lighter: var(--brand-blue-100); /* Blue 100 */
+  --ifm-color-primary-lightest: var(--brand-blue-100); /* Blue 100 */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
-  /* Neutral Grays (non-blue tinted) */
-  --brand-neutral-900: #1a1a1a; /* Very dark neutral gray */
-  --brand-neutral-800: #2d2d2d; /* Dark neutral gray */
-  --brand-neutral-700: #404040; /* Medium-dark neutral gray */
-  --brand-neutral-600: #666666; /* Medium neutral gray */
-  --brand-neutral-500: #808080; /* Mid neutral gray */
-  --brand-neutral-400: #999999; /* Light-medium neutral gray */
-  --brand-neutral-300: #cccccc; /* Light neutral gray */
-  --brand-neutral-200: #e6e6e6; /* Very light neutral gray */
-  --brand-neutral-100: #f5f5f5; /* Near-white neutral gray */
-
-  /* Set SeasonMix as default for body and headings */
+  /* Set SeasonMix as the default font family for most text */
   --ifm-font-family-base: 'SeasonMix', 'Inter', system-ui, -apple-system,
     Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif,
     BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --ifm-font-family-heading: 'SeasonMix', system-ui, -apple-system, sans-serif;
 
-  /* Primary Blue - Mapped to Brand Blue */
-  --ifm-color-primary: var(--brand-blue);
-  --ifm-color-primary-dark: var(--brand-black-700);
-  --ifm-color-primary-darker: var(--brand-black);
-  --ifm-color-primary-darkest: var(--brand-black);
-  --ifm-color-primary-light: var(--brand-blue-400);
-  --ifm-color-primary-lighter: var(--brand-blue-400);
-  --ifm-color-primary-lightest: var(--brand-blue-100);
-
-  /* Code settings */
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 80, 199, 0.08);
-
-  /* Accent/Secondary - Mapped to Brand Colors */
-  --color-secondary-purple: var(--brand-purple);
-  --color-secondary-green: var(--brand-green);
-  --color-accent-teal: var(--brand-aqua);
-  --color-accent-pale: var(--brand-purple-pale);
-
-  /* Product-specific accent colors - Mapped to Brand Colors */
-  --pro-accent: var(--brand-green);
-  --insights-accent: var(--brand-aqua);
-  --express-accent: var(--brand-purple);
-  --actions-accent: var(--brand-blue-400);
-
-  /* Product-specific shadow colors - Using Brand RGBA */
-  --pro-shadow: rgba(0, 176, 112, 0.2);
-  --insights-shadow: rgba(0, 212, 255, 0.2);
-  --express-shadow: rgba(143, 74, 255, 0.2);
-  --actions-shadow: rgba(0, 102, 255, 0.2);
-
-  /* Dynamic product variables - set by ProductProvider */
-  --product-accent-color: var(--actions-accent);
-  --product-accent-shadow: var(--actions-shadow);
-
-  /* Semantic Text Colors - Mapped to Brand Colors */
-  --color-text-primary: var(--brand-black-700);
-  --color-text-secondary: var(--brand-grey-600);
-  --color-text-light: var(--brand-grey-500);
-  --color-text-white: var(--brand-white);
-
-  /* Semantic Background Colors - Mapped to Brand Colors */
-  --color-bg-gradient-start: var(--brand-grey-100);
-  --color-bg-gradient-end: var(--brand-grey-200);
-  --color-bg-dark-section: var(--brand-black);
-  --color-bg-card-dark: var(--brand-black-700);
-  --color-bg-card-light: var(--brand-white);
-  --color-bg-footer: var(--color-bg-card-dark);
-  --color-bg-overlay: rgba(5, 7, 15, 0.08);
-
-  /* Semantic Border Colors - Mapped to Brand Colors */
-  --color-border-light: var(--brand-grey-200);
-  --color-border-dark: var(--brand-neutral-700);
-
-  /* Semantic Shadow Colors - Using Brand RGBA */
-  --color-shadow-light: rgba(5, 7, 15, 0.08);
-  --color-shadow-medium: rgba(5, 7, 15, 0.12);
-
-  /* Docusaurus Footer Override */
-  --ifm-footer-background-color: var(--color-bg-footer);
+  /* Set SeasonMix for headings */
+  --ifm-heading-font-family: 'SeasonMix', 'Inter', system-ui, -apple-system,
+    sans-serif;
 }
 
+/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  /* Lightened colors for dark backgrounds - using brand palette */
-  --ifm-color-primary: var(--brand-blue-100);
-  --ifm-color-primary-dark: var(--brand-blue-400);
-  --ifm-color-primary-darker: var(--brand-blue);
-  --ifm-color-primary-darkest: var(--brand-black-700);
-  --ifm-color-primary-light: var(--brand-grey-300);
-  --ifm-color-primary-lighter: var(--brand-grey-200);
-  --ifm-color-primary-lightest: var(--brand-white);
-  --docusaurus-highlighted-code-line-bg: rgba(203, 224, 255, 0.15);
-
-  /* Dark Theme Semantic Overrides - using brand palette */
-  --color-text-primary: var(--brand-white);
-  --color-text-secondary: var(--brand-grey-500);
-  --color-text-light: var(--brand-grey-600);
-
-  --color-bg-gradient-start: var(--brand-black-700);
-  --color-bg-gradient-end: var(--brand-neutral-800);
-  --color-bg-dark-section: var(--brand-black);
-  --color-bg-card-dark: var(--brand-black-700);
-  --color-bg-card-light: var(--brand-neutral-800);
-  --color-bg-overlay: rgba(255, 255, 255, 0.08);
-
-  --color-border-light: var(--brand-neutral-600);
-  --color-border-dark: var(--brand-black-700);
-
-  --color-shadow-light: rgba(5, 7, 15, 0.3);
-  --color-shadow-medium: rgba(5, 7, 15, 0.4);
-
-  /* Docusaurus Footer Override */
-  --ifm-footer-background-color: var(--color-bg-footer);
+  /* Dark theme - using greys */
+  --ifm-color-primary: var(--brand-grey-600); /* Grey 600 */
+  --ifm-color-primary-dark: var(--brand-grey-500); /* Grey 500 */
+  --ifm-color-primary-darker: var(--brand-grey-400); /* Grey 400 */
+  --ifm-color-primary-darkest: var(--brand-grey-300); /* Grey 300 */
+  --ifm-color-primary-light: var(--brand-grey-200); /* Grey 200 */
+  --ifm-color-primary-lighter: var(--brand-grey-250); /* Grey 250 */
+  --ifm-color-primary-lightest: var(--brand-white); /* White */
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
 /* Inter font for documentation content specifically */
@@ -208,7 +121,6 @@
     var(--brand-black) 0%,
     var(--brand-blue) 100%
   ) !important;
-  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
 }
 
 /* Subtle gradient overlay for visual depth */
@@ -275,88 +187,6 @@
   font-weight: 600;
 }
 
-/* Brand Gradients - Using provided examples */
-.gradient-brand-blue {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-black) 0%,
-    var(--brand-blue) 100%
-  );
-}
-
-.gradient-brand-green {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-black) 0%,
-    var(--brand-green) 100%
-  );
-}
-
-.gradient-brand-purple {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-black) 0%,
-    var(--brand-purple) 100%
-  );
-}
-
-.gradient-brand-orange {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-black) 0%,
-    var(--brand-orange) 100%
-  );
-}
-
-.gradient-brand-aqua {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-black) 0%,
-    var(--brand-aqua) 100%
-  );
-}
-
-/* Additional Light Gradients using extended palette */
-.gradient-brand-blue-light {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-blue-100) 0%,
-    var(--brand-white) 100%
-  );
-}
-
-.gradient-brand-purple-light {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-purple-pale) 0%,
-    var(--brand-white) 100%
-  );
-}
-
-.gradient-brand-green-light {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-green-pale) 0%,
-    var(--brand-white) 100%
-  );
-}
-
-.gradient-brand-orange-light {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-orange-pale) 0%,
-    var(--brand-white) 100%
-  );
-}
-
-.gradient-brand-aqua-light {
-  background: linear-gradient(
-    to bottom,
-    var(--brand-aqua-pale) 0%,
-    var(--brand-white) 100%
-  );
-}
-
 /* Dark Mode Header/Navbar Styling */
 [data-theme='dark'] .navbar {
   background-color: var(--brand-black) !important;
@@ -418,70 +248,80 @@
   font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
 }
 
-/* Ensure all text elements use SeasonMix font */
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.navbar__brand,
-.footer__title,
-.footer__link-item,
-.menu__link,
-.pagination-nav__link,
-.breadcrumbs__link,
-.button {
-  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+/*DO NOT TOUCH BELOW THIS LINE*/
+
+/* Hide the chatbot button on the homepage */
+body[data-homepage='true'] #ainiro_chat_btn {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  animation: none !important;
+  transition: none !important;
 }
 
-/* ============================================ */
-/* HOMEPAGE MEDIA QUERIES */
-/* ============================================ */
-
-@media (min-width: 1200px) {
-  .homepage-container {
-    max-width: 1440px !important;
-    padding: 0 80px !important;
-  }
-
-  .homepage-title {
-    font-size: 4.5rem !important;
-  }
-
-  .homepage-card {
-    padding: 56px 42px !important;
-  }
+/* Target Docusaurus pages with specific classes */
+/* Only hide navbar on forms pages */
+html[class*='mdx-wrapper'][class*='plugin-pages']
+  body[data-pathname*='/forms/']
+  nav.navbar.navbar--fixed-top,
+.mdx-wrapper.mdx-page.plugin-pages.plugin-id-default
+  body[data-pathname*='/forms/']
+  nav.navbar.navbar--fixed-top {
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  visibility: hidden !important;
 }
 
-@media (min-width: 1440px) {
-  .homepage-container {
-    max-width: 1600px !important;
-    padding: 0 100px !important;
-  }
-
-  .homepage-section {
-    min-height: 75vh !important;
-    padding: 120px 0 140px 0 !important;
-  }
+/* Adjust spacing only on forms pages */
+body[data-pathname*='/forms/'] #docusaurus_skipToContent_fallback {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
-/* Remove external link icons from footer - more specific selectors */
+/* Hide Back to Top Button */
+.theme-back-to-top-button {
+  display: none !important;
+}
+
+/* Hide footer on learning pages */
+body[data-pathname*='/learning/'] .footer {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Alternative selector in case the data-pathname approach doesn't work */
+html[class*='learning'] .footer,
+.footer[data-learning='true'] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Remove external link icons from navbar and footer - comprehensive selectors */
+
+/* Footer external link icons */
 .footer__link-item::after {
   display: none !important;
 }
-
 .footer .footer__links a::after {
   display: none !important;
 }
-
-/* Target Docusaurus external link icon class directly */
 .footer [class*='iconExternalLink'] {
   display: none !important;
 }
-
-/* Alternative approach - hide all pseudo elements in footer links */
 .footer a[href^="http"]::after,
 .footer a[href^="https://"]::after
 {
@@ -489,157 +329,65 @@ h6,
   display: none !important;
 }
 
-/* ============================================ */
-/* PROFESSIONAL NAVBAR DROPDOWN */
-/* ============================================ */
-
-/* Ensure dropdown container has proper positioning */
-.navbar__item.dropdown {
-  position: relative !important;
+/* Navbar external link icons */
+.navbar__link::after {
+  display: none !important;
 }
-
-/* Professional dropdown menu styling */
-.navbar__item.dropdown .dropdown__menu {
-  position: absolute !important;
-  top: 100% !important;
-  left: 0 !important;
-  z-index: 1000 !important;
-  margin-top: 0 !important;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-5px);
-  transition: all 0.15s ease;
-  pointer-events: none;
-
-  /* Clean professional styling */
-  background: #ffffff !important;
-  border: 1px solid #e1e5e9 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  min-width: 180px !important;
-  padding: 8px 0 !important;
-  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
+.navbar .navbar__items a::after {
+  display: none !important;
 }
-
-/* Show dropdown on hover */
-.navbar__item.dropdown:hover .dropdown__menu,
-.navbar__item.dropdown .dropdown__menu:hover {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0) !important;
-  pointer-events: auto !important;
+.navbar [class*='iconExternalLink'] {
+  display: none !important;
 }
-
-/* Invisible bridge to prevent dropdown from closing */
-.navbar__item.dropdown::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background: transparent;
-  z-index: 999;
-}
-
-/* Ensure navbar has proper z-index */
-.navbar {
-  z-index: 1000 !important;
-  position: relative !important;
-}
-
-/* Override Docusaurus default dropdown behavior */
-.navbar__item.dropdown--hoverable:hover .dropdown__menu {
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0) !important;
-  pointer-events: auto !important;
-}
-
-/* Clean dropdown links */
-.navbar__item.dropdown .dropdown__menu .dropdown__link {
-  display: block !important;
-  padding: 10px 16px !important;
-  color: #333333 !important;
-  text-decoration: none !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  line-height: 1.4 !important;
-  background: none !important;
-  border: none !important;
-  transition: background-color 0.1s ease !important;
-  font-family: 'SeasonMix', system-ui, -apple-system, sans-serif !important;
-}
-
-.navbar__item.dropdown .dropdown__menu .dropdown__link:hover {
-  background: #f8f9fa !important;
-  color: #333333 !important;
-  text-decoration: none !important;
-}
-
-/* Dark theme / homepage navbar styling */
-.navbarHomepageGradient .navbar__item.dropdown .dropdown__menu {
-  background: #ffffff !important;
-  border: 1px solid #e1e5e9 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-.navbarHomepageGradient .navbar__item.dropdown .dropdown__menu .dropdown__link {
-  color: #333333 !important;
-}
-
-.navbarHomepageGradient
-  .navbar__item.dropdown
-  .dropdown__menu
-  .dropdown__link:hover {
-  background: #f8f9fa !important;
-  color: #333333 !important;
-}
-
-/* Handle cascade layers if they exist */
-@layer base {
-  .navbar__item.dropdown .dropdown__menu {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    z-index: 1000 !important;
-  }
-}
-
-/* Mobile-specific fixes */
-@media (max-width: 996px) {
-  .navbar__item.dropdown .dropdown__menu {
-    position: static !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    margin-top: 8px !important;
-    box-shadow: none !important;
-    border: 1px solid #e1e5e9 !important;
-  }
-
-  .navbar__item.dropdown::after {
-    display: none;
-  }
-}
-/* ============================================ */
-/* SIMPLE CHATBOT VISIBILITY CONTROL */
-/* ============================================ */
-
-/* Hide the original chatbot button by default on ALL pages */
-html > body > button.ainiro {
+.navbar a[href^="http"]::after,
+.navbar a[href^="https://"]::after
+{
+  content: none !important;
   display: none !important;
 }
 
-/* Only show the original chatbot button on service blueprinting module pages */
-/* Use CSS attribute selectors to detect the current page */
-body[data-current-route*='/learning/service-blueprinting/modules']
-  button.ainiro,
-html[data-route*='/learning/service-blueprinting/modules'] button.ainiro {
-  display: block !important;
-  position: fixed !important;
-  bottom: 24px !important;
-  right: 24px !important;
-  z-index: 9999 !important;
+/* Dropdown menu external link icons */
+.dropdown__link::after {
+  display: none !important;
+}
+.dropdown__menu a::after {
+  display: none !important;
+}
+.dropdown [class*='iconExternalLink'] {
+  display: none !important;
+}
+.dropdown a[href^="http"]::after,
+.dropdown a[href^="https://"]::after
+{
+  content: none !important;
+  display: none !important;
+}
+
+/* Global approach - remove all external link icons site-wide */
+[class*='iconExternalLink'] {
+  display: none !important;
+}
+
+/* Remove external link icons from any link with external URL */
+a[href^="http"]::after:not(.keep-external-icon),
+a[href^="https://"]::after:not(.keep-external-icon)
+{
+  content: none !important;
+  display: none !important;
+}
+
+/* More specific Docusaurus classes */
+.theme-doc-sidebar-item-link[href^="http"]::after,
+.theme-doc-sidebar-item-link[href^="https://"]::after,
+.menu__link[href^="http"]::after,
+.menu__link[href^="https://"]::after
+{
+  display: none !important;
+}
+
+/* Mobile sidebar external link icons */
+.navbar-sidebar__items a[href^="http"]::after,
+.navbar-sidebar__items a[href^="https://"]::after
+{
+  display: none !important;
 }

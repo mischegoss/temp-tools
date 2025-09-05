@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 
@@ -66,184 +63,172 @@ const LoadingOverlay = ({ className }) => (
 )
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  padding: '4rem 0',
   maxWidth: '1200px',
   margin: '0 auto',
+  padding: '80px 40px 100px 40px',
+  width: '100%',
+  position: 'relative',
+  zIndex: 1,
+  [theme.breakpoints.down('lg')]: {
+    padding: '60px 32px 80px 32px',
+  },
+  [theme.breakpoints.down('md')]: {
+    padding: '60px 24px 80px 24px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: '60px 16px 80px 16px',
+  },
 }))
 
-const StyledCard = styled(Card)(({ theme }) => ({
+const StyledSection = styled('section')(({ theme }) => ({
+  background: 'var(--brand-grey-100)',
+  minHeight: '60vh',
   width: '100%',
-  maxWidth: '400px',
+  margin: 0,
+  position: 'relative',
+  overflow: 'hidden',
+  fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+}))
+
+const ProductCard = styled(Box)(({ theme }) => ({
+  borderRadius: '16px',
+  padding: '32px 20px',
+  transition: 'all 0.3s ease',
+  border: '2px solid transparent',
   height: '280px',
-  transition: 'all 0.3s ease-in-out',
-  border: '1px solid #0A192F',
-  borderRadius: '12px',
-  cursor: 'pointer',
-  textDecoration: 'none',
-  color: 'inherit',
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
-  backgroundColor: '#ffffff',
-  padding: '2.4rem 1.6rem',
+  justifyContent: 'center',
   position: 'relative',
-  boxShadow: '0 2px 8px rgba(14, 190, 190, 0.1)',
-  margin: 0,
+  overflow: 'hidden',
+  boxShadow: '0 8px 24px rgba(5, 7, 15, 0.15)',
+  fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+  cursor: 'pointer',
+  textDecoration: 'none !important',
+  color: 'inherit',
+  textAlign: 'center',
   '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 24px rgba(14, 190, 190, 0.2)',
-    borderColor: '#0ebebe',
-    textDecoration: 'none',
-    '& .feature-svg': {
-      transform: 'scale(1.05)',
-    },
+    transform: 'translateY(-6px)',
+    boxShadow:
+      '0 16px 32px rgba(5, 7, 15, 0.25), 0 0 20px rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    textDecoration: 'none !important',
+  },
+  [theme.breakpoints.down('lg')]: {
+    height: '260px',
+    padding: '28px 18px',
   },
   [theme.breakpoints.down('md')]: {
     height: '240px',
-    padding: '1.2rem',
-    maxWidth: '320px',
+    padding: '24px 16px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    height: '220px',
+    padding: '20px 12px',
   },
 }))
 
-const ImageContainer = styled(Box)(({ theme }) => ({
-  height: '96px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: '2.4rem',
-  backgroundColor: '#ffffff',
-  position: 'relative',
+const ProductTitle = styled('h3')(({ theme }) => ({
+  fontSize: '1.35rem',
+  fontWeight: '600',
+  color: 'var(--brand-white)',
+  marginBottom: '16px',
+  lineHeight: '1.3',
+  fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+  textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+  margin: '0 0 16px 0',
+  [theme.breakpoints.down('lg')]: {
+    fontSize: '1.25rem',
+  },
   [theme.breakpoints.down('md')]: {
-    height: '80px',
-    marginBottom: '1.6rem',
+    fontSize: '1.15rem',
+  },
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '1.1rem',
   },
 }))
 
-const FeatureSvg = styled('div')(({ theme }) => ({
-  width: 'auto',
-  transition: 'transform 0.3s ease',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  '& svg': {
-    width: 'auto',
-    objectFit: 'contain',
-  },
-  '&.expressLogo svg': {
-    height: '52px',
-    maxWidth: '224px',
-    [theme.breakpoints.down('md')]: {
-      height: '36px',
-      maxWidth: '160px',
-    },
-  },
-  '&.actionsLogo svg': {
-    height: '68px',
-    maxWidth: '240px',
-    marginTop: '-8px',
-    [theme.breakpoints.down('md')]: {
-      height: '52px',
-      maxWidth: '176px',
-      marginTop: '-5px',
-    },
-  },
-  '&.proLogo svg': {
-    height: '44px',
-    maxWidth: '192px',
-    [theme.breakpoints.down('md')]: {
-      height: '28px',
-      maxWidth: '128px',
-    },
-  },
-  '&.insightsLogo svg': {
-    height: '44px',
-    maxWidth: '192px',
-    [theme.breakpoints.down('md')]: {
-      height: '28px',
-      maxWidth: '128px',
-    },
-  },
-}))
-
-const CardTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '1.2rem',
-  margin: '0 0 1.2rem 0',
-  fontWeight: 600,
-  lineHeight: 1.3,
-  color: '#2c3345',
-  textAlign: 'center',
-  height: '3rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  [theme.breakpoints.down('md')]: {
-    fontSize: '1rem',
-    height: '2.6rem',
-    marginBottom: '1rem',
-  },
-}))
-
-const CardDescription = styled(Typography)(({ theme }) => ({
+const ProductDescription = styled('p')(({ theme }) => ({
   fontSize: '1rem',
-  color: '#6c757d',
-  textAlign: 'center',
-  lineHeight: 1.5,
-  padding: '0 0.8rem',
+  color: 'rgba(255, 255, 255, 0.9)',
+  lineHeight: '1.5',
+  fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+  textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
   margin: 0,
+  [theme.breakpoints.down('lg')]: {
+    fontSize: '0.95rem',
+  },
   [theme.breakpoints.down('md')]: {
     fontSize: '0.9rem',
   },
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '0.85rem',
+  },
 }))
+
+// Gradient styles matching DocsProducts component
+const gradientStyles = {
+  express: {
+    background:
+      'linear-gradient(to bottom, #0f0519 0%, #1a0829 30%, #2d0a4f 70%, #4a1a7a 100%)',
+  },
+  actions: {
+    background:
+      'linear-gradient(to bottom, #000511 0%, #001024 30%, #001845 70%, #002b6e 100%)',
+  },
+  pro: {
+    background:
+      'linear-gradient(to bottom, #001a0f 0%, #002819 30%, #003d2b 70%, #005c42 100%)',
+  },
+  insights: {
+    background:
+      'linear-gradient(to bottom, #001a1f 0%, #002a33 30%, #004454 70%, #006b7a 100%)',
+  },
+}
 
 const FeatureList = [
   {
-    title: 'Resolve Actions Express Documentation',
-    Svg: require('@site/static/img/Resolve-Actions-Express-Dark.svg').default,
-    description:
-      'Drag-and-drop, no-code IT automation with a large built-in library of automation actions.',
-    link: '/express/',
-    imageClass: 'expressLogo',
-  },
-  {
+    id: 'actions',
     title: 'Resolve Actions Documentation',
-    Svg: require('@site/static/img/Resolve-Actions.svg').default,
-    description:
-      'Our newest drag-and-drop, no-code IT process automation platform.',
-    link: '/actions/',
-    imageClass: 'actionsLogo',
+    description: 'Easily automate and orchestrate IT operations',
+    link: 'https://help.resolve.io/actions',
   },
   {
+    id: 'pro',
     title: 'Resolve Actions Pro Documentation',
-    Svg: require('@site/static/img/Resolve-Actions-Pro-Dark.svg').default,
-    description: 'Tailor-made IT automation with powerful code-based features.',
+    description: 'Tailor-made IT automation with powerful code-based features',
     link: '/pro/',
-    imageClass: 'proLogo',
   },
   {
+    id: 'express',
+    title: 'Resolve Actions Express Documentation',
+    description: 'No-code IT automation with built-in actions library',
+    link: '/express/',
+  },
+  {
+    id: 'insights',
     title: 'Resolve Insights Documentation',
-    Svg: require('@site/static/img/Resolve-Insights-Dark.svg').default,
-    description: 'Our Discovery and Dependency Mapping (DDM) product.',
+    description: 'Discovery and dependency mapping for your team',
     link: '/insights/',
-    imageClass: 'insightsLogo',
   },
 ]
 
-function Feature({ Svg, title, description, link, imageClass }) {
+function Feature({ id, title, description, link }) {
   return (
-    <Grid item xs={12} sm={6} display='flex' justifyContent='center'>
-      <StyledCard component='a' href={link} sx={{ textDecoration: 'none' }}>
-        <ImageContainer>
-          <FeatureSvg className={`feature-svg ${imageClass}`}>
-            <Svg role='img' />
-          </FeatureSvg>
-        </ImageContainer>
-        <CardContent sx={{ padding: 0, '&:last-child': { paddingBottom: 0 } }}>
-          <CardTitle variant='h3' component='h3'>
-            {title}
-          </CardTitle>
-          <CardDescription variant='body1'>{description}</CardDescription>
-        </CardContent>
-      </StyledCard>
+    <Grid item xs={12} sm={6} md={3}>
+      <ProductCard
+        component='a'
+        href={link}
+        target={link.startsWith('http') ? '_blank' : '_self'}
+        rel={link.startsWith('http') ? 'noopener noreferrer' : undefined}
+        sx={{
+          ...gradientStyles[id],
+          width: '100%',
+        }}
+      >
+        <ProductTitle>{title}</ProductTitle>
+        <ProductDescription>{description}</ProductDescription>
+      </ProductCard>
     </Grid>
   )
 }
@@ -290,26 +275,23 @@ export default function HomepageFeatures() {
     <>
       {isLoading && <LoadingOverlay className={isFading ? 'fade-out' : ''} />}
       {showContent && (
-        <StyledContainer>
-          <Grid
-            container
-            spacing={3}
-            justifyContent='center'
-            alignItems='stretch'
-            sx={{
-              maxWidth: '100%',
-              margin: 0,
-              '& .MuiGrid-item': {
-                display: 'flex',
+        <StyledSection>
+          <StyledContainer>
+            <Grid
+              container
+              spacing={2.5}
+              sx={{
+                maxWidth: '1200px',
+                margin: '0 auto',
                 justifyContent: 'center',
-              },
-            }}
-          >
-            {FeatureList.map((props, idx) => (
-              <Feature key={idx} {...props} />
-            ))}
-          </Grid>
-        </StyledContainer>
+              }}
+            >
+              {FeatureList.map((props, idx) => (
+                <Feature key={idx} {...props} />
+              ))}
+            </Grid>
+          </StyledContainer>
+        </StyledSection>
       )}
     </>
   )
