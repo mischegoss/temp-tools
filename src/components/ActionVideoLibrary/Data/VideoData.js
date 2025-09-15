@@ -2,7 +2,7 @@
 
 export const videoLibrary = [
   // ==========================================
-  // ACTIONS FEATURED VIDEO (Current video)
+  // INSTRUCTIONAL TEMPLATE EXAMPLE - ACTIONS FEATURED VIDEO
   // ==========================================
   {
     id: 'getting-started-actions',
@@ -16,11 +16,16 @@ export const videoLibrary = [
     category: 'Platform Overview',
     tags: ['basics', 'getting-started', 'workflow'],
     publishDate: '2024-01-15',
-    thumbnailUrl: null, 
+    thumbnailUrl: null,
     product: 'actions',
     featured: true,
     platform: 'youtube',
-    template: 'instructional', // NEW: Template property
+    template: 'instructional',
+
+    // Instructional template fields
+    learningObjectives:
+      'Learn to navigate the workflow designer interface, build workflows using drag-and-drop activities, configure integrations, implement logic controls, and test your automations effectively.',
+    estimatedTime: '15-20 minutes to complete tutorial',
     tutorialSteps: [
       {
         step: 1,
@@ -53,124 +58,45 @@ export const videoLibrary = [
           'Test workflows with input parameters to simulate external triggers like alerts or tickets. Add activity notes for team collaboration, create rich documentation with graphics, apply tags for organization, and use built-in version control to manage changes and rollbacks.',
       },
     ],
-  },
 
-  // ==========================================
-  // PRO FEATURED VIDEO
-  // ==========================================
-  {
-    id: 'pro-featured-video',
-    title: 'Welcome to Resolve Actions Pro',
-    description:
-      'Get introduced to the enterprise-class IT automation and orchestration platform, including third-party integrations, the Automation Exchange, and flexible development approaches.',
-    videoUrl: 'https://www.youtube.com/watch?v=bJL_c08aElQ',
-    videoId: 'bJL_c08aElQ',
-    duration: '2:25',
-    level: 'automation-design',
-    category: 'Enterprise Features',
-    tags: ['pro', 'enterprise', 'advanced-features'],
-    publishDate: '2024-08-15',
-    thumbnailUrl: null,
-    product: 'pro',
-    featured: true,
-    platform: 'youtube',
-    template: 'instructional', // NEW: Template property
-    tutorialSteps: [
+    // Resources (available for all templates)
+    learningResources: [
       {
-        step: 1,
-        title: 'Set Up Enterprise IT Automation Platform',
-        content:
-          'Deploy Resolve Actions Pro in either cloud or on-premise environments to handle enterprise-class IT automation and orchestration. Configure the platform to intercept and process incidents from third-party tools like ServiceNow automatically.',
+        title: 'Workflow Designer Documentation',
+        description: 'Complete guide to using the visual workflow designer',
+        link: '/docs/actions/workflow-designer',
       },
       {
-        step: 2,
-        title: 'Build Comprehensive Automation Workflows',
-        content:
-          'Create automations using drag-and-drop building blocks to handle complex scenarios including server provisioning, user account management, network diagnostics, firewall rule configuration, and database operations. Leverage both simple and advanced automation capabilities.',
+        title: 'Activity Library Reference',
+        description:
+          'Comprehensive reference for all available workflow activities',
+        link: '/docs/actions/activity-library',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Workflow Designer Quick Start Guide',
+        description: 'PDF guide to get started with workflow design',
+        type: 'PDF',
+        link: '/downloads/workflow-designer-quickstart.pdf',
       },
       {
-        step: 3,
-        title: 'Integrate with Enterprise IT Services',
-        content:
-          'Connect Resolve Actions Pro with your existing IT infrastructure and services. Configure integrations to automatically trigger automations from service requests, incidents, or alerts, enabling hands-off auto-remediation within seconds.',
-      },
-      {
-        step: 4,
-        title: 'Leverage the Automation Exchange',
-        content:
-          'Access pre-built use cases, templates, and automations from the Automation Exchange to accelerate deployment. Download and customize proven automation patterns for common enterprise scenarios and use cases.',
-      },
-      {
-        step: 5,
-        title: 'Customize with Low-Code and Custom Code Approaches',
-        content:
-          'Build runbooks using Action tasks and workflow elements through low-code/no-code methods, or bring your own custom code to create specialized building blocks. Design automations that handle previously non-automatable scenarios using flexible development approaches.',
+        title: 'Sample Workflow Templates',
+        description: 'Download sample workflow templates to get started',
+        type: 'ZIP',
+        link: '/downloads/sample-workflows.zip',
       },
     ],
   },
 
   // ==========================================
-  // EXPRESS FEATURED VIDEO
-  // ==========================================
-  {
-    id: 'express-featured-video',
-    title: 'Resolve Actions Express - Scheduled Script Execution',
-    description:
-      'Learn to build data-driven workflow templates for automated script execution from GitHub repositories, including scheduling, credential management, and comprehensive reporting.',
-    videoUrl: 'https://www.youtube.com/watch?v=6W9AdnRHlzk',
-    videoId: '6W9AdnRHlzk',
-    duration: '10:03',
-    level: 'automation-design',
-    category: 'Quick Start',
-    tags: ['express', 'incident-resolution', 'workflows'],
-    publishDate: '2024-08-10',
-    thumbnailUrl: null,
-    product: 'express',
-    featured: true,
-    platform: 'youtube',
-    template: 'instructional', // NEW: Template property
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Configure Data-Driven Workflow Tables',
-        content:
-          'Set up tables to define which scripts to execute and where they are located. Create a scripts table with columns for location (GitHub), script type (PowerShell, Python), file path, repository owner, and repository name. Build a hosts table listing target machines with comma-separated script IDs to control which scripts run on which hosts.',
-      },
-      {
-        step: 2,
-        title: 'Create Scheduled Automation Policies',
-        content:
-          'Navigate to the Policy Actions page and create new schedules using the plus sign. Configure schedule names, descriptions, and select target workflows. Set up execution logging to specific folders for easy filtering and review. Define cadence options including hourly, daily, weekly, or monthly intervals with custom time ranges.',
-      },
-      {
-        step: 3,
-        title: 'Integrate with Credential Management Systems',
-        content:
-          'Configure secure credential retrieval using built-in integrations with password vaults like Azure Key Vault, CyberArk, HashiCorp, or BeyondTrust. Set up service account authentication for remote host access during script execution, ensuring credentials are retrieved dynamically in real-time.',
-      },
-      {
-        step: 4,
-        title: 'Build Dynamic Script Execution Workflows',
-        content:
-          'Design workflows that loop through host tables, parse data, and execute child workflows with parameters. Configure GitHub integration to retrieve the most up-to-date scripts in real-time. Set up conditional branching for different script types (PowerShell vs Python) and implement remote code execution against target hosts.',
-      },
-      {
-        step: 5,
-        title: 'Implement Reporting and Result Management',
-        content:
-          'Configure automated reporting through email, spreadsheet generation, PDF creation, or database population. Set up execution logging with verbose results and script previews. Design comprehensive reports showing host execution summaries, script counts, types, sources, and detailed execution results for monitoring and compliance.',
-      },
-    ],
-  },
-
-  // ==========================================
-  // INSIGHTS FEATURED VIDEO - VIMEO (Updated to Informational Template)
+  // INFORMATIONAL TEMPLATE EXAMPLE - INSIGHTS FEATURED VIDEO
   // ==========================================
   {
     id: 'insights-featured-video',
-    title: 'Introduction to Insights',
+    title: 'Introduction to Insights Analytics Platform',
     description:
-      'Learn how to install and set up Resolve Insights on your virtual machines with step-by-step instructions for deployment and configuration.',
+      'Discover the powerful analytics capabilities of Resolve Insights, including real-time dashboards, data correlation, automated reporting, and predictive intelligence for comprehensive IT monitoring.',
     videoUrl: 'https://vimeo.com/1111422908',
     videoId: '1111422908',
     duration: '2:15',
@@ -182,8 +108,9 @@ export const videoLibrary = [
     product: 'insights',
     featured: true,
     platform: 'vimeo',
-    template: 'informational', // CHANGED: Now uses informational template
-    // For informational template
+    template: 'informational',
+
+    // Informational template fields
     keyConcepts: [
       {
         icon: '📊',
@@ -216,45 +143,8 @@ export const videoLibrary = [
           'Seamlessly integrate data from multiple sources including monitoring tools, ITSM platforms, cloud services, and custom applications. Create a unified view of your IT landscape for comprehensive analysis.',
       },
     ],
-    // For instructional template (optional - converted from original tutorialSteps)
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Prepare Virtual Machines for Installation',
-        content:
-          'Follow the prerequisite checklist to prepare your virtual machines for Insights installation. Ensure all system requirements are met and necessary dependencies are in place before proceeding with the installation process.',
-      },
-      {
-        step: 2,
-        title: 'Obtain Verified Installation Files',
-        content:
-          'Contact your Resolve representative to obtain the latest Insights installation file. All installation files are verified and digitally signed to ensure security and authenticity before deployment.',
-      },
-      {
-        step: 3,
-        title: 'Upload and Extract Installation Files',
-        content:
-          'Upload the installation file to each node in your deployment and extract the contents. Ensure proper file permissions and verify the integrity of extracted files on all target nodes.',
-      },
-      {
-        step: 4,
-        title: 'Configure Installation Settings',
-        content:
-          'Update the configuration file on each node according to the provided installation instructions. Customize settings based on your environment requirements and network topology.',
-      },
-      {
-        step: 5,
-        title: 'Execute Installation in Proper Sequence',
-        content:
-          'Run the installation file on each node following the specified order outlined in the installation guide. Monitor the installation progress and verify successful completion on each node.',
-      },
-      {
-        step: 6,
-        title: 'Begin Using Insights',
-        content:
-          'Once installation is complete across all nodes, start using Insights for analytics and reporting. Verify system functionality and begin configuring your analytics workflows and dashboards.',
-      },
-    ],
+
+    // Resources (available for all templates)
     learningResources: [
       {
         title: 'Insights Analytics Overview',
@@ -298,10 +188,232 @@ export const videoLibrary = [
   },
 
   // ==========================================
-  // EXAMPLE VIDEO WITH SIMPLE PREVIEW (Removed 'featured' template)
+  // SUMMARY TEMPLATE EXAMPLE - NEW
   // ==========================================
   {
-    id: 'example-automation-concepts',
+    id: 'automation-platform-overview',
+    title: 'Resolve Actions Platform Overview',
+    description:
+      'A comprehensive overview of the Resolve Actions automation platform, covering key capabilities, deployment options, and use cases for enterprise IT automation.',
+    videoUrl: 'https://www.youtube.com/watch?v=platformOverview789',
+    videoId: 'platformOverview789',
+    duration: '5:30',
+    level: 'integrations',
+    category: 'Platform Overview',
+    tags: ['platform', 'overview', 'capabilities'],
+    publishDate: '2024-09-20',
+    thumbnailUrl: null,
+    product: 'actions',
+    featured: false,
+    platform: 'youtube',
+    template: 'summary',
+
+    // Summary template field
+    summary:
+      'Resolve Actions is a comprehensive IT automation and orchestration platform designed to streamline enterprise operations through intelligent workflow automation. The platform offers both cloud-based and on-premise deployment options, featuring a visual workflow designer, extensive integration library, and enterprise-grade security. Key capabilities include automated incident response, service request fulfillment, infrastructure provisioning, and compliance management. With support for both low-code and custom development approaches, Actions enables IT teams to automate complex multi-step processes while maintaining full visibility and control over their automation landscape.',
+
+    // Resources (available for all templates)
+    learningResources: [
+      {
+        title: 'Platform Architecture Guide',
+        description: 'Technical overview of the Actions platform architecture',
+        link: '/docs/actions/architecture',
+      },
+      {
+        title: 'Deployment Options Guide',
+        description: 'Compare cloud vs on-premise deployment options',
+        link: '/docs/actions/deployment',
+      },
+      {
+        title: 'Use Cases Library',
+        description: 'Explore common automation use cases and examples',
+        link: '/docs/actions/use-cases',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Platform Capabilities Matrix',
+        description:
+          'Detailed comparison of platform features and capabilities',
+        type: 'PDF',
+        link: '/downloads/actions-capabilities-matrix.pdf',
+      },
+      {
+        title: 'ROI Calculator',
+        description: 'Calculate potential ROI from automation initiatives',
+        type: 'XLSX',
+        link: '/downloads/actions-roi-calculator.xlsx',
+      },
+    ],
+  },
+
+  // ==========================================
+  // PRO INSTRUCTIONAL EXAMPLE
+  // ==========================================
+  {
+    id: 'pro-featured-video',
+    title: 'Getting Started with Actions Pro Enterprise Features',
+    description:
+      'Learn to leverage the advanced enterprise capabilities of Resolve Actions Pro, including the Automation Exchange, custom development options, and enterprise integrations.',
+    videoUrl: 'https://www.youtube.com/watch?v=bJL_c08aElQ',
+    videoId: 'bJL_c08aElQ',
+    duration: '2:25',
+    level: 'automation-design',
+    category: 'Enterprise Features',
+    tags: ['pro', 'enterprise', 'advanced-features'],
+    publishDate: '2024-08-15',
+    thumbnailUrl: null,
+    product: 'pro',
+    featured: true,
+    platform: 'youtube',
+    template: 'instructional',
+
+    // Instructional template fields
+    learningObjectives:
+      'Master the enterprise features of Actions Pro including platform deployment, workflow development, enterprise integrations, Automation Exchange utilization, and custom development approaches.',
+    estimatedTime: '10-15 minutes',
+    tutorialSteps: [
+      {
+        step: 1,
+        title: 'Set Up Enterprise IT Automation Platform',
+        content:
+          'Deploy Resolve Actions Pro in either cloud or on-premise environments to handle enterprise-class IT automation and orchestration. Configure the platform to intercept and process incidents from third-party tools like ServiceNow automatically.',
+      },
+      {
+        step: 2,
+        title: 'Build Comprehensive Automation Workflows',
+        content:
+          'Create automations using drag-and-drop building blocks to handle complex scenarios including server provisioning, user account management, network diagnostics, firewall rule configuration, and database operations. Leverage both simple and advanced automation capabilities.',
+      },
+      {
+        step: 3,
+        title: 'Integrate with Enterprise IT Services',
+        content:
+          'Connect Resolve Actions Pro with your existing IT infrastructure and services. Configure integrations to automatically trigger automations from service requests, incidents, or alerts, enabling hands-off auto-remediation within seconds.',
+      },
+      {
+        step: 4,
+        title: 'Leverage the Automation Exchange',
+        content:
+          'Access pre-built use cases, templates, and automations from the Automation Exchange to accelerate deployment. Download and customize proven automation patterns for common enterprise scenarios and use cases.',
+      },
+      {
+        step: 5,
+        title: 'Customize with Low-Code and Custom Code Approaches',
+        content:
+          'Build runbooks using Action tasks and workflow elements through low-code/no-code methods, or bring your own custom code to create specialized building blocks. Design automations that handle previously non-automatable scenarios using flexible development approaches.',
+      },
+    ],
+
+    // Resources
+    learningResources: [
+      {
+        title: 'Actions Pro Documentation',
+        description: 'Complete documentation for enterprise features',
+        link: '/docs/pro/overview',
+      },
+      {
+        title: 'Automation Exchange',
+        description: 'Browse and download pre-built automations',
+        link: '/automation-exchange',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Enterprise Deployment Guide',
+        description: 'Step-by-step guide for enterprise deployment',
+        type: 'PDF',
+        link: '/downloads/pro-enterprise-deployment.pdf',
+      },
+    ],
+  },
+
+  // ==========================================
+  // EXPRESS INSTRUCTIONAL EXAMPLE
+  // ==========================================
+  {
+    id: 'express-featured-video',
+    title: 'Building Scheduled Script Automation with Actions Express',
+    description:
+      'Learn to build data-driven workflow templates for automated script execution from GitHub repositories, including scheduling, credential management, and comprehensive reporting.',
+    videoUrl: 'https://www.youtube.com/watch?v=6W9AdnRHlzk',
+    videoId: '6W9AdnRHlzk',
+    duration: '10:03',
+    level: 'automation-design',
+    category: 'Quick Start',
+    tags: ['express', 'incident-resolution', 'workflows'],
+    publishDate: '2024-08-10',
+    thumbnailUrl: null,
+    product: 'express',
+    featured: true,
+    platform: 'youtube',
+    template: 'instructional',
+
+    // Instructional template fields
+    learningObjectives:
+      'Build data-driven workflow templates that automate script execution from GitHub repositories with proper scheduling, credential management, and comprehensive reporting capabilities.',
+    estimatedTime: '20-25 minutes',
+    tutorialSteps: [
+      {
+        step: 1,
+        title: 'Configure Data-Driven Workflow Tables',
+        content:
+          'Set up tables to define which scripts to execute and where they are located. Create a scripts table with columns for location (GitHub), script type (PowerShell, Python), file path, repository owner, and repository name. Build a hosts table listing target machines with comma-separated script IDs to control which scripts run on which hosts.',
+      },
+      {
+        step: 2,
+        title: 'Create Scheduled Automation Policies',
+        content:
+          'Navigate to the Policy Actions page and create new schedules using the plus sign. Configure schedule names, descriptions, and select target workflows. Set up execution logging to specific folders for easy filtering and review. Define cadence options including hourly, daily, weekly, or monthly intervals with custom time ranges.',
+      },
+      {
+        step: 3,
+        title: 'Integrate with Credential Management Systems',
+        content:
+          'Configure secure credential retrieval using built-in integrations with password vaults like Azure Key Vault, CyberArk, HashiCorp, or BeyondTrust. Set up service account authentication for remote host access during script execution, ensuring credentials are retrieved dynamically in real-time.',
+      },
+      {
+        step: 4,
+        title: 'Build Dynamic Script Execution Workflows',
+        content:
+          'Design workflows that loop through host tables, parse data, and execute child workflows with parameters. Configure GitHub integration to retrieve the most up-to-date scripts in real-time. Set up conditional branching for different script types (PowerShell vs Python) and implement remote code execution against target hosts.',
+      },
+      {
+        step: 5,
+        title: 'Implement Reporting and Result Management',
+        content:
+          'Configure automated reporting through email, spreadsheet generation, PDF creation, or database population. Set up execution logging with verbose results and script previews. Design comprehensive reports showing host execution summaries, script counts, types, sources, and detailed execution results for monitoring and compliance.',
+      },
+    ],
+
+    // Resources
+    learningResources: [
+      {
+        title: 'Actions Express Documentation',
+        description: 'Complete guide to Actions Express features',
+        link: '/docs/express/overview',
+      },
+      {
+        title: 'Script Automation Guide',
+        description: 'Best practices for script-based automation',
+        link: '/docs/express/script-automation',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Script Automation Checklist',
+        description: 'Checklist for setting up script automation',
+        type: 'PDF',
+        link: '/downloads/express-script-checklist.pdf',
+      },
+    ],
+  },
+
+  // ==========================================
+  // INFORMATIONAL EXAMPLE - CONCEPTS
+  // ==========================================
+  {
+    id: 'automation-concepts-overview',
     title: 'Understanding IT Automation Concepts',
     description:
       'Explore the fundamental concepts of IT automation, including key terminology, architectural patterns, and best practices for modern automation platforms.',
@@ -313,12 +425,12 @@ export const videoLibrary = [
     tags: ['concepts', 'automation', 'fundamentals'],
     publishDate: '2024-09-01',
     thumbnailUrl: null,
-    thumbnailFileName: 'automation-concepts-thumb.jpg', // For gallery cards only
     product: 'actions',
     featured: false,
     platform: 'youtube',
-    template: 'informational', // CHANGED: Now uses informational template for full page
-    // For informational template
+    template: 'informational',
+
+    // Informational template fields
     keyConcepts: [
       {
         icon: '🔄',
@@ -338,11 +450,15 @@ export const videoLibrary = [
         content:
           'Automation that responds to specific triggers or events, such as alerts, incidents, or scheduled times. This reactive approach enables real-time responses to changing conditions in your IT environment.',
       },
+      {
+        icon: '🎯',
+        title: 'Infrastructure as Code',
+        content:
+          'The practice of managing and provisioning computing infrastructure through machine-readable definition files, rather than manual processes. This approach enables consistent, repeatable, and scalable infrastructure management.',
+      },
     ],
-    // For instructional template (not used for this informational video)
-    tutorialSteps: null,
-    learningObjectives: null,
-    estimatedTime: null,
+
+    // Resources
     learningResources: [
       {
         title: 'Automation Best Practices Guide',
@@ -369,10 +485,10 @@ export const videoLibrary = [
   },
 
   // ==========================================
-  // NEW INSTRUCTIONAL VIDEO EXAMPLE
+  // TROUBLESHOOTING INSTRUCTIONAL EXAMPLE
   // ==========================================
   {
-    id: 'workflow-troubleshooting-guide', 
+    id: 'workflow-troubleshooting-guide',
     title: 'Troubleshooting Automation Workflows',
     description:
       'Learn systematic approaches to debugging and troubleshooting automation workflows, from identifying common issues to implementing robust error handling and monitoring.',
@@ -387,10 +503,11 @@ export const videoLibrary = [
     product: 'actions',
     featured: false,
     platform: 'youtube',
-    template: 'instructional', // NEW: Instructional template example
-    // For instructional template
+    template: 'instructional',
+
+    // Instructional template fields
     learningObjectives:
-      'Master systematic debugging techniques and implement robust error handling strategies for automation workflows',
+      'Master systematic debugging techniques and implement robust error handling strategies for automation workflows to ensure reliable and maintainable automation solutions.',
     estimatedTime: '15-20 minutes',
     tutorialSteps: [
       {
@@ -430,8 +547,8 @@ export const videoLibrary = [
           'Analyze workflow performance metrics to identify bottlenecks and optimization opportunities. Implement preventive measures based on historical failure patterns and establish regular health checks and maintenance procedures.',
       },
     ],
-    // For informational template (not used for this instructional video)
-    keyConcepts: null,
+
+    // Resources
     learningResources: [
       {
         title: 'Workflow Debugging Guide',

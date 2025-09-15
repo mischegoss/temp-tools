@@ -5,13 +5,23 @@ import Layout from '@theme/Layout'
 import Link from '@docusaurus/Link'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 
+// Import template-specific content components
+import InstructionalContent from './templates/InstructionalContent.js'
+import SummaryContent from './templates/SummaryContent.js'
+import InformationalContent from './templates/InformationalContent.js'
+
 /**
  * VideoLandingPage component - Individual video page with template support
- * Supports two templates: 'instructional' (default) and 'informational'
+ * Supports three templates: 'instructional', 'summary', and 'informational'
+ * RESTRUCTURED: Template-specific content extracted to separate components
  */
 const VideoLandingPage = ({ videoData }) => {
+  console.log('=== VideoLandingPage received videoData ===', !!videoData)
+  console.log('VideoLandingPage videoData:', videoData)
+
   // Show loading or error state if no video data
   if (!videoData) {
+    console.log('VideoLandingPage: No videoData, showing error state')
     return (
       <Layout title='Video Not Found' description='Video content not available'>
         <div
@@ -43,9 +53,33 @@ const VideoLandingPage = ({ videoData }) => {
     )
   }
 
-  // Determine template type
-  const template = videoData.template || 'instructional'
-  const isInformational = template === 'informational'
+  console.log('VideoLandingPage: videoData exists, proceeding with render')
+
+  // Template switcher - renders appropriate content component based on template field
+  const renderTemplateContent = () => {
+    const template = videoData.template || 'instructional'
+
+    console.log('=== VideoLandingPage renderTemplateContent ===')
+    console.log('videoData received:', !!videoData)
+    console.log('template value:', template)
+    console.log('videoData.template:', videoData.template)
+    console.log('About to render template component...')
+
+    switch (template) {
+      case 'instructional':
+        console.log('Rendering InstructionalContent')
+        return <InstructionalContent videoData={videoData} />
+      case 'summary':
+        console.log('Rendering SummaryContent')
+        return <SummaryContent videoData={videoData} />
+      case 'informational':
+        console.log('Rendering InformationalContent')
+        return <InformationalContent videoData={videoData} />
+      default:
+        console.log('Rendering default InstructionalContent')
+        return <InstructionalContent videoData={videoData} />
+    }
+  }
 
   // Shared container style
   const containerStyle = {
@@ -161,119 +195,13 @@ const VideoLandingPage = ({ videoData }) => {
     fontWeight: '500',
   }
 
-  // Learning objectives section (instructional only)
-  const learningSection = {
-    background: '#f9fafb',
-    borderRadius: '8px',
-    padding: '24px',
-    marginBottom: '32px',
-  }
-
-  const learningGrid = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '24px',
-  }
-
-  const learningTitle = {
-    fontSize: '12px',
-    fontWeight: '600',
-    color: '#374151',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '8px',
-  }
-
-  const learningContent = {
-    color: '#111827',
-    fontWeight: '500',
-  }
-
-  // Tutorial/Concepts section styles
-  const tutorialSectionStyle = {
+  // Template content section styles
+  const templateSectionStyle = {
     background: '#F7FAFC',
     padding: '80px 0',
   }
 
-  const tutorialTitleStyle = {
-    fontSize: '2rem',
-    fontWeight: '700',
-    color: '#2D3748',
-    textAlign: 'center',
-    marginBottom: '48px',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-  }
-
-  const stepsContainerStyle = {
-    maxWidth: '800px',
-    margin: '0 auto',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '32px',
-  }
-
-  const stepStyle = {
-    background: 'white',
-    padding: '32px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-    border: '1px solid var(--color-border-light)',
-  }
-
-  const stepHeaderStyle = {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '20px',
-    marginBottom: '16px',
-  }
-
-  const stepNumberStyle = {
-    background: 'var(--brand-blue)',
-    color: 'white',
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    flexShrink: 0,
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-  }
-
-  // Concept icon for informational template
-  const conceptIconStyle = {
-    background: '#4A90E2',
-    color: 'white',
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.2rem',
-    fontWeight: '600',
-    flexShrink: 0,
-  }
-
-  const stepTitleStyle = {
-    fontSize: '1.3rem',
-    fontWeight: '600',
-    color: 'var(--color-text-primary)',
-    margin: 0,
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-  }
-
-  const stepContentStyle = {
-    color: 'var(--color-text-secondary)',
-    fontSize: '1rem',
-    lineHeight: '1.6',
-    marginLeft: '60px',
-    fontFamily: 'var(--ifm-font-family-base)',
-  }
-
-  // Resources section styles
+  // Resources section styles (FIXED: Now shows for all templates)
   const resourcesSection = {
     borderTop: '1px solid #e5e7eb',
     paddingTop: '32px',
@@ -287,19 +215,21 @@ const VideoLandingPage = ({ videoData }) => {
   }
 
   const resourceTitle = {
-    fontSize: '18px',
+    fontSize: '1.375rem',
     fontWeight: '600',
-    color: '#111827',
-    marginBottom: '16px',
+    color: '#1A202C',
+    marginBottom: '20px',
     display: 'flex',
     alignItems: 'center',
+    fontFamily:
+      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   }
 
   const resourceIcon = {
-    width: '20px',
-    height: '20px',
-    color: '#6b7280',
-    marginRight: '8px',
+    width: '24px',
+    height: '24px',
+    color: '#4A5568',
+    marginRight: '12px',
   }
 
   const resourceList = {
@@ -309,20 +239,37 @@ const VideoLandingPage = ({ videoData }) => {
   }
 
   const resourceItem = {
-    marginBottom: '12px',
+    marginBottom: '20px',
   }
 
   const resourceLink = {
-    color: '#2563eb',
+    color: '#0066FF',
     textDecoration: 'none',
     display: 'block',
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: '1.125rem',
+    lineHeight: '1.6',
+    fontFamily:
+      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   }
 
   const resourceMeta = {
-    fontSize: '14px',
-    color: '#6b7280',
-    marginTop: '2px',
+    fontSize: '1rem',
+    color: '#4A5568',
+    marginTop: '6px',
+    lineHeight: '1.6',
+    fontFamily:
+      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  }
+
+  const resourcesSectionTitle = {
+    fontSize: '2rem',
+    fontWeight: '600',
+    color: '#1A202C',
+    textAlign: 'center',
+    marginBottom: '48px',
+    fontFamily:
+      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   }
 
   // Generate embed URL based on platform
@@ -333,20 +280,10 @@ const VideoLandingPage = ({ videoData }) => {
     return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0&modestbranding=1`
   }
 
-  // Get content for the main section based on template
-  const getMainContent = () => {
-    if (isInformational) {
-      return videoData.keyConcepts && videoData.keyConcepts.length > 0
-        ? videoData.keyConcepts
-        : null
-    } else {
-      return videoData.tutorialSteps && videoData.tutorialSteps.length > 0
-        ? videoData.tutorialSteps
-        : null
-    }
-  }
-
-  const mainContent = getMainContent()
+  // Check if resources exist
+  const hasResources =
+    (videoData.learningResources && videoData.learningResources.length > 0) ||
+    (videoData.documentResources && videoData.documentResources.length > 0)
 
   return (
     <Layout title={videoData.title} description={videoData.description}>
@@ -410,158 +347,98 @@ const VideoLandingPage = ({ videoData }) => {
             <span style={levelBadgeStyle}>{videoData.level}</span>
             <span style={categoryBadgeStyle}>{videoData.category}</span>
           </div>
-
-          {/* Learning Objectives & Time (Instructional Only) */}
-          {!isInformational && (
-            <div style={learningSection}>
-              <div style={learningGrid}>
-                <div>
-                  <h3 style={learningTitle}>What You Will Learn</h3>
-                  <p style={learningContent}>
-                    {videoData.learningObjectives ||
-                      'Master the concepts and techniques covered in this video tutorial.'}
-                  </p>
-                </div>
-                <div>
-                  <h3 style={learningTitle}>Estimated Time</h3>
-                  <p style={learningContent}>
-                    {videoData.estimatedTime || `${videoData.duration} minutes`}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Tutorial/Concepts Section */}
-      {mainContent && (
-        <section style={tutorialSectionStyle}>
+      {/* Template-Specific Content Section */}
+      <section style={templateSectionStyle}>
+        <div style={containerStyle}>{renderTemplateContent()}</div>
+      </section>
+
+      {/* Resources Section - FIXED: Shows for ALL templates */}
+      {hasResources && (
+        <section style={{ background: '#F7FAFC', paddingBottom: '80px' }}>
           <div style={containerStyle}>
-            <h2 style={tutorialTitleStyle}>
-              {isInformational ? 'Key Concepts' : 'Step-by-Step Tutorial'}
-            </h2>
-            <div style={stepsContainerStyle}>
-              {mainContent.map((item, index) => (
-                <div key={index} style={stepStyle}>
-                  <div style={stepHeaderStyle}>
-                    <div
-                      style={
-                        isInformational ? conceptIconStyle : stepNumberStyle
-                      }
-                    >
-                      {isInformational
-                        ? item.icon || '💡'
-                        : item.step || index + 1}
+            <div style={resourcesSection}>
+              <h2 style={resourcesSectionTitle}>Learn More</h2>
+              <div style={resourcesGrid}>
+                {/* Related Documents */}
+                {videoData.documentResources &&
+                  videoData.documentResources.length > 0 && (
+                    <div>
+                      <h3 style={resourceTitle}>
+                        <svg
+                          style={resourceIcon}
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth='2'
+                            d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                          />
+                        </svg>
+                        Related Documents
+                      </h3>
+                      <ul style={resourceList}>
+                        {videoData.documentResources.map((document, index) => (
+                          <li key={index} style={resourceItem}>
+                            <a
+                              href={document.link}
+                              style={resourceLink}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                            >
+                              {document.title}
+                            </a>
+                            <div style={resourceMeta}>
+                              {document.description}
+                              {document.type && ` • ${document.type}`}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <h3 style={stepTitleStyle}>{item.title}</h3>
-                  </div>
-                  <div style={stepContentStyle}>
-                    {typeof item.content === 'string' ? (
-                      <p>{item.content}</p>
-                    ) : (
-                      item.content
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                  )}
 
-            {/* Resources Section */}
-            {((videoData.learningResources &&
-              videoData.learningResources.length > 0) ||
-              (videoData.documentResources &&
-                videoData.documentResources.length > 0)) && (
-              <div style={resourcesSection}>
-                <h2 style={tutorialTitleStyle}>Learn More</h2>
-                <div style={resourcesGrid}>
-                  {/* Related Documents */}
-                  {videoData.documentResources &&
-                    videoData.documentResources.length > 0 && (
-                      <div>
-                        <h3 style={resourceTitle}>
-                          <svg
-                            style={resourceIcon}
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth='2'
-                              d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                            />
-                          </svg>
-                          Related Documents
-                        </h3>
-                        <ul style={resourceList}>
-                          {videoData.documentResources.map(
-                            (document, index) => (
-                              <li key={index} style={resourceItem}>
-                                <a
-                                  href={document.link}
-                                  style={resourceLink}
-                                  target='_blank'
-                                  rel='noopener noreferrer'
-                                >
-                                  {document.title}
-                                </a>
-                                <div style={resourceMeta}>
-                                  {document.description}
-                                  {document.type && ` • ${document.type}`}
-                                </div>
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                      </div>
-                    )}
-
-                  {/* Related Training */}
-                  {videoData.learningResources &&
-                    videoData.learningResources.length > 0 && (
-                      <div>
-                        <h3 style={resourceTitle}>
-                          <svg
-                            style={resourceIcon}
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth='2'
-                              d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
-                            />
-                          </svg>
-                          Related Training
-                        </h3>
-                        <ul style={resourceList}>
-                          {videoData.learningResources.map(
-                            (resource, index) => (
-                              <li key={index} style={resourceItem}>
-                                <a
-                                  href={resource.link}
-                                  style={resourceLink}
-                                  target='_blank'
-                                  rel='noopener noreferrer'
-                                >
-                                  {resource.title}
-                                </a>
-                                <div style={resourceMeta}>
-                                  {resource.description}
-                                </div>
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                </div>
+                {/* Learning Resources */}
+                {videoData.learningResources &&
+                  videoData.learningResources.length > 0 && (
+                    <div>
+                      <h3 style={resourceTitle}>
+                        <svg
+                          style={resourceIcon}
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth='2'
+                            d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+                          />
+                        </svg>
+                        Related Training
+                      </h3>
+                      <ul style={resourceList}>
+                        {videoData.learningResources.map((resource, index) => (
+                          <li key={index} style={resourceItem}>
+                            <a href={resource.link} style={resourceLink}>
+                              {resource.title}
+                            </a>
+                            <div style={resourceMeta}>
+                              {resource.description}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
               </div>
-            )}
+            </div>
           </div>
         </section>
       )}
