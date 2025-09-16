@@ -9,6 +9,7 @@ import BrowserOnly from '@docusaurus/BrowserOnly'
  * Fixed for SSR compatibility using BrowserOnly
  * Supports both YouTube and Vimeo videos
  * FIXED: Updated to use video-gallery URLs
+ * FIXED: Added consistent card sizing with flexbox layout
  */
 const VideoCard = ({ video, index, colorTheme }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -27,7 +28,7 @@ const VideoCard = ({ video, index, colorTheme }) => {
     }
   }
 
-  // Card styles
+  // Card styles - FIXED: Added flexbox for consistent heights
   const cardStyle = {
     background: 'var(--color-bg-card-light)',
     borderRadius: '12px',
@@ -40,6 +41,9 @@ const VideoCard = ({ video, index, colorTheme }) => {
     cursor: 'pointer',
     border: '1px solid var(--color-border-light)',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    height: '100%', // FIXED: Ensure all cards have same height
+    display: 'flex', // FIXED: Flexbox layout
+    flexDirection: 'column', // FIXED: Column direction
   }
 
   const thumbnailStyle = {
@@ -84,8 +88,12 @@ const VideoCard = ({ video, index, colorTheme }) => {
     marginLeft: '4px', // Slight offset for visual balance
   }
 
+  // FIXED: Updated to use flex layout for proper content distribution
   const videoInfoStyle = {
     padding: '24px',
+    flex: 1, // FIXED: Fill remaining space
+    display: 'flex', // FIXED: Flex layout
+    flexDirection: 'column', // FIXED: Column direction
   }
 
   const titleStyle = {
@@ -97,12 +105,18 @@ const VideoCard = ({ video, index, colorTheme }) => {
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
+  // FIXED: Added text truncation to prevent card height variations
   const descriptionStyle = {
     color: 'var(--color-text-secondary)',
     fontSize: '0.95rem',
     lineHeight: '1.5',
     margin: '0 0 16px 0',
     fontFamily: 'var(--ifm-font-family-base)',
+    flex: 1, // FIXED: Fill available space
+    overflow: 'hidden', // FIXED: Hide overflow
+    display: '-webkit-box', // FIXED: Multi-line truncation
+    WebkitLineClamp: 2, // FIXED: Limit to 2 lines
+    WebkitBoxOrient: 'vertical', // FIXED: Vertical orientation
   }
 
   const metaStyle = {
@@ -110,6 +124,7 @@ const VideoCard = ({ video, index, colorTheme }) => {
     gap: '12px',
     alignItems: 'center',
     flexWrap: 'wrap',
+    marginTop: 'auto', // FIXED: Push to bottom of card
   }
 
   const durationStyle = {
@@ -145,45 +160,70 @@ const VideoCard = ({ video, index, colorTheme }) => {
         tabIndex={0}
         aria-label={`View tutorial: ${video.title}`}
       >
-        {/* Video Thumbnail with Iframe */}
+        {/* Video Thumbnail with Custom Image or Iframe */}
         <div style={thumbnailStyle}>
-          <BrowserOnly fallback={<div style={iframeStyle} />}>
-            {() => {
-              // Generate embed URL based on platform
-              const getEmbedUrl = (videoId, platform) => {
-                if (platform === 'vimeo') {
-                  return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
-                }
-                // Default to YouTube
-                return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`
-              }
-
-              return (
-                <iframe
-                  src={getEmbedUrl(video.videoId, video.platform)}
-                  style={iframeStyle}
-                  frameBorder='0'
-                  allow={
-                    video.platform === 'vimeo'
-                      ? 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share'
-                      : 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+          {video.thumbnail ? (
+            // CUSTOM THUMBNAIL: Show image instead of iframe
+            <>
+              <img
+                src={`/img/videoThumbnail/${video.thumbnail}`}
+                alt={`${video.title} thumbnail`}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              {/* Play Overlay */}
+              <div style={playOverlayStyle}>
+                <span style={playIconStyle}>▶</span>
+              </div>
+            </>
+          ) : (
+            // DEFAULT: Show iframe with play overlay
+            <>
+              <BrowserOnly fallback={<div style={iframeStyle} />}>
+                {() => {
+                  // Generate embed URL based on platform
+                  const getEmbedUrl = (videoId, platform) => {
+                    if (platform === 'vimeo') {
+                      return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
+                    }
+                    // Default to YouTube
+                    return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`
                   }
-                  referrerPolicy={
-                    video.platform === 'vimeo'
-                      ? 'strict-origin-when-cross-origin'
-                      : undefined
-                  }
-                  allowFullScreen
-                  title={video.title}
-                />
-              )
-            }}
-          </BrowserOnly>
 
-          {/* Play Overlay */}
-          <div style={playOverlayStyle}>
-            <span style={playIconStyle}>▶</span>
-          </div>
+                  return (
+                    <iframe
+                      src={getEmbedUrl(video.videoId, video.platform)}
+                      style={iframeStyle}
+                      frameBorder='0'
+                      allow={
+                        video.platform === 'vimeo'
+                          ? 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share'
+                          : 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                      }
+                      referrerPolicy={
+                        video.platform === 'vimeo'
+                          ? 'strict-origin-when-cross-origin'
+                          : undefined
+                      }
+                      allowFullScreen
+                      title={video.title}
+                    />
+                  )
+                }}
+              </BrowserOnly>
+
+              {/* Play Overlay */}
+              <div style={playOverlayStyle}>
+                <span style={playIconStyle}>▶</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Video Info */}
