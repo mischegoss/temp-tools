@@ -16,6 +16,10 @@ class ChatbotService {
     this.lastHealthCheck = null
     this.healthCheckInterval = 5 * 60 * 1000 // 5 minutes
 
+    // Preemptive warmup constants
+    this.WARMUP_COOLDOWN = 5 * 60 * 1000 // 5 minutes between warmups
+    this.WARMUP_SESSION_KEY = 'chatbot-preemptive-warmup'
+
     console.log(
       '🤖 ChatbotService initialized with Cloud Run URL:',
       this.baseURL,
@@ -125,6 +129,51 @@ class ChatbotService {
       this.isServerAwake = false
       console.log('💔 Server health check failed:', error.message)
       throw error
+    }
+  }
+
+  /**
+   * Preemptive warmup - called by GlobalChatbotManager
+   * This method warms up the server silently without user-facing errors
+   */
+  async preemptiveWarmup() {
+    try {
+      // Check if we've warmed up recently (session-based cooldown)
+      const lastWarmup = sessionStorage.getItem(this.WARMUP_SESSION_KEY)
+      const now = Date.now()
+
+      if (lastWarmup && now - parseInt(lastWarmup) < this.WARMUP_COOLDOWN) {
+        console.log('⏱️ Preemptive warmup skipped - recently warmed')
+        return { success: true, skipped: true }
+      }
+
+      console.log('🚀 Starting preemptive chatbot warmup...')
+
+      // Call health endpoint to wake up the service
+      const result = await this.checkHealth()
+
+      // Update last warmup time only on success
+      sessionStorage.setItem(this.WARMUP_SESSION_KEY, now.toString())
+      console.log('✨ Preemptive warmup completed successfully!')
+
+      return {
+        success: true,
+        skipped: false,
+        serverStatus: result,
+      }
+    } catch (error) {
+      // Fail silently for preemptive warmup - don't disrupt user experience
+      console.log(
+        '⚠️ Preemptive warmup failed (service may be cold starting):',
+        error.message,
+      )
+
+      // Don't update last warmup time on failure so we'll retry sooner
+      return {
+        success: false,
+        error: error.message,
+        skipped: false,
+      }
     }
   }
 

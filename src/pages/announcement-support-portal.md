@@ -4,9 +4,9 @@ title: Support Portal Announcement
 
 # Change to Our Support Portal – September 19
 
-Resolve Support will be moving to a **new support ticketing system**.
+Resolve Support has moved to a **new support ticketing system**.
 
-The migration will take place on **Thursday, September 18**, during which there may be brief periods when the current support portal is unavailable. All support will begin in the new portal starting **Friday, September 19**.
+All support will now take place in the new portal starting **Friday, September 19**.
 
 ## What this means for you:
 

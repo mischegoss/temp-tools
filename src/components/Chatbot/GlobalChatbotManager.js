@@ -1,8 +1,9 @@
-// GlobalChatbotManager with route checking and global state setup
+// GlobalChatbotManager with route checking, global state setup, and preemptive warmup
 
 import React, { useState, useEffect } from 'react'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 import { useLocation } from '@docusaurus/router'
+import chatbotService from '../../services/chatbotService.js'
 
 const GlobalChatbotManagerComponent = () => {
   const location = useLocation()
@@ -35,6 +36,22 @@ const GlobalChatbotManagerComponent = () => {
         .catch(error => {
           console.error('Failed to load ChatbotComponent:', error)
         })
+    }
+  }, [shouldShowChatbot])
+
+  // Preemptive warmup when chatbot loads on /actions pages
+  useEffect(() => {
+    if (shouldShowChatbot) {
+      // Delay warmup slightly to avoid blocking page load
+      const warmupTimer = setTimeout(() => {
+        console.log(
+          '🔥 GlobalChatbotManager: Starting preemptive warmup for /actions page',
+        )
+        chatbotService.preemptiveWarmup()
+      }, 2000) // 2 second delay
+
+      // Cleanup timer if component unmounts
+      return () => clearTimeout(warmupTimer)
     }
   }, [shouldShowChatbot])
 
