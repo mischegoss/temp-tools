@@ -5,7 +5,24 @@ import styles from './styles.module.css'
 export default function NavigationDropdowns() {
   return (
     <>
-      {/* Documentation Dropdown */}
+      {/* Discover Platform Link */}
+      <div className={`navbar__item ${styles.navbarItem}`}>
+        <Link
+          className={`navbar__link ${styles.navbarLink}`}
+          to='/learning/discover'
+        >
+          Discover Platform
+        </Link>
+      </div>
+
+      {/* Learning Hub Link */}
+      <div className={`navbar__item ${styles.navbarItem}`}>
+        <Link className={`navbar__link ${styles.navbarLink}`} to='/learning/'>
+          Learning Hub
+        </Link>
+      </div>
+
+      {/* Product Learning Dropdown */}
       <div
         className={`navbar__item dropdown dropdown--hoverable ${styles.dropdown}`}
       >
@@ -16,26 +33,29 @@ export default function NavigationDropdowns() {
           role='button'
           className={`navbar__link ${styles.navbarLink}`}
         >
-          Documentation
+          Product Learning
         </a>
         <ul className={`dropdown__menu ${styles.dropdownMenu}`}>
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/actions'
+              to='/learning/actions'
             >
-              Actions
+              Platform
             </Link>
           </li>
           <li>
-            <Link className={`dropdown__link ${styles.dropdownLink}`} to='/pro'>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
+              to='/learning/pro'
+            >
               Pro
             </Link>
           </li>
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/express'
+              to='/learning/express'
             >
               Express
             </Link>
@@ -43,7 +63,7 @@ export default function NavigationDropdowns() {
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
-              to='/insights'
+              to='/learning/insights'
             >
               Insights
             </Link>
@@ -51,79 +71,17 @@ export default function NavigationDropdowns() {
         </ul>
       </div>
 
-      {/* Learning Dropdown */}
-      <div
-        className={`navbar__item dropdown dropdown--hoverable ${styles.dropdown}`}
-      >
+      {/* Customer Hub Link */}
+      <div className={`navbar__item ${styles.navbarItem}`}>
         <a
-          href='#'
-          aria-haspopup='true'
-          aria-expanded='false'
-          role='button'
+          href='https://help.resolve.io'
           className={`navbar__link ${styles.navbarLink}`}
+          target='_blank'
+          rel='noopener noreferrer'
         >
-          Training
+          Customer Hub
         </a>
-        <ul className={`dropdown__menu ${styles.dropdownMenu}`}>
-          <li>
-            <Link
-              className={`dropdown__link ${styles.dropdownLink}`}
-              to='https://training.resolve.io/learning/discover'
-            >
-              Discover Resolve
-            </Link>
-          </li>
-          <li>
-            <Link
-              className={`dropdown__link ${styles.dropdownLink}`}
-              to='https://training.resolve.io/learning'
-            >
-              Learning Hub
-            </Link>
-          </li>
-        </ul>
       </div>
-
-      {/* Support Dropdown */}
-      <div
-        className={`navbar__item dropdown dropdown--hoverable ${styles.dropdown}`}
-      >
-        <a
-          href='#'
-          aria-haspopup='true'
-          aria-expanded='false'
-          role='button'
-          className={`navbar__link ${styles.navbarLink}`}
-        >
-          Support
-        </a>
-        <ul className={`dropdown__menu ${styles.dropdownMenu}`}>
-          <li>
-            <Link
-              className={`dropdown__link ${styles.dropdownLink}`}
-              to='https://support.resolve.io/'
-            >
-              Support Portal
-            </Link>
-          </li>
-          <li>
-            <Link
-              className={`dropdown__link ${styles.dropdownLink}`}
-              href='/announcement-support-portal'
-            >
-              Support Portal Update
-            </Link>
-          </li>
-        </ul>
-      </div>
-
-      {/* Automation Exchange Link */}
-      <Link
-        className={`navbar__item navbar__link ${styles.navbarLink}`}
-        to='https://exchange.resolve.io/'
-      >
-        Automation Exchange
-      </Link>
     </>
   )
 }
