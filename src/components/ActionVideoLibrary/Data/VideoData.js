@@ -2,7 +2,7 @@
 
 export const videoLibrary = [
   // ==========================================
-  // ACTIONS FEATURED VIDEO (Current video)
+  // ACTIONS FEATURED VIDEO
   // ==========================================
   {
     id: 'getting-started-actions',
@@ -16,11 +16,14 @@ export const videoLibrary = [
     category: 'Platform Overview',
     tags: ['basics', 'getting-started', 'workflow'],
     publishDate: '2024-01-15',
-    thumbnailUrl: null, // Will use YouTube auto-generated thumbnail
+    thumbnailUrl: null,
     product: 'actions',
     featured: true,
     platform: 'youtube',
     template: 'instructional',
+    learningObjectives:
+      'After completing this tutorial, you will be able to navigate the workflow designer interface, build workflows using drag-and-drop activities, configure integrations with service instances, implement logic controls and decision-making, and test and document your automation workflows.',
+    estimatedTime: '8-10 minutes',
     tutorialSteps: [
       {
         step: 1,
@@ -53,6 +56,22 @@ export const videoLibrary = [
           'Test workflows with input parameters to simulate external triggers like alerts or tickets. Add activity notes for team collaboration, create rich documentation with graphics, apply tags for organization, and use built-in version control to manage changes and rollbacks.',
       },
     ],
+    learningResources: [
+      {
+        title: 'Automation Essentials',
+        description:
+          'Learn the fundamentals of Resolve Actions and workflow automation design',
+        link: '/learning/actions',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Actions Documentation',
+        description:
+          'Complete reference for Actions features, activities, and best practices',
+        link: 'https://help.resolve.io/actions/',
+      },
+    ],
   },
 
   // ==========================================
@@ -75,6 +94,9 @@ export const videoLibrary = [
     featured: true,
     platform: 'youtube',
     template: 'instructional',
+    learningObjectives:
+      'After completing this tutorial, you will be able to set up the enterprise IT automation platform, build comprehensive automation workflows using drag-and-drop building blocks, integrate with enterprise IT services for automated incident response, and leverage the Automation Exchange for pre-built templates and use cases.',
+    estimatedTime: '5-7 minutes',
     tutorialSteps: [
       {
         step: 1,
@@ -107,6 +129,23 @@ export const videoLibrary = [
           'Build runbooks using Action tasks and workflow elements through low-code/no-code methods, or bring your own custom code to create specialized building blocks. Design automations that handle previously non-automatable scenarios using flexible development approaches.',
       },
     ],
+    learningResources: [
+      {
+        title: 'Actions Pro Training',
+        description:
+          'Advanced training on Resolve Actions Pro features and enterprise use cases',
+        link: '/learning/pro',
+      },
+      ,
+    ],
+    documentResources: [
+      {
+        title: 'Pro Documentation',
+        description:
+          'Comprehensive documentation for Resolve Actions Pro features and integrations',
+        link: 'https://help.resolve.io/pro/',
+      },
+    ],
   },
 
   // ==========================================
@@ -129,6 +168,9 @@ export const videoLibrary = [
     featured: true,
     platform: 'youtube',
     template: 'instructional',
+    learningObjectives:
+      'After completing this tutorial, you will be able to configure data-driven workflow tables for script execution, create scheduled automation policies with custom cadence options, integrate with password vault systems for secure credential management, build dynamic workflows for GitHub script execution, and implement comprehensive reporting and result management.',
+    estimatedTime: '8-10 minutes',
     tutorialSteps: [
       {
         step: 1,
@@ -161,6 +203,23 @@ export const videoLibrary = [
           'Configure automated reporting through email, spreadsheet generation, PDF creation, or database population. Set up execution logging with verbose results and script previews. Design comprehensive reports showing host execution summaries, script counts, types, sources, and detailed execution results for monitoring and compliance.',
       },
     ],
+    learningResources: [
+      {
+        title: 'Express Training Courses',
+        description:
+          'Essential training on building workflows and automations in Express',
+        link: '/learning/express',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Express Documentation',
+        description:
+          'Comprehensive reference for Express features, workflows, and best practices',
+        type: 'PDF',
+        link: 'https://help.resolve.io/express/',
+      },
+    ],
   },
 
   // ==========================================
@@ -184,6 +243,9 @@ export const videoLibrary = [
     featured: true,
     platform: 'vimeo',
     template: 'instructional',
+    learningObjectives:
+      'After completing this tutorial, you will be able to prepare virtual machines for Insights installation, obtain and verify installation files from your Resolve representative, upload and extract installation files properly, configure installation settings according to your environment, execute the installation in the correct sequence, and begin using Insights for analytics and reporting.',
+    estimatedTime: '5-7 minutes',
     tutorialSteps: [
       {
         step: 1,
@@ -222,6 +284,23 @@ export const videoLibrary = [
           'Once installation is complete across all nodes, start using Insights for analytics and reporting. Verify system functionality and begin configuring your analytics workflows and dashboards.',
       },
     ],
+    learningResources: [
+      {
+        title: 'Insights Training',
+        description:
+          'Comprehensive course on creating dashboards and analytics reports in Insights',
+        link: '/learning/insights',
+      },
+    ],
+    documentResources: [
+      {
+        title: 'Insights Documentation',
+        description:
+          'Complete reference for Insights features, installation, and best practices',
+
+        link: 'https://help.resolve.io/insights/',
+      },
+    ],
   },
 
   // ==========================================
@@ -245,6 +324,9 @@ export const videoLibrary = [
     featured: false,
     platform: 'vimeo',
     template: 'instructional',
+    learningObjectives:
+      'After completing this tutorial, you will be able to create a Slack bot for your workspace, obtain the necessary Slack Signing Secret and oAuth Bot Token, and configure global variables in Actions to enable Slack activities and integrations.',
+    estimatedTime: '5-6 minutes',
     tutorialSteps: [
       {
         step: 1,
@@ -258,65 +340,19 @@ export const videoLibrary = [
         content:
           'In your Actions platform, navigate to Repository > General > Global Variables. Update the SlackBotToken and SlackSigningSecrete with the values from the Slack settings.',
       },
-      {
-        step: 3,
-        title: 'Save and Add Activities',
-        content:
-          'Save the global variables and navigate to your Workflow Designer. Add pre-built Slack activities to your workflow.',
-      },
     ],
-  },
 
-  // ==========================================
-  // AUTOMATE PASSWORD RESETS - YOUTUBE
-  // ==========================================
-  {
-    id: 'automate-password-resets',
-    title: 'How to Automate Password Resets with Resolve',
-    description:
-      "Use Resolve's IT agent, RITA, to automate account unlocks and password resets so users can quickly regain access without filing a service desk ticket.",
-    videoUrl: 'https://youtu.be/uWY3ZyWwklo',
-    videoId: 'uWY3ZyWwklo',
-    duration: '5:55',
-    level: 'beginner',
-    category: 'Actions',
-    tags: ['RITA', 'automation', 'actions'],
-    publishDate: '2025-07-29',
-    thumbnailUrl: 'automate-password.png',
-    product: 'actions',
-    featured: false,
-    platform: 'youtube',
-    template: 'instructional',
-    tutorialSteps: [
+    documentResources: [
       {
-        step: 1,
-        title: 'Start a Conversation with RITA',
-        content:
-          "Open the Rita IT agent in Teams (or Slack or web client), say hello, and describe the login issue you're experiencing.",
+        title: 'Actions Docs on Slack',
+        description: 'Guide to using Slack with Actions',
+        link: 'https://help.resolve.io/actions/category/slack',
       },
       {
-        step: 2,
-        title: 'Let RITA Identify the Locked Account',
-        content:
-          'Rita uses NLP to understand the problem and can scan your accounts to detect which one is locked. Confirm the correct account when prompted.',
-      },
-      {
-        step: 3,
-        title: 'Verify Your Identity',
-        content:
-          'Approve the identity verification request (e.g., via MFA) so RITA can securely proceed with the unlock process.',
-      },
-      {
-        step: 4,
-        title: 'Unlock and Reset Password',
-        content:
-          'RITA attempts to unlock the account first. If login still fails, it automatically triggers a password reset, generates a temporary password, and instructs you to update it.',
-      },
-      {
-        step: 5,
-        title: 'Confirm Access and Provide Feedback',
-        content:
-          'Log in with the new credentials, change your password, and confirm everything works. Then complete the conversation by rating your experience with RITA.',
+        title: 'Configuring Slack Activities',
+        description:
+          'Guide for creating and configuring Slack bots for Actions',
+        link: 'https://help.resolve.io/actions/Developing-Custom-Activities/Activity-Guides/Slack-Integration/configuring-the-slack-integration/',
       },
     ],
   },
