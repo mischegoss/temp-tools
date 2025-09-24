@@ -20,6 +20,7 @@ export const videoLibrary = [
     product: 'actions',
     featured: true,
     platform: 'youtube',
+    template: 'instructional',
     tutorialSteps: [
       {
         step: 1,
@@ -73,6 +74,7 @@ export const videoLibrary = [
     product: 'pro',
     featured: true,
     platform: 'youtube',
+    template: 'instructional',
     tutorialSteps: [
       {
         step: 1,
@@ -126,6 +128,7 @@ export const videoLibrary = [
     product: 'express',
     featured: true,
     platform: 'youtube',
+    template: 'instructional',
     tutorialSteps: [
       {
         step: 1,
@@ -170,6 +173,7 @@ export const videoLibrary = [
       'Learn how to install and set up Resolve Insights on your virtual machines with step-by-step instructions for deployment and configuration.',
     videoUrl: 'https://vimeo.com/1111422908',
     videoId: '1111422908',
+    vimeoHash: '4252a9dae6',
     duration: '2:15',
     level: 'integrations',
     category: 'Analytics',
@@ -179,6 +183,7 @@ export const videoLibrary = [
     product: 'insights',
     featured: true,
     platform: 'vimeo',
+    template: 'instructional',
     tutorialSteps: [
       {
         step: 1,
@@ -229,6 +234,7 @@ export const videoLibrary = [
       'Create a Slack bot and integrate your secret keys into Resolve Actions to use Slack activities or develop your own custom Slack integrations.',
     videoUrl: 'https://vimeo.com/1117874513',
     videoId: '1117874513',
+    vimeoHash: 'c89516ad14',
     duration: '1:53',
     level: 'beginner',
     category: 'Actions',
@@ -238,6 +244,7 @@ export const videoLibrary = [
     product: 'actions',
     featured: false,
     platform: 'vimeo',
+    template: 'instructional',
     tutorialSteps: [
       {
         step: 1,
@@ -279,6 +286,7 @@ export const videoLibrary = [
     product: 'actions',
     featured: false,
     platform: 'youtube',
+    template: 'instructional',
     tutorialSteps: [
       {
         step: 1,
@@ -309,59 +317,6 @@ export const videoLibrary = [
         title: 'Confirm Access and Provide Feedback',
         content:
           'Log in with the new credentials, change your password, and confirm everything works. Then complete the conversation by rating your experience with RITA.',
-      },
-    ],
-  },
-
-  // ==========================================
-  // TEAMS CHATBOT INTEGRATION - YOUTUBE
-  // ==========================================
-  {
-    id: 'integrate-with-teams-chatbot',
-    title: 'Integrating Resolve Actions with Microsoft Teams Chatbot',
-    description:
-      'Use the Microsoft Teams integration with Resolve Actions Express to interact with automations from a familiar chat interface. Request accounts, manage virtual machines, and reset passwords without leaving Teams.',
-    videoUrl: 'https://youtu.be/YDpeSHHVxxw',
-    videoId: 'YDpeSHHVxxw',
-    duration: '8:23',
-    level: 'beginner',
-    category: 'Actions',
-    tags: ['actions', 'integration', 'teams'],
-    publishDate: '2021-11-22',
-    thumbnailUrl: 'teams-integration.png',
-    product: 'actions',
-    featured: false,
-    platform: 'youtube',
-    tutorialSteps: [
-      {
-        step: 1,
-        title: 'Start a Chat with the Bot',
-        content:
-          'Type a trigger word like "hi" or "hello" in Microsoft Teams to begin interacting with the Resolve Actions Express bot.',
-      },
-      {
-        step: 2,
-        title: 'Request a New Account',
-        content:
-          "Select the Account Request option, choose the service (e.g., PagerDuty), and let the workflow email your manager for approval. Once approved, you're notified in Teams with your new account details.",
-      },
-      {
-        step: 3,
-        title: 'Provision a Virtual Machine',
-        content:
-          'Choose Virtual Machine Management, enter your configuration (datastore, CPU, RAM, OS), and let the workflow automatically create and confirm the new VM directly in Teams.',
-      },
-      {
-        step: 4,
-        title: 'Reset a Password',
-        content:
-          'Select Password Reset, verify your identity (e.g., last four digits of SSN), and Actions Express automatically generates a temporary password, documents the reset, and shares the new credentials.',
-      },
-      {
-        step: 5,
-        title: 'Review Workflows',
-        content:
-          'After completing chatbot interactions, view the underlying Resolve workflows that power account requests, password resets, and VM provisioning through a visual drag-and-drop designer.',
       },
     ],
   },

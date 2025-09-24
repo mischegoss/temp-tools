@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import BrowserOnly from '@docusaurus/BrowserOnly'
+import { getEmbedUrl } from '../../utils/videoUtils.js'
 
 /**
  * FeaturedVideoSection-VideoGallery component
@@ -93,97 +94,91 @@ const FeaturedVideoSectionVideoGallery = ({
     width: '80px',
     height: '80px',
     background: isVideoHovered
-      ? 'rgba(74, 144, 226, 0.95)'
-      : 'rgba(0, 0, 0, 0.7)',
+      ? 'rgba(0, 102, 255, 0.95)'
+      : 'rgba(0, 102, 255, 0.8)',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0 4px 12px rgba(0, 102, 255, 0.3)',
   }
 
   const playIconStyle = {
-    color: 'white',
-    fontSize: '28px',
-    marginLeft: '4px', // Slight offset for visual balance
+    color: '#FFFFFF',
+    fontSize: '24px',
+    marginLeft: '4px',
   }
 
   // Video content styles
   const videoContentStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
+    textAlign: 'left',
   }
 
   const featuredLabelStyle = {
-    color: '#008B8B',
-    fontSize: '0.9rem',
+    fontSize: '0.875rem',
     fontWeight: '600',
+    color: '#008B8B',
     textTransform: 'uppercase',
     letterSpacing: '1px',
-    marginBottom: '16px',
-    fontFamily: 'var(--ifm-font-family-base)',
-  }
-
-  const videoTitleStyle = {
-    fontSize: '2rem',
-    fontWeight: '700',
-    color: '#2D3748',
-    marginBottom: '16px',
-    lineHeight: '1.2',
+    marginBottom: '12px',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
+  const videoTitleStyle = {
+    fontSize: '1.75rem',
+    fontWeight: '600',
+    color: '#2D3748',
+    marginBottom: '16px',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    lineHeight: '1.3',
+  }
+
   const videoDescriptionStyle = {
+    fontSize: '1rem',
     color: '#4A5568',
-    fontSize: '1.1rem',
     lineHeight: '1.6',
-    marginBottom: '24px',
-    fontFamily: 'var(--ifm-font-family-base)',
+    marginBottom: '16px', // Reduced from 24px to 16px
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const videoMetaStyle = {
     display: 'flex',
-    gap: '16px',
-    marginBottom: '32px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
+    gap: '12px',
+    marginBottom: '16px', // Reduced from 24px to 16px
   }
 
   const durationBadgeStyle = {
-    background: '#F7FAFC',
-    color: '#4A5568',
-    padding: '8px 16px',
-    borderRadius: '24px',
-    fontSize: '0.9rem',
+    backgroundColor: '#008B8B',
+    color: '#FFFFFF',
+    padding: '4px 12px',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
     fontWeight: '500',
-    border: '1px solid #E2E8F0',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const levelBadgeStyle = {
-    background: '#008B8B',
-    color: 'white',
-    padding: '8px 16px',
-    borderRadius: '24px',
-    fontSize: '0.9rem',
+    backgroundColor: '#0066FF',
+    color: '#FFFFFF',
+    padding: '4px 12px',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
     fontWeight: '500',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
-  // FIXED: Gallery button styles - oval and blue
   const galleryButtonStyle = {
-    background: '#0066FF',
-    color: 'white',
+    backgroundColor: '#0066FF',
+    color: '#FFFFFF',
     border: 'none',
-    padding: '14px 28px',
-    borderRadius: '28px', // Oval shape
+    borderRadius: '8px',
+    padding: '12px 24px',
     fontSize: '1rem',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
     textDecoration: 'none',
     display: 'inline-block',
     marginTop: '8px',
@@ -217,20 +212,6 @@ const FeaturedVideoSectionVideoGallery = ({
               }
             >
               {() => {
-                // Generate embed URL based on platform
-                const getEmbedUrl = (videoId, platform) => {
-                  const origin =
-                    typeof window !== 'undefined'
-                      ? window.location.origin
-                      : 'https://resolve.io'
-
-                  if (platform === 'vimeo') {
-                    return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
-                  }
-                  // Default to YouTube
-                  return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${origin}`
-                }
-
                 // Get external video URL for fallback
                 const getExternalVideoUrl = (videoId, platform) => {
                   if (platform === 'vimeo') {
@@ -286,6 +267,7 @@ const FeaturedVideoSectionVideoGallery = ({
                       src={getEmbedUrl(
                         featuredVideo.videoId,
                         featuredVideo.platform,
+                        featuredVideo.vimeoHash,
                       )}
                       style={videoIframeStyle}
                       frameBorder='0'

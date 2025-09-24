@@ -58,7 +58,7 @@ const VideoGalleryCards = ({
   // Video cards grid container style
   const cardsContainerStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
     gap: '30px',
     margin: 0,
     padding: 0,

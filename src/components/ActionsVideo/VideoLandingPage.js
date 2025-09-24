@@ -4,6 +4,7 @@ import React from 'react'
 import Layout from '@theme/Layout'
 import Link from '@docusaurus/Link'
 import BrowserOnly from '@docusaurus/BrowserOnly'
+import { getEmbedUrl } from '../../utils/videoUtils.js'
 
 // Import template-specific content components
 import InstructionalContent from './templates/InstructionalContent.js'
@@ -61,39 +62,35 @@ const VideoLandingPage = ({ videoData }) => {
 
     console.log('=== VideoLandingPage renderTemplateContent ===')
     console.log('videoData received:', !!videoData)
-    console.log('template value:', template)
-    console.log('videoData.template:', videoData.template)
-    console.log('About to render template component...')
+    console.log('Template:', template)
 
     switch (template) {
       case 'instructional':
-        console.log('Rendering InstructionalContent')
+        console.log('Rendering InstructionalContent with videoData')
         return <InstructionalContent videoData={videoData} />
       case 'summary':
-        console.log('Rendering SummaryContent')
+        console.log('Rendering SummaryContent with videoData')
         return <SummaryContent videoData={videoData} />
       case 'informational':
-        console.log('Rendering InformationalContent')
+        console.log('Rendering InformationalContent with videoData')
         return <InformationalContent videoData={videoData} />
       default:
-        console.log('Rendering default InstructionalContent')
+        console.log('Unknown template, defaulting to InstructionalContent')
         return <InstructionalContent videoData={videoData} />
     }
   }
 
-  // Shared container style
-  const containerStyle = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '0 40px',
-    width: '100%',
-  }
-
-  // Navigation section styles
+  // Shared styles for all video landing pages
   const navigationStyle = {
     background: '#F7FAFC',
     padding: '20px 0',
     borderBottom: '1px solid #E2E8F0',
+  }
+
+  const containerStyle = {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 40px',
   }
 
   const breadcrumbStyle = {
@@ -102,7 +99,7 @@ const VideoLandingPage = ({ videoData }) => {
     gap: '8px',
     fontSize: '0.875rem',
     color: '#4A5568',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const backLinkStyle = {
@@ -110,9 +107,9 @@ const VideoLandingPage = ({ videoData }) => {
     textDecoration: 'none',
     fontSize: '0.875rem',
     fontWeight: '500',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
-  // Content section styles
   const contentSectionStyle = {
     background: '#FFFFFF',
     padding: '60px 0',
@@ -122,114 +119,128 @@ const VideoLandingPage = ({ videoData }) => {
     fontSize: '2.5rem',
     fontWeight: '700',
     color: '#2D3748',
-    margin: 0,
-    lineHeight: '1.2',
+    marginBottom: '16px',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-  }
-
-  const accentLineStyle = {
-    width: '60px',
-    height: '4px',
-    background: '#008B8B',
-    margin: '16px auto 24px',
-    borderRadius: '2px',
+    lineHeight: '1.2',
   }
 
   const subtitleStyle = {
-    fontSize: '1.25rem',
+    fontSize: '1.125rem',
     color: '#4A5568',
     lineHeight: '1.6',
     maxWidth: '800px',
     margin: '0 auto',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+  }
+
+  const accentLineStyle = {
+    width: '80px',
+    height: '4px',
+    background: '#008B8B',
+    margin: '0 auto 24px auto',
   }
 
   const videoPlayerStyle = {
     maxWidth: '900px',
-    margin: '40px auto',
+    margin: '40px auto 0 auto',
     position: 'relative',
+    paddingBottom: '56.25%', // 16:9 aspect ratio
+    background: '#000',
     borderRadius: '12px',
     overflow: 'hidden',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
   }
 
   const iframeStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: '100%',
-    height: '506px', // 16:9 ratio for 900px width
+    height: '100%',
     border: 'none',
-    display: 'block',
+    borderRadius: '12px',
   }
 
   const metaInfoStyle = {
     display: 'flex',
     justifyContent: 'center',
-    gap: '16px',
-    marginTop: '24px',
+    gap: '20px',
+    marginTop: '20px',
     flexWrap: 'wrap',
   }
 
   const durationBadgeStyle = {
-    background: '#E2E8F0',
-    color: '#2D3748',
-    padding: '8px 16px',
+    backgroundColor: '#008B8B',
+    color: '#FFFFFF',
+    padding: '6px 12px',
     borderRadius: '20px',
     fontSize: '0.875rem',
     fontWeight: '500',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const levelBadgeStyle = {
-    background: '#008B8B',
-    color: 'white',
-    padding: '8px 16px',
+    backgroundColor: '#0066FF',
+    color: '#FFFFFF',
+    padding: '6px 12px',
     borderRadius: '20px',
     fontSize: '0.875rem',
     fontWeight: '500',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const categoryBadgeStyle = {
-    background: '#0066FF',
-    color: 'white',
-    padding: '8px 16px',
+    backgroundColor: '#4A5568',
+    color: '#FFFFFF',
+    padding: '6px 12px',
     borderRadius: '20px',
     fontSize: '0.875rem',
     fontWeight: '500',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
-  // Template content section styles
   const templateSectionStyle = {
     background: '#F7FAFC',
     padding: '80px 0',
   }
 
-  // Resources section styles (FIXED: Now shows for all templates)
   const resourcesSection = {
-    borderTop: '1px solid #e5e7eb',
-    paddingTop: '32px',
-    marginTop: '48px',
+    textAlign: 'center',
+    marginTop: '60px',
+  }
+
+  const resourcesSectionTitle = {
+    fontSize: '2rem',
+    fontWeight: '600',
+    color: '#2D3748',
+    marginBottom: '40px',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const resourcesGrid = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '32px',
+    gap: '40px',
+    maxWidth: '800px',
+    margin: '0 auto',
+    textAlign: 'left',
   }
 
   const resourceTitle = {
-    fontSize: '1.375rem',
+    fontSize: '1.25rem',
     fontWeight: '600',
-    color: '#1A202C',
-    marginBottom: '20px',
+    color: '#2D3748',
+    marginBottom: '16px',
     display: 'flex',
     alignItems: 'center',
-    fontFamily:
-      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    gap: '8px',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const resourceIcon = {
-    width: '24px',
-    height: '24px',
-    color: '#4A5568',
-    marginRight: '12px',
+    width: '20px',
+    height: '20px',
+    color: '#008B8B',
   }
 
   const resourceList = {
@@ -239,45 +250,27 @@ const VideoLandingPage = ({ videoData }) => {
   }
 
   const resourceItem = {
-    marginBottom: '20px',
+    marginBottom: '12px',
+    padding: '16px',
+    background: '#FFFFFF',
+    borderRadius: '8px',
+    border: '1px solid #E2E8F0',
+    transition: 'all 0.2s ease',
   }
 
   const resourceLink = {
     color: '#0066FF',
     textDecoration: 'none',
-    display: 'block',
     fontWeight: '600',
-    fontSize: '1.125rem',
-    lineHeight: '1.6',
-    fontFamily:
-      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontSize: '1rem',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const resourceMeta = {
-    fontSize: '1rem',
     color: '#4A5568',
-    marginTop: '6px',
-    lineHeight: '1.6',
-    fontFamily:
-      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  }
-
-  const resourcesSectionTitle = {
-    fontSize: '2rem',
-    fontWeight: '600',
-    color: '#1A202C',
-    textAlign: 'center',
-    marginBottom: '48px',
-    fontFamily:
-      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  }
-
-  // Generate embed URL based on platform
-  const getEmbedUrl = (videoId, platform) => {
-    if (platform === 'vimeo') {
-      return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
-    }
-    return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0&modestbranding=1`
+    fontSize: '0.875rem',
+    marginTop: '4px',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   // Check if resources exist
@@ -330,8 +323,18 @@ const VideoLandingPage = ({ videoData }) => {
             <BrowserOnly fallback={<div style={iframeStyle} />}>
               {() => (
                 <iframe
-                  src={getEmbedUrl(videoData.videoId, videoData.platform)}
+                  src={getEmbedUrl(videoData.videoId, videoData.platform, videoData.vimeoHash)}
                   style={iframeStyle}
+                  allow={
+                    videoData.platform === 'vimeo'
+                      ? 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share'
+                      : 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                  }
+                  referrerPolicy={
+                    videoData.platform === 'vimeo'
+                      ? 'strict-origin-when-cross-origin'
+                      : undefined
+                  }
                   allowFullScreen
                   title={videoData.title}
                 />
@@ -356,92 +359,92 @@ const VideoLandingPage = ({ videoData }) => {
       </section>
 
       {/* Resources Section - FIXED: Shows for ALL templates */}
-      {hasResources && (
-        <section style={{ background: '#F7FAFC', paddingBottom: '80px' }}>
-          <div style={containerStyle}>
-            <div style={resourcesSection}>
-              <h2 style={resourcesSectionTitle}>Learn More</h2>
-              <div style={resourcesGrid}>
-                {/* Related Documents */}
-                {videoData.documentResources &&
-                  videoData.documentResources.length > 0 && (
-                    <div>
-                      <h3 style={resourceTitle}>
-                        <svg
-                          style={resourceIcon}
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth='2'
-                            d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                          />
-                        </svg>
-                        Related Documents
-                      </h3>
-                      <ul style={resourceList}>
-                        {videoData.documentResources.map((document, index) => (
-                          <li key={index} style={resourceItem}>
-                            <a
-                              href={document.link}
-                              style={resourceLink}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                            >
-                              {document.title}
-                            </a>
-                            <div style={resourceMeta}>
-                              {document.description}
-                              {document.type && ` • ${document.type}`}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                {/* Learning Resources */}
-                {videoData.learningResources &&
-                  videoData.learningResources.length > 0 && (
-                    <div>
-                      <h3 style={resourceTitle}>
-                        <svg
-                          style={resourceIcon}
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth='2'
-                            d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
-                          />
-                        </svg>
-                        Related Training
-                      </h3>
-                      <ul style={resourceList}>
-                        {videoData.learningResources.map((resource, index) => (
-                          <li key={index} style={resourceItem}>
-                            <a href={resource.link} style={resourceLink}>
-                              {resource.title}
-                            </a>
-                            <div style={resourceMeta}>
-                              {resource.description}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+{hasResources && (
+  <section style={{ background: '#F7FAFC', paddingBottom: '80px' }}>
+    <div style={containerStyle}>
+      <div style={resourcesSection}>
+        <h2 style={resourcesSectionTitle}>Learn More</h2>
+        <div style={resourcesGrid}>
+          {/* Related Documents */}
+          {videoData.documentResources &&
+            videoData.documentResources.length > 0 && (
+              <div>
+                <h3 style={resourceTitle}>
+                  <svg
+                    style={resourceIcon}
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth='2'
+                      d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                    />
+                  </svg>
+                  Related Documents
+                </h3>
+                <ul style={resourceList}>
+                  {videoData.documentResources.map((document, index) => (
+                    <li key={index} style={resourceItem}>
+                      <a
+                        href={document.link}
+                        style={resourceLink}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        {document.title}
+                      </a>
+                      <div style={resourceMeta}>
+                        {document.description}
+                        {document.type && ` • ${document.type}`}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          </div>
-        </section>
-      )}
+            )}
+
+          {/* Learning Resources */}
+          {videoData.learningResources &&
+            videoData.learningResources.length > 0 && (
+              <div>
+                <h3 style={resourceTitle}>
+                  <svg
+                    style={resourceIcon}
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth='2'
+                      d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+                    />
+                  </svg>
+                  Related Training
+                </h3>
+                <ul style={resourceList}>
+                  {videoData.learningResources.map((resource, index) => (
+                    <li key={index} style={resourceItem}>
+                      <a href={resource.link} style={resourceLink}>
+                        {resource.title}
+                      </a>
+                      <div style={resourceMeta}>
+                        {resource.description}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+        </div>
+      </div>
+    </div>
+  </section>
+    )}
     </Layout>
   )
 }

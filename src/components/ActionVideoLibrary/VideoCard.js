@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
 import BrowserOnly from '@docusaurus/BrowserOnly'
+import { getEmbedUrl } from '../../utils/videoUtils.js'
 
 /**
  * VideoCard component - Individual video card for the gallery
@@ -74,94 +75,86 @@ const VideoCard = ({ video, index, colorTheme }) => {
       : 'translate(-50%, -50%)',
     width: '80px',
     height: '80px',
-    background: isHovered ? 'rgba(74, 144, 226, 0.95)' : 'rgba(0, 0, 0, 0.7)',
+    background: isHovered
+      ? 'rgba(0, 102, 255, 0.95)'
+      : 'rgba(0, 102, 255, 0.8)',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0 4px 12px rgba(0, 102, 255, 0.3)',
   }
 
   const playIconStyle = {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: '24px',
-    marginLeft: '4px', // Slight offset for visual balance
+    marginLeft: '4px',
   }
 
-  // FIXED: Updated to use flex layout for proper content distribution
   const videoInfoStyle = {
-    padding: '24px',
-    flex: 1, // FIXED: Fill remaining space
-    display: 'flex', // FIXED: Flex layout
-    flexDirection: 'column', // FIXED: Column direction
+    padding: '20px',
+    flex: 1, // FIXED: Allow content to expand and push footer down
+    display: 'flex',
+    flexDirection: 'column',
   }
 
   const titleStyle = {
     fontSize: '1.25rem',
-    fontWeight: '700',
+    fontWeight: '600',
     color: 'var(--color-text-primary)',
-    margin: '0 0 12px 0',
+    marginBottom: '8px',
     lineHeight: '1.4',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
-  // FIXED: Added text truncation to prevent card height variations
   const descriptionStyle = {
+    fontSize: '0.875rem',
     color: 'var(--color-text-secondary)',
-    fontSize: '0.95rem',
     lineHeight: '1.5',
-    margin: '0 0 16px 0',
-    fontFamily: 'var(--ifm-font-family-base)',
-    flex: 1, // FIXED: Fill available space
-    overflow: 'hidden', // FIXED: Hide overflow
-    display: '-webkit-box', // FIXED: Multi-line truncation
-    WebkitLineClamp: 2, // FIXED: Limit to 2 lines
-    WebkitBoxOrient: 'vertical', // FIXED: Vertical orientation
+    marginBottom: '12px',
+    flex: 1, // FIXED: Allow description to expand
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const metaStyle = {
     display: 'flex',
-    gap: '12px',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    marginTop: 'auto', // FIXED: Push to bottom of card
+    justifyContent: 'space-between',
+    marginTop: 'auto', // FIXED: Push meta to bottom
   }
 
   const durationStyle = {
-    background: 'var(--brand-grey-100)',
-    color: 'var(--brand-grey-600)',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '0.9rem',
+    fontSize: '0.75rem',
+    color: 'var(--color-text-secondary)',
+    background: 'var(--color-bg-secondary)',
+    padding: '4px 8px',
+    borderRadius: '4px',
     fontWeight: '500',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const levelBadgeStyle = {
+    fontSize: '0.75rem',
+    color: '#FFFFFF',
     background: getLevelBadgeColor(video.level),
-    color: 'white',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '0.9rem',
+    padding: '4px 8px',
+    borderRadius: '4px',
     fontWeight: '500',
-    fontFamily: 'var(--ifm-font-family-base)',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   return (
     <Link
       to={`/learning/video-gallery/videos?video=${video.id}`}
-      style={{ textDecoration: 'none', color: 'inherit' }}
+      style={{ textDecoration: 'none' }}
     >
       <div
         style={cardStyle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        role='button'
-        tabIndex={0}
-        aria-label={`View tutorial: ${video.title}`}
       >
-        {/* Video Thumbnail with Custom Image or Iframe */}
+        {/* Video Thumbnail/Preview */}
         <div style={thumbnailStyle}>
           {video.thumbnail ? (
             // CUSTOM THUMBNAIL: Show image instead of iframe
@@ -188,18 +181,13 @@ const VideoCard = ({ video, index, colorTheme }) => {
             <>
               <BrowserOnly fallback={<div style={iframeStyle} />}>
                 {() => {
-                  // Generate embed URL based on platform
-                  const getEmbedUrl = (videoId, platform) => {
-                    if (platform === 'vimeo') {
-                      return `https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479`
-                    }
-                    // Default to YouTube
-                    return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`
-                  }
-
                   return (
                     <iframe
-                      src={getEmbedUrl(video.videoId, video.platform)}
+                      src={getEmbedUrl(
+                        video.videoId,
+                        video.platform,
+                        video.vimeoHash,
+                      )}
                       style={iframeStyle}
                       frameBorder='0'
                       allow={
