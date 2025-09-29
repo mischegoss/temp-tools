@@ -64,12 +64,19 @@ const ActionsVideoIndex = ({
   const [searchResults, setSearchResults] = useState(resources)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchIntent, setSearchIntent] = useState({ suggestions: [] })
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Handle search results with intent detection
   const handleSearchResults = (results, term, intent = { suggestions: [] }) => {
     setSearchResults(results)
     setSearchTerm(term)
     setSearchIntent(intent)
+  }
+
+  // Handle page change with scroll to top
+  const handlePageChange = pageNumber => {
+    setCurrentPage(pageNumber)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Use search results instead of resources for all calculations
@@ -134,16 +141,37 @@ const ActionsVideoIndex = ({
     return filtered
   }, [activeProductFilter, activeLevelFilter, videosToProcess])
 
-  // Group filtered videos into 3 main sections for display
+  // Group filtered videos into sections for display
   const groupedVideos = useMemo(() => {
+    const platformVideos = filteredVideos.filter(
+      video => video.product === 'actions',
+    )
+
+    // Group platform videos by section
+    const platformBySection = platformVideos.reduce((acc, video) => {
+      const section = video.section || video.category || 'Other'
+      if (!acc[section]) {
+        acc[section] = []
+      }
+      acc[section].push(video)
+      return acc
+    }, {})
+
+    // Sort sections by sectionOrder
+    const sortedPlatformSections = Object.entries(platformBySection).sort(
+      ([, videosA], [, videosB]) => {
+        const orderA = videosA[0]?.sectionOrder || 999
+        const orderB = videosB[0]?.sectionOrder || 999
+        return orderA - orderB
+      },
+    )
+
     const groups = {
-      platform: filteredVideos.filter(video => video.product === 'actions'),
-      deviceDiscovery: filteredVideos.filter(
-        video => video.product === 'insights',
-      ),
-      automationDesign: filteredVideos.filter(
-        video => video.product === 'pro' || video.product === 'express',
-      ),
+      platform: platformVideos,
+      platformSections: sortedPlatformSections,
+      pro: filteredVideos.filter(video => video.product === 'pro'),
+      express: filteredVideos.filter(video => video.product === 'express'),
+      insights: filteredVideos.filter(video => video.product === 'insights'),
     }
 
     return groups
@@ -191,6 +219,35 @@ const ActionsVideoIndex = ({
     ...sectionHeadingStyle,
     marginTop: '1rem', // Less top margin for first section
   }
+
+  const subSectionHeadingStyle = {
+    fontSize: '1.4rem',
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: '1.5rem',
+    marginTop: '0',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+  }
+
+  // Sub-section container styles with alternating backgrounds and bottom border
+  const getSubSectionContainerStyle = index => ({
+    padding: '2rem 2.5rem',
+    background: index % 2 === 0 ? '#FAFBFC' : '#F5F7FA',
+    marginLeft: '-2.5rem',
+    marginRight: '-2.5rem',
+    marginBottom: '0',
+    borderBottom: '1px solid #E2E8F0',
+  })
+
+  // Main section container style for Page 2 (no sub-sections)
+  const getMainSectionContainerStyle = index => ({
+    padding: '2rem 2.5rem',
+    background: index % 2 === 0 ? '#FAFBFC' : '#F5F7FA',
+    marginLeft: '-2.5rem',
+    marginRight: '-2.5rem',
+    marginBottom: '0',
+    borderBottom: '1px solid #E2E8F0',
+  })
 
   // Pagination controls style
   const paginationStyle = {
@@ -280,11 +337,11 @@ const ActionsVideoIndex = ({
         </div>
       </section>
 
-      {/* Video Cards Section - Organized in 3 main sections with pagination */}
+      {/* Video Cards Section - Paginated content */}
       <section style={cardsSectionStyleReduced}>
         <div style={containerStyle}>
-          {/* Platform Section */}
-          {groupedVideos.platform.length > 0 && (
+          {/* PAGE 1: Platform Section with Sub-sections */}
+          {currentPage === 1 && groupedVideos.platform.length > 0 && (
             <>
               <div
                 style={{
@@ -313,54 +370,92 @@ const ActionsVideoIndex = ({
                   Featured
                 </span>
               </div>
-              <VideoGalleryCards
-                videos={groupedVideos.platform}
-                hideSection={true}
-                colorTheme={actionsTheme}
-              />
+
+              {/* Platform Sub-sections with alternating backgrounds */}
+              {groupedVideos.platformSections.map(
+                ([sectionName, sectionVideos], index) => (
+                  <div
+                    key={sectionName}
+                    style={getSubSectionContainerStyle(index)}
+                  >
+                    <h3 style={subSectionHeadingStyle}>{sectionName}</h3>
+                    <VideoGalleryCards
+                      videos={sectionVideos}
+                      hideSection={true}
+                      colorTheme={actionsTheme}
+                    />
+                  </div>
+                ),
+              )}
             </>
           )}
 
-          {/* Device Discovery Section */}
-          {groupedVideos.deviceDiscovery.length > 0 && (
+          {/* PAGE 2: Pro, Express, Insights Sections with cards */}
+          {currentPage === 2 && (
             <>
-              <h2
-                style={
-                  groupedVideos.platform.length > 0
-                    ? sectionHeadingStyle
-                    : firstSectionHeadingStyle
-                }
-              >
-                Device Discovery
-              </h2>
-              <VideoGalleryCards
-                videos={groupedVideos.deviceDiscovery}
-                hideSection={true}
-                colorTheme={actionsTheme}
-              />
+              {/* Resolve Actions Pro Section */}
+              {groupedVideos.pro.length > 0 && (
+                <div style={getMainSectionContainerStyle(0)}>
+                  <h2 style={{ ...firstSectionHeadingStyle, marginTop: '0' }}>
+                    Resolve Actions Pro
+                  </h2>
+                  <VideoGalleryCards
+                    videos={groupedVideos.pro}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
+                </div>
+              )}
+
+              {/* Resolve Actions Express Section */}
+              {groupedVideos.express.length > 0 && (
+                <div style={getMainSectionContainerStyle(1)}>
+                  <h2 style={{ ...sectionHeadingStyle, marginTop: '0' }}>
+                    Resolve Actions Express
+                  </h2>
+                  <VideoGalleryCards
+                    videos={groupedVideos.express}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
+                </div>
+              )}
+
+              {/* Insights Section */}
+              {groupedVideos.insights.length > 0 && (
+                <div style={getMainSectionContainerStyle(2)}>
+                  <h2 style={{ ...sectionHeadingStyle, marginTop: '0' }}>
+                    Insights
+                  </h2>
+                  <VideoGalleryCards
+                    videos={groupedVideos.insights}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
+                </div>
+              )}
             </>
           )}
 
-          {/* Automation Design Section */}
-          {groupedVideos.automationDesign.length > 0 && (
-            <>
-              <h2
-                style={
-                  groupedVideos.platform.length > 0 ||
-                  groupedVideos.deviceDiscovery.length > 0
-                    ? sectionHeadingStyle
-                    : firstSectionHeadingStyle
-                }
-              >
-                Automation Design (Pro and Express)
-              </h2>
-              <VideoGalleryCards
-                videos={groupedVideos.automationDesign}
-                hideSection={true}
-                colorTheme={actionsTheme}
-              />
-            </>
-          )}
+          {/* Pagination Controls - at the bottom */}
+          <div style={paginationStyle}>
+            <button
+              style={
+                currentPage === 1 ? activePageButtonStyle : pageButtonStyle
+              }
+              onClick={() => handlePageChange(1)}
+            >
+              Page 1
+            </button>
+            <button
+              style={
+                currentPage === 2 ? activePageButtonStyle : pageButtonStyle
+              }
+              onClick={() => handlePageChange(2)}
+            >
+              Page 2
+            </button>
+          </div>
         </div>
       </section>
     </>

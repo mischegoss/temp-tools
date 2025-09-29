@@ -14,7 +14,7 @@ export const videoLibrary = [
     duration: '7:15',
     level: 'step-by-step',
     category: 'Platform Overview',
-    section: 'Automation Design',
+    section: 'Getting Started',
     sectionOrder: 4,
     tags: ['basics', 'getting-started', 'workflow'],
     publishDate: '2024-01-15',
@@ -624,7 +624,7 @@ export const videoLibrary = [
     duration: '2:37',
     level: 'quick-start',
     category: 'Platform Overview',
-    section: 'Getting Started',
+    section: 'Building Your Workflow',
     sectionOrder: 1,
     tags: [
       'workflow-creation',
@@ -785,7 +785,7 @@ export const videoLibrary = [
     vimeoHash: '11744c3869',
     duration: '2:21',
     level: 'quick-start',
-    category: 'Workflow Design',
+    category: 'Support and Troubleshooting',
     section: 'Activity Configuration',
     sectionOrder: 6,
     tags: [
