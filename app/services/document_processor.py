@@ -20,8 +20,8 @@ class DocumentProcessor:
         self.embeddings = None
         self.metadata = {}
         self.chunk_data = []
-        self.page_mappings = {}  # New: store page mappings from comprehensive JSON
-        self.documentation_stats = {}  # New: store documentation statistics
+        self.page_mappings = {}
+        self.documentation_stats = {}
         self.model_loaded = False
         
         # Initialize Cloud Storage
@@ -36,17 +36,19 @@ class DocumentProcessor:
             shared_model: Pre-loaded SentenceTransformer model to share (optional)
         """
         try:
+            # CRITICAL FIX: Use shared model if provided, otherwise fail
             if shared_model is not None:
-                # Use the pre-loaded model from main app (memory optimization)
                 logger.info("Using shared sentence transformer model from main application")
                 self.model = shared_model
                 self.model_loaded = True
             else:
-                # Fallback: load model independently (for standalone usage)
+                # This should NOT happen in production - log error
+                logger.error("No shared model provided to DocumentProcessor.initialize()")
+                logger.error("This will cause duplicate model loading and waste memory!")
                 logger.info(f"Loading embedding model independently: {EMBEDDING_MODEL}")
                 self.model = SentenceTransformer(EMBEDDING_MODEL)
                 self.model_loaded = True
-                logger.info("Embedding model loaded successfully")
+                logger.warning("⚠️ Model loaded independently - this is not optimal!")
             
             # Initialize storage service
             self.storage.initialize()
@@ -427,3 +429,4 @@ class DocumentProcessor:
             "documentation_stats": self.documentation_stats,
             "enhanced_features_available": len(self.documentation_stats) > 0
         }
+        

@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-from contextual import asynccontextmanager
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sentence_transformers import SentenceTransformer
@@ -34,22 +34,51 @@ async def lifespan(app: FastAPI):
     global sentence_model, startup_time, models_loaded
     global doc_processor, search_service, gemini_service, services_initialized
     
+    # CRITICAL: Set offline mode FIRST, before any imports or model loading
+    # This must be the very first thing to prevent HuggingFace API calls
+    os.environ['HF_HUB_OFFLINE'] = '1'
+    os.environ['TRANSFORMERS_OFFLINE'] = '1'
+    
     # Startup
     startup_time = time.time()
     logger.info("Starting up Actions Chatbot API...")
     
     try:
-        # Step 1: Pre-load the sentence transformer model into memory (SINGLE INSTANCE)
-        logger.info("Loading sentence transformer model...")
-        sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        
+        # Ensure cache directories are set (should match Dockerfile runtime ENV)
+        # These should already be set in Dockerfile, but we verify them here
+        cache_dir = os.getenv('SENTENCE_TRANSFORMERS_HOME', '/home/appuser/.cache/torch/sentence_transformers')
+        
+        # Verify cache exists before trying to load
+        from pathlib import Path
+        cache_path = Path(cache_dir)
+        if cache_path.exists():
+            logger.info(f"✅ Model cache found at: {cache_dir}")
+            cache_files = list(cache_path.rglob('*'))
+            logger.info(f"✅ Cache contains {len(cache_files)} items")
+        else:
+            logger.error(f"❌ Cache directory not found at: {cache_dir}")
+            raise RuntimeError(f"Model cache not found at {cache_dir}. Docker build may have failed.")
+        
+        # Step 1: Load sentence transformer model ONCE (from cache in Docker image)
+        # Use local_files_only=True to force loading from cache without any API calls
+        logger.info("Loading sentence transformer model from cache (offline mode)...")
+        model_load_start = time.time()
+        sentence_model = SentenceTransformer(
+            'sentence-transformers/all-MiniLM-L6-v2',
+            local_files_only=True  # Critical: prevents any HuggingFace API calls
+        )
+        model_load_time = time.time() - model_load_start
         
         # Test the model with a simple encoding to ensure it's working
         logger.info("Testing model functionality...")
         test_encoding = sentence_model.encode("test sentence")
         logger.info(f"Model test successful. Embedding dimension: {len(test_encoding)}")
+        logger.info(f"Model loaded in {model_load_time:.2f} seconds (from Docker cache)")
         
-        # NEW: Pre-warm the model for faster first response
+        # Pre-warm the model for faster first response
         logger.info("Pre-warming model for faster first response...")
+        warmup_start = time.time()
         sentence_model.encode([
             "how to create workflow",
             "what is actions", 
@@ -58,16 +87,17 @@ async def lifespan(app: FastAPI):
             "example workflow",
             "activities and tasks"
         ])
-        logger.info("Model pre-warmed successfully - first response will be faster")
+        warmup_time = time.time() - warmup_start
+        logger.info(f"Model pre-warmed in {warmup_time:.2f} seconds")
         
         models_loaded = True
         
-        # Step 2: Initialize business services with SHARED model (memory optimization)
-        logger.info("Initializing business services with shared model...")
+        # Step 2: Initialize business services with SHARED model (no duplicate loading)
+        logger.info("Initializing business services with shared model instance...")
         
-        # Initialize document processor with shared model
+        # Initialize document processor with shared model - CRITICAL FIX
         doc_processor = DocumentProcessor()
-        doc_processor.initialize(shared_model=sentence_model)  # PASS SHARED MODEL
+        doc_processor.initialize(shared_model=sentence_model)
         logger.info("✅ Document processor initialized (using shared model)")
         
         # Initialize search service
@@ -85,7 +115,10 @@ async def lifespan(app: FastAPI):
         startup_duration = time.time() - startup_time
         logger.info(f"🎉 Startup completed successfully in {startup_duration:.2f} seconds")
         logger.info("Actions Chatbot API is ready to serve requests!")
-        logger.info("💡 Memory optimized: Using single shared sentence transformer model instance")
+        logger.info("💡 Memory optimized: Single shared sentence transformer model instance")
+        logger.info(f"   - Model load time: {model_load_time:.2f}s (from Docker cache)")
+        logger.info(f"   - Warmup time: {warmup_time:.2f}s")
+        logger.info(f"   - Total startup: {startup_duration:.2f}s")
         
     except Exception as e:
         logger.error(f"Failed to initialize services during startup: {e}")
@@ -127,7 +160,7 @@ async def health_check():
         "services_initialized": services_initialized,
         "uptime_seconds": time.time() - startup_time if startup_time else 0,
         "ready_for_chat": models_loaded and services_initialized,
-        "memory_optimized": True  # Indicates shared model approach
+        "memory_optimized": True
     }
 
 @app.get("/warmup")
@@ -167,8 +200,8 @@ async def warmup():
             "gemini_service_ready": gemini_ready,
             "chat_ready": search_ready and gemini_ready,
             "uptime_seconds": time.time() - startup_time if startup_time else 0,
-            "memory_optimization": "shared_model_instance",  # Memory optimization indicator
-            "pre_warmed": True  # NEW: Indicates model was pre-warmed
+            "memory_optimization": "shared_model_instance",
+            "pre_warmed": True
         }
     except Exception as e:
         logger.error(f"Warmup test failed: {e}")
@@ -192,8 +225,8 @@ async def get_status():
                 "loaded": sentence_model is not None,
                 "model_name": "sentence-transformers/all-MiniLM-L6-v2",
                 "ready": models_loaded,
-                "shared_instance": True,  # Memory optimization flag
-                "pre_warmed": True  # NEW: Model was pre-warmed for faster responses
+                "shared_instance": True,
+                "pre_warmed": True
             }
         },
         "services": {
@@ -206,10 +239,11 @@ async def get_status():
             "models_loaded": models_loaded,
             "services_initialized": services_initialized,
             "chat_ready": gemini_status.get("can_chat", False),
-            "first_response_optimized": True  # NEW: Indicates optimized first response
+            "first_response_optimized": True
         },
         "memory_optimization": {
             "shared_model": True,
+            "model_loaded_once": True,
             "estimated_memory_savings": "~50% reduction from avoiding duplicate model loading"
         },
         "endpoints": {
@@ -239,11 +273,11 @@ async def root():
             "api_endpoints": "/api/v1/*"
         },
         "optimization_features": [
-            "Pre-loaded sentence transformer model",
+            "Model pre-downloaded in Docker image",
+            "Model loaded once from cache at startup",
             "Shared model instance across services (50% memory reduction)",
-            "Startup-time service initialization", 
-            "Fast embedding generation",
-            "Pre-warmed model for faster first response",  # NEW
+            "No duplicate model loading",
+            "Pre-warmed model for faster first response",
             "Optimized for Cloud Run deployment"
         ]
     }
@@ -263,3 +297,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
+    
