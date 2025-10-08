@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Grid, Box } from '@mui/material'
-import Button from './button.js'
+import Button from './button'
 import { styles } from './styles/videotemplatestyles.js'
 import videoTemplateData from './data/videotemplatedata.js'
 
