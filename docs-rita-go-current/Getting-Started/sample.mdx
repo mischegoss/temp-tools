@@ -1,0 +1,55 @@
+---
+# FRONT MATTER — used for LLM ingestion and site metadata
+# Everything inside these `---` lines describes your page for search, AI ingestion, and sidebar placement. It is NOT visible.
+# Comments are NOT ingested
+
+id: accessing-login-page # Unique identifier for this page — used for internal linking and plugin reference
+title: Accessing the Login Page # This is a must.
+description: Learn how to access and log in to your account. This guide covers the login process, credential requirements, authentication methods, and troubleshooting common login issues. #This is sometimes called summary. The name doesn't matter, the words do.
+sidebar_position: 1 # For Docusaurus site structure (NOT used by LLMs). Ask Jana for positioning rules.
+keywords: [login, authentication, sign in, credentials] # Used for LLM search enrichment — include at least 4.
+tags: [getting-started, authentication, access] # Used by the Docusaurus site to group related content.
+---
+
+<!-- SECTION 2: PAGE CONTENT -->
+<!-- This is the actual documentation content users (and the LLM) read. Keep it short, one topic per page. This is just a sample!  -->
+
+# Accessing the Login Page
+
+## What You Need to Log In
+
+Before accessing the system, ensure you have the following:
+
+- Valid username or email address
+- Current password
+- Active account status
+- Compatible web browser
+
+<!--
+Tip:
+Use clear headers and lists.
+Each section should answer a single user question (e.g., "How do I log in?").
+Avoid multiple topics in one file.
+-->
+
+<!-- SECTION 3: VIDEO EMBED EXAMPLE -->
+<!-- Use this to embed a product video or tutorial related to this topic. -->
+<!-- The component pulls a thumbnail and video link from your custom Docusaurus setup. -->
+<!-- WE WILL GO OVER THIS USAGE ONCE WE ACTUALLY HAVE VIDEOS. -->
+
+## THE TITLE OF THE VIDEO GOES HERE
+
+import FeaturedVideoComponent from '../src/components/Video/FeaturedVideo'
+
+<FeaturedVideoComponent
+  title='ADD TITLE HERE OR LEAVE IT BLANK'
+  thumbnailFileName='docusaurus.png'
+  videoUrl='https://training.resolve.io/learning/video-gallery/videos/?video=pro-featured-video'
+/>
+
+<!--
+How this works:
+- `title` shows above the embedded video (optional)
+- `thumbnailFileName` points to the image in your `/static/img` or similar folder
+- `videoUrl` links to your hosted video
+-->
