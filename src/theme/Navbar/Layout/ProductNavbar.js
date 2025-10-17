@@ -127,7 +127,7 @@ export default function ProductsNavbar(props) {
         {/* Your custom mobile sidebar with state */}
         <MobileSidebar
           logoSrc='/img/Resolve-Logo-White-Teal-RGB.svg'
-          showRaniButton={true}
+          showRaniButton={false}
           onRaniClick={handleMobileRaniClick}
           isOpen={isMobileSidebarOpen}
           onClose={() => setIsMobileSidebarOpen(false)}

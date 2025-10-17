@@ -22,6 +22,14 @@ export default function NavigationDropdowns() {
           <li>
             <Link
               className={`dropdown__link ${styles.dropdownLink}`}
+              to='/rita-go'
+            >
+              Rita Go
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`dropdown__link ${styles.dropdownLink}`}
               to='/actions'
             >
               Actions

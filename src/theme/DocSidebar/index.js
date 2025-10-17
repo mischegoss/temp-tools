@@ -1,10 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useLocation } from '@docusaurus/router' // Add this import
 import MainDocSidebar from '@theme-original/DocSidebar'
 import ChatbotButton from '@site/src/components/Chatbot/ChatbotButton'
 
 function ChatbotPortal() {
   const [mountNode, setMountNode] = useState(null)
+  const location = useLocation() // Add this line
+
+  // Check if current page is Rita Go (not homepage, not actions)
+  const isRitaGo =
+    location.pathname !== '/' && !location.pathname.startsWith('/actions')
+
+  // Don't render RANI button for Rita Go pages
+  if (isRitaGo) {
+    return null
+  }
 
   useEffect(() => {
     const findAndCreateMountPoint = () => {

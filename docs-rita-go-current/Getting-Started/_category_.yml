@@ -1,8 +1,6 @@
 position: 20
-label: Getting Started 
-collapsible: true
+label: Getting Started
 collapsed: true
 link:
   type: generated-index
   title: Getting Started
-  
