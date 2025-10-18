@@ -1,4 +1,4 @@
-// src/components/FeatureBadges/index.js
+// src/components/FeatureBadges/index.js - REVISED FOR CLEAN BAR APPROACH
 import React, { useEffect, useState } from 'react'
 import { useLocation } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
@@ -86,22 +86,18 @@ function FeatureBadgesComponent({
 
   // Determine user role badges
   const getRoleBadges = () => {
-    if (users && admin)
-      return [{ label: 'Users & Admin', type: 'both', icon: '👥' }]
-    if (admin && !users)
-      return [{ label: 'Admin Only', type: 'admin', icon: '🔒' }]
-    if (users && !admin)
-      return [{ label: 'Users Only', type: 'users', icon: '👤' }]
+    if (users && admin) return [{ label: 'Users & Admin', type: 'both' }]
+    if (admin && !users) return [{ label: 'Admin Only', type: 'admin' }]
+    if (users && !admin) return [{ label: 'Users Only', type: 'users' }]
     return []
   }
 
   // Determine plan badges
   const getPlanBadges = () => {
     const badges = []
-    if (trial) badges.push({ label: 'Trial', type: 'trial', icon: '🚀' })
-    if (premium) badges.push({ label: 'Premium', type: 'premium', icon: '⭐' })
-    if (enterprise)
-      badges.push({ label: 'Enterprise', type: 'enterprise', icon: '🏢' })
+    if (trial) badges.push({ label: 'Trial', type: 'trial' })
+    if (premium) badges.push({ label: 'Premium', type: 'premium' })
+    if (enterprise) badges.push({ label: 'Enterprise', type: 'enterprise' })
     return badges
   }
 
@@ -109,22 +105,28 @@ function FeatureBadgesComponent({
   const planBadges = getPlanBadges()
 
   return (
-    <div className={styles.badgeContainer}>
-      {/* Role Badges */}
-      {roleBadges.map((badge, index) => (
-        <span key={index} className={`${styles.badge} ${styles[badge.type]}`}>
-          <span className={styles.badgeIcon}>{badge.icon}</span>
-          <span className={styles.badgeLabel}>{badge.label}</span>
-        </span>
-      ))}
+    <div className={styles.availabilityBar}>
+      <div className={styles.availabilityBadges}>
+        {/* Role Badges */}
+        {roleBadges.map((badge, index) => (
+          <span
+            key={`role-${index}`}
+            className={`${styles.availabilityBadge} ${styles[badge.type]}`}
+          >
+            {badge.label}
+          </span>
+        ))}
 
-      {/* Plan Badges */}
-      {planBadges.map((badge, index) => (
-        <span key={index} className={`${styles.badge} ${styles[badge.type]}`}>
-          <span className={styles.badgeIcon}>{badge.icon}</span>
-          <span className={styles.badgeLabel}>{badge.label}</span>
-        </span>
-      ))}
+        {/* Plan Badges */}
+        {planBadges.map((badge, index) => (
+          <span
+            key={`plan-${index}`}
+            className={`${styles.availabilityBadge} ${styles[badge.type]}`}
+          >
+            {badge.label}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

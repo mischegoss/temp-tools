@@ -1,10 +1,11 @@
-// src/theme/DocSidebar/index.js - SCROLL-SAFE VERSION
+// src/theme/DocSidebar/index.js - REVISED WITH FILTERING LOGIC
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from '@docusaurus/router'
 import MainDocSidebar from '@theme-original/DocSidebar'
 import ChatbotButton from '@site/src/components/Chatbot/ChatbotButton'
 import EmbeddedFilterControls from '../../components/FilterControls/index.js'
+import { useSidebarFilter } from '../../hooks/useSidebarFilter'
 
 function ChatbotPortal() {
   const [mountNode, setMountNode] = useState(null)
@@ -136,10 +137,52 @@ function FilterPortal() {
   return createPortal(<EmbeddedFilterControls />, mountNode)
 }
 
+// NEW: Enhanced DocSidebar with filtering support
+function FilteredDocSidebar(props) {
+  const location = useLocation()
+
+  // Check if we're on Rita Go pages
+  const isRitaGo =
+    location.pathname !== '/' &&
+    !location.pathname.startsWith('/actions') &&
+    !location.pathname.startsWith('/blog')
+
+  // Use sidebar filtering hook
+  const { filteredSidebar, isLoading } = useSidebarFilter(
+    props.sidebar,
+    isRitaGo,
+  )
+
+  // If not Rita Go or no filtering needed, render original sidebar
+  if (!isRitaGo || !filteredSidebar) {
+    return <MainDocSidebar {...props} />
+  }
+
+  // Show loading state during filter application
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          padding: '20px',
+          textAlign: 'center',
+          fontSize: '14px',
+          color: '#64748b',
+          fontFamily: 'var(--ifm-font-family-base)',
+        }}
+      >
+        Loading filtered navigation...
+      </div>
+    )
+  }
+
+  // Render sidebar with filtered content
+  return <MainDocSidebar {...props} sidebar={filteredSidebar} />
+}
+
 export default function DocSidebar(props) {
   return (
     <>
-      <MainDocSidebar {...props} />
+      <FilteredDocSidebar {...props} />
       <ChatbotPortal />
       <FilterPortal />
     </>

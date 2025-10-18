@@ -1,18 +1,20 @@
-// src/components/EmbeddedFilterControls/index.js - UPDATED WITH BADGE INTEGRATION
+// src/components/FilterControls/index.js - REVISED WITH SIDEBAR INTEGRATION
 import React, { useState, useEffect } from 'react'
 import BrowserOnly from '@docusaurus/BrowserOnly'
+import { useAvailabilityData } from '../../hooks/useAvailabilityData'
 
 function EmbeddedFilterControlsComponent() {
   const [filters, setFilters] = useState({
     role: 'all',
-    plans: [],
+    plans: ['trial'], // Default to trial selected
     showUnavailable: false,
   })
 
   const [isMainCollapsed, setIsMainCollapsed] = useState(false)
-  const [isRoleCollapsed, setIsRoleCollapsed] = useState(true)
-  const [isPlansCollapsed, setIsPlansCollapsed] = useState(true)
   const [realResultsCount, setRealResultsCount] = useState(0)
+
+  // Load availability data from the manifest
+  const { availabilityData, isLoading: dataLoading } = useAvailabilityData()
 
   // Initialize global state and badge integration
   useEffect(() => {
@@ -20,19 +22,26 @@ function EmbeddedFilterControlsComponent() {
       window.globalFilterState = {
         filters: {
           role: 'all',
-          plans: [],
+          plans: ['trial'],
           showUnavailable: false,
         },
         setFilters: null,
         pagesBadgeData: new Map(),
         updatePageBadges: null,
         filterChangeCallbacks: new Set(),
+        sidebarUpdateCallbacks: new Set(), // NEW: Sidebar update callbacks
+        availabilityManifest: null, // NEW: Store manifest data
       }
     }
 
     // Set our functions to global state
     window.globalFilterState.setFilters = setFilters
     window.globalFilterState.filters = filters
+
+    // Store availability manifest in global state
+    if (availabilityData) {
+      window.globalFilterState.availabilityManifest = availabilityData
+    }
 
     // Notify all badge components of filter changes
     const notifyFilterChange = () => {
@@ -45,26 +54,35 @@ function EmbeddedFilterControlsComponent() {
       })
     }
 
-    // Calculate real results count based on badge data
+    // NEW: Notify sidebar components of filter changes
+    const notifySidebarUpdate = () => {
+      window.globalFilterState.sidebarUpdateCallbacks.forEach(callback => {
+        try {
+          callback(filters)
+        } catch (error) {
+          console.error('Error in sidebar update callback:', error)
+        }
+      })
+    }
+
+    // Calculate real results count based on availability manifest
     const calculateRealResults = () => {
       try {
-        if (!window.globalFilterState?.pagesBadgeData) {
+        if (!availabilityData) {
           return
         }
 
-        const allPages = Array.from(
-          window.globalFilterState.pagesBadgeData.values(),
-        )
+        const allPages = Object.entries(availabilityData)
 
-        const filteredPages = allPages.filter(page => {
+        const filteredPages = allPages.filter(([url, pageData]) => {
           // Role filtering
-          if (filters.role === 'users' && !page.users) return false
-          if (filters.role === 'admin' && !page.admin) return false
+          if (filters.role === 'users' && !pageData.users) return false
+          if (filters.role === 'admin' && !pageData.admin) return false
           // 'all' role shows everything
 
           // Plan filtering (if any plans are selected, page must match at least one)
           if (filters.plans.length > 0) {
-            const hasMatchingPlan = filters.plans.some(plan => page[plan])
+            const hasMatchingPlan = filters.plans.some(plan => pageData[plan])
             if (!hasMatchingPlan) return false
           }
 
@@ -80,15 +98,16 @@ function EmbeddedFilterControlsComponent() {
     // Update results when filters change
     calculateRealResults()
     notifyFilterChange()
+    notifySidebarUpdate() // NEW: Trigger sidebar updates
 
     return () => {
       if (window.globalFilterState) {
         window.globalFilterState.setFilters = null
       }
     }
-  }, [filters])
+  }, [filters, availabilityData])
 
-  // Recalculate results when badge data changes
+  // Also update badge data fallback for compatibility
   useEffect(() => {
     const interval = setInterval(() => {
       if (window.globalFilterState?.pagesBadgeData?.size > 0) {
@@ -109,7 +128,10 @@ function EmbeddedFilterControlsComponent() {
             return true
           })
 
-          setRealResultsCount(filteredPages.length)
+          // Only update if we don't have manifest data
+          if (!availabilityData && filteredPages.length > 0) {
+            setRealResultsCount(filteredPages.length)
+          }
         } catch (error) {
           console.error('Error calculating results:', error)
         }
@@ -117,7 +139,7 @@ function EmbeddedFilterControlsComponent() {
     }, 1000) // Check every second for new badge data
 
     return () => clearInterval(interval)
-  }, [filters])
+  }, [filters, availabilityData])
 
   const handleRoleChange = role => {
     const newFilters = { ...filters, role }
@@ -125,29 +147,39 @@ function EmbeddedFilterControlsComponent() {
   }
 
   const handlePlanToggle = plan => {
-    const newFilters = {
-      ...filters,
-      plans: filters.plans.includes(plan)
-        ? filters.plans.filter(p => p !== plan)
-        : [...filters.plans, plan],
+    // For now, only allow trial selection
+    if (plan === 'trial') {
+      const newFilters = {
+        ...filters,
+        plans: filters.plans.includes(plan) ? [] : ['trial'],
+      }
+      setFilters(newFilters)
     }
-    setFilters(newFilters)
   }
 
   const clearFilters = () => {
     const clearedFilters = {
       role: 'all',
-      plans: [],
+      plans: ['trial'], // Reset to trial default
       showUnavailable: false,
     }
     setFilters(clearedFilters)
   }
 
-  const hasActiveFilters = filters.role !== 'all' || filters.plans.length > 0
+  const hasActiveFilters =
+    filters.role !== 'all' ||
+    filters.plans.length !== 1 ||
+    !filters.plans.includes('trial')
 
-  // Use real results count from badge data, fallback to estimated count
+  // Use real results count from availability manifest, fallback to badge data
   const getResultsCount = () => {
     try {
+      // Prioritize availability manifest data
+      if (availabilityData && Object.keys(availabilityData).length > 0) {
+        return realResultsCount
+      }
+
+      // Fallback to badge data
       if (window.globalFilterState?.pagesBadgeData?.size > 0) {
         return realResultsCount
       }
@@ -155,33 +187,43 @@ function EmbeddedFilterControlsComponent() {
       console.error('Error getting results count:', error)
     }
 
-    // Fallback estimation if no badge data yet
-    let base = 45
-    if (filters.role === 'admin') base = Math.floor(base * 0.6)
-    if (filters.role === 'users') base = Math.floor(base * 0.8)
-    if (filters.plans.length > 0) base = Math.floor(base * 0.7)
-    return Math.max(base, 8)
+    // Return null if no data is available yet
+    return null
   }
 
-  // Get available filter options based on actual badge data
+  // Get available filter options based on availability manifest
   const getAvailableOptions = () => {
     try {
-      if (
-        !window.globalFilterState?.pagesBadgeData ||
-        window.globalFilterState.pagesBadgeData.size === 0
-      ) {
+      if (!availabilityData || Object.keys(availabilityData).length === 0) {
+        // Fallback to badge data
+        if (
+          !window.globalFilterState?.pagesBadgeData ||
+          window.globalFilterState.pagesBadgeData.size === 0
+        ) {
+          return {
+            hasUsers: true,
+            hasAdmin: true,
+            hasTrial: true,
+            hasPremium: false,
+            hasEnterprise: false,
+          }
+        }
+
+        const allPages = Array.from(
+          window.globalFilterState.pagesBadgeData.values(),
+        )
+
         return {
-          hasUsers: true,
-          hasAdmin: true,
-          hasTrial: true,
-          hasPremium: false,
-          hasEnterprise: false,
+          hasUsers: allPages.some(page => page.users),
+          hasAdmin: allPages.some(page => page.admin),
+          hasTrial: allPages.some(page => page.trial),
+          hasPremium: allPages.some(page => page.premium),
+          hasEnterprise: allPages.some(page => page.enterprise),
         }
       }
 
-      const allPages = Array.from(
-        window.globalFilterState.pagesBadgeData.values(),
-      )
+      // Use availability manifest
+      const allPages = Object.values(availabilityData)
 
       return {
         hasUsers: allPages.some(page => page.users),
@@ -204,6 +246,23 @@ function EmbeddedFilterControlsComponent() {
 
   const availableOptions = getAvailableOptions()
 
+  // Role options
+  const roleOptions = [
+    {
+      value: 'users',
+      label: 'Users',
+      icon: '👤',
+      available: availableOptions.hasUsers,
+    },
+    {
+      value: 'admin',
+      label: 'Admin',
+      icon: '🔒',
+      available: availableOptions.hasAdmin,
+    },
+    { value: 'all', label: 'All', icon: '🌐', available: true },
+  ]
+
   return (
     <div
       style={{
@@ -211,616 +270,325 @@ function EmbeddedFilterControlsComponent() {
         fontFamily: 'var(--ifm-font-family-base)',
       }}
     >
-      {/* Widget Container */}
+      {/* Collapsible Widget Container */}
       <div
         style={{
           backgroundColor: 'white',
-          border: '2px solid #e9ecef',
-          borderRadius: '10px',
-          boxShadow: '0 3px 8px rgba(0, 0, 0, 0.1)',
+          border: '2px solid #e2e8f0',
+          borderRadius: '12px',
           overflow: 'hidden',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
           transition: 'all 0.3s ease',
         }}
       >
-        {/* Header with gradient background */}
+        {/* Header with brand gradient */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #0066FF 0%, #4285f4 100%)',
+            background: 'linear-gradient(135deg, #0050c7 0%, #0066ff 100%)',
             color: 'white',
-            padding: '10px 14px',
+            padding: '12px 16px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            fontFamily: 'var(--ifm-font-family-base)',
+            transition: 'all 0.2s ease',
           }}
           onClick={() => setIsMainCollapsed(!isMainCollapsed)}
+          onMouseEnter={e => {
+            e.target.style.background =
+              'linear-gradient(135deg, #004bb3 0%, #005ce6 100%)'
+          }}
+          onMouseLeave={e => {
+            e.target.style.background =
+              'linear-gradient(135deg, #0050c7 0%, #0066ff 100%)'
+          }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '3px',
+                width: '16px',
+                height: '16px',
+                background: 'rgba(255, 255, 255, 0.2)',
                 borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}
-            >
-              <svg
-                width='14'
-                height='14'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='white'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-              >
-                <polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3'></polygon>
-              </svg>
-            </div>
-            <span
-              style={{
-                fontWeight: '600',
-                fontSize: '13px',
-                letterSpacing: '0.3px',
-              }}
-            >
-              CUSTOMIZE VIEW
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {hasActiveFilters && (
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                  color: 'white',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  padding: '3px 6px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                }}
-              >
-                <span>{getResultsCount()}</span>
-              </div>
-            )}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '3px',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                flexShrink: 0,
               }}
             >
               <svg
                 width='10'
                 height='10'
+                fill='currentColor'
                 viewBox='0 0 24 24'
-                fill='none'
-                stroke='white'
-                strokeWidth='2'
-                style={{
-                  transform: isMainCollapsed
-                    ? 'rotate(0deg)'
-                    : 'rotate(180deg)',
-                  transition: 'transform 0.3s ease',
-                }}
               >
-                <polyline points='6 9 12 15 18 9'></polyline>
+                <path d='M4.22 11.29l-2.12-2.12c-.78-.78-.78-2.05 0-2.83L4.22 4.22c.78-.78 2.05-.78 2.83 0L9.17 6.34c.78.78.78 2.05 0 2.83L7.05 11.29c-.78.78-2.05.78-2.83 0zM15.78 11.29l-2.12-2.12c-.78-.78-.78-2.05 0-2.83l2.12-2.12c.78-.78 2.05-.78 2.83 0l2.12 2.12c.78.78.78 2.05 0 2.83l-2.12 2.12c-.78.78-2.05.78-2.83 0zM4.22 22.71l-2.12-2.12c-.78-.78-.78-2.05 0-2.83l2.12-2.12c.78-.78 2.05-.78 2.83 0l2.12 2.12c.78.78.78 2.05 0 2.83l-2.12 2.12c-.78.78-2.05.78-2.83 0zM15.78 22.71l-2.12-2.12c-.78-.78-.78-2.05 0-2.83l2.12-2.12c.78-.78 2.05-.78 2.83 0l2.12 2.12c.78.78.78 2.05 0 2.83l-2.12 2.12c-.78.78-2.05.78-2.83 0z' />
               </svg>
             </div>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                Filter Articles
+              </div>
+              <div style={{ fontSize: '11px', opacity: 0.9, margin: 0 }}>
+                by User & Version
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Scrollable Content Area */}
-        {!isMainCollapsed && (
-          <div
+          <svg
+            width='16'
+            height='16'
+            fill='currentColor'
+            viewBox='0 0 24 24'
             style={{
-              maxHeight: '350px',
-              overflowY: 'auto',
-              backgroundColor: '#fafbfc',
+              transition: 'transform 0.2s ease',
+              transform: isMainCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+              flexShrink: 0,
             }}
           >
-            <div
-              style={{
-                padding: '14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}
-            >
-              {/* Role Filter Section */}
-              <div
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: '6px',
-                  border: '1px solid #e9ecef',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Role Header */}
+            <path d='M7 14l5-5 5 5z' />
+          </svg>
+        </div>
+
+        {/* Collapsible Content */}
+        <div
+          style={{
+            maxHeight: isMainCollapsed ? '0' : '400px',
+            overflow: 'hidden',
+            transition: 'all 0.3s ease',
+            padding: isMainCollapsed ? '0 16px' : '16px',
+          }}
+        >
+          {!isMainCollapsed && (
+            <>
+              {/* User Role Section */}
+              <div style={{ marginBottom: '16px' }}>
                 <div
                   style={{
-                    padding: '10px 12px',
-                    backgroundColor: '#f8f9fa',
-                    borderBottom: isRoleCollapsed
-                      ? 'none'
-                      : '1px solid #e9ecef',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                  onClick={() => setIsRoleCollapsed(!isRoleCollapsed)}
-                >
-                  <div
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      color: '#495057',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.3px',
-                    }}
-                  >
-                    <span style={{ fontSize: '11px' }}>👤</span>
-                    <span>User Role</span>
-                    {filters.role !== 'all' && (
-                      <span
-                        style={{
-                          backgroundColor: '#0066FF',
-                          color: 'white',
-                          fontSize: '9px',
-                          fontWeight: '700',
-                          padding: '2px 5px',
-                          borderRadius: '6px',
-                        }}
-                      >
-                        {filters.role === 'users'
-                          ? 'Users'
-                          : filters.role === 'admin'
-                          ? 'Admin'
-                          : 'All'}
-                      </span>
-                    )}
-                  </div>
-                  <svg
-                    width='10'
-                    height='10'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='#6c757d'
-                    strokeWidth='2'
-                    style={{
-                      transform: isRoleCollapsed
-                        ? 'rotate(0deg)'
-                        : 'rotate(180deg)',
-                      transition: 'transform 0.2s ease',
-                    }}
-                  >
-                    <polyline points='6 9 12 15 18 9'></polyline>
-                  </svg>
-                </div>
-
-                {/* Role Content */}
-                {!isRoleCollapsed && (
-                  <div style={{ padding: '12px' }}>
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr 1fr',
-                        gap: '6px',
-                      }}
-                    >
-                      {[
-                        {
-                          value: 'users',
-                          label: 'Users',
-                          icon: '👤',
-                          available: availableOptions.hasUsers,
-                        },
-                        {
-                          value: 'admin',
-                          label: 'Admin',
-                          icon: '🔒',
-                          available: availableOptions.hasAdmin,
-                        },
-                        {
-                          value: 'all',
-                          label: 'All',
-                          icon: '🌐',
-                          available: true,
-                        },
-                      ].map(role => (
-                        <button
-                          key={role.value}
-                          onClick={() => handleRoleChange(role.value)}
-                          disabled={!role.available}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '8px 6px',
-                            borderRadius: '6px',
-                            fontSize: '10px',
-                            fontWeight: '600',
-                            border: '2px solid',
-                            borderColor:
-                              filters.role === role.value
-                                ? '#0066FF'
-                                : '#e9ecef',
-                            backgroundColor:
-                              filters.role === role.value
-                                ? '#e7f3ff'
-                                : role.available
-                                ? 'white'
-                                : '#f8f9fa',
-                            color:
-                              filters.role === role.value
-                                ? '#0066FF'
-                                : role.available
-                                ? '#6c757d'
-                                : '#adb5bd',
-                            cursor: role.available ? 'pointer' : 'not-allowed',
-                            transition: 'all 0.2s ease',
-                            boxShadow:
-                              filters.role === role.value
-                                ? '0 1px 4px rgba(0, 102, 255, 0.15)'
-                                : 'none',
-                            opacity: role.available ? 1 : 0.6,
-                          }}
-                        >
-                          <div
-                            style={{
-                              backgroundColor:
-                                filters.role === role.value
-                                  ? '#0066FF'
-                                  : '#f8f9fa',
-                              color:
-                                filters.role === role.value
-                                  ? 'white'
-                                  : '#6c757d',
-                              padding: '4px',
-                              borderRadius: '4px',
-                              fontSize: '10px',
-                              transition: 'all 0.2s ease',
-                            }}
-                          >
-                            {role.icon}
-                          </div>
-                          <span>{role.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Plans Filter Section */}
-              <div
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: '6px',
-                  border: '1px solid #e9ecef',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Plans Header */}
-                <div
-                  style={{
-                    padding: '10px 12px',
-                    backgroundColor: '#f8f9fa',
-                    borderBottom: isPlansCollapsed
-                      ? 'none'
-                      : '1px solid #e9ecef',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                  onClick={() => setIsPlansCollapsed(!isPlansCollapsed)}
-                >
-                  <div
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      color: '#495057',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.3px',
-                    }}
-                  >
-                    <svg
-                      width='10'
-                      height='10'
-                      viewBox='0 0 24 24'
-                      fill='#0066FF'
-                      stroke='none'
-                    >
-                      <path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' />
-                    </svg>
-                    <span>Subscription Level</span>
-                    {filters.plans.length > 0 && (
-                      <span
-                        style={{
-                          backgroundColor: '#0066FF',
-                          color: 'white',
-                          fontSize: '9px',
-                          fontWeight: '700',
-                          padding: '2px 5px',
-                          borderRadius: '6px',
-                        }}
-                      >
-                        {filters.plans.join(', ')}
-                      </span>
-                    )}
-                  </div>
-                  <svg
-                    width='10'
-                    height='10'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='#6c757d'
-                    strokeWidth='2'
-                    style={{
-                      transform: isPlansCollapsed
-                        ? 'rotate(0deg)'
-                        : 'rotate(180deg)',
-                      transition: 'transform 0.2s ease',
-                    }}
-                  >
-                    <polyline points='6 9 12 15 18 9'></polyline>
-                  </svg>
-                </div>
-
-                {/* Plans Content */}
-                {!isPlansCollapsed && (
-                  <div style={{ padding: '12px' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '6px',
-                      }}
-                    >
-                      {[
-                        {
-                          value: 'trial',
-                          label: 'Trial',
-                          icon: '🚀',
-                          color: '#0066FF',
-                          available: availableOptions.hasTrial,
-                        },
-                        {
-                          value: 'premium',
-                          label: 'Premium (Coming Soon)',
-                          icon: '⭐',
-                          color: '#8b5cf6',
-                          available: availableOptions.hasPremium,
-                        },
-                        {
-                          value: 'enterprise',
-                          label: 'Enterprise (Coming Soon)',
-                          icon: '🏢',
-                          color: '#3b82f6',
-                          available: availableOptions.hasEnterprise,
-                        },
-                      ].map(plan => (
-                        <button
-                          key={plan.value}
-                          onClick={() =>
-                            plan.available && handlePlanToggle(plan.value)
-                          }
-                          disabled={!plan.available}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '8px 10px',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            fontWeight: '600',
-                            border: '2px solid',
-                            borderColor:
-                              plan.available &&
-                              filters.plans.includes(plan.value)
-                                ? plan.color
-                                : '#e9ecef',
-                            backgroundColor:
-                              plan.available &&
-                              filters.plans.includes(plan.value)
-                                ? '#e7f3ff'
-                                : plan.available
-                                ? 'white'
-                                : '#f8f9fa',
-                            color: plan.available
-                              ? filters.plans.includes(plan.value)
-                                ? plan.color
-                                : '#495057'
-                              : '#adb5bd',
-                            cursor: plan.available ? 'pointer' : 'not-allowed',
-                            transition: 'all 0.2s ease',
-                            opacity: plan.available ? 1 : 0.6,
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                            }}
-                          >
-                            <div
-                              style={{
-                                backgroundColor:
-                                  plan.available &&
-                                  filters.plans.includes(plan.value)
-                                    ? plan.color
-                                    : plan.available
-                                    ? '#f8f9fa'
-                                    : '#e9ecef',
-                                color:
-                                  plan.available &&
-                                  filters.plans.includes(plan.value)
-                                    ? 'white'
-                                    : '#6c757d',
-                                padding: '4px',
-                                borderRadius: '4px',
-                                fontSize: '10px',
-                                opacity: plan.available ? 1 : 0.5,
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              {plan.icon}
-                            </div>
-                            <span>{plan.label}</span>
-                          </div>
-                          <div
-                            style={{
-                              width: '14px',
-                              height: '14px',
-                              borderRadius: '3px',
-                              border: '2px solid',
-                              borderColor:
-                                plan.available &&
-                                filters.plans.includes(plan.value)
-                                  ? plan.color
-                                  : '#dee2e6',
-                              backgroundColor:
-                                plan.available &&
-                                filters.plans.includes(plan.value)
-                                  ? plan.color
-                                  : 'transparent',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              opacity: plan.available ? 1 : 0.5,
-                            }}
-                          >
-                            {plan.available &&
-                              filters.plans.includes(plan.value) && (
-                                <svg
-                                  width='8'
-                                  height='8'
-                                  viewBox='0 0 24 24'
-                                  fill='white'
-                                  stroke='none'
-                                >
-                                  <polyline
-                                    points='20 6 9 17 4 12'
-                                    strokeWidth='3'
-                                    stroke='white'
-                                    fill='none'
-                                  />
-                                </svg>
-                              )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Results Summary - Compact */}
-              {hasActiveFilters && (
-                <div
-                  style={{
-                    padding: '10px 12px',
-                    background:
-                      'linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%)',
-                    borderRadius: '6px',
-                    border: '1px solid #b3d9ff',
-                    fontSize: '11px',
-                    color: '#0066FF',
-                    textAlign: 'center',
+                    fontSize: '12px',
                     fontWeight: '600',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    color: '#1a1a1a',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontFamily: 'var(--ifm-font-family-base)',
+                  }}
+                >
+                  User Role
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
                     gap: '6px',
                   }}
                 >
-                  <div
+                  {roleOptions.map(role => (
+                    <button
+                      key={role.value}
+                      onClick={() =>
+                        role.available && handleRoleChange(role.value)
+                      }
+                      style={{
+                        padding: '12px 8px',
+                        background: 'white',
+                        border: `2px solid ${
+                          filters.role === role.value ? '#0050c7' : '#e2e8f0'
+                        }`,
+                        borderRadius: '8px',
+                        textAlign: 'center',
+                        cursor: role.available ? 'pointer' : 'not-allowed',
+                        transition: 'all 0.2s ease',
+                        fontFamily: 'var(--ifm-font-family-base)',
+                        backgroundColor:
+                          filters.role === role.value ? '#cbe0ff' : 'white',
+                        boxShadow:
+                          filters.role === role.value
+                            ? '0 0 0 1px #0050c7, 0 1px 4px rgba(0, 80, 199, 0.15)'
+                            : 'none',
+                        aspectRatio: '1',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      onMouseEnter={e => {
+                        if (role.available && filters.role !== role.value) {
+                          e.target.style.borderColor = '#cbd5e1'
+                          e.target.style.backgroundColor = '#f8fafc'
+                          e.target.style.boxShadow =
+                            '0 1px 4px rgba(0, 0, 0, 0.1)'
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (role.available && filters.role !== role.value) {
+                          e.target.style.borderColor = '#e2e8f0'
+                          e.target.style.backgroundColor = 'white'
+                          e.target.style.boxShadow = 'none'
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          background:
+                            filters.role === role.value ? '#0050c7' : '#f1f5f9',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          transition: 'all 0.2s ease',
+                          color:
+                            filters.role === role.value ? 'white' : 'inherit',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        {role.icon}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color:
+                            filters.role === role.value ? '#0050c7' : '#1a1a1a',
+                          transition: 'all 0.2s ease',
+                          fontFamily: 'var(--ifm-font-family-base)',
+                        }}
+                      >
+                        {role.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subscription Level Section */}
+              <div style={{ marginBottom: '16px' }}>
+                <div
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    color: '#1a1a1a',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontFamily: 'var(--ifm-font-family-base)',
+                  }}
+                >
+                  Subscription Level
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <select
+                    value={filters.plans.includes('trial') ? 'trial' : ''}
+                    onChange={e => handlePlanToggle(e.target.value)}
                     style={{
-                      backgroundColor: '#0066FF',
-                      color: 'white',
-                      padding: '2px 6px',
+                      width: '100%',
+                      padding: '10px 12px',
+                      background: 'white',
+                      border: '2px solid #e2e8f0',
                       borderRadius: '8px',
-                      fontSize: '10px',
-                      fontWeight: '700',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      color: '#1a1a1a',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      fontFamily: 'var(--ifm-font-family-base)',
+                      appearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                      backgroundPosition: 'right 8px center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: '14px',
                     }}
                   >
-                    {getResultsCount()}
-                  </div>
-                  <span>results found</span>
+                    <option value='trial'>Trial</option>
+                    <option value='premium' disabled>
+                      Premium (Coming Soon)
+                    </option>
+                    <option value='enterprise' disabled>
+                      Enterprise (Coming Soon)
+                    </option>
+                  </select>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Sticky Clear Button */}
-            {hasActiveFilters && (
-              <div
-                style={{
-                  position: 'sticky',
-                  bottom: 0,
-                  backgroundColor: '#fafbfc',
-                  borderTop: '1px solid #e9ecef',
-                  padding: '10px 14px',
-                }}
-              >
+              {/* Results Counter or Loading State */}
+              {dataLoading ? (
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '2px solid #e2e8f0',
+                    fontSize: '13px',
+                    color: '#9ca3af',
+                    textAlign: 'center',
+                    fontFamily: 'var(--ifm-font-family-base)',
+                    fontWeight: '500',
+                    marginBottom: hasActiveFilters ? '12px' : '0',
+                  }}
+                >
+                  Loading articles...
+                </div>
+              ) : getResultsCount() !== null ? (
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '2px solid #e2e8f0',
+                    fontSize: '13px',
+                    color: '#1a1a1a',
+                    textAlign: 'center',
+                    fontFamily: 'var(--ifm-font-family-base)',
+                    fontWeight: '500',
+                    marginBottom: hasActiveFilters ? '12px' : '0',
+                  }}
+                >
+                  <span style={{ fontWeight: '700', color: '#0050c7' }}>
+                    {getResultsCount()}
+                  </span>{' '}
+                  articles found
+                </div>
+              ) : null}
+
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
                   style={{
                     width: '100%',
-                    padding: '8px 16px',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    color: '#dc3545',
-                    backgroundColor: 'white',
-                    border: '2px solid #dc3545',
-                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    background: 'white',
+                    border: '2px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    color: '#1a1a1a',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
+                    fontFamily: 'var(--ifm-font-family-base)',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.3px',
+                    letterSpacing: '0.05em',
+                    marginTop: getResultsCount() === null ? '0' : '0',
                   }}
-                  onMouseOver={e => {
-                    e.target.style.backgroundColor = '#dc3545'
-                    e.target.style.color = 'white'
+                  onMouseEnter={e => {
+                    e.target.style.borderColor = '#cbd5e1'
+                    e.target.style.backgroundColor = '#f8fafc'
                   }}
-                  onMouseOut={e => {
+                  onMouseLeave={e => {
+                    e.target.style.borderColor = '#e2e8f0'
                     e.target.style.backgroundColor = 'white'
-                    e.target.style.color = '#dc3545'
                   }}
                 >
-                  🗑️ Clear Filters
+                  Clear Filters
                 </button>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </div>
-
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-      </style>
     </div>
   )
 }
