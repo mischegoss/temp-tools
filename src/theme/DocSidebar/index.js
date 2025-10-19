@@ -1,11 +1,10 @@
-// src/theme/DocSidebar/index.js - REVISED WITH FILTERING LOGIC
+// src/theme/DocSidebar/index.js - FIXED VERSION
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from '@docusaurus/router'
 import MainDocSidebar from '@theme-original/DocSidebar'
 import ChatbotButton from '@site/src/components/Chatbot/ChatbotButton'
 import EmbeddedFilterControls from '../../components/FilterControls/index.js'
-import { useSidebarFilter } from '../../hooks/useSidebarFilter'
 
 function ChatbotPortal() {
   const [mountNode, setMountNode] = useState(null)
@@ -79,11 +78,8 @@ function FilterPortal() {
   const [mountNode, setMountNode] = useState(null)
   const location = useLocation()
 
-  // ONLY show on Rita-Go pages
-  const isRitaGo =
-    location.pathname !== '/' &&
-    !location.pathname.startsWith('/actions') &&
-    !location.pathname.startsWith('/blog')
+  // FIXED: ONLY show on Rita-Go pages (check path starts with /rita-go)
+  const isRitaGo = location.pathname.startsWith('/rita-go')
 
   if (!isRitaGo) {
     return null
@@ -91,6 +87,7 @@ function FilterPortal() {
 
   useEffect(() => {
     const findAndCreateMountPoint = () => {
+      // FIXED: Use same selectors and pattern as working chatbot code
       const selectors = [
         '.theme-doc-sidebar-menu',
         '[class*="sidebar"] ul:first-of-type',
@@ -101,23 +98,24 @@ function FilterPortal() {
       for (const selector of selectors) {
         const element = document.querySelector(selector)
         if (element) {
+          // Check for existing mount to avoid duplicates
           const existingMount = element.querySelector('[data-filter-mount]')
           if (existingMount) {
             setMountNode(existingMount)
             return
           }
 
-          // SCROLL-SAFE APPROACH: Natural flow, not absolute positioning
+          // FIXED: Use same simple pattern as working chatbot code
           const mountDiv = document.createElement('div')
           mountDiv.setAttribute('data-filter-mount', 'true')
           mountDiv.style.cssText = `
-            margin: 20px 12px 16px 12px;
-            padding: 16px 0 0 0;
-            border-top: 1px solid var(--brand-grey-200);
-            position: relative;
+            margin: 16px 16px 20px 16px;
+            display: flex;
+            justify-content: center;
           `
 
-          // Append naturally to end of sidebar content (participates in scroll)
+          // FIXED: Use insertBefore like working code, but at the END
+          // Insert at the end of the sidebar content
           element.appendChild(mountDiv)
           setMountNode(mountDiv)
           return
@@ -128,6 +126,7 @@ function FilterPortal() {
     }
 
     findAndCreateMountPoint()
+    // FIXED: Use same 2 second interval as working code
     const interval = setInterval(findAndCreateMountPoint, 2000)
     return () => clearInterval(interval)
   }, [])
@@ -137,52 +136,53 @@ function FilterPortal() {
   return createPortal(<EmbeddedFilterControls />, mountNode)
 }
 
-// NEW: Enhanced DocSidebar with filtering support
-function FilteredDocSidebar(props) {
+// SIMPLIFIED: Use original DocSidebar with CSS-based filtering
+function SimplifiedDocSidebar(props) {
   const location = useLocation()
 
   // Check if we're on Rita Go pages
-  const isRitaGo =
-    location.pathname !== '/' &&
-    !location.pathname.startsWith('/actions') &&
-    !location.pathname.startsWith('/blog')
+  const isRitaGo = location.pathname.startsWith('/rita-go')
 
-  // Use sidebar filtering hook
-  const { filteredSidebar, isLoading } = useSidebarFilter(
-    props.sidebar,
-    isRitaGo,
-  )
+  // Apply CSS-based filtering using global styles
+  useEffect(() => {
+    if (isRitaGo) {
+      // Add filtering CSS when on Rita Go pages
+      const filteringCSS = document.getElementById('filtering-styles')
+      if (!filteringCSS) {
+        const style = document.createElement('style')
+        style.id = 'filtering-styles'
+        style.textContent = `
+          /* Hide filtered sidebar items */
+          .sidebar-filtered-hidden {
+            display: none !important;
+          }
+          
+          /* Hide categories with no visible children */
+          .theme-doc-sidebar-item-category:not(:has(.theme-doc-sidebar-item-link:not(.sidebar-filtered-hidden))) {
+            display: none !important;
+          }
+        `
+        document.head.appendChild(style)
+      }
+    }
 
-  // If not Rita Go or no filtering needed, render original sidebar
-  if (!isRitaGo || !filteredSidebar) {
-    return <MainDocSidebar {...props} />
-  }
+    return () => {
+      // Clean up on unmount
+      const filteringCSS = document.getElementById('filtering-styles')
+      if (filteringCSS && !isRitaGo) {
+        filteringCSS.remove()
+      }
+    }
+  }, [isRitaGo])
 
-  // Show loading state during filter application
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          padding: '20px',
-          textAlign: 'center',
-          fontSize: '14px',
-          color: '#64748b',
-          fontFamily: 'var(--ifm-font-family-base)',
-        }}
-      >
-        Loading filtered navigation...
-      </div>
-    )
-  }
-
-  // Render sidebar with filtered content
-  return <MainDocSidebar {...props} sidebar={filteredSidebar} />
+  // Render original sidebar without modification
+  return <MainDocSidebar {...props} />
 }
 
 export default function DocSidebar(props) {
   return (
     <>
-      <FilteredDocSidebar {...props} />
+      <SimplifiedDocSidebar {...props} />
       <ChatbotPortal />
       <FilterPortal />
     </>

@@ -1,12 +1,10 @@
-// src/utils/globalFilterState.js
+// src/utils/globalFilterState.js - SIMPLIFIED VERSION
 /**
- * Centralized filter state management utilities
- * Manages the global filter state used across components
+ * Simplified global filter state management using existing badge system
  */
 
 /**
  * Initialize global filter state if it doesn't exist
- * This ensures consistent state structure across all components
  */
 export function initializeGlobalFilterState() {
   if (typeof window === 'undefined') return null
@@ -23,13 +21,9 @@ export function initializeGlobalFilterState() {
       // Component callbacks
       setFilters: null,
       filterChangeCallbacks: new Set(),
-      sidebarUpdateCallbacks: new Set(),
 
-      // Data sources
-      pagesBadgeData: new Map(), // Legacy: from FeatureBadges components
-      availabilityManifest: null, // New: from plugin manifest
-
-      // Update functions
+      // Existing badge data (already working)
+      pagesBadgeData: new Map(),
       updatePageBadges: null,
     }
   }
@@ -39,7 +33,6 @@ export function initializeGlobalFilterState() {
 
 /**
  * Get current filter state
- * @returns {Object} Current filter state
  */
 export function getCurrentFilters() {
   const state = initializeGlobalFilterState()
@@ -49,8 +42,7 @@ export function getCurrentFilters() {
 }
 
 /**
- * Update filter state and notify all listeners
- * @param {Object} newFilters - New filter state
+ * Update filter state and apply CSS filtering
  */
 export function updateFilters(newFilters) {
   const state = initializeGlobalFilterState()
@@ -58,6 +50,9 @@ export function updateFilters(newFilters) {
 
   // Update filters
   state.filters = { ...state.filters, ...newFilters }
+
+  // Apply CSS-based filtering
+  applyCSSFiltering(state.filters)
 
   // Notify filter change callbacks
   state.filterChangeCallbacks.forEach(callback => {
@@ -67,21 +62,133 @@ export function updateFilters(newFilters) {
       console.error('Error in filter change callback:', error)
     }
   })
+}
 
-  // Notify sidebar update callbacks
-  state.sidebarUpdateCallbacks.forEach(callback => {
-    try {
-      callback(state.filters)
-    } catch (error) {
-      console.error('Error in sidebar update callback:', error)
+/**
+ * Apply CSS-based filtering to sidebar items
+ */
+function applyCSSFiltering(filters) {
+  if (typeof window === 'undefined') return
+
+  const state = window.globalFilterState
+
+  // Check if any meaningful filters are active
+  const hasActiveFilters =
+    (filters.role && filters.role !== 'all') ||
+    (filters.plans &&
+      filters.plans.length > 0 &&
+      !(filters.plans.length === 1 && filters.plans[0] === 'trial'))
+
+  // If no active filters, show everything (remove all hidden classes)
+  if (!hasActiveFilters) {
+    document.querySelectorAll('.sidebar-filtered-hidden').forEach(el => {
+      el.classList.remove('sidebar-filtered-hidden')
+    })
+    return
+  }
+
+  // If active filters are applied, we need to check ALL sidebar items
+  // not just those with badge data
+  const allSidebarItems = document.querySelectorAll(
+    '.theme-doc-sidebar-item-link',
+  )
+
+  allSidebarItems.forEach(linkElement => {
+    const href = linkElement.getAttribute('href')
+    if (!href) return
+
+    // Check if this page has badge data
+    const pageData = findPageDataByHref(href, state)
+
+    if (pageData) {
+      // Page has badge data - apply filtering
+      const shouldShow = checkPageVisibility(pageData, filters)
+      const itemElement = linkElement.closest('.theme-doc-sidebar-item')
+
+      if (itemElement) {
+        if (shouldShow) {
+          itemElement.classList.remove('sidebar-filtered-hidden')
+        } else {
+          itemElement.classList.add('sidebar-filtered-hidden')
+        }
+      }
+    } else {
+      // Page has NO badge data - always show it (default behavior)
+      const itemElement = linkElement.closest('.theme-doc-sidebar-item')
+      if (itemElement) {
+        itemElement.classList.remove('sidebar-filtered-hidden')
+      }
     }
   })
 }
 
 /**
+ * Find page data by href from the badge data
+ */
+function findPageDataByHref(href, state) {
+  if (!state || !state.pagesBadgeData.size) return null
+
+  // Try to match the href with registered page URLs
+  for (const [pageUrl, pageData] of state.pagesBadgeData.entries()) {
+    // Clean up URLs for comparison
+    const cleanHref = href.replace(/^\/+|\/+$/g, '')
+    const cleanPageUrl = pageUrl.replace(/^\/+|\/+$/g, '')
+
+    if (
+      cleanHref === cleanPageUrl ||
+      href.includes(cleanPageUrl) ||
+      pageUrl.includes(cleanHref)
+    ) {
+      return pageData
+    }
+  }
+
+  return null
+}
+
+/**
+ * Check if a page should be visible based on filters
+ */
+function checkPageVisibility(pageData, filters) {
+  // Role filtering
+  if (filters.role === 'users' && !pageData.users) return false
+  if (filters.role === 'admin' && !pageData.admin) return false
+
+  // Plan filtering
+  if (filters.plans && filters.plans.length > 0) {
+    const hasMatchingPlan = filters.plans.some(plan => pageData[plan])
+    if (!hasMatchingPlan) return false
+  }
+
+  return true
+}
+
+/**
+ * Find sidebar link element for a given page URL
+ */
+function findSidebarLinkElement(pageUrl) {
+  // Clean up the URL to match what appears in hrefs
+  const cleanUrl = pageUrl.replace(/^\/+|\/+$/g, '')
+
+  // Try different URL patterns that might appear in the sidebar
+  const patterns = [
+    `[href="/${cleanUrl}"]`,
+    `[href="${cleanUrl}"]`,
+    `[href*="${cleanUrl}"]`,
+  ]
+
+  for (const pattern of patterns) {
+    const element = document.querySelector(
+      `.theme-doc-sidebar-item-link${pattern}`,
+    )
+    if (element) return element.closest('.theme-doc-sidebar-item')
+  }
+
+  return null
+}
+
+/**
  * Register a callback for filter changes
- * @param {Function} callback - Function to call when filters change
- * @returns {Function} Cleanup function to remove the callback
  */
 export function onFilterChange(callback) {
   const state = initializeGlobalFilterState()
@@ -95,50 +202,7 @@ export function onFilterChange(callback) {
 }
 
 /**
- * Register a callback for sidebar updates
- * @param {Function} callback - Function to call when sidebar should update
- * @returns {Function} Cleanup function to remove the callback
- */
-export function onSidebarUpdate(callback) {
-  const state = initializeGlobalFilterState()
-  if (!state) return () => {}
-
-  state.sidebarUpdateCallbacks.add(callback)
-
-  return () => {
-    state.sidebarUpdateCallbacks.delete(callback)
-  }
-}
-
-/**
- * Set the availability manifest data
- * @param {Object} manifest - Availability manifest from plugin
- */
-export function setAvailabilityManifest(manifest) {
-  const state = initializeGlobalFilterState()
-  if (!state) return
-
-  state.availabilityManifest = manifest
-  console.log(
-    '📊 Availability manifest updated:',
-    Object.keys(manifest || {}).length,
-    'pages',
-  )
-}
-
-/**
- * Get the availability manifest data
- * @returns {Object|null} Current availability manifest
- */
-export function getAvailabilityManifest() {
-  const state = initializeGlobalFilterState()
-  return state ? state.availabilityManifest : null
-}
-
-/**
- * Register page badge data (legacy support)
- * @param {string} url - Page URL
- * @param {Object} badgeData - Badge availability data
+ * Register page badge data (existing functionality)
  */
 export function registerPageBadge(url, badgeData) {
   const state = initializeGlobalFilterState()
@@ -153,58 +217,8 @@ export function registerPageBadge(url, badgeData) {
 
 /**
  * Get all registered page badge data
- * @returns {Map} Map of page URLs to badge data
  */
 export function getPageBadgeData() {
   const state = initializeGlobalFilterState()
   return state ? state.pagesBadgeData : new Map()
-}
-
-/**
- * Clear all registered page badge data
- */
-export function clearPageBadgeData() {
-  const state = initializeGlobalFilterState()
-  if (!state) return
-
-  state.pagesBadgeData.clear()
-}
-
-/**
- * Get filter statistics for debugging
- * @returns {Object} Filter statistics
- */
-export function getFilterStats() {
-  const state = initializeGlobalFilterState()
-  if (!state) return null
-
-  const manifest = state.availabilityManifest || {}
-  const badgeData = state.pagesBadgeData || new Map()
-
-  return {
-    currentFilters: state.filters,
-    manifestPages: Object.keys(manifest).length,
-    badgePages: badgeData.size,
-    filterCallbacks: state.filterChangeCallbacks.size,
-    sidebarCallbacks: state.sidebarUpdateCallbacks.size,
-  }
-}
-
-/**
- * Reset all filter state (useful for testing)
- */
-export function resetFilterState() {
-  if (typeof window !== 'undefined') {
-    delete window.globalFilterState
-  }
-}
-
-/**
- * Debug helper to log current state
- */
-export function debugFilterState() {
-  if (process.env.NODE_ENV === 'development') {
-    const stats = getFilterStats()
-    console.debug('🔍 Filter State Debug:', stats)
-  }
 }
