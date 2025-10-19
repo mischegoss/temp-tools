@@ -1,15 +1,12 @@
-// src/components/FilterControls/index.js - SIMPLIFIED VERSION
+// src/components/FilterControls/index.js - STATIC FLOW VERSION (NO OVERLAPPING)
 import React, { useState, useEffect } from 'react'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 import {
   initializeGlobalFilterState,
-  setBadgeData,
+  setFilterableData,
   updateFilters,
   countFilteredPages,
 } from '../../utils/globalFilterState'
-
-// Import static badge data
-import staticBadgeData from '../../data/badgeData.json'
 
 function EmbeddedFilterControlsComponent() {
   const [filters, setFilters] = useState({
@@ -18,19 +15,60 @@ function EmbeddedFilterControlsComponent() {
   })
   const [isMainCollapsed, setIsMainCollapsed] = useState(false)
   const [resultCount, setResultCount] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
 
-  // Initialize once on mount
+  // Initialize and load filterable data
   useEffect(() => {
-    initializeGlobalFilterState()
-    setBadgeData(staticBadgeData)
-    updateResultCount()
+    const loadFilterableData = async () => {
+      try {
+        setIsLoading(true)
+
+        // Initialize the global state
+        initializeGlobalFilterState()
+
+        // Fetch filterable data from static folder
+        const response = await fetch('/data/filterableData.json')
+
+        if (!response.ok) {
+          throw new Error(`Failed to load filterable data: ${response.status}`)
+        }
+
+        const filterableData = await response.json()
+
+        // Set the filterable data in global state
+        setFilterableData(filterableData)
+
+        // Update result count
+        updateResultCount()
+
+        console.log(
+          '✅ Filterable data loaded successfully:',
+          filterableData.length,
+          'items',
+        )
+        console.log(
+          '📊 Items with filtering:',
+          filterableData.filter(item => item.hasFiltering).length,
+        )
+      } catch (error) {
+        console.error('❌ Failed to load filterable data:', error)
+        setLoadError(error.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadFilterableData()
   }, [])
 
   // Update when filters change
   useEffect(() => {
-    updateFilters(filters)
-    updateResultCount()
-  }, [filters])
+    if (!isLoading && !loadError) {
+      updateFilters(filters)
+      updateResultCount()
+    }
+  }, [filters, isLoading, loadError])
 
   const updateResultCount = () => {
     const count = countFilteredPages(filters)
@@ -56,20 +94,76 @@ function EmbeddedFilterControlsComponent() {
     { value: 'admin', label: 'Admin', icon: '⚙️', available: true },
   ]
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '8px',
+          padding: '12px',
+          textAlign: 'center',
+          fontFamily: 'var(--ifm-font-family-base)',
+          fontSize: '13px',
+          color: '#64748b',
+          // CRITICAL: No positioning that could cause overlay
+          position: 'static',
+          display: 'block',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
+      >
+        Loading filters...
+      </div>
+    )
+  }
+
+  // Show error state
+  if (loadError) {
+    return (
+      <div
+        style={{
+          background: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          padding: '12px',
+          textAlign: 'center',
+          fontFamily: 'var(--ifm-font-family-base)',
+          fontSize: '13px',
+          color: '#dc2626',
+          // CRITICAL: No positioning that could cause overlay
+          position: 'static',
+          display: 'block',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div style={{ fontWeight: '500', marginBottom: '4px' }}>
+          Filter Error
+        </div>
+        <div style={{ fontSize: '11px' }}>{loadError}</div>
+      </div>
+    )
+  }
+
   return (
     <div
       style={{
-        background:
-          'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(226, 232, 240, 0.8)',
-        borderRadius: '12px',
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow:
-          '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
         fontFamily: 'var(--ifm-font-family-base)',
-        maxWidth: '280px',
-        margin: '0 auto',
+        // CRITICAL: Static positioning to prevent overlay
+        position: 'static',
+        display: 'block',
+        width: '100%',
+        boxSizing: 'border-box',
+        // Remove any transforms or z-index that could cause positioning issues
+        transform: 'none',
+        zIndex: 'auto',
       }}
     >
       {/* Header */}
@@ -77,7 +171,7 @@ function EmbeddedFilterControlsComponent() {
         style={{
           background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
           color: 'white',
-          padding: '12px 16px',
+          padding: '10px 12px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -86,7 +180,7 @@ function EmbeddedFilterControlsComponent() {
         <div
           style={{
             fontWeight: '600',
-            fontSize: '14px',
+            fontSize: '12px',
             fontFamily: 'var(--ifm-font-family-base)',
           }}
         >
@@ -95,9 +189,9 @@ function EmbeddedFilterControlsComponent() {
         <div
           style={{
             background: 'rgba(255, 255, 255, 0.2)',
-            padding: '2px 8px',
-            borderRadius: '12px',
-            fontSize: '12px',
+            padding: '2px 6px',
+            borderRadius: '10px',
+            fontSize: '10px',
             fontWeight: '500',
           }}
         >
@@ -110,7 +204,7 @@ function EmbeddedFilterControlsComponent() {
         <div
           onClick={() => setIsMainCollapsed(!isMainCollapsed)}
           style={{
-            padding: '12px 16px',
+            padding: '10px 12px',
             background: '#f8fafc',
             borderBottom: '1px solid #e2e8f0',
             cursor: 'pointer',
@@ -129,7 +223,7 @@ function EmbeddedFilterControlsComponent() {
           <span
             style={{
               fontWeight: '500',
-              fontSize: '13px',
+              fontSize: '11px',
               color: '#1a1a1a',
               fontFamily: 'var(--ifm-font-family-base)',
             }}
@@ -137,8 +231,8 @@ function EmbeddedFilterControlsComponent() {
             User Type & Plans
           </span>
           <svg
-            width='16'
-            height='16'
+            width='14'
+            height='14'
             viewBox='0 0 24 24'
             fill='none'
             stroke='currentColor'
@@ -158,187 +252,126 @@ function EmbeddedFilterControlsComponent() {
         {/* Collapsible Content */}
         <div
           style={{
-            maxHeight: isMainCollapsed ? '0' : '400px',
+            maxHeight: isMainCollapsed ? '0' : '300px',
             overflow: 'hidden',
             transition: 'all 0.3s ease',
-            padding: isMainCollapsed ? '0 16px' : '16px',
+            padding: isMainCollapsed ? '0 12px' : '12px',
           }}
         >
-          {!isMainCollapsed && (
-            <>
-              {/* User Role Section */}
-              <div style={{ marginBottom: '16px' }}>
-                <div
+          {/* Role Filter */}
+          <div style={{ marginBottom: '16px' }}>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: '500',
+                color: '#475569',
+                marginBottom: '6px',
+                fontFamily: 'var(--ifm-font-family-base)',
+              }}
+            >
+              User Type
+            </div>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+            >
+              {roleOptions.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => handleRoleChange(option.value)}
                   style={{
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#1a1a1a',
-                    marginBottom: '8px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
+                    padding: '6px 8px',
+                    border: 'none',
+                    borderRadius: '4px',
+                    background:
+                      filters.role === option.value ? '#0050c7' : '#f8fafc',
+                    color: filters.role === option.value ? 'white' : '#64748b',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease',
                     fontFamily: 'var(--ifm-font-family-base)',
-                  }}
-                >
-                  User Role
-                </div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr 1fr',
-                    gap: '6px',
-                  }}
-                >
-                  {roleOptions.map(role => (
-                    <button
-                      key={role.value}
-                      onClick={() =>
-                        role.available && handleRoleChange(role.value)
-                      }
-                      style={{
-                        padding: '12px 8px',
-                        background: 'white',
-                        border: `2px solid ${
-                          filters.role === role.value ? '#0050c7' : '#e2e8f0'
-                        }`,
-                        borderRadius: '8px',
-                        textAlign: 'center',
-                        cursor: role.available ? 'pointer' : 'not-allowed',
-                        transition: 'all 0.2s ease',
-                        fontFamily: 'var(--ifm-font-family-base)',
-                        backgroundColor:
-                          filters.role === role.value ? '#cbe0ff' : 'white',
-                        boxShadow:
-                          filters.role === role.value
-                            ? '0 0 0 1px #0050c7, 0 1px 4px rgba(0, 80, 199, 0.15)'
-                            : 'none',
-                        aspectRatio: '1',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      onMouseEnter={e => {
-                        if (role.available && filters.role !== role.value) {
-                          e.target.style.borderColor = '#cbd5e1'
-                          e.target.style.backgroundColor = '#f8fafc'
-                          e.target.style.boxShadow =
-                            '0 1px 4px rgba(0, 0, 0, 0.1)'
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        if (role.available && filters.role !== role.value) {
-                          e.target.style.borderColor = '#e2e8f0'
-                          e.target.style.backgroundColor = 'white'
-                          e.target.style.boxShadow = 'none'
-                        }
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '20px',
-                          height: '20px',
-                          background:
-                            filters.role === role.value ? '#0050c7' : '#f1f5f9',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '12px',
-                          transition: 'all 0.2s ease',
-                          color:
-                            filters.role === role.value ? 'white' : 'inherit',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        {role.icon}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: '600',
-                          color:
-                            filters.role === role.value ? '#0050c7' : '#64748b',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {role.label}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Plan Section */}
-              <div style={{ marginBottom: '12px' }}>
-                <div
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#1a1a1a',
-                    marginBottom: '8px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontFamily: 'var(--ifm-font-family-base)',
-                  }}
-                >
-                  Plans
-                </div>
-                <div
-                  style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '6px',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  <button
-                    onClick={() => handlePlanToggle('trial')}
+                  <span
                     style={{
-                      padding: '10px 12px',
-                      background: filters.plans.includes('trial')
-                        ? '#cbe0ff'
-                        : 'white',
-                      border: `2px solid ${
-                        filters.plans.includes('trial') ? '#0050c7' : '#e2e8f0'
-                      }`,
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontFamily: 'var(--ifm-font-family-base)',
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      color: filters.plans.includes('trial')
-                        ? '#0050c7'
-                        : '#64748b',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
+                      gap: '4px',
                     }}
                   >
-                    <span>Trial</span>
-                    <div
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        borderRadius: '4px',
-                        background: filters.plans.includes('trial')
-                          ? '#0050c7'
-                          : '#f1f5f9',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: filters.plans.includes('trial')
-                          ? 'white'
-                          : '#64748b',
-                        fontSize: '12px',
-                      }}
-                    >
-                      {filters.plans.includes('trial') ? '✓' : ''}
-                    </div>
-                  </button>
+                    <span>{option.icon}</span>
+                    <span>{option.label}</span>
+                  </span>
+                  {filters.role === option.value && (
+                    <span style={{ fontSize: '10px' }}>✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Plan Filter */}
+          <div>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: '500',
+                color: '#475569',
+                marginBottom: '6px',
+                fontFamily: 'var(--ifm-font-family-base)',
+              }}
+            >
+              Plans
+            </div>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+            >
+              <button
+                onClick={() => handlePlanToggle('trial')}
+                style={{
+                  padding: '6px 8px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  background: '#f8fafc',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'var(--ifm-font-family-base)',
+                  color: filters.plans.includes('trial')
+                    ? '#0050c7'
+                    : '#64748b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span>Trial</span>
+                <div
+                  style={{
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '3px',
+                    background: filters.plans.includes('trial')
+                      ? '#0050c7'
+                      : '#f1f5f9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: filters.plans.includes('trial')
+                      ? 'white'
+                      : '#64748b',
+                    fontSize: '10px',
+                  }}
+                >
+                  {filters.plans.includes('trial') ? '✓' : ''}
                 </div>
-              </div>
-            </>
-          )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
