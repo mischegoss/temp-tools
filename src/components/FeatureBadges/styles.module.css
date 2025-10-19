@@ -46,23 +46,27 @@
 
 /* Role badges */
 .badge.users {
-  background-color: #3b82f6; /* Blue */
+  background-color: var(--brand-blue);
   color: white;
 }
 
 .badge.admin {
-  background-color: #7c3aed; /* Purple */
+  background-color: var(--brand-aqua); /*Make this teal*/
   color: white;
 }
 
 .badge.both {
-  background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+  background: linear-gradient(
+    135deg,
+    var(--brand-blue) 0%,
+    var(--brand-aqua) 100%
+  );
   color: white;
 }
 
 /* Plan badges */
 .badge.trial {
-  background-color: #ea580c; /* Burnt orange as requested */
+  background-color: #cc7a00; /* Burnt orange as requested */
   color: white;
 }
 
@@ -72,7 +76,7 @@
 }
 
 .badge.enterprise {
-  background-color: #1f2937; /* Dark gray */
+  background-color: var(--brand-black-700); /* Dark gray */
   color: white;
 }
 
