@@ -1,0 +1,107 @@
+/* src/components/FeatureBadges/styles.module.css */
+
+.badgeBar {
+  /* Position at the top of content area, below breadcrumbs */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 0;
+  margin: 0;
+
+  /* Target the main content area in Docusaurus */
+  /* This positions it at the top of the article content */
+}
+
+/* Alternative positioning - try this if absolute doesn't work */
+.badgeBar {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding: 0;
+}
+
+.badgeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem; /* Rounded edges */
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  font-family: var(--ifm-font-family-base);
+}
+
+/* Role badges */
+.badge.users {
+  background-color: var(--brand-blue);
+  color: white;
+}
+
+.badge.admin {
+  background-color: var(--brand-aqua); /*Make this teal*/
+  color: white;
+}
+
+.badge.both {
+  background: linear-gradient(
+    135deg,
+    var(--brand-blue) 0%,
+    var(--brand-aqua) 100%
+  );
+  color: white;
+}
+
+/* Plan badges */
+.badge.trial {
+  background-color: #cc7a00; /* Burnt orange as requested */
+  color: white;
+}
+
+.badge.premium {
+  background-color: #059669; /* Green */
+  color: white;
+}
+
+.badge.enterprise {
+  background-color: var(--brand-black-700); /* Dark gray */
+  color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .badgeBar {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .badge {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.5rem;
+  }
+}
+
+/* Integration with Docusaurus content area */
+/* Try to position within the main article content */
+[class*='docPage'] .badgeBar {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+/* Position after breadcrumbs if they exist */
+.theme-doc-breadcrumbs + * .badgeBar,
+[class*='breadcrumbs'] + * .badgeBar {
+  margin-top: 1rem;
+}
