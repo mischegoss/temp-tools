@@ -1,6 +1,6 @@
 // src/utils/globalFilterState.js - SIMPLIFIED VERSION
 /**
- * Simplified global filter state management using existing badge system
+ * Minimal global filter state for static badge data
  */
 
 /**
@@ -11,20 +11,11 @@ export function initializeGlobalFilterState() {
 
   if (!window.globalFilterState) {
     window.globalFilterState = {
-      // Current filter settings
       filters: {
         role: 'all',
         plans: ['trial'],
-        showUnavailable: false,
       },
-
-      // Component callbacks
-      setFilters: null,
-      filterChangeCallbacks: new Set(),
-
-      // Existing badge data (already working)
-      pagesBadgeData: new Map(),
-      updatePageBadges: null,
+      badgeData: new Map(),
     }
   }
 
@@ -32,127 +23,127 @@ export function initializeGlobalFilterState() {
 }
 
 /**
- * Get current filter state
+ * Set badge data from JSON
  */
-export function getCurrentFilters() {
+export function setBadgeData(badgeDataObject) {
   const state = initializeGlobalFilterState()
-  return state
-    ? state.filters
-    : { role: 'all', plans: ['trial'], showUnavailable: false }
+  if (!state) return
+
+  state.badgeData.clear()
+  Object.entries(badgeDataObject).forEach(([url, badges]) => {
+    state.badgeData.set(url, { ...badges, url })
+  })
 }
 
 /**
- * Update filter state and apply CSS filtering
+ * Get all badge data
+ */
+export function getBadgeData() {
+  const state = initializeGlobalFilterState()
+  return state ? state.badgeData : new Map()
+}
+
+/**
+ * Update filters and apply to DOM
  */
 export function updateFilters(newFilters) {
   const state = initializeGlobalFilterState()
   if (!state) return
 
-  // Update filters
   state.filters = { ...state.filters, ...newFilters }
-
-  // Apply CSS-based filtering
-  applyCSSFiltering(state.filters)
-
-  // Notify filter change callbacks
-  state.filterChangeCallbacks.forEach(callback => {
-    try {
-      callback()
-    } catch (error) {
-      console.error('Error in filter change callback:', error)
-    }
-  })
+  applyCSSFiltering(state.filters, state.badgeData)
 }
 
 /**
- * Apply CSS-based filtering to sidebar items
+ * Apply CSS filtering to sidebar items
  */
-function applyCSSFiltering(filters) {
+function applyCSSFiltering(filters, badgeData) {
   if (typeof window === 'undefined') return
 
-  const state = window.globalFilterState
+  // Get all sidebar items
+  const allSidebarItems = document.querySelectorAll(
+    '.theme-doc-sidebar-item-link',
+  )
+  const allCategories = document.querySelectorAll(
+    '.theme-doc-sidebar-item-category',
+  )
 
-  // Check if any meaningful filters are active
+  // Reset: show everything first
+  allSidebarItems.forEach(linkElement => {
+    const itemElement = linkElement.closest('.theme-doc-sidebar-item')
+    if (itemElement) {
+      itemElement.classList.remove('sidebar-filtered-hidden')
+    }
+  })
+
+  allCategories.forEach(category => {
+    category.classList.remove('sidebar-filtered-hidden')
+  })
+
+  // Check if filters are active
   const hasActiveFilters =
     (filters.role && filters.role !== 'all') ||
     (filters.plans &&
       filters.plans.length > 0 &&
       !(filters.plans.length === 1 && filters.plans[0] === 'trial'))
 
-  // If no active filters, show everything (remove all hidden classes)
-  if (!hasActiveFilters) {
-    document.querySelectorAll('.sidebar-filtered-hidden').forEach(el => {
-      el.classList.remove('sidebar-filtered-hidden')
-    })
-    return
-  }
+  // If no active filters, we're done
+  if (!hasActiveFilters) return
 
-  // If active filters are applied, we need to check ALL sidebar items
-  // not just those with badge data
-  const allSidebarItems = document.querySelectorAll(
-    '.theme-doc-sidebar-item-link',
-  )
-
+  // Apply filtering
   allSidebarItems.forEach(linkElement => {
     const href = linkElement.getAttribute('href')
     if (!href) return
 
-    // Check if this page has badge data
-    const pageData = findPageDataByHref(href, state)
-
-    if (pageData) {
-      // Page has badge data - apply filtering
-      const shouldShow = checkPageVisibility(pageData, filters)
-      const itemElement = linkElement.closest('.theme-doc-sidebar-item')
-
-      if (itemElement) {
-        if (shouldShow) {
-          itemElement.classList.remove('sidebar-filtered-hidden')
-        } else {
-          itemElement.classList.add('sidebar-filtered-hidden')
-        }
-      }
-    } else {
-      // Page has NO badge data - always show it (default behavior)
+    const pageData = findPageDataByHref(href, badgeData)
+    if (pageData && !shouldShowPage(pageData, filters)) {
       const itemElement = linkElement.closest('.theme-doc-sidebar-item')
       if (itemElement) {
-        itemElement.classList.remove('sidebar-filtered-hidden')
+        itemElement.classList.add('sidebar-filtered-hidden')
       }
+    }
+  })
+
+  // Hide empty categories
+  allCategories.forEach(category => {
+    const visibleLinks = category.querySelectorAll(
+      '.theme-doc-sidebar-item-link:not(.sidebar-filtered-hidden)',
+    )
+    if (visibleLinks.length === 0) {
+      category.classList.add('sidebar-filtered-hidden')
     }
   })
 }
 
 /**
- * Find page data by href from the badge data
+ * Find page data by href
  */
-function findPageDataByHref(href, state) {
-  if (!state || !state.pagesBadgeData.size) return null
+function findPageDataByHref(href, badgeData) {
+  const cleanHref = href.replace(/^\/+|\/+$/g, '')
 
-  // Try to match the href with registered page URLs
-  for (const [pageUrl, pageData] of state.pagesBadgeData.entries()) {
-    // Clean up URLs for comparison
-    const cleanHref = href.replace(/^\/+|\/+$/g, '')
+  for (const [pageUrl, pageData] of badgeData.entries()) {
     const cleanPageUrl = pageUrl.replace(/^\/+|\/+$/g, '')
-
-    if (
-      cleanHref === cleanPageUrl ||
-      href.includes(cleanPageUrl) ||
-      pageUrl.includes(cleanHref)
-    ) {
+    if (cleanHref === cleanPageUrl || href.includes(cleanPageUrl)) {
       return pageData
     }
   }
-
   return null
 }
 
 /**
- * Check if a page should be visible based on filters
+ * Check if page should be visible
  */
-function checkPageVisibility(pageData, filters) {
-  // Role filtering
-  if (filters.role === 'users' && !pageData.users) return false
-  if (filters.role === 'admin' && !pageData.admin) return false
+
+function shouldShowPage(pageData, filters) {
+  // Role filtering - FIXED LOGIC
+  if (filters.role === 'users') {
+    // When "Users" is selected, only show pages that have users=true
+    if (!pageData.users) return false
+  } else if (filters.role === 'admin') {
+    // When "Admin" is selected, only show pages that have admin=true  
+    if (!pageData.admin) return false
+  }
+  // When "All" is selected, show regardless of user/admin flags
 
   // Plan filtering
   if (filters.plans && filters.plans.length > 0) {
@@ -164,61 +155,21 @@ function checkPageVisibility(pageData, filters) {
 }
 
 /**
- * Find sidebar link element for a given page URL
+ * Count filtered pages
  */
-function findSidebarLinkElement(pageUrl) {
-  // Clean up the URL to match what appears in hrefs
-  const cleanUrl = pageUrl.replace(/^\/+|\/+$/g, '')
+export function countFilteredPages(filters) {
+  const badgeData = getBadgeData()
+  if (badgeData.size === 0) return null
 
-  // Try different URL patterns that might appear in the sidebar
-  const patterns = [
-    `[href="/${cleanUrl}"]`,
-    `[href="${cleanUrl}"]`,
-    `[href*="${cleanUrl}"]`,
-  ]
+  const hasActiveFilters =
+    (filters.role && filters.role !== 'all') ||
+    (filters.plans &&
+      filters.plans.length > 0 &&
+      !(filters.plans.length === 1 && filters.plans[0] === 'trial'))
 
-  for (const pattern of patterns) {
-    const element = document.querySelector(
-      `.theme-doc-sidebar-item-link${pattern}`,
-    )
-    if (element) return element.closest('.theme-doc-sidebar-item')
-  }
+  if (!hasActiveFilters) return null
 
-  return null
-}
-
-/**
- * Register a callback for filter changes
- */
-export function onFilterChange(callback) {
-  const state = initializeGlobalFilterState()
-  if (!state) return () => {}
-
-  state.filterChangeCallbacks.add(callback)
-
-  return () => {
-    state.filterChangeCallbacks.delete(callback)
-  }
-}
-
-/**
- * Register page badge data (existing functionality)
- */
-export function registerPageBadge(url, badgeData) {
-  const state = initializeGlobalFilterState()
-  if (!state) return
-
-  state.pagesBadgeData.set(url, {
-    ...badgeData,
-    url,
-    timestamp: Date.now(),
-  })
-}
-
-/**
- * Get all registered page badge data
- */
-export function getPageBadgeData() {
-  const state = initializeGlobalFilterState()
-  return state ? state.pagesBadgeData : new Map()
+  const allPages = Array.from(badgeData.values())
+  const filteredPages = allPages.filter(page => shouldShowPage(page, filters))
+  return filteredPages.length
 }

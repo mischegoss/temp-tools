@@ -1,146 +1,59 @@
-// src/components/FilterControls/index.js - FIXED VERSION
+// src/components/FilterControls/index.js - SIMPLIFIED VERSION
 import React, { useState, useEffect } from 'react'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 import {
   initializeGlobalFilterState,
+  setBadgeData,
   updateFilters,
-  getPageBadgeData,
+  countFilteredPages,
 } from '../../utils/globalFilterState'
+
+// Import static badge data
+import staticBadgeData from '../../data/badgeData.json'
 
 function EmbeddedFilterControlsComponent() {
   const [filters, setFilters] = useState({
     role: 'all',
     plans: ['trial'],
-    showUnavailable: false,
   })
-
   const [isMainCollapsed, setIsMainCollapsed] = useState(false)
-  const [realResultsCount, setRealResultsCount] = useState(null)
+  const [resultCount, setResultCount] = useState(null)
 
-  // Initialize global state
+  // Initialize once on mount
   useEffect(() => {
-    const state = initializeGlobalFilterState()
-    if (state) {
-      state.setFilters = setFilters
-      state.filters = filters
-    }
+    initializeGlobalFilterState()
+    setBadgeData(staticBadgeData)
+    updateResultCount()
   }, [])
 
-  // Update global state and apply filtering when filters change
+  // Update when filters change
   useEffect(() => {
-    // For initial mount, don't mark as user interaction
-    updateFilters(filters, false)
-    calculateResults()
-  }, [])
-
-  // For subsequent filter changes (user interactions)
-  useEffect(() => {
-    // Skip the initial render
-    if (
-      filters.role === 'all' &&
-      filters.plans.length === 1 &&
-      filters.plans[0] === 'trial' &&
-      !filters.showUnavailable
-    ) {
-      return // This is the initial state, don't mark as user interaction
-    }
-
-    // This is a real user interaction
-    updateFilters(filters, true)
-    calculateResults()
+    updateFilters(filters)
+    updateResultCount()
   }, [filters])
 
-  // Calculate results based on badge data
-  const calculateResults = () => {
-    try {
-      const badgeData = getPageBadgeData()
-
-      if (badgeData.size === 0) {
-        setRealResultsCount(null)
-        return
-      }
-
-      // Check if any meaningful filters are active
-      const hasActiveFilters =
-        (filters.role && filters.role !== 'all') ||
-        (filters.plans &&
-          filters.plans.length > 0 &&
-          !(filters.plans.length === 1 && filters.plans[0] === 'trial'))
-
-      if (!hasActiveFilters) {
-        setRealResultsCount(null) // Show "All content"
-        return
-      }
-
-      // Count filtered pages
-      const allPages = Array.from(badgeData.values())
-      const filteredPages = allPages.filter(page => {
-        // Role filtering
-        if (filters.role === 'users' && !page.users) return false
-        if (filters.role === 'admin' && !page.admin) return false
-
-        // Plan filtering
-        if (filters.plans.length > 0) {
-          const hasMatchingPlan = filters.plans.some(plan => page[plan])
-          if (!hasMatchingPlan) return false
-        }
-
-        return true
-      })
-
-      setRealResultsCount(filteredPages.length)
-    } catch (error) {
-      console.error('Error calculating results:', error)
-      setRealResultsCount(0)
-    }
+  const updateResultCount = () => {
+    const count = countFilteredPages(filters)
+    setResultCount(count)
   }
 
-  // Update results when badge data changes
-  useEffect(() => {
-    const interval = setInterval(calculateResults, 2000)
-    return () => clearInterval(interval)
-  }, [filters])
-
   const handleRoleChange = role => {
-    const newFilters = { ...filters, role }
-    setFilters(newFilters)
+    setFilters({ ...filters, role })
   }
 
   const handlePlanToggle = plan => {
     if (plan === 'trial') {
-      const newFilters = {
-        ...filters,
-        plans: filters.plans.includes(plan)
-          ? filters.plans.filter(p => p !== plan)
-          : [...filters.plans, plan],
-      }
-      setFilters(newFilters)
+      const newPlans = filters.plans.includes(plan)
+        ? filters.plans.filter(p => p !== plan)
+        : [...filters.plans, plan]
+      setFilters({ ...filters, plans: newPlans })
     }
   }
 
-  const handleToggleMainSection = () => {
-    setIsMainCollapsed(!isMainCollapsed)
-  }
-
   const roleOptions = [
-    {
-      value: 'all',
-      label: 'All',
-      icon: '👥',
-      available: true,
-    },
-    {
-      value: 'users',
-      label: 'Users',
-      icon: '👤',
-      available: true,
-    },
-    {
-      value: 'admin',
-      label: 'Admin',
-      icon: '⚙️',
-      available: true,
-    },
+    { value: 'all', label: 'All', icon: '👥', available: true },
+    { value: 'users', label: 'Users', icon: '👤', available: true },
+    { value: 'admin', label: 'Admin', icon: '⚙️', available: true },
   ]
 
   return (
@@ -188,16 +101,14 @@ function EmbeddedFilterControlsComponent() {
             fontWeight: '500',
           }}
         >
-          {realResultsCount !== null
-            ? `${realResultsCount} results`
-            : 'All content'}
+          {resultCount !== null ? `${resultCount} results` : 'All content'}
         </div>
       </div>
 
       {/* Main Filter Section */}
       <div>
         <div
-          onClick={handleToggleMainSection}
+          onClick={() => setIsMainCollapsed(!isMainCollapsed)}
           style={{
             padding: '12px 16px',
             background: '#f8fafc',
@@ -346,9 +257,8 @@ function EmbeddedFilterControlsComponent() {
                           fontSize: '11px',
                           fontWeight: '600',
                           color:
-                            filters.role === role.value ? '#0050c7' : '#1a1a1a',
-                          transition: 'all 0.2s ease',
-                          fontFamily: 'var(--ifm-font-family-base)',
+                            filters.role === role.value ? '#0050c7' : '#64748b',
+                          textAlign: 'center',
                         }}
                       >
                         {role.label}
@@ -358,8 +268,8 @@ function EmbeddedFilterControlsComponent() {
                 </div>
               </div>
 
-              {/* Subscription Level Section */}
-              <div style={{ marginBottom: '16px' }}>
+              {/* Plan Section */}
+              <div style={{ marginBottom: '12px' }}>
                 <div
                   style={{
                     fontSize: '12px',
@@ -371,54 +281,60 @@ function EmbeddedFilterControlsComponent() {
                     fontFamily: 'var(--ifm-font-family-base)',
                   }}
                 >
-                  Subscription Level
+                  Plans
                 </div>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    value={filters.plans.includes('trial') ? 'trial' : 'none'}
-                    onChange={e => handlePlanToggle(e.target.value)}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                  }}
+                >
+                  <button
+                    onClick={() => handlePlanToggle('trial')}
                     style={{
-                      width: '100%',
                       padding: '10px 12px',
-                      border: '2px solid #e2e8f0',
+                      background: filters.plans.includes('trial')
+                        ? '#cbe0ff'
+                        : 'white',
+                      border: `2px solid ${
+                        filters.plans.includes('trial') ? '#0050c7' : '#e2e8f0'
+                      }`,
                       borderRadius: '8px',
-                      background: 'white',
-                      fontSize: '13px',
-                      fontFamily: 'var(--ifm-font-family-base)',
-                      appearance: 'none',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
+                      fontFamily: 'var(--ifm-font-family-base)',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      color: filters.plans.includes('trial')
+                        ? '#0050c7'
+                        : '#64748b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                     }}
                   >
-                    <option value='trial'>Trial</option>
-                    <option value='premium' disabled>
-                      Premium (Coming Soon)
-                    </option>
-                    <option value='enterprise' disabled>
-                      Enterprise (Coming Soon)
-                    </option>
-                  </select>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      right: '12px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      pointerEvents: 'none',
-                      color: '#64748b',
-                    }}
-                  >
-                    <svg
-                      width='12'
-                      height='12'
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='2'
+                    <span>Trial</span>
+                    <div
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '4px',
+                        background: filters.plans.includes('trial')
+                          ? '#0050c7'
+                          : '#f1f5f9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: filters.plans.includes('trial')
+                          ? 'white'
+                          : '#64748b',
+                        fontSize: '12px',
+                      }}
                     >
-                      <path d='M6 9l6 6 6-6' />
-                    </svg>
-                  </div>
+                      {filters.plans.includes('trial') ? '✓' : ''}
+                    </div>
+                  </button>
                 </div>
               </div>
             </>
@@ -431,7 +347,7 @@ function EmbeddedFilterControlsComponent() {
 
 export default function EmbeddedFilterControls() {
   return (
-    <BrowserOnly fallback={<div style={{ display: 'none' }} />}>
+    <BrowserOnly fallback={<div>Loading filters...</div>}>
       {() => <EmbeddedFilterControlsComponent />}
     </BrowserOnly>
   )
