@@ -7,35 +7,30 @@ export const docsProductsData = {
   products: [
     {
       id: 'actions',
-      title: 'Resolve Platform Documentation',
+      title: 'Resolve Actions Documentation',
       description:
-        'Automate and orchestrate IT operations with low-code platform',
+        'Our newest drag-and-drop, no-code IT process automation platform.',
       link: '/actions/',
     },
     {
-      id: 'ritago',
-      title: 'Rita Go Documentation',
-      description:
-        'Next-gen Service Desk Assistant for enhanced IT service delivery',
-      link: '/rita-go/',
+      id: 'insights',
+      title: 'Resolve Insights Documentation',
+      description: 'Our Discovery and Dependency Mapping (DDM) product.',
+      link: '/insights/',
     },
     {
       id: 'pro',
-      title: 'Actions Pro Documentation',
-      description: 'Tailor made IT automation with powerful features',
+      title: 'Resolve Actions Pro Documentation',
+      description:
+        'Tailor-made IT automation with powerful code-based features.',
       link: '/pro/',
     },
     {
       id: 'express',
-      title: 'Express Documentation',
-      description: 'No code IT automation with built-in actions library',
+      title: 'Resolve Actions Express Documentation',
+      description:
+        'Drag-and-drop, no-code IT automation with a large built-in library of automation actions.',
       link: '/express/',
-    },
-    {
-      id: 'insights',
-      title: 'Insights Documentation',
-      description: 'Discovery and dependency mapping for your team',
-      link: '/insights/',
     },
   ],
 }

@@ -68,6 +68,7 @@ export default function NavbarContent() {
   return (
     <NavbarContentLayout
       left={
+        // TODO stop hardcoding items?
         <>
           {!mobileSidebar.disabled && <NavbarMobileSidebarToggle />}
           <NavbarLogo />
@@ -75,6 +76,7 @@ export default function NavbarContent() {
         </>
       }
       right={
+        // TODO stop hardcoding items?
         // Ask the user to add the respective navbar items => more flexible
         <>
           <NavbarItems items={rightItems} />

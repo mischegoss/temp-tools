@@ -29,17 +29,17 @@ const Button = ({
 
   const variantStyles = {
     primary: {
-      background: 'var(--ifm-color-primary)',
+      background: '#008a9e', // CHANGED: Darker teal to match homepage gradient
       color: 'var(--color-text-white)',
     },
     secondary: {
       background: 'transparent',
-      color: 'var(--ifm-color-primary)',
+      color: 'var(--brand-aqua)',
       border: '2px solid var(--ifm-color-primary)',
     },
     outline: {
       background: 'transparent',
-      color: 'var(--color-text-primary)',
+      color: 'var(--brand-aqua)',
       border: '1px solid var(--color-border-light)',
     },
   }
