@@ -1,4 +1,4 @@
-// src/components/VideoManagement/VideoForm.js
+// src-admin/components/VideoManagement/VideoForm.js
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -34,10 +34,10 @@ const VideoForm = ({ mode = 'create' }) => {
     videoId: '',
     platform: 'youtube',
     duration: '',
-    level: 'step-by-step',
+    level: 'quick-start', // UPDATED: Changed from 'step-by-step' to 'quick-start'
     category: '',
     section: '',
-    product: 'actions',
+    product: 'rita-go', // UPDATED: Changed default to 'rita-go'
     featured: false,
     tags: '',
     vimeoHash: '',
@@ -98,22 +98,16 @@ const VideoForm = ({ mode = 'create' }) => {
       const result = await getVideo(id)
 
       if (result.success) {
-        // Convert tags array to string
-        const videoData = result.data
-
-        if (Array.isArray(videoData.tags)) {
-          videoData.tags = videoData.tags.join(', ')
-        }
-
-        setFormData(videoData)
+        setFormData(result.data)
       } else {
         setError('Failed to load video: ' + result.error)
       }
     } catch (error) {
-      setError('Error loading video: ' + error.message)
+      console.error('Error loading video:', error)
+      setError('Failed to load video')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }, [id])
 
   useEffect(() => {
@@ -122,73 +116,77 @@ const VideoForm = ({ mode = 'create' }) => {
     }
   }, [mode, id, loadVideo])
 
-  // Function to check if Custom Video ID is unique
-  const checkIdUniqueness = useCallback(
-    async id => {
-      if (!id || mode === 'edit') return // Skip check for edit mode
+  // Extract video ID from URL
+  const extractVideoId = url => {
+    try {
+      // YouTube patterns
+      const youtubeRegex =
+        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+      const youtubeMatch = url.match(youtubeRegex)
+      if (youtubeMatch) {
+        return youtubeMatch[1]
+      }
 
-      setIdValidation({ checking: true, isValid: null, message: 'Checking...' })
+      // Vimeo patterns
+      const vimeoRegex = /(?:vimeo\.com\/)([0-9]+)/
+      const vimeoMatch = url.match(vimeoRegex)
+      if (vimeoMatch) {
+        return vimeoMatch[1]
+      }
 
-      try {
-        const result = await searchVideosByTitle(id)
-        if (result.success) {
-          const exists = result.data.some(
-            video => video.id === id || video.customId === id,
-          )
-          if (exists) {
-            setIdValidation({
-              checking: false,
-              isValid: false,
-              message: 'This ID already exists. Please choose a different one.',
-            })
-          } else {
-            setIdValidation({
-              checking: false,
-              isValid: true,
-              message: 'ID is available ✓',
-            })
-          }
-        }
-      } catch (error) {
+      return null
+    } catch (error) {
+      console.error('Error extracting video ID:', error)
+      return null
+    }
+  }
+
+  // Check if custom video ID is unique
+  const checkIdUniqueness = async customId => {
+    if (!customId || customId.trim() === '') {
+      setIdValidation({ checking: false, isValid: null, message: '' })
+      return
+    }
+
+    setIdValidation({ checking: true, isValid: null, message: 'Checking...' })
+
+    try {
+      const result = await searchVideosByTitle(customId, 'id')
+      const isDuplicate = result.some(video => video.id === customId)
+
+      if (isDuplicate) {
         setIdValidation({
           checking: false,
-          isValid: null,
-          message: 'Could not verify uniqueness',
+          isValid: false,
+          message: 'This ID is already taken',
+        })
+      } else {
+        setIdValidation({
+          checking: false,
+          isValid: true,
+          message: 'ID is available',
         })
       }
-    },
-    [mode],
-  )
+    } catch (error) {
+      console.error('Error checking ID uniqueness:', error)
+      setIdValidation({
+        checking: false,
+        isValid: null,
+        message: 'Error checking availability',
+      })
+    }
+  }
 
   // Debounced ID checking
   useEffect(() => {
-    if (!formData.id || mode === 'edit') return
+    if (mode === 'create') {
+      const timer = setTimeout(() => {
+        checkIdUniqueness(formData.id)
+      }, 500)
 
-    const timeoutId = setTimeout(() => {
-      checkIdUniqueness(formData.id)
-    }, 500) // Wait 500ms after user stops typing
-
-    return () => clearTimeout(timeoutId)
-  }, [formData.id, mode, checkIdUniqueness])
-
-  // Function to extract video ID from URL
-  const extractVideoId = url => {
-    if (!url) return ''
-
-    // YouTube pattern: extract ID after v=
-    const youtubeMatch = url.match(/[?&]v=([^&]+)/)
-    if (youtubeMatch) {
-      return youtubeMatch[1]
+      return () => clearTimeout(timer)
     }
-
-    // Vimeo pattern: extract first number sequence after vimeo.com/
-    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
-    if (vimeoMatch) {
-      return vimeoMatch[1]
-    }
-
-    return ''
-  }
+  }, [formData.id, mode])
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target
@@ -468,7 +466,7 @@ const VideoForm = ({ mode = 'create' }) => {
               name='id'
               value={formData.id}
               onChange={handleChange}
-              placeholder='e.g., getting-started-workflow'
+              placeholder='e.g., create-knowledge-base'
               style={{
                 ...styles.input,
                 ...(idValidation.isValid === false ? styles.inputError : {}),
@@ -476,24 +474,24 @@ const VideoForm = ({ mode = 'create' }) => {
               }}
               disabled={mode === 'edit'}
             />
-            {idValidation.checking && (
-              <small style={styles.validationChecking}>
-                {idValidation.message}
-              </small>
-            )}
-            {idValidation.isValid === false && (
-              <small style={styles.validationError}>
-                {idValidation.message}
-              </small>
-            )}
-            {idValidation.isValid === true && (
-              <small style={styles.validationSuccess}>
+            {idValidation.message && (
+              <small
+                style={{
+                  ...styles.helpText,
+                  color:
+                    idValidation.isValid === true
+                      ? '#38a169'
+                      : idValidation.isValid === false
+                      ? '#e53e3e'
+                      : '#718096',
+                }}
+              >
                 {idValidation.message}
               </small>
             )}
             <small style={styles.helpText}>
-              Lowercase with hyphens, used in URLs (cannot be changed after
-              creation)
+              Unique identifier (lowercase, hyphens only). Example:
+              "create-knowledge-base"
             </small>
           </div>
 
@@ -504,7 +502,7 @@ const VideoForm = ({ mode = 'create' }) => {
               name='title'
               value={formData.title}
               onChange={handleChange}
-              placeholder='e.g., Getting Started with Workflow Builder'
+              placeholder='e.g., Create Your Knowledge Base'
               style={styles.input}
             />
           </div>
@@ -515,8 +513,9 @@ const VideoForm = ({ mode = 'create' }) => {
               name='description'
               value={formData.description}
               onChange={handleChange}
-              placeholder='Brief description of what this video teaches...'
-              style={styles.textareaSmall}
+              placeholder='Brief description of what the video covers...'
+              style={styles.textarea}
+              rows={3}
             />
           </div>
         </section>
@@ -532,9 +531,18 @@ const VideoForm = ({ mode = 'create' }) => {
               name='videoUrl'
               value={formData.videoUrl}
               onChange={handleChange}
-              placeholder='https://www.youtube.com/watch?v=... or https://vimeo.com/...'
+              placeholder={
+                formData.platform === 'vimeo'
+                  ? 'https://player.vimeo.com/video/1127035847'
+                  : 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+              }
               style={styles.input}
             />
+            <small style={styles.helpText}>
+              {formData.platform === 'vimeo'
+                ? 'Use the player.vimeo.com format for Vimeo videos'
+                : 'Use the regular YouTube watch URL'}
+            </small>
           </div>
 
           <div style={styles.gridTwo}>
@@ -545,11 +553,17 @@ const VideoForm = ({ mode = 'create' }) => {
                 name='videoId'
                 value={formData.videoId}
                 onChange={handleChange}
-                placeholder='Auto-extracted from URL'
+                placeholder={
+                  formData.platform === 'vimeo'
+                    ? 'e.g., 1127035847'
+                    : 'e.g., dQw4w9WgXcQ'
+                }
                 style={styles.input}
               />
               <small style={styles.helpText}>
-                Automatically extracted from the video URL
+                {formData.platform === 'vimeo'
+                  ? 'The numeric ID from the Vimeo URL'
+                  : 'The ID from the YouTube URL (automatically extracted)'}
               </small>
             </div>
 
@@ -575,26 +589,32 @@ const VideoForm = ({ mode = 'create' }) => {
                 name='duration'
                 value={formData.duration}
                 onChange={handleChange}
-                placeholder='e.g., 5:30'
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Vimeo Hash</label>
-              <input
-                type='text'
-                name='vimeoHash'
-                value={formData.vimeoHash}
-                onChange={handleChange}
-                placeholder='e.g., abc123def456 (for private Vimeo videos)'
+                placeholder='e.g., 2:00'
                 style={styles.input}
               />
               <small style={styles.helpText}>
-                Required for private Vimeo videos (leave empty for public
-                videos)
+                Format: MM:SS (e.g., "1:53", "12:45")
               </small>
             </div>
+
+            {/* UPDATED: Show vimeoHash field conditionally for Vimeo videos */}
+            {formData.platform === 'vimeo' && (
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Vimeo Hash</label>
+                <input
+                  type='text'
+                  name='vimeoHash'
+                  value={formData.vimeoHash}
+                  onChange={handleChange}
+                  placeholder='e.g., b51ecd9d6e'
+                  style={styles.input}
+                />
+                <small style={styles.helpText}>
+                  Hash parameter from Vimeo embed code (after h=). Example:
+                  "b51ecd9d6e"
+                </small>
+              </div>
+            )}
           </div>
         </section>
 
@@ -611,6 +631,7 @@ const VideoForm = ({ mode = 'create' }) => {
                 onChange={handleChange}
                 style={styles.select}
               >
+                <option value='rita-go'>Rita Go</option>
                 <option value='actions'>Actions</option>
                 <option value='express'>Express</option>
                 <option value='insights'>Insights</option>
@@ -626,32 +647,33 @@ const VideoForm = ({ mode = 'create' }) => {
                 onChange={handleChange}
                 style={styles.select}
               >
-                <option value='step-by-step'>Step-by-Step</option>
-                <option value='intermediate'>Intermediate</option>
-                <option value='advanced'>Advanced</option>
                 <option value='quick-start'>Quick Start</option>
+                <option value='step-by-step'>Step-by-Step</option>
+                <option value='deep-dive'>Deep Dive</option>
+                <option value='webinar'>Webinar</option>
               </select>
             </div>
           </div>
 
           <div style={styles.gridTwo}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Display Category (badge) *</label>
+              <label style={styles.label}>Category *</label>
               <input
                 type='text'
                 name='category'
                 value={formData.category}
                 onChange={handleChange}
-                placeholder='e.g., Platform Overview'
+                placeholder='e.g., Rita Go Overview'
                 style={styles.input}
               />
               <small style={styles.helpText}>
-                Shown as a badge on the video detail page
+                Examples: "Rita Go Overview", "Workflow Designer", "Platform
+                Overview"
               </small>
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Gallery Section (grouping)</label>
+              <label style={styles.label}>Section</label>
               <input
                 type='text'
                 name='section'
@@ -661,12 +683,13 @@ const VideoForm = ({ mode = 'create' }) => {
                 style={styles.input}
               />
               <small style={styles.helpText}>
-                Used to group videos in the gallery. If empty, will use the
-                Display Category for grouping.
+                Examples: "Getting Started", "Workflow Designer", "Advanced
+                Features"
               </small>
             </div>
           </div>
 
+          {/* UPDATED: Add Section Order field to UI */}
           <div style={styles.gridTwo}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Section Order</label>
@@ -675,40 +698,44 @@ const VideoForm = ({ mode = 'create' }) => {
                 name='sectionOrder'
                 value={formData.sectionOrder}
                 onChange={handleChange}
-                placeholder='0'
-                style={styles.input}
+                placeholder='e.g., 1'
                 min='0'
+                style={styles.input}
               />
               <small style={styles.helpText}>
-                Lower numbers appear first in the gallery (0 = first)
+                Order within the section (0 = first, 1 = second, etc.)
               </small>
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Publish Date</label>
+              <label style={styles.label}>Estimated Time</label>
               <input
-                type='date'
-                name='publishDate'
-                value={formData.publishDate}
+                type='text'
+                name='estimatedTime'
+                value={formData.estimatedTime}
                 onChange={handleChange}
+                placeholder='e.g., 5 minutes'
                 style={styles.input}
               />
               <small style={styles.helpText}>
-                When this video was published (used for sorting and AI search)
+                Examples: "5 minutes", "3-4 minutes", "10-15 minutes"
               </small>
             </div>
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Tags (comma-separated)</label>
+            <label style={styles.label}>Tags</label>
             <input
               type='text'
               name='tags'
               value={formData.tags}
               onChange={handleChange}
-              placeholder='basics, getting-started, workflow'
+              placeholder='knowledge-base, setup, configuration'
               style={styles.input}
             />
+            <small style={styles.helpText}>
+              Comma-separated tags for searchability
+            </small>
           </div>
 
           <div style={styles.formGroup}>
@@ -727,107 +754,49 @@ const VideoForm = ({ mode = 'create' }) => {
 
         {/* Template Selection */}
         <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Video Template *</h2>
+          <h2 style={styles.sectionTitle}>Template & Content</h2>
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Template Type *</label>
-            <div style={styles.templateGrid}>
-              <div
-                style={{
-                  ...styles.templateCard,
-                  ...(formData.template === 'instructional'
-                    ? styles.templateCardActive
-                    : {}),
-                }}
-                onClick={() => handleTemplateChange('instructional')}
-              >
-                <h4 style={styles.templateTitle}>📚 Instructional</h4>
-                <p style={styles.templateDescription}>
-                  Step-by-step tutorials with learning objectives and detailed
-                  steps
-                </p>
-              </div>
-
-              <div
-                style={{
-                  ...styles.templateCard,
-                  ...(formData.template === 'summary'
-                    ? styles.templateCardActive
-                    : {}),
-                }}
-                onClick={() => handleTemplateChange('summary')}
-              >
-                <h4 style={styles.templateTitle}>📋 Summary</h4>
-                <p style={styles.templateDescription}>
-                  Overview videos with concise summary content
-                </p>
-              </div>
-
-              <div
-                style={{
-                  ...styles.templateCard,
-                  ...(formData.template === 'informational'
-                    ? styles.templateCardActive
-                    : {}),
-                }}
-                onClick={() => handleTemplateChange('informational')}
-              >
-                <h4 style={styles.templateTitle}>🔍 Informational</h4>
-                <p style={styles.templateDescription}>
-                  Concept explanations with key points and insights
-                </p>
-              </div>
+            <div style={styles.templateSelector}>
+              {['instructional', 'summary', 'informational'].map(template => (
+                <button
+                  key={template}
+                  type='button'
+                  onClick={() => handleTemplateChange(template)}
+                  style={{
+                    ...styles.templateButton,
+                    ...(formData.template === template
+                      ? styles.templateButtonActive
+                      : {}),
+                  }}
+                >
+                  {template.charAt(0).toUpperCase() + template.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
-        </section>
 
-        {/* Template Content */}
-        {formData.template === 'instructional' && (
-          <>
-            <section style={styles.section}>
-              <h2 style={styles.sectionTitle}>Instructional Content</h2>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Learning Objectives</label>
+            <textarea
+              name='learningObjectives'
+              value={formData.learningObjectives}
+              onChange={handleChange}
+              placeholder='After completing this tutorial, you will be able to...'
+              style={styles.textarea}
+              rows={3}
+            />
+          </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Learning Objectives</label>
-                <textarea
-                  name='learningObjectives'
-                  value={formData.learningObjectives}
-                  onChange={handleChange}
-                  placeholder='After completing this tutorial, you will be able to...'
-                  style={styles.textareaSmall}
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Estimated Time</label>
-                <input
-                  type='text'
-                  name='estimatedTime'
-                  value={formData.estimatedTime}
-                  onChange={handleChange}
-                  placeholder='e.g., 8-10 minutes'
-                  style={styles.input}
-                />
-              </div>
-            </section>
-
-            {/* Tutorial Steps */}
-            <section style={styles.section}>
-              <div style={styles.sectionHeader}>
-                <h2 style={styles.sectionTitle}>Tutorial Steps *</h2>
-                <button
-                  type='button'
-                  onClick={addStep}
-                  style={styles.addButton}
-                >
-                  + Add Step
-                </button>
-              </div>
-
+          {/* Template-specific content */}
+          {formData.template === 'instructional' && (
+            <div style={styles.templateContent}>
+              <h3 style={styles.templateTitle}>Tutorial Steps</h3>
               {formData.tutorialSteps.map((step, index) => (
                 <div key={index} style={styles.stepCard}>
                   <div style={styles.cardHeader}>
-                    <h3 style={styles.cardTitle}>Step {step.step}</h3>
+                    <h4 style={styles.cardTitle}>Step {index + 1}</h4>
                     {formData.tutorialSteps.length > 1 && (
                       <button
                         type='button'
@@ -838,284 +807,136 @@ const VideoForm = ({ mode = 'create' }) => {
                       </button>
                     )}
                   </div>
-
                   <div style={styles.formGroup}>
-                    <label style={styles.labelSmall}>Step Title *</label>
+                    <label style={styles.labelSmall}>Step Title</label>
                     <input
                       type='text'
                       value={step.title}
                       onChange={e =>
                         handleStepChange(index, 'title', e.target.value)
                       }
-                      placeholder='e.g., Navigate the Workflow Designer Interface'
+                      placeholder='e.g., Add While Control to Workflow'
                       style={styles.input}
                     />
                   </div>
-
                   <div style={styles.formGroup}>
-                    <label style={styles.labelSmall}>Step Content *</label>
+                    <label style={styles.labelSmall}>Step Content</label>
                     <textarea
                       value={step.content}
                       onChange={e =>
                         handleStepChange(index, 'content', e.target.value)
                       }
-                      placeholder='Describe what the user should do in this step...'
+                      placeholder='Detailed instructions for this step...'
                       style={styles.textarea}
+                      rows={3}
                     />
                   </div>
                 </div>
               ))}
-            </section>
-          </>
-        )}
-
-        {formData.template === 'summary' && (
-          <section style={styles.section}>
-            <h2 style={styles.sectionTitle}>Summary Content</h2>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Summary *</label>
-              <textarea
-                name='summary'
-                value={formData.summary}
-                onChange={handleChange}
-                placeholder='Provide a comprehensive summary of the video content...'
-                style={styles.textareaLarge}
-              />
+              <button type='button' onClick={addStep} style={styles.addButton}>
+                Add Step
+              </button>
             </div>
-          </section>
-        )}
+          )}
 
-        {formData.template === 'informational' && (
-          <section style={styles.section}>
-            <div style={styles.sectionHeader}>
-              <h2 style={styles.sectionTitle}>Key Concepts *</h2>
+          {formData.template === 'summary' && (
+            <div style={styles.templateContent}>
+              <h3 style={styles.templateTitle}>Summary Content</h3>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Summary</label>
+                <textarea
+                  name='summary'
+                  value={formData.summary}
+                  onChange={handleChange}
+                  placeholder='Comprehensive summary of the video content...'
+                  style={styles.textarea}
+                  rows={6}
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.template === 'informational' && (
+            <div style={styles.templateContent}>
+              <h3 style={styles.templateTitle}>Key Concepts</h3>
+              {formData.keyConcepts.map((concept, index) => (
+                <div key={index} style={styles.conceptCard}>
+                  <div style={styles.cardHeader}>
+                    <h4 style={styles.cardTitle}>Concept {index + 1}</h4>
+                    {formData.keyConcepts.length > 1 && (
+                      <button
+                        type='button'
+                        onClick={() => removeConcept(index)}
+                        style={styles.removeButton}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <div style={styles.gridThree}>
+                    <div style={styles.formGroup}>
+                      <label style={styles.labelSmall}>Icon</label>
+                      <select
+                        value={concept.icon}
+                        onChange={e =>
+                          handleConceptChange(index, 'icon', e.target.value)
+                        }
+                        style={styles.select}
+                      >
+                        {iconOptions.map(icon => (
+                          <option key={icon} value={icon}>
+                            {icon}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.labelSmall}>Title</label>
+                      <input
+                        type='text'
+                        value={concept.title}
+                        onChange={e =>
+                          handleConceptChange(index, 'title', e.target.value)
+                        }
+                        placeholder='Concept name'
+                        style={styles.input}
+                      />
+                    </div>
+                  </div>
+                  <div style={styles.formGroup}>
+                    <label style={styles.labelSmall}>Content</label>
+                    <textarea
+                      value={concept.content}
+                      onChange={e =>
+                        handleConceptChange(index, 'content', e.target.value)
+                      }
+                      placeholder='Explain this concept...'
+                      style={styles.textarea}
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              ))}
               <button
                 type='button'
                 onClick={addConcept}
                 style={styles.addButton}
               >
-                + Add Concept
+                Add Concept
               </button>
-            </div>
-
-            {formData.keyConcepts.map((concept, index) => (
-              <div key={index} style={styles.conceptCard}>
-                <div style={styles.cardHeader}>
-                  <h4 style={styles.cardTitle}>Concept {index + 1}</h4>
-                  {formData.keyConcepts.length > 1 && (
-                    <button
-                      type='button'
-                      onClick={() => removeConcept(index)}
-                      style={styles.removeButton}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                <div style={styles.gridTwo}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.labelSmall}>Icon</label>
-                    <select
-                      value={concept.icon}
-                      onChange={e =>
-                        handleConceptChange(index, 'icon', e.target.value)
-                      }
-                      style={styles.select}
-                    >
-                      {iconOptions.map(icon => (
-                        <option key={icon} value={icon}>
-                          {icon} {icon}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.labelSmall}>Concept Title *</label>
-                    <input
-                      type='text'
-                      value={concept.title}
-                      onChange={e =>
-                        handleConceptChange(index, 'title', e.target.value)
-                      }
-                      placeholder='e.g., Workflow Triggers'
-                      style={styles.input}
-                    />
-                  </div>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.labelSmall}>Concept Content *</label>
-                  <textarea
-                    value={concept.content}
-                    onChange={e =>
-                      handleConceptChange(index, 'content', e.target.value)
-                    }
-                    placeholder='Explain this key concept...'
-                    style={styles.textarea}
-                  />
-                </div>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {/* Transcript */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Additional Content</h2>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Transcript</label>
-            <textarea
-              name='transcript'
-              value={formData.transcript}
-              onChange={handleChange}
-              placeholder='Enter the full video transcript here...'
-              style={styles.textareaLarge}
-            />
-            <small style={styles.helpText}>
-              Full video transcript (optional)
-            </small>
-          </div>
-        </section>
-
-        {/* Learning Path */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Learning Path</h2>
-
-          <div style={styles.formGroup}>
-            <label style={styles.checkboxLabel}>
-              <input
-                type='checkbox'
-                checked={formData.learningPath.isPartOfPath}
-                onChange={e =>
-                  handleLearningPathChange('isPartOfPath', e.target.checked)
-                }
-                style={styles.checkbox}
-              />
-              Part of Learning Path
-            </label>
-          </div>
-
-          {formData.learningPath.isPartOfPath && (
-            <>
-              <div style={styles.gridTwo}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Path Name *</label>
-                  <input
-                    type='text'
-                    value={formData.learningPath.pathName}
-                    onChange={e =>
-                      handleLearningPathChange('pathName', e.target.value)
-                    }
-                    placeholder='e.g., Automation Essentials'
-                    style={styles.input}
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Path ID *</label>
-                  <input
-                    type='text'
-                    value={formData.learningPath.pathId}
-                    onChange={e =>
-                      handleLearningPathChange('pathId', e.target.value)
-                    }
-                    placeholder='e.g., automation-essentials'
-                    style={styles.input}
-                  />
-                </div>
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Order in Path *</label>
-                <input
-                  type='number'
-                  value={formData.learningPath.orderInPath}
-                  onChange={e =>
-                    handleLearningPathChange('orderInPath', e.target.value)
-                  }
-                  placeholder='e.g., 1'
-                  style={styles.input}
-                  min='1'
-                />
-              </div>
-
-              <div style={styles.gridTwo}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Previous Video ID</label>
-                  <input
-                    type='text'
-                    value={formData.learningPath.previousVideoId}
-                    onChange={e =>
-                      handleLearningPathChange(
-                        'previousVideoId',
-                        e.target.value,
-                      )
-                    }
-                    placeholder='e.g., workflow-basics'
-                    style={styles.input}
-                  />
-                  <small style={styles.helpText}>
-                    You can find the id by viewing All Videos
-                  </small>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Next Video ID</label>
-                  <input
-                    type='text'
-                    value={formData.learningPath.nextVideoId}
-                    onChange={e =>
-                      handleLearningPathChange('nextVideoId', e.target.value)
-                    }
-                    placeholder='e.g., advanced-triggers'
-                    style={styles.input}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {!formData.learningPath.isPartOfPath && (
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Suggested Next Video (Standalone)
-              </label>
-              <input
-                type='text'
-                name='suggestedNextVideo'
-                value={formData.suggestedNextVideo}
-                onChange={handleChange}
-                placeholder='e.g., related-video-id'
-                style={styles.input}
-              />
-              <small style={styles.helpText}>
-                You can find the id by viewing All Videos
-              </small>
             </div>
           )}
         </section>
 
         {/* Learning Resources */}
         <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Learning Resources</h2>
-            <button
-              type='button'
-              onClick={() => addResource('learning')}
-              style={styles.addButton}
-            >
-              + Add Resource
-            </button>
-          </div>
-
+          <h2 style={styles.sectionTitle}>Learning Resources</h2>
           {formData.learningResources.map((resource, index) => (
-            <div key={index} style={styles.resourceCardGreen}>
+            <div key={index} style={styles.resourceCard}>
               <div style={styles.cardHeader}>
-                <h4 style={styles.resourceTitle}>Resource {index + 1}</h4>
+                <h4 style={styles.resourceTitle}>
+                  Learning Resource {index + 1}
+                </h4>
                 {formData.learningResources.length > 1 && (
                   <button
                     type='button'
@@ -1127,22 +948,42 @@ const VideoForm = ({ mode = 'create' }) => {
                 )}
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.labelSmall}>Title</label>
-                <input
-                  type='text'
-                  value={resource.title}
-                  onChange={e =>
-                    handleResourceChange(
-                      'learning',
-                      index,
-                      'title',
-                      e.target.value,
-                    )
-                  }
-                  placeholder='Resource name'
-                  style={styles.input}
-                />
+              <div style={styles.gridTwo}>
+                <div style={styles.formGroup}>
+                  <label style={styles.labelSmall}>Title</label>
+                  <input
+                    type='text'
+                    value={resource.title}
+                    onChange={e =>
+                      handleResourceChange(
+                        'learning',
+                        index,
+                        'title',
+                        e.target.value,
+                      )
+                    }
+                    placeholder='e.g., Automation Essentials'
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.labelSmall}>Link</label>
+                  <input
+                    type='url'
+                    value={resource.link}
+                    onChange={e =>
+                      handleResourceChange(
+                        'learning',
+                        index,
+                        'link',
+                        e.target.value,
+                      )
+                    }
+                    placeholder='/learning/actions'
+                    style={styles.input}
+                  />
+                </div>
               </div>
 
               <div style={styles.formGroup}>
@@ -1162,45 +1003,26 @@ const VideoForm = ({ mode = 'create' }) => {
                   style={styles.input}
                 />
               </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.labelSmall}>Link</label>
-                <input
-                  type='url'
-                  value={resource.link}
-                  onChange={e =>
-                    handleResourceChange(
-                      'learning',
-                      index,
-                      'link',
-                      e.target.value,
-                    )
-                  }
-                  placeholder='https://...'
-                  style={styles.input}
-                />
-              </div>
             </div>
           ))}
+          <button
+            type='button'
+            onClick={() => addResource('learning')}
+            style={styles.addButton}
+          >
+            Add Learning Resource
+          </button>
         </section>
 
         {/* Document Resources */}
         <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Document Resources</h2>
-            <button
-              type='button'
-              onClick={() => addResource('document')}
-              style={styles.addButton}
-            >
-              + Add Resource
-            </button>
-          </div>
-
+          <h2 style={styles.sectionTitle}>Document Resources</h2>
           {formData.documentResources.map((document, index) => (
-            <div key={index} style={styles.resourceCardBlue}>
+            <div key={index} style={styles.documentCard}>
               <div style={styles.cardHeader}>
-                <h4 style={styles.resourceTitle}>Document {index + 1}</h4>
+                <h4 style={styles.resourceTitle}>
+                  Document Resource {index + 1}
+                </h4>
                 {formData.documentResources.length > 1 && (
                   <button
                     type='button'
@@ -1212,22 +1034,42 @@ const VideoForm = ({ mode = 'create' }) => {
                 )}
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.labelSmall}>Title</label>
-                <input
-                  type='text'
-                  value={document.title}
-                  onChange={e =>
-                    handleResourceChange(
-                      'document',
-                      index,
-                      'title',
-                      e.target.value,
-                    )
-                  }
-                  placeholder='Document name'
-                  style={styles.input}
-                />
+              <div style={styles.gridTwo}>
+                <div style={styles.formGroup}>
+                  <label style={styles.labelSmall}>Title</label>
+                  <input
+                    type='text'
+                    value={document.title}
+                    onChange={e =>
+                      handleResourceChange(
+                        'document',
+                        index,
+                        'title',
+                        e.target.value,
+                      )
+                    }
+                    placeholder='Document name'
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.labelSmall}>Link</label>
+                  <input
+                    type='url'
+                    value={document.link}
+                    onChange={e =>
+                      handleResourceChange(
+                        'document',
+                        index,
+                        'link',
+                        e.target.value,
+                      )
+                    }
+                    placeholder='https://...'
+                    style={styles.input}
+                  />
+                </div>
               </div>
 
               <div style={styles.formGroup}>
@@ -1247,26 +1089,15 @@ const VideoForm = ({ mode = 'create' }) => {
                   style={styles.input}
                 />
               </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.labelSmall}>Link</label>
-                <input
-                  type='url'
-                  value={document.link}
-                  onChange={e =>
-                    handleResourceChange(
-                      'document',
-                      index,
-                      'link',
-                      e.target.value,
-                    )
-                  }
-                  placeholder='https://...'
-                  style={styles.input}
-                />
-              </div>
             </div>
           ))}
+          <button
+            type='button'
+            onClick={() => addResource('document')}
+            style={styles.addButton}
+          >
+            Add Document Resource
+          </button>
         </section>
 
         {/* Submit Section */}
@@ -1308,28 +1139,30 @@ const VideoForm = ({ mode = 'create' }) => {
 const styles = {
   wrapper: {
     minHeight: '100vh',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f7fafc',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
   },
   container: {
-    maxWidth: '1000px',
+    maxWidth: '900px',
     margin: '0 auto',
-    padding: '0 20px 40px 20px',
+    padding: '20px',
   },
   pageHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: '30px',
-    paddingTop: '30px',
+    paddingBottom: '20px',
+    borderBottom: '2px solid #e2e8f0',
   },
   pageTitle: {
-    fontSize: '28px',
+    fontSize: '2rem',
     fontWeight: '700',
     color: '#2d3748',
     margin: '0 0 8px 0',
   },
   editingNote: {
-    fontSize: '16px',
+    fontSize: '1rem',
     color: '#718096',
     margin: 0,
   },
@@ -1338,29 +1171,26 @@ const styles = {
     color: '#4a5568',
     border: 'none',
     borderRadius: '6px',
-    padding: '10px 16px',
+    padding: '10px 20px',
     cursor: 'pointer',
     fontSize: '14px',
     fontWeight: '500',
-    textDecoration: 'none',
   },
   section: {
-    marginBottom: '40px',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    padding: '30px',
+    marginBottom: '24px',
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
   },
   sectionTitle: {
-    fontSize: '20px',
+    fontSize: '1.5rem',
     fontWeight: '600',
     color: '#2d3748',
-    marginBottom: '20px',
-    margin: '0 0 20px 0',
-    borderBottom: '2px solid #e2e8f0',
-    paddingBottom: '10px',
-  },
-  sectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px',
+    marginBottom: '24px',
+    borderBottom: '2px solid #4299e1',
+    paddingBottom: '8px',
   },
   formGroup: {
     marginBottom: '20px',
@@ -1369,7 +1199,7 @@ const styles = {
     display: 'block',
     marginBottom: '8px',
     fontWeight: '600',
-    color: '#2d3748',
+    color: '#4a5568',
     fontSize: '14px',
   },
   labelSmall: {
@@ -1381,90 +1211,57 @@ const styles = {
   },
   input: {
     width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #cbd5e0',
-    borderRadius: '6px',
+    padding: '12px 16px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
     fontSize: '14px',
-    fontFamily: 'inherit',
+    color: '#2d3748',
+    backgroundColor: '#ffffff',
+    transition: 'border-color 0.2s ease',
+    boxSizing: 'border-box',
   },
   inputError: {
-    borderColor: '#f56565',
-    backgroundColor: '#fed7d7',
+    borderColor: '#e53e3e',
   },
   inputSuccess: {
-    borderColor: '#48bb78',
-    backgroundColor: '#c6f6d5',
-  },
-  select: {
-    width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #cbd5e0',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    backgroundColor: '#ffffff',
+    borderColor: '#38a169',
   },
   textarea: {
     width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #cbd5e0',
-    borderRadius: '6px',
+    padding: '12px 16px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
     fontSize: '14px',
-    fontFamily: 'inherit',
-    minHeight: '100px',
+    color: '#2d3748',
+    backgroundColor: '#ffffff',
     resize: 'vertical',
+    fontFamily: 'inherit',
+    lineHeight: '1.5',
+    boxSizing: 'border-box',
   },
-  textareaSmall: {
+  select: {
     width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #cbd5e0',
-    borderRadius: '6px',
+    padding: '12px 16px',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
     fontSize: '14px',
-    fontFamily: 'inherit',
-    minHeight: '80px',
-    resize: 'vertical',
-  },
-  textareaLarge: {
-    width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #cbd5e0',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    minHeight: '150px',
-    resize: 'vertical',
+    color: '#2d3748',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer',
+    boxSizing: 'border-box',
   },
   helpText: {
-    display: 'block',
-    marginTop: '5px',
     fontSize: '12px',
     color: '#718096',
-  },
-  validationChecking: {
-    display: 'block',
-    marginTop: '5px',
-    fontSize: '12px',
-    color: '#4a5568',
-  },
-  validationError: {
-    display: 'block',
-    marginTop: '5px',
-    fontSize: '12px',
-    color: '#e53e3e',
-  },
-  validationSuccess: {
-    display: 'block',
-    marginTop: '5px',
-    fontSize: '12px',
-    color: '#38a169',
+    marginTop: '4px',
+    fontStyle: 'italic',
   },
   checkboxLabel: {
     display: 'flex',
     alignItems: 'center',
-    cursor: 'pointer',
-    fontWeight: '600',
-    color: '#2d3748',
     fontSize: '14px',
+    fontWeight: '500',
+    color: '#4a5568',
   },
   checkbox: {
     marginRight: '8px',
@@ -1476,62 +1273,69 @@ const styles = {
     gap: '20px',
     marginBottom: '20px',
   },
-  templateGrid: {
+  gridThree: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gridTemplateColumns: '100px 1fr',
     gap: '16px',
+    marginBottom: '16px',
   },
-  templateCard: {
+  templateSelector: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  templateButton: {
+    padding: '10px 20px',
     border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    padding: '20px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
+    borderRadius: '6px',
     backgroundColor: '#ffffff',
+    color: '#4a5568',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    transition: 'all 0.2s ease',
   },
-  templateCardActive: {
+  templateButtonActive: {
     borderColor: '#4299e1',
     backgroundColor: '#ebf8ff',
+    color: '#2b6cb0',
+  },
+  templateContent: {
+    marginTop: '20px',
   },
   templateTitle: {
-    margin: '0 0 8px 0',
-    fontSize: '16px',
+    fontSize: '1.2rem',
     fontWeight: '600',
     color: '#2d3748',
-  },
-  templateDescription: {
-    margin: 0,
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '1.5',
+    marginBottom: '16px',
   },
   stepCard: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e2e8f0',
+    backgroundColor: '#f7fafc',
     borderRadius: '8px',
     padding: '20px',
     marginBottom: '16px',
+    border: '1px solid #e2e8f0',
   },
   conceptCard: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    padding: '20px',
-    marginBottom: '16px',
-  },
-  resourceCardGreen: {
     backgroundColor: '#f0fff4',
+    borderRadius: '8px',
+    padding: '20px',
+    marginBottom: '16px',
     border: '1px solid #c6f6d5',
-    borderRadius: '8px',
-    padding: '20px',
-    marginBottom: '16px',
   },
-  resourceCardBlue: {
-    backgroundColor: '#ebf8ff',
-    border: '1px solid #bee3f8',
+  resourceCard: {
+    backgroundColor: '#f0fff4',
     borderRadius: '8px',
     padding: '20px',
     marginBottom: '16px',
+    border: '1px solid #c6f6d5',
+  },
+  documentCard: {
+    backgroundColor: '#eff6ff',
+    borderRadius: '8px',
+    padding: '20px',
+    marginBottom: '16px',
+    border: '1px solid #bee3f8',
   },
   cardHeader: {
     display: 'flex',
