@@ -1,4 +1,4 @@
-// src/components/library/data/docsproductsdata.js
+// src/data/docsProductsData.js
 
 export const docsProductsData = {
   title: 'Product Documentation',
@@ -6,38 +6,36 @@ export const docsProductsData = {
     'Choose your Resolve platform to access comprehensive guides and references',
   products: [
     {
-      id: 'rita-go',
-      title: 'Rita Go Documentation',
-      description:
-        'Our newest AI-powered automation assistant for intelligent workflow management.',
-      link: '/rita-go/',
-    },
-    {
       id: 'actions',
-      title: 'Resolve Actions Documentation',
+      title: 'Resolve Platform Documentation',
       description:
-        'Our newest drag-and-drop, no-code IT process automation platform.',
+        'Automate and orchestrate IT operations with low-code platform',
       link: '/actions/',
     },
     {
-      id: 'insights',
-      title: 'Resolve Insights Documentation',
-      description: 'Our Discovery and Dependency Mapping (DDM) product.',
-      link: '/insights/',
+      id: 'ritago',
+      title: 'Rita Go Documentation',
+      description:
+        'Next-gen Service Desk Assistant for enhanced IT service delivery',
+      link: '/rita-go/',
     },
     {
       id: 'pro',
-      title: 'Resolve Actions Pro Documentation',
-      description:
-        'Tailor-made IT automation with powerful code-based features.',
+      title: 'Actions Pro Documentation',
+      description: 'Tailor made IT automation with powerful features',
       link: '/pro/',
     },
     {
       id: 'express',
-      title: 'Resolve Actions Express Documentation',
-      description:
-        'Drag-and-drop, no-code IT automation with a large built-in library of automation actions.',
+      title: 'Express Documentation',
+      description: 'No code IT automation with built-in actions library',
       link: '/express/',
+    },
+    {
+      id: 'insights',
+      title: 'Insights Documentation',
+      description: 'Discovery and dependency mapping for your team',
+      link: '/insights/',
     },
   ],
 }
