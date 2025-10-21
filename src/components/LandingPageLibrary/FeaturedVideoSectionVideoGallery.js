@@ -93,95 +93,94 @@ const FeaturedVideoSectionVideoGallery = ({
       : 'translate(-50%, -50%)',
     width: '80px',
     height: '80px',
-    background: isVideoHovered
-      ? 'rgba(0, 102, 255, 0.95)'
-      : 'rgba(0, 102, 255, 0.8)',
+    background: isVideoHovered ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.7)',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 102, 255, 0.3)',
+    zIndex: 10,
   }
 
   const playIconStyle = {
-    color: '#FFFFFF',
     fontSize: '24px',
+    color: 'white',
     marginLeft: '4px',
   }
 
   // Video content styles
   const videoContentStyle = {
-    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
   }
 
   const featuredLabelStyle = {
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
     fontWeight: '600',
-    color: '#008B8B',
     textTransform: 'uppercase',
     letterSpacing: '1px',
-    marginBottom: '12px',
+    color: '#008B8B',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const videoTitleStyle = {
-    fontSize: '1.75rem',
-    fontWeight: '600',
+    fontSize: '2rem',
+    fontWeight: '700',
+    lineHeight: '1.2',
+    margin: 0,
     color: '#2D3748',
-    marginBottom: '16px',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    lineHeight: '1.3',
   }
 
   const videoDescriptionStyle = {
-    fontSize: '1rem',
-    color: '#4A5568',
+    fontSize: '1.1rem',
     lineHeight: '1.6',
-    marginBottom: '16px', // Reduced from 24px to 16px
+    color: '#4A5568',
+    margin: 0,
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const videoMetaStyle = {
     display: 'flex',
     gap: '12px',
-    marginBottom: '16px', // Reduced from 24px to 16px
+    alignItems: 'center',
+    flexWrap: 'wrap',
   }
 
   const durationBadgeStyle = {
-    backgroundColor: '#008B8B',
-    color: '#FFFFFF',
+    background: '#E2E8F0',
+    color: '#2D3748',
     padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
     fontWeight: '500',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const levelBadgeStyle = {
-    backgroundColor: '#0066FF',
-    color: '#FFFFFF',
+    background: '#008B8B',
+    color: 'white',
     padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
     fontWeight: '500',
+    textTransform: 'capitalize',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
   }
 
   const galleryButtonStyle = {
-    backgroundColor: '#0066FF',
-    color: '#FFFFFF',
+    background: '#0066FF',
+    color: 'white',
     border: 'none',
-    borderRadius: '8px',
     padding: '12px 24px',
+    borderRadius: '8px',
     fontSize: '1rem',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
-    textDecoration: 'none',
-    display: 'inline-block',
-    marginTop: '8px',
+    alignSelf: 'flex-start',
   }
 
   // Don't render if no featured video
@@ -194,7 +193,7 @@ const FeaturedVideoSectionVideoGallery = ({
       <div style={containerStyle}>
         <div style={videoFrameStyle}>
           <div style={featuredVideoGridStyle}>
-            {/* Video Player - Smart gallery/YouTube/Vimeo fallback */}
+            {/* Video Player */}
             <BrowserOnly
               fallback={
                 <div

@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react'
 import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsExpress.js'
-import { videoLibrary } from '@site/src/components/ActionVideoLibrary/Data/VideoData.js'
+import { useVideoLibrary } from '@site/src/components/ActionVideoLibrary/Data/VideoData.js'
 
 // Import the shared modular components (excluding filter) + hydration-safe cards
 import WelcomeSection from '../LandingPageLibrary/WelcomeSection.js'
@@ -52,25 +52,29 @@ const ExpressIndexNoFilter = ({
 
   // Data sources
   resources = learningPaths,
-  videoResources = videoLibrary,
+  videoResources, // CHANGED: Now comes from Firebase, not static
 }) => {
-  // Express product info (referencing custom.css values)
-  const productInfo = {
-    accent: 'var(--brand-purple)', // Express brand color from custom.css
-    contentType: 'automation development',
-    contentTypeDisplay: 'Automation Development',
-  }
+  // CHANGED: Get real-time video data from Firebase
+  const {
+    videos: videoLibrary,
+    loading: videosLoading,
+    error: videosError,
+  } = useVideoLibrary()
+
+  // Use Firebase data if available, otherwise use passed videoResources
+  const activeVideoResources =
+    videoLibrary.length > 0 ? videoLibrary : videoResources || []
 
   // Get featured video (memoized for performance)
   const featuredVideo = useMemo(() => {
-    if (!videoResources || videoResources.length === 0) return null
+    if (!activeVideoResources || activeVideoResources.length === 0) return null
 
     // Look for Express featured video
-    const expressFeatured = videoResources.find(
+    const expressFeatured = activeVideoResources.find(
       v => v.product === 'express' && v.featured === true,
     )
-    return expressFeatured || videoResources[0] // fallback
-  }, [videoResources])
+    return expressFeatured || activeVideoResources[0] // fallback
+  }, [activeVideoResources])
 
   // All learning paths (no filtering applied)
   const allPaths = useMemo(() => {
@@ -79,16 +83,14 @@ const ExpressIndexNoFilter = ({
 
   return (
     <>
-      {/* Welcome Section with product colors */}
-      <WelcomeSection
-        welcomeSectionProps={welcomeSectionProps}
-        productColors={{ accent: productInfo.accent }}
-      />
+      {/* Welcome Section */}
+      <WelcomeSection welcomeSectionProps={welcomeSectionProps} />
 
       {/* Featured Video Section */}
       {featuredVideo && (
         <FeaturedVideoSectionVideoGallery
           featuredVideo={featuredVideo}
+          videoGallery={activeVideoResources}
           sectionProps={featuredVideoSectionProps}
         />
       )}
@@ -99,11 +101,8 @@ const ExpressIndexNoFilter = ({
         productInfo={{ product: 'express' }}
       />
 
-      {/* Help Section with product colors */}
-      <HelpSection
-        helpSectionProps={helpSectionProps}
-        productColors={{ accent: productInfo.accent }}
-      />
+      {/* Help Section */}
+      <HelpSection helpSectionProps={helpSectionProps} />
     </>
   )
 }

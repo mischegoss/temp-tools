@@ -1,12 +1,13 @@
+
 // src-learning/components/ActionVideoLibrary/Data/VideoData.js
-// UPDATED: Now uses Firebase real-time data instead of static data
+// FIXED: Resolves subscription timing issue where hooks don't receive existing data
 
 import { useState, useEffect } from 'react'
 import { videoStore } from '../../../firebase/videoOperations'
 
 /**
  * React hook for real-time video library data
- * Provides automatic updates when Firebase data changes
+ * FIXED: Now properly handles case where data exists before subscription
  *
  * @returns {Object} { videos, loading, error }
  */
@@ -18,6 +19,15 @@ export const useVideoLibrary = () => {
   useEffect(() => {
     console.log('🎬 Setting up video library hook')
 
+    // FIX: Check if data already exists in the store
+    const existingVideos = videoStore.getVideos()
+    if (existingVideos.length > 0) {
+      console.log(`📊 Found existing videos in store: ${existingVideos.length}`)
+      setVideos(existingVideos)
+      setLoading(false)
+      setError(null)
+    }
+
     // Subscribe to real-time video updates
     const unsubscribe = videoStore.subscribe((updatedVideos, updateError) => {
       if (updateError) {
@@ -25,7 +35,7 @@ export const useVideoLibrary = () => {
         setError(updateError.message || 'Failed to load videos')
         setLoading(false)
       } else {
-        console.log(`📊 Video library updated: ${updatedVideos.length} videos`)
+        console.log(`📊 Video library hook updated: ${updatedVideos.length} videos`)
         setVideos(updatedVideos)
         setError(null)
         setLoading(false)

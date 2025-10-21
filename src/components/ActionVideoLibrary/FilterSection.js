@@ -10,6 +10,7 @@ import {
 /**
  * VideoFilterSection component - Filter buttons for video gallery
  * Uses custom filter colors that match the Actions dark theme
+ * UPDATED: Changed RITA to RITA Go for new product focus
  */
 const VideoFilterSection = ({
   activeFilter,
@@ -21,6 +22,7 @@ const VideoFilterSection = ({
   const totalCount = resources.length
 
   // Custom filter colors for video categories using Actions dark theme
+  // UPDATED: Changed 'rita' to 'rita-go' and updated styling
   const videoFilterColors = {
     gradients: {
       all: 'linear-gradient(to bottom, #05070f 0%, #0d1637 100%)',
@@ -28,7 +30,7 @@ const VideoFilterSection = ({
       workflows: 'linear-gradient(to bottom, #05070f 0%, #0050c7 100%)',
       'automation-design':
         'linear-gradient(to bottom, #05070f 0%, #0066FF 100%)',
-      rita: 'linear-gradient(to bottom, #05070f 0%, #008B8B 100%)',
+      'rita-go': 'linear-gradient(to bottom, #05070f 0%, #008B8B 100%)', // Updated key
       jarvis: 'linear-gradient(to bottom, #05070f 0%, #6B46C1 100%)',
     },
     borderColors: {
@@ -36,7 +38,7 @@ const VideoFilterSection = ({
       integrations: '#00b8de',
       workflows: '#0050c7',
       'automation-design': '#0066FF',
-      rita: '#008B8B',
+      'rita-go': '#008B8B', // Updated key
       jarvis: '#6B46C1',
     },
     shadowColors: {
@@ -44,7 +46,7 @@ const VideoFilterSection = ({
       integrations: 'rgba(0, 184, 222, 0.2)',
       workflows: 'rgba(0, 80, 199, 0.2)',
       'automation-design': 'rgba(0, 102, 255, 0.2)',
-      rita: 'rgba(0, 139, 139, 0.2)',
+      'rita-go': 'rgba(0, 139, 139, 0.2)', // Updated key
       jarvis: 'rgba(107, 70, 193, 0.2)',
     },
     activeGlowColors: {
@@ -52,7 +54,7 @@ const VideoFilterSection = ({
       integrations: 'rgba(0, 184, 222, 0.4)',
       workflows: 'rgba(0, 80, 199, 0.4)',
       'automation-design': 'rgba(0, 102, 255, 0.4)',
-      rita: 'rgba(0, 139, 139, 0.4)',
+      'rita-go': 'rgba(0, 139, 139, 0.4)', // Updated key
       jarvis: 'rgba(107, 70, 193, 0.4)',
     },
   }
@@ -133,13 +135,14 @@ const VideoFilterSection = ({
       >
         Automation Design ({totalByLevel['automation-design']})
       </button>
+      {/* UPDATED: Changed from 'rita' to 'rita-go' and updated button text */}
       <button
-        style={getFilterButtonStyle('rita', activeFilter === 'rita')}
-        onClick={() => setActiveFilter('rita')}
-        onMouseEnter={e => handleMouseEnter(e, 'rita')}
-        onMouseLeave={e => handleMouseLeave(e, 'rita')}
+        style={getFilterButtonStyle('rita-go', activeFilter === 'rita-go')}
+        onClick={() => setActiveFilter('rita-go')}
+        onMouseEnter={e => handleMouseEnter(e, 'rita-go')}
+        onMouseLeave={e => handleMouseLeave(e, 'rita-go')}
       >
-        RITA ({totalByLevel.rita})
+        RITA Go ({totalByLevel['rita-go'] || 0})
       </button>
       <button
         style={getFilterButtonStyle('jarvis', activeFilter === 'jarvis')}

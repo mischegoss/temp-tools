@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react'
 import { learningPaths } from '@site/src/components/LandingPageLibrary/Data/LearningPathsActions.js'
-import { videoLibrary } from '@site/src/components/ActionVideoLibrary/Data/VideoData.js'
+import { useVideoLibrary } from '@site/src/components/ActionVideoLibrary/Data/VideoData.js'
 
 // Import the shared modular components (excluding filter) + hydration-safe cards
 import WelcomeSection from '../LandingPageLibrary/WelcomeSection.js'
@@ -52,18 +52,29 @@ const ActionsIndexNoFilter = ({
 
   // Data sources
   resources = learningPaths,
-  videoResources = videoLibrary,
+  videoResources, // CHANGED: Now comes from Firebase, not static
 }) => {
+  // CHANGED: Get real-time video data from Firebase
+  const {
+    videos: videoLibrary,
+    loading: videosLoading,
+    error: videosError,
+  } = useVideoLibrary()
+
+  // Use Firebase data if available, otherwise use passed videoResources
+  const activeVideoResources =
+    videoLibrary.length > 0 ? videoLibrary : videoResources || []
+
   // Get featured video (memoized for performance)
   const featuredVideo = useMemo(() => {
-    if (!videoResources || videoResources.length === 0) return null
+    if (!activeVideoResources || activeVideoResources.length === 0) return null
 
     // Look for Actions featured video
-    const actionsFeatured = videoResources.find(
+    const actionsFeatured = activeVideoResources.find(
       v => v.product === 'actions' && v.featured === true,
     )
-    return actionsFeatured || videoResources[0] // fallback
-  }, [videoResources])
+    return actionsFeatured || activeVideoResources[0] // fallback
+  }, [activeVideoResources])
 
   // All learning paths (no filtering applied)
   const allPaths = useMemo(() => {
@@ -79,7 +90,7 @@ const ActionsIndexNoFilter = ({
       {featuredVideo && (
         <FeaturedVideoSectionVideoGallery
           featuredVideo={featuredVideo}
-          videoGallery={videoResources}
+          videoGallery={activeVideoResources}
           sectionProps={featuredVideoSectionProps}
         />
       )}
