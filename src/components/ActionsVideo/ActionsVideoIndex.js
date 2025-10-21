@@ -33,7 +33,7 @@ const ITEMS_PER_PAGE = 12
 
 /**
  * ActionsVideoIndex component - Netflix-style video gallery with product/level filters
- * Displays videos in 3 main sections: Platform, Device Discovery, Automation Design
+ * Displays videos in sections: Rita Go, Platform, Pro, Express, Insights
  */
 const ActionsVideoIndex = ({
   // Welcome section props
@@ -57,17 +57,17 @@ const ActionsVideoIndex = ({
     additionalText: "and we'll get back to you within 24 hours.",
   },
 }) => {
-  // 🔥 NEW: Use the real-time video library hook instead of static import
+  // Get video data from Firebase
   const { videos: resources, loading, error } = useVideoLibrary()
 
+  // State for filters
   const [activeProductFilter, setActiveProductFilter] = useState('all')
   const [activeLevelFilter, setActiveLevelFilter] = useState('all')
-  const [searchResults, setSearchResults] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchIntent, setSearchIntent] = useState({ suggestions: [] })
+  const [searchResults, setSearchResults] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
 
-  // 🔥 FIX: Update searchResults when resources load
+  // Initialize search results when resources load
   React.useEffect(() => {
     if (resources.length > 0 && searchResults.length === 0 && !searchTerm) {
       console.log(
@@ -75,35 +75,31 @@ const ActionsVideoIndex = ({
         resources.length,
         'videos',
       )
-      console.log('📊 Sample video structure:', resources[0])
       setSearchResults(resources)
     }
   }, [resources, searchResults.length, searchTerm])
 
-  // 🔥 FIX: Memoize the handleSearchResults function to prevent infinite renders
-  const handleSearchResults = useCallback(
-    (results, term, intent = { suggestions: [] }) => {
-      console.log('🔍 Search results updated:', {
-        resultsCount: results.length,
-        term,
-        intentSuggestions: intent.suggestions.length,
-      })
-      setSearchResults(results)
-      setSearchTerm(term)
-      setSearchIntent(intent)
-    },
-    [],
-  ) // Empty dependency array since we only use state setters (which are stable)
+  // Handle search results
+  const handleSearchResults = useCallback((results, term) => {
+    console.log('🔍 Search results updated:', {
+      resultsCount: results.length,
+      term,
+    })
+    setSearchResults(results)
+    setSearchTerm(term)
+    setCurrentPage(1) // Reset to first page when searching
+  }, [])
 
-  // Handle page change with scroll to top
-  const handlePageChange = pageNumber => {
-    setCurrentPage(pageNumber)
+  // Handle page changes
+  const handlePageChange = useCallback(page => {
+    setCurrentPage(page)
+    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [])
 
-  // Use search results instead of resources for all calculations
+  // Determine which videos to process (search results take precedence)
   const videosToProcess = useMemo(() => {
-    const result = searchTerm ? searchResults : resources
+    const result = searchTerm.trim() ? searchResults : resources
     console.log('📋 Videos to process:', {
       searchTerm,
       searchResultsCount: searchResults.length,
@@ -116,6 +112,7 @@ const ActionsVideoIndex = ({
   // Calculate how many videos match each individual product
   const totalByProduct = useMemo(() => {
     const counts = {
+      'rita-go': 0,
       actions: 0,
       pro: 0,
       express: 0,
@@ -204,6 +201,7 @@ const ActionsVideoIndex = ({
     )
 
     const groups = {
+      'rita-go': filteredVideos.filter(video => video.product === 'rita-go'),
       platform: platformVideos,
       platformSections: sortedPlatformSections,
       pro: filteredVideos.filter(video => video.product === 'pro'),
@@ -212,24 +210,17 @@ const ActionsVideoIndex = ({
     }
 
     console.log('📦 Final groups:', {
+      'rita-go': groups['rita-go'].length,
       platform: groups.platform.length,
       pro: groups.pro.length,
       express: groups.express.length,
       insights: groups.insights.length,
-      platformSections: groups.platformSections.length,
     })
 
     return groups
   }, [filteredVideos])
 
-  // Reset filters when search changes
-  React.useEffect(() => {
-    // Optional: Could reset filters when search changes
-    // setActiveProductFilter('all')
-    // setActiveLevelFilter('all')
-  }, [searchTerm])
-
-  // Modified section styles with reduced spacing
+  // Styling
   const welcomeSectionStyleReduced = {
     ...learningHubSectionStyle,
     padding: '60px 0 40px 0',
@@ -237,247 +228,263 @@ const ActionsVideoIndex = ({
 
   const filterSectionStyleReduced = {
     ...learningHubSectionStyle,
-    padding: '20px 0 0 0',
+    padding: '40px 0',
+    background: '#F7FAFC',
   }
 
   const cardsSectionStyleReduced = {
     ...learningHubSectionStyle,
-    padding: '0 0 60px 0',
-  }
-
-  const helpSectionStyleReduced = {
-    ...helpSectionStyle,
-    padding: '60px 0 80px 0',
-  }
-
-  // Section heading styles
-  const sectionHeadingStyle = {
-    fontSize: '1.8rem',
-    fontWeight: '600',
-    color: '#2c3345',
-    marginBottom: '2rem',
-    marginTop: '3rem',
-    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    padding: '60px 0',
   }
 
   const firstSectionHeadingStyle = {
-    ...sectionHeadingStyle,
-    marginTop: '1rem', // Less top margin for first section
+    fontSize: '2rem',
+    fontWeight: '700',
+    color: '#2d3748',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    marginBottom: '1.5rem',
+  }
+
+  const sectionHeadingStyle = {
+    fontSize: '1.8rem',
+    fontWeight: '700',
+    color: '#2d3748',
+    fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    marginBottom: '1.5rem',
   }
 
   const subSectionHeadingStyle = {
     fontSize: '1.4rem',
     fontWeight: '600',
-    color: '#2d3748',
-    marginBottom: '1.5rem',
-    marginTop: '0',
+    color: '#4a5568',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    marginBottom: '1rem',
   }
 
-  // Sub-section container styles with alternating backgrounds and bottom border
-  const getSubSectionContainerStyle = index => ({
-    padding: '2rem 2.5rem',
-    background: index % 2 === 0 ? '#f8fafc' : '#ffffff',
-    borderBottom: '1px solid #e2e8f0',
-  })
+  // Badge styles
+  const badgeStyle = {
+    padding: '4px 12px',
+    borderRadius: '12px',
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    color: 'white',
+    marginLeft: '12px',
+  }
 
-  // Main section container styles (for page 2 sections)
+  const newBadgeStyle = {
+    ...badgeStyle,
+    background: '#10B981', // Green for "New"
+  }
+
+  const featuredBadgeStyle = {
+    ...badgeStyle,
+    background: actionsTheme.primary, // Blue for "Featured"
+  }
+
   const getMainSectionContainerStyle = index => ({
-    padding: '2rem 0',
-    borderBottom: index < 2 ? '1px solid #e2e8f0' : 'none',
+    marginBottom: index === 0 ? '60px' : '50px',
+    marginTop: index === 0 ? '0' : '40px',
   })
 
-  // Pagination styles
+  const getSubSectionContainerStyle = index => ({
+    marginBottom: '40px',
+    marginTop: index === 0 ? '0' : '30px',
+  })
+
   const paginationStyle = {
     display: 'flex',
     justifyContent: 'center',
     gap: '12px',
-    marginTop: '3rem',
-    padding: '2rem 0',
+    marginTop: '60px',
+    padding: '20px 0',
   }
 
   const pageButtonStyle = {
     padding: '12px 24px',
+    background: '#ffffff',
     border: '2px solid #e2e8f0',
     borderRadius: '8px',
-    backgroundColor: '#ffffff',
-    color: '#64748b',
-    fontSize: '0.95rem',
-    fontWeight: '500',
+    color: '#4a5568',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    fontWeight: '600',
     fontFamily: 'SeasonMix, system-ui, -apple-system, sans-serif',
+    transition: 'all 0.2s ease',
   }
 
   const activePageButtonStyle = {
     ...pageButtonStyle,
-    backgroundColor: actionsTheme.primary,
+    background: actionsTheme.primary,
     borderColor: actionsTheme.primary,
-    color: '#ffffff',
+    color: 'white',
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <section style={welcomeSectionStyleReduced}>
+        <div style={containerStyle}>
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <h2 style={sectionTitleStyle}>Loading Video Library...</h2>
+            <p style={subtitleStyle}>
+              Please wait while we load the latest video content.
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Error State
+  if (error) {
+    return (
+      <section style={welcomeSectionStyleReduced}>
+        <div style={containerStyle}>
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <h2 style={sectionTitleStyle}>Unable to Load Videos</h2>
+            <p style={subtitleStyle}>
+              There was an error loading the video library: {error}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: actionsTheme.primary,
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                marginTop: '20px',
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Main Content - Only show when not loading and no error
   return (
     <>
-      {/* Loading State */}
-      {loading && (
-        <section style={welcomeSectionStyleReduced}>
-          <div style={containerStyle}>
-            <div style={{ textAlign: 'center', padding: '60px 0' }}>
-              <h2 style={sectionTitleStyle}>Loading Video Library...</h2>
-              <p style={subtitleStyle}>
-                Please wait while we fetch the latest videos.
-              </p>
-            </div>
+      {/* Welcome Section */}
+      <section style={welcomeSectionStyleReduced}>
+        <div style={containerStyle}>
+          <div style={headerStyle}>
+            <h1 style={sectionTitleStyle}>{welcomeSectionProps.title}</h1>
+            <p style={subtitleStyle}>{welcomeSectionProps.content}</p>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* Error State */}
-      {error && (
-        <section style={welcomeSectionStyleReduced}>
-          <div style={containerStyle}>
-            <div style={{ textAlign: 'center', padding: '60px 0' }}>
-              <h2 style={sectionTitleStyle}>Unable to Load Videos</h2>
-              <p style={subtitleStyle}>
-                There was an error loading the video library: {error}
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: actionsTheme.primary,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  marginTop: '20px',
-                }}
-              >
-                Retry
-              </button>
+      {/* Filter Section */}
+      <section style={filterSectionStyleReduced}>
+        <div style={containerStyle}>
+          <div style={accentLineStyle}></div>
+          <h2 style={sectionTitleStyle}>{filterSectionProps.title}</h2>
+          <p style={subtitleStyle}>{filterSectionProps.pathDescription}</p>
+
+          {/* Netflix-style filter */}
+          <NetflixStyleFilter
+            activeProductFilter={activeProductFilter}
+            setActiveProductFilter={setActiveProductFilter}
+            activeLevelFilter={activeLevelFilter}
+            setActiveLevelFilter={setActiveLevelFilter}
+            totalByProduct={totalByProduct}
+            totalByLevel={totalByLevel}
+            resources={videosToProcess}
+          />
+
+          {/* Search Component */}
+          <VideoSearch
+            resources={resources}
+            onSearchResults={handleSearchResults}
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+          />
+
+          {/* Debug info in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div
+              style={{
+                background: '#f0f8ff',
+                padding: '10px',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                marginTop: '20px',
+              }}
+            >
+              Filtered videos: {filteredVideos.length}
+              <br />
+              Rita Go videos: {groupedVideos['rita-go'].length}
+              <br />
+              Platform videos: {groupedVideos.platform.length}
+              <br />
+              Pro videos: {groupedVideos.pro.length}
+              <br />
+              Express videos: {groupedVideos.express.length}
+              <br />
+              Insights videos: {groupedVideos.insights.length}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
-      {/* Main Content - Only show when not loading and no error */}
-      {!loading && !error && (
-        <>
-          {/* Welcome Section */}
-          <section style={welcomeSectionStyleReduced}>
-            <div style={containerStyle}>
-              <div style={headerStyle}>
-                <h1 style={sectionTitleStyle}>{welcomeSectionProps.title}</h1>
-                <p style={subtitleStyle}>{welcomeSectionProps.content}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Filter Section */}
-          <section style={filterSectionStyleReduced}>
-            <div style={containerStyle}>
-              <div style={accentLineStyle}></div>
-              <h2 style={sectionTitleStyle}>{filterSectionProps.title}</h2>
-              <p style={subtitleStyle}>{filterSectionProps.pathDescription}</p>
-
-              {/* Netflix-style filter */}
-              <NetflixStyleFilter
-                activeProductFilter={activeProductFilter}
-                setActiveProductFilter={setActiveProductFilter}
-                activeLevelFilter={activeLevelFilter}
-                setActiveLevelFilter={setActiveLevelFilter}
-                totalByProduct={totalByProduct}
-                totalByLevel={totalByLevel}
-                resources={videosToProcess}
-              />
-
-              {/* Search Component */}
-              <VideoSearch
-                videos={resources}
-                onSearchResults={handleSearchResults}
-                placeholder='Search videos by title, description, tags...'
-                colorTheme={actionsTheme}
-              />
-
-              {/* Search Intent Feedback */}
-              {searchTerm && searchIntent.suggestions.length > 0 && (
-                <div
-                  style={{
-                    textAlign: 'center',
-                    marginBottom: '20px',
-                    padding: '10px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    color: '#6c757d',
-                  }}
-                >
-                  💡 {searchIntent.suggestions.join(' • ')}
+      {/* Video Cards Section - Paginated content */}
+      <section style={cardsSectionStyleReduced}>
+        <div style={containerStyle}>
+          {/* PAGE 1: Rita Go and Platform Sections */}
+          {currentPage === 1 && (
+            <>
+              {/* Rita Go Section - First with "New" Badge */}
+              {groupedVideos['rita-go'].length > 0 && (
+                <div style={getMainSectionContainerStyle(0)}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '2rem',
+                    }}
+                  >
+                    <h2 style={{ ...firstSectionHeadingStyle, margin: '0' }}>
+                      Rita Go
+                    </h2>
+                    <span style={newBadgeStyle}>New</span>
+                  </div>
+                  <VideoGalleryCards
+                    videos={groupedVideos['rita-go']}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
                 </div>
               )}
 
-              {/* Debug Info - Remove this in production */}
-              {process.env.NODE_ENV === 'development' && (
-                <div
-                  style={{
-                    background: '#f0f0f0',
-                    padding: '10px',
-                    margin: '20px 0',
-                    borderRadius: '4px',
-                    fontSize: '0.8rem',
-                    color: '#666',
-                  }}
-                >
-                  <strong>Debug Info:</strong>
-                  <br />
-                  Resources loaded: {resources.length}
-                  <br />
-                  Videos to process: {videosToProcess.length}
-                  <br />
-                  Search results: {searchResults.length}
-                  <br />
-                  Search term: "{searchTerm}"<br />
-                  Current page: {currentPage}
-                  <br />
-                  Platform videos: {groupedVideos.platform.length}
-                  <br />
-                  Pro videos: {groupedVideos.pro.length}
-                  <br />
-                  Express videos: {groupedVideos.express.length}
-                  <br />
-                  Insights videos: {groupedVideos.insights.length}
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Video Cards Section - Paginated content */}
-          <section style={cardsSectionStyleReduced}>
-            <div style={containerStyle}>
-              {/* PAGE 1: Platform Section with Sub-sections */}
-              {currentPage === 1 && groupedVideos.platform.length > 0 && (
+              {/* Platform Section with "Featured" Badge and Sub-sections */}
+              {groupedVideos.platform.length > 0 && (
                 <>
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
                       marginBottom: '2rem',
-                      marginTop: '1rem',
+                      marginTop:
+                        groupedVideos['rita-go'].length > 0 ? '3rem' : '1rem',
                     }}
                   >
-                    <h2 style={{ ...firstSectionHeadingStyle, marginTop: '0' }}>
-                      Resolve Actions Platform
+                    <h2 style={{ ...sectionHeadingStyle, margin: '0' }}>
+                      Actions Platform
                     </h2>
+                    <span style={featuredBadgeStyle}>Featured</span>
                     <span
                       style={{
-                        background: actionsTheme.primary,
+                        background: '#6B7280',
                         color: 'white',
                         padding: '4px 12px',
                         borderRadius: '12px',
                         fontSize: '0.8rem',
                         fontWeight: '600',
+                        marginLeft: '12px',
                       }}
                     >
                       {groupedVideos.platform.length} videos
@@ -502,98 +509,91 @@ const ActionsVideoIndex = ({
                   )}
                 </>
               )}
+            </>
+          )}
 
-              {/* PAGE 2: Other Products */}
-              {currentPage === 2 && (
-                <>
-                  {/* Resolve Actions Pro Section */}
-                  {groupedVideos.pro.length > 0 && (
-                    <div style={getMainSectionContainerStyle(0)}>
-                      <h2
-                        style={{ ...firstSectionHeadingStyle, marginTop: '0' }}
-                      >
-                        Resolve Actions Pro
-                      </h2>
-                      <VideoGalleryCards
-                        videos={groupedVideos.pro}
-                        hideSection={true}
-                        colorTheme={actionsTheme}
-                      />
-                    </div>
-                  )}
-
-                  {/* Resolve Actions Express Section */}
-                  {groupedVideos.express.length > 0 && (
-                    <div style={getMainSectionContainerStyle(1)}>
-                      <h2 style={{ ...sectionHeadingStyle, marginTop: '0' }}>
-                        Resolve Actions Express
-                      </h2>
-                      <VideoGalleryCards
-                        videos={groupedVideos.express}
-                        hideSection={true}
-                        colorTheme={actionsTheme}
-                      />
-                    </div>
-                  )}
-
-                  {/* Insights Section */}
-                  {groupedVideos.insights.length > 0 && (
-                    <div style={getMainSectionContainerStyle(2)}>
-                      <h2 style={{ ...sectionHeadingStyle, marginTop: '0' }}>
-                        Insights
-                      </h2>
-                      <VideoGalleryCards
-                        videos={groupedVideos.insights}
-                        hideSection={true}
-                        colorTheme={actionsTheme}
-                      />
-                    </div>
-                  )}
-                </>
+          {/* PAGE 2: Other Products (Pro, Express, Insights) */}
+          {currentPage === 2 && (
+            <>
+              {/* Resolve Actions Pro Section */}
+              {groupedVideos.pro.length > 0 && (
+                <div style={getMainSectionContainerStyle(0)}>
+                  <h2 style={{ ...firstSectionHeadingStyle, marginTop: '0' }}>
+                    Pro
+                  </h2>
+                  <VideoGalleryCards
+                    videos={groupedVideos.pro}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
+                </div>
               )}
 
-              {/* Pagination Controls - at the bottom */}
-              <div style={paginationStyle}>
-                <button
-                  style={
-                    currentPage === 1 ? activePageButtonStyle : pageButtonStyle
-                  }
-                  onClick={() => handlePageChange(1)}
-                >
-                  Page 1
-                </button>
-                <button
-                  style={
-                    currentPage === 2 ? activePageButtonStyle : pageButtonStyle
-                  }
-                  onClick={() => handlePageChange(2)}
-                >
-                  Page 2
-                </button>
-              </div>
-            </div>
-          </section>
+              {/* Resolve Actions Express Section */}
+              {groupedVideos.express.length > 0 && (
+                <div style={getMainSectionContainerStyle(1)}>
+                  <h2 style={{ ...sectionHeadingStyle, marginTop: '0' }}>
+                    Express
+                  </h2>
+                  <VideoGalleryCards
+                    videos={groupedVideos.express}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
+                </div>
+              )}
 
-          {/* Help Section */}
-          <section style={helpSectionStyleReduced}>
-            <div style={containerStyle}>
-              <div style={accentLineStyle}></div>
-              <h2 style={helpTitleStyle}>{helpSectionProps.title}</h2>
-              <p style={helpDescriptionStyle}>{helpSectionProps.description}</p>
-              <Link
-                to={`mailto:${helpSectionProps.email}`}
-                style={helpLinkStyle}
-              >
-                Email {helpSectionProps.email}
-              </Link>
-              <span style={helpDescriptionStyle}>
-                {' '}
-                {helpSectionProps.additionalText}
-              </span>
-            </div>
-          </section>
-        </>
-      )}
+              {/* Insights Section */}
+              {groupedVideos.insights.length > 0 && (
+                <div style={getMainSectionContainerStyle(2)}>
+                  <h2 style={{ ...sectionHeadingStyle, marginTop: '0' }}>
+                    Insights
+                  </h2>
+                  <VideoGalleryCards
+                    videos={groupedVideos.insights}
+                    hideSection={true}
+                    colorTheme={actionsTheme}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Pagination Controls - at the bottom */}
+          <div style={paginationStyle}>
+            <button
+              style={
+                currentPage === 1 ? activePageButtonStyle : pageButtonStyle
+              }
+              onClick={() => handlePageChange(1)}
+            >
+              Page 1
+            </button>
+            <button
+              style={
+                currentPage === 2 ? activePageButtonStyle : pageButtonStyle
+              }
+              onClick={() => handlePageChange(2)}
+            >
+              Page 2
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Help Section */}
+      <section style={helpSectionStyle}>
+        <div style={containerStyle}>
+          <h2 style={helpTitleStyle}>{helpSectionProps.title}</h2>
+          <p style={helpDescriptionStyle}>
+            {helpSectionProps.description}{' '}
+            <Link to={`mailto:${helpSectionProps.email}`} style={helpLinkStyle}>
+              Contact {helpSectionProps.email}
+            </Link>{' '}
+            {helpSectionProps.additionalText}
+          </p>
+        </div>
+      </section>
     </>
   )
 }

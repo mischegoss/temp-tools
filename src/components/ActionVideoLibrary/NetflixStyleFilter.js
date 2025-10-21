@@ -4,7 +4,7 @@ import React from 'react'
 
 /**
  * NetflixStyleFilter component - Two independent dropdown filters for video gallery
- * Product filter (Platform, Pro, Express, Insights) and Level filter working independently
+ * Product filter (Platform, Pro, Express, Insights, Rita Go) and Level filter working independently
  */
 const NetflixStyleFilter = ({
   activeProductFilter,
@@ -82,6 +82,9 @@ const NetflixStyleFilter = ({
           }}
         >
           <option value='all'>All Products ({totalCount})</option>
+          <option value='rita-go'>
+            Rita Go ({totalByProduct['rita-go'] || 0})
+          </option>
           <option value='actions'>
             Platform ({totalByProduct.actions || 0})
           </option>

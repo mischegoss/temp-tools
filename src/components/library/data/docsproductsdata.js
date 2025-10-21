@@ -1,10 +1,17 @@
-// src/data/docsProductsData.js
+// src/components/library/data/docsproductsdata.js
 
 export const docsProductsData = {
   title: 'Product Documentation',
   subtitle:
     'Choose your Resolve platform to access comprehensive guides and references',
   products: [
+    {
+      id: 'rita-go',
+      title: 'Rita Go Documentation',
+      description:
+        'Our newest AI-powered automation assistant for intelligent workflow management.',
+      link: '/rita-go/',
+    },
     {
       id: 'actions',
       title: 'Resolve Actions Documentation',
