@@ -1,0 +1,163 @@
+{
+  "/rita-go/Administration/admin-settings": {
+    "users": true,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Getting-Started/add-first-knowledge-article": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Getting-Started/add-users": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Getting-Started/intro-to-dashboard": {
+    "users": true,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Getting-Started/logging-in": {
+    "users": true,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Getting-Started/sign-up": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Getting-Started/test-chat": {
+    "users": true,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Knowledge-Base-Management/metrics": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Knowledge-Base-Management/sample-2": {
+    "users": true,
+    "admin": false,
+    "trial": true,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/Knowledge-Base-Management/confluence-connection": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/connection-sources-overview": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/manage-confluence": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/servicenow-connection": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/sharepoint-connection": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/web-search-connection": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/knowledge-article-maintenance": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/ritago-knowledge-base-setup": {
+    "users": true,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/knowledge-dashboard": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/Knowledge-Base-Management/uploading-knowledge-articles": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/User-Management/sample-3": {
+    "users": true,
+    "admin": true,
+    "trial": false,
+    "premium": false,
+    "enterprise": false
+  },
+  "/rita-go/User-Management/edit-users": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/User-Management/user-management-overview": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  },
+  "/rita-go/User-Management/User Permissions": {
+    "users": false,
+    "admin": true,
+    "trial": true,
+    "premium": true,
+    "enterprise": true
+  }
+}
