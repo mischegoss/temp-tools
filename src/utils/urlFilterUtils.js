@@ -1,4 +1,4 @@
-// src/utils/urlFilterUtils.js - HYBRID SYSTEM WITH ORIGINAL DOM MANIPULATION
+// src/utils/urlFilterUtils.js - FIXED VERSION WITH CORRECTED FILTERING LOGIC
 /**
  * Hybrid URL parameter + original DOM manipulation system
  */
@@ -78,39 +78,30 @@ export async function loadFilterableData() {
 }
 
 /**
- * Check if page should be visible (using original logic)
+ * FIXED: Check if page should be visible - Simple logic that matches requirements exactly
  */
 function shouldShowPage(badges, filters) {
   if (!badges) return true // Pages without badges are always visible
 
-  // User role filtering with boolean toggles (original logic)
   const hasUserBadge = badges.users
   const hasAdminBadge = badges.admin
 
-  // If page has user content and users toggle is off, hide it
-  if (hasUserBadge && !filters.users) {
-    return false
+  // If both filters are active (or no filters), show everything
+  if (filters.users && filters.admin) {
+    return true
   }
 
-  // If page has admin content and admin toggle is off, hide it
-  if (hasAdminBadge && !filters.admin) {
-    return false
+  // If only user filter is active
+  if (filters.users && !filters.admin) {
+    return hasUserBadge // Show pages with user badge (includes Admin&User pages)
   }
 
-  // If page has ONLY user content and user toggle is off, hide it
-  // If page has ONLY admin content and admin toggle is off, hide it
-  // If page has both user and admin content, show if either toggle is on
-  if (hasUserBadge && hasAdminBadge) {
-    // Page has both - show if either toggle is on
-    return filters.users || filters.admin
-  } else if (hasUserBadge) {
-    // Page has only user content - show only if users toggle is on
-    return filters.users
-  } else if (hasAdminBadge) {
-    // Page has only admin content - show only if admin toggle is on
-    return filters.admin
+  // If only admin filter is active
+  if (!filters.users && filters.admin) {
+    return hasAdminBadge // Show pages with admin badge (includes Admin&User pages)
   }
 
+  // If no filters are active (shouldn't happen with current URL logic)
   return true
 }
 

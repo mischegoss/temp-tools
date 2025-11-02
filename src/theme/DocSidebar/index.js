@@ -1,4 +1,4 @@
-// src/theme/DocSidebar/index.js - HYBRID SYSTEM VERSION
+// src/theme/DocSidebar/index.js - FIXED VERSION (NO STYLES MODULE)
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from '@docusaurus/router'

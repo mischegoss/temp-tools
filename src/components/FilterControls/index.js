@@ -1,4 +1,4 @@
-// src/components/FilterControls/index.js - SIMPLIFIED TOGGLEABLE VERSION
+// src/components/FilterControls/index.js - COMPLETE CORRECTED VERSION
 import React, { useState, useEffect } from 'react'
 import { useLocation } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
@@ -79,11 +79,12 @@ function EmbeddedFilterControlsComponent() {
     }
   }
 
+  // FIXED: Don't show "All content" when both toggles are on
   const getDisplayText = () => {
     if (loading) return 'Loading...'
 
     if (userToggle && adminToggle) {
-      return 'All content'
+      return null // Don't show any text when showing all content
     } else if (userToggle && !adminToggle) {
       return pageCount !== null
         ? `User content (${pageCount} pages)`
@@ -94,7 +95,7 @@ function EmbeddedFilterControlsComponent() {
         : 'Admin content'
     }
 
-    return 'All content'
+    return null
   }
 
   // Toggle switch component
@@ -148,31 +149,12 @@ function EmbeddedFilterControlsComponent() {
             top: '2px',
             left: checked ? '22px' : '2px',
             transition: 'left 0.2s ease',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
           }}
         />
       </div>
     </div>
   )
-
-  if (loading) {
-    return (
-      <div
-        style={{
-          background: 'var(--ifm-color-emphasis-100)',
-          border: '1px solid var(--ifm-color-emphasis-300)',
-          borderRadius: '8px',
-          padding: '12px',
-          textAlign: 'center',
-          fontFamily: 'var(--ifm-font-family-base)',
-          fontSize: '13px',
-          color: 'var(--ifm-color-content-secondary)',
-        }}
-      >
-        Loading filters...
-      </div>
-    )
-  }
 
   return (
     <div
@@ -181,46 +163,49 @@ function EmbeddedFilterControlsComponent() {
         border: '1px solid var(--ifm-color-emphasis-300)',
         borderRadius: '8px',
         padding: '16px',
+        marginBottom: '24px',
         fontFamily: 'var(--ifm-font-family-base)',
-        margin: '8px 0',
       }}
     >
-      {/* Header */}
+      {/* FIXED: Conditional display text */}
       <div
         style={{
-          textAlign: 'center',
-          marginBottom: '16px',
-          paddingBottom: '12px',
-          borderBottom: '1px solid var(--ifm-color-emphasis-200)',
+          marginBottom: '12px',
         }}
       >
-        <h4
-          style={{
-            margin: '0 0 4px 0',
-            fontSize: '1rem',
-            fontWeight: '600',
-            color: 'var(--ifm-color-content)',
-          }}
-        >
-          Filter Results by User
-        </h4>
         <div
           style={{
-            fontSize: '0.85rem',
+            fontSize: '1rem',
+            fontWeight: '600',
             color: 'var(--ifm-color-content-secondary)',
-            fontWeight: '500',
+            marginBottom: getDisplayText() ? '4px' : '0px',
           }}
         >
-          {getDisplayText()}
+          📚 Filter Content
         </div>
+        {getDisplayText() && (
+          <div
+            style={{
+              fontSize: '0.85rem',
+              color: 'var(--ifm-color-content-secondary)',
+              fontWeight: '500',
+            }}
+          >
+            {getDisplayText()}
+          </div>
+        )}
       </div>
 
-      {/* Toggle Switches */}
-      <div>
+      <div
+        style={{
+          borderTop: '1px solid var(--ifm-color-emphasis-300)',
+          paddingTop: '8px',
+        }}
+      >
         <ToggleSwitch
           checked={userToggle}
           onChange={handleUserToggle}
-          label='Users'
+          label='User'
           icon='👤'
         />
 
@@ -231,55 +216,13 @@ function EmbeddedFilterControlsComponent() {
           icon='🔧'
         />
       </div>
-
-      {/* Status */}
-      <div
-        style={{
-          textAlign: 'center',
-          marginTop: '12px',
-          paddingTop: '12px',
-          borderTop: '1px solid var(--ifm-color-emphasis-200)',
-        }}
-      >
-        <div
-          style={{
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            color: 'var(--ifm-color-content)',
-          }}
-        >
-          {getDisplayText()}
-        </div>
-      </div>
-
-      {/* Debug info */}
-      {process.env.NODE_ENV === 'development' && (
-        <div
-          style={{
-            fontSize: '0.7rem',
-            marginTop: '8px',
-            padding: '4px',
-            background: 'var(--ifm-color-emphasis-200)',
-            borderRadius: '4px',
-            fontFamily: 'monospace',
-            textAlign: 'center',
-          }}
-        >
-          <div>URL: {window.location.search || '(no params)'}</div>
-          <div>Filter: {getFilterFromURL() || 'none'}</div>
-          <div>
-            Toggles: User={userToggle ? 'ON' : 'OFF'}, Admin=
-            {adminToggle ? 'ON' : 'OFF'}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default function EmbeddedFilterControls() {
   return (
-    <BrowserOnly fallback={<div>Loading filters...</div>}>
+    <BrowserOnly fallback={null}>
       {() => <EmbeddedFilterControlsComponent />}
     </BrowserOnly>
   )
