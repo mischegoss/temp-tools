@@ -1,4 +1,4 @@
-// src/components/FilterControls/index.js - COMPLETE CORRECTED VERSION
+// src/components/FilterControls/index.js - FIXED STATE UPDATES AND PERSISTENCE
 import React, { useState, useEffect } from 'react'
 import { useLocation } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
@@ -10,95 +10,129 @@ import {
 
 function EmbeddedFilterControlsComponent() {
   const location = useLocation()
-  const [userToggle, setUserToggle] = useState(true)
-  const [adminToggle, setAdminToggle] = useState(true) // Start with both on
+  const [userToggle, setUserToggle] = useState(false) // Start OFF
+  const [adminToggle, setAdminToggle] = useState(false) // Start OFF
   const [pageCount, setPageCount] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Initialize from URL on component mount and URL changes
+  // FIXED: Initialize from URL on component mount and URL changes
   useEffect(() => {
     const currentFilter = getFilterFromURL()
 
-    console.log('🎯 Reading filter from URL:', currentFilter)
+    console.log('🎯 FilterControls: Reading filter from URL:', currentFilter)
+    console.log('📍 Current location:', location.pathname, location.search)
 
-    // Set toggles based on URL parameter
+    // FIXED: Ensure state updates happen immediately
     if (currentFilter === 'user') {
+      console.log('👤 Setting User ON, Admin OFF')
       setUserToggle(true)
       setAdminToggle(false)
     } else if (currentFilter === 'admin') {
+      console.log('🔧 Setting User OFF, Admin ON')
       setUserToggle(false)
       setAdminToggle(true)
-    } else {
-      // No filter parameter = show all content
+    } else if (currentFilter === 'both') {
+      console.log('🔄 Setting Both ON')
       setUserToggle(true)
       setAdminToggle(true)
+    } else {
+      console.log('⭕ Setting Both OFF (no filter)')
+      setUserToggle(false)
+      setAdminToggle(false)
     }
 
     // Update page count
     getFilteredPageCount().then(count => {
       setPageCount(count)
       setLoading(false)
+      console.log('📊 Page count updated:', count)
     })
-  }, [location.search]) // Only watch URL parameters
+  }, [location.search, location.pathname]) // FIXED: Watch both search and pathname
 
-  // Handle user toggle click
+  // FIXED: Handle user toggle click with immediate state update
   const handleUserToggle = () => {
-    console.log('👤 User toggle clicked')
+    const newUserState = !userToggle
+    console.log('👤 User toggle clicked:', userToggle, '->', newUserState)
+    console.log('🔧 Admin current state:', adminToggle)
 
-    if (userToggle && adminToggle) {
-      // Both on -> turn off admin, keep user (user only)
+    // FIXED: Update state immediately for UI responsiveness
+    setUserToggle(newUserState)
+
+    // Determine new filter state based on both toggles
+    if (newUserState && adminToggle) {
+      // Both will be on
+      console.log('🔄 Setting filter to: both')
+      setFilterInURL('both')
+    } else if (newUserState && !adminToggle) {
+      // User only
+      console.log('👤 Setting filter to: user')
       setFilterInURL('user')
-    } else if (userToggle && !adminToggle) {
-      // User on, admin off -> turn on admin, keep user (both on)
-      setFilterInURL(null)
-    } else if (!userToggle && adminToggle) {
-      // User off, admin on -> turn off admin, turn on user (user only)
-      setFilterInURL('user')
+    } else if (!newUserState && adminToggle) {
+      // Admin only
+      console.log('🔧 Setting filter to: admin')
+      setFilterInURL('admin')
     } else {
-      // Both off (shouldn't happen) -> user only
-      setFilterInURL('user')
+      // Both off
+      console.log('⭕ Setting filter to: none')
+      setFilterInURL('none')
     }
   }
 
-  // Handle admin toggle click
+  // FIXED: Handle admin toggle click with immediate state update
   const handleAdminToggle = () => {
-    console.log('🔧 Admin toggle clicked')
+    const newAdminState = !adminToggle
+    console.log('🔧 Admin toggle clicked:', adminToggle, '->', newAdminState)
+    console.log('👤 User current state:', userToggle)
 
-    if (userToggle && adminToggle) {
-      // Both on -> turn off user, keep admin (admin only)
+    // FIXED: Update state immediately for UI responsiveness
+    setAdminToggle(newAdminState)
+
+    // Determine new filter state based on both toggles
+    if (userToggle && newAdminState) {
+      // Both will be on
+      console.log('🔄 Setting filter to: both')
+      setFilterInURL('both')
+    } else if (!userToggle && newAdminState) {
+      // Admin only
+      console.log('🔧 Setting filter to: admin')
       setFilterInURL('admin')
-    } else if (!userToggle && adminToggle) {
-      // User off, admin on -> turn on user, keep admin (both on)
-      setFilterInURL(null)
-    } else if (userToggle && !adminToggle) {
-      // User on, admin off -> turn off user, turn on admin (admin only)
-      setFilterInURL('admin')
+    } else if (userToggle && !newAdminState) {
+      // User only
+      console.log('👤 Setting filter to: user')
+      setFilterInURL('user')
     } else {
-      // Both off (shouldn't happen) -> admin only
-      setFilterInURL('admin')
+      // Both off
+      console.log('⭕ Setting filter to: none')
+      setFilterInURL('none')
     }
   }
 
-  // FIXED: Don't show "All content" when both toggles are on
+  // Display text logic
   const getDisplayText = () => {
     if (loading) return 'Loading...'
 
-    if (userToggle && adminToggle) {
-      return null // Don't show any text when showing all content
+    if (!userToggle && !adminToggle) {
+      // Both off - show all content, no text
+      return null
     } else if (userToggle && !adminToggle) {
+      // User only
       return pageCount !== null
         ? `User content (${pageCount} pages)`
         : 'User content'
     } else if (!userToggle && adminToggle) {
+      // Admin only
       return pageCount !== null
         ? `Admin content (${pageCount} pages)`
         : 'Admin content'
+    } else if (userToggle && adminToggle) {
+      // Both on - show all content, no text
+      return null
     }
 
     return null
   }
 
-  // Toggle switch component
+  // FIXED: Toggle switch component with better visual feedback
   const ToggleSwitch = ({ checked, onChange, label, icon }) => (
     <div
       style={{
@@ -133,21 +167,22 @@ function EmbeddedFilterControlsComponent() {
           width: '44px',
           height: '24px',
           borderRadius: '12px',
-          background: checked ? '#3b82f6' : '#d1d5db',
+          background: checked ? '#3b82f6' : '#d1d5db', // Blue when checked
           position: 'relative',
           cursor: 'pointer',
           transition: 'background-color 0.2s ease',
+          border: checked ? '2px solid #1d4ed8' : '2px solid transparent', // ADDED: Border for better visual feedback
         }}
       >
         <div
           style={{
-            width: '20px',
-            height: '20px',
+            width: '18px', // ADJUSTED: Slightly smaller to account for border
+            height: '18px',
             borderRadius: '50%',
             background: 'white',
             position: 'absolute',
-            top: '2px',
-            left: checked ? '22px' : '2px',
+            top: '1px', // ADJUSTED: Account for border
+            left: checked ? '21px' : '1px', // ADJUSTED: Account for border
             transition: 'left 0.2s ease',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
           }}
@@ -155,6 +190,12 @@ function EmbeddedFilterControlsComponent() {
       </div>
     </div>
   )
+
+  // DEBUGGING: Log current state
+  console.log('🎨 FilterControls render - toggles:', {
+    userToggle,
+    adminToggle,
+  })
 
   return (
     <div
@@ -167,7 +208,7 @@ function EmbeddedFilterControlsComponent() {
         fontFamily: 'var(--ifm-font-family-base)',
       }}
     >
-      {/* FIXED: Conditional display text */}
+      {/* Header and display text */}
       <div
         style={{
           marginBottom: '12px',

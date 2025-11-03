@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from '@docusaurus/Link'
 import { Grid, Box } from '@mui/material'
-import Button from './button.js'
+import Button from './button'
 import {
   docsSectionStyle,
   containerStyle,
@@ -14,7 +14,7 @@ import {
   cardTitleStyle,
   cardDescriptionStyle,
   gradientBorderCSS,
-} from './styles/docsnavstyles.js'
+} from '../library/styles/docsnavstyles.js'
 
 const DocumentationNavigation = ({ data }) => {
   // Dynamic styles that respond to ProductProvider changes
