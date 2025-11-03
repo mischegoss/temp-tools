@@ -5,7 +5,7 @@ export const ritaheroData = {
   cards: [
     {
       title: 'Get Started with Rita Go Docs',
-      link: 'rita-go/category/getting-started',
+      link: '/rita-go/category/getting-started',
     },
     {
       title: 'Explore Rita Go Video Library',

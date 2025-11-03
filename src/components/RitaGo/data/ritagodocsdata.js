@@ -8,7 +8,7 @@ export const ritagoDocsNavData = {
     {
       title: 'Getting Started',
       description: 'Explore Rita Go features and capabilities',
-      link: 'rita-go/category/getting-started',
+      link: '/rita-go/category/getting-started',
     },
     {
       title: 'Administration',
@@ -18,7 +18,7 @@ export const ritagoDocsNavData = {
     {
       title: 'Knowledge Base',
       description: 'Adding and updating knowledge base articles',
-      link: 'rita-go/category/knowledge-base',
+      link: '/rita-go/category/knowledge-base',
     },
     {
       title: 'User Management',

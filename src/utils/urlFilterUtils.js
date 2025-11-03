@@ -1,13 +1,75 @@
-// src/utils/urlFilterUtils.js - ROBUST PERSISTENCE VERSION
+// src/utils/urlFilterUtils.js - WORKING VERSION + History API Interception
 /**
- * Robust filtering with comprehensive link persistence
- * Uses mutation observer to catch dynamically generated links
+ * 4-state filter system with WORKING persistence: 'none', 'user', 'admin', 'both'
  */
 
-// Cache for filter lists
-let filterLists = null
-let currentFilter = 'none'
-let linkObserver = null
+/**
+ * ADDED: History API Interception for comprehensive navigation capture
+ */
+function addFilterToUrl(url, filterType) {
+  if (!url || !url.includes('rita-go') || filterType === 'none') {
+    return url
+  }
+
+  try {
+    const urlObj = new URL(url, window.location.origin)
+    urlObj.searchParams.delete('filter')
+    if (filterType !== 'none') {
+      urlObj.searchParams.set('filter', filterType)
+    }
+    return urlObj.pathname + urlObj.search + urlObj.hash
+  } catch (error) {
+    // Fallback for relative URLs
+    const cleanUrl = url.split('?')[0]
+    return filterType !== 'none' ? cleanUrl + `?filter=${filterType}` : cleanUrl
+  }
+}
+
+/**
+ * ADDED: Intercept browser history API for comprehensive navigation capture
+ */
+function setupHistoryAPIInterception() {
+  // Store original methods
+  const originalPushState = history.pushState
+  const originalReplaceState = history.replaceState
+
+  // Intercept pushState (for navigation)
+  history.pushState = function (state, title, url) {
+    // Use the active filter from persistence system, not URL
+    const currentFilter = window.filterPersistence?.filterType || 'none'
+    if (currentFilter !== 'none' && url && url.includes('rita-go')) {
+      const modifiedUrl = addFilterToUrl(url, currentFilter)
+      console.log(
+        '🎯 HISTORY API: Intercepted pushState:',
+        url,
+        '→',
+        modifiedUrl,
+        `(using active filter: ${currentFilter})`,
+      )
+      originalPushState.call(this, state, title, modifiedUrl)
+    } else {
+      originalPushState.call(this, state, title, url)
+    }
+  }
+
+  // DON'T intercept replaceState - let filter system manage its own URL updates
+  // This prevents interference with setFilterInURL() calls
+  console.log('✅ History API interception setup complete (pushState only)')
+
+  // Also intercept popstate for back/forward buttons
+  window.addEventListener('popstate', function (event) {
+    const currentFilter = getFilterFromURL()
+    console.log('🎯 HISTORY API: Popstate detected, filter:', currentFilter)
+
+    // Re-apply filtering after navigation
+    setTimeout(() => {
+      applySimpleFiltering()
+      if (currentFilter !== 'none') {
+        startUltraRobustPersistence(currentFilter)
+      }
+    }, 100)
+  })
+}
 
 /**
  * Get current filter from URL parameter
@@ -26,17 +88,13 @@ export function getFilterFromURL() {
 }
 
 /**
- * Set filter in URL and start persistent link updating
+ * Set filter in URL parameter
  */
 export function setFilterInURL(filterType) {
   if (typeof window === 'undefined') return
 
   const url = new URL(window.location)
-  currentFilter = filterType
 
-  console.log('🔗 Setting filter:', filterType)
-
-  // Update current page URL
   if (
     filterType === 'user' ||
     filterType === 'admin' ||
@@ -47,182 +105,95 @@ export function setFilterInURL(filterType) {
     url.searchParams.delete('filter')
   }
 
-  window.history.replaceState({}, '', url.toString())
+  window.history.replaceState({ filter: filterType }, '', url.toString())
 
-  // Start comprehensive link persistence
-  startLinkPersistence(filterType)
+  // START AGGRESSIVE PERSISTENCE (restore working original pattern)
+  startUltraRobustPersistence(filterType)
 
-  // Apply sidebar filtering
   setTimeout(() => {
     applySimpleFiltering()
   }, 50)
 }
 
 /**
- * COMPREHENSIVE PERSISTENCE: Update all links and watch for new ones
+ * AGGRESSIVE PERSISTENCE with optimized performance
  */
-function startLinkPersistence(filterType) {
-  console.log('🔄 Starting comprehensive link persistence for:', filterType)
-
-  // Stop any existing observer
-  if (linkObserver) {
-    linkObserver.disconnect()
+function startUltraRobustPersistence(filterType) {
+  // Stop any existing persistence
+  if (window.filterPersistence) {
+    clearInterval(window.filterPersistence.interval)
+    if (window.filterPersistence.observer) {
+      window.filterPersistence.observer.disconnect()
+    }
+    document.removeEventListener(
+      'click',
+      window.filterPersistence.clickHandler,
+      true,
+    )
   }
 
-  // Update all existing links immediately
-  updateAllLinks(filterType)
+  if (filterType === 'none') {
+    window.filterPersistence = null
+    return
+  }
 
-  // Set up mutation observer to catch new links
-  if (filterType !== 'none') {
-    linkObserver = new MutationObserver(mutations => {
-      let hasNewLinks = false
+  // Strategy 1: Immediate comprehensive update
+  updateAllLinksComprehensively(filterType)
 
-      mutations.forEach(mutation => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach(node => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              // Check if the new node contains links
-              const newLinks = node.querySelectorAll
-                ? node.querySelectorAll('a[href*="rita-go"]')
-                : []
-              if (
-                newLinks.length > 0 ||
-                (node.tagName === 'A' &&
-                  node.href &&
-                  node.href.includes('rita-go'))
-              ) {
-                hasNewLinks = true
-              }
+  // Strategy 2: Less aggressive interval for better performance
+  const interval = setInterval(() => {
+    updateAllLinksComprehensively(filterType)
+  }, 10000) // Changed from 2s to 10s for better performance
+
+  // Strategy 3: Mutation observer for dynamic content
+  const observer = new MutationObserver(mutations => {
+    let shouldUpdate = false
+
+    mutations.forEach(mutation => {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const hasRitaGoLinks =
+              node.querySelectorAll &&
+              node.querySelectorAll('a[href*="rita-go"]').length > 0
+            const isRitaGoLink =
+              node.tagName === 'A' && node.href && node.href.includes('rita-go')
+
+            if (hasRitaGoLinks || isRitaGoLink) {
+              shouldUpdate = true
             }
-          })
-        }
-
-        // Also check for attribute changes on existing links
-        if (
-          mutation.type === 'attributes' &&
-          mutation.target.tagName === 'A' &&
-          mutation.attributeName === 'href'
-        ) {
-          const href = mutation.target.getAttribute('href')
-          if (href && href.includes('rita-go')) {
-            hasNewLinks = true
           }
-        }
-      })
+        })
+      }
 
-      if (hasNewLinks) {
-        console.log('🔄 New links detected, updating...')
-        updateAllLinks(currentFilter)
+      if (
+        mutation.type === 'attributes' &&
+        mutation.target.tagName === 'A' &&
+        mutation.attributeName === 'href'
+      ) {
+        const href = mutation.target.getAttribute('href')
+        if (href && href.includes('rita-go')) {
+          shouldUpdate = true
+        }
       }
     })
 
-    // Start observing
-    linkObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['href'],
-    })
-
-    console.log('👁️ Started watching for new links')
-  }
-}
-
-/**
- * Update ALL links comprehensively
- */
-function updateAllLinks(filterType) {
-  // SUPER COMPREHENSIVE selector - catch everything
-  const selectors = [
-    'a[href*="/rita-go"]', // Any link containing rita-go
-    'a[href^="/rita-go"]', // Links starting with /rita-go
-    '.menu__link', // Sidebar menu links
-    '.navbar__item a', // Navbar links
-    '.pagination-nav a', // Pagination links
-    '.table-of-contents a', // TOC links
-    '[class*="sidebar"] a', // Any sidebar links
-    '[class*="menu"] a', // Any menu links
-    'nav a', // Any nav links
-    '.theme-doc-sidebar-item-link a', // Docusaurus sidebar links
-  ]
-
-  let totalUpdated = 0
-
-  selectors.forEach(selector => {
-    try {
-      const links = document.querySelectorAll(selector)
-      let selectorUpdated = 0
-
-      links.forEach(link => {
-        const currentHref = link.getAttribute('href')
-        if (!currentHref || !currentHref.includes('rita-go')) return
-
-        try {
-          let newHref
-
-          if (currentHref.startsWith('http')) {
-            // Absolute URL
-            const url = new URL(currentHref)
-            url.searchParams.delete('filter')
-            if (filterType !== 'none') {
-              url.searchParams.set('filter', filterType)
-            }
-            newHref = url.toString()
-          } else {
-            // Relative URL
-            const url = new URL(currentHref, window.location.origin)
-            url.searchParams.delete('filter')
-            if (filterType !== 'none') {
-              url.searchParams.set('filter', filterType)
-            }
-            newHref = url.pathname + url.search + url.hash
-          }
-
-          if (newHref !== currentHref) {
-            link.setAttribute('href', newHref)
-            selectorUpdated++
-            totalUpdated++
-          }
-        } catch (error) {
-          // Fallback for problematic URLs
-          if (currentHref.includes('rita-go')) {
-            let cleanHref = currentHref.split('?')[0]
-            if (filterType !== 'none') {
-              cleanHref += `?filter=${filterType}`
-            }
-            if (cleanHref !== currentHref) {
-              link.setAttribute('href', cleanHref)
-              selectorUpdated++
-              totalUpdated++
-            }
-          }
-        }
-      })
-
-      if (selectorUpdated > 0) {
-        console.log(`  📎 ${selector}: ${selectorUpdated} links updated`)
-      }
-    } catch (error) {
-      console.warn(`Could not process selector ${selector}:`, error)
+    if (shouldUpdate) {
+      setTimeout(() => {
+        updateAllLinksComprehensively(filterType)
+      }, 100)
     }
   })
 
-  console.log(`✅ Total links updated: ${totalUpdated}`)
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['href'],
+  })
 
-  // Also set up click interceptor for any missed links
-  if (filterType !== 'none') {
-    setupClickInterceptor(filterType)
-  }
-}
-
-/**
- * Backup: Intercept clicks on rita-go links and add filter if missing
- */
-function setupClickInterceptor(filterType) {
-  // Remove any existing interceptor
-  document.removeEventListener('click', handleLinkClick)
-
-  function handleLinkClick(event) {
+  // Strategy 4: Click interceptor as final backup
+  const clickHandler = event => {
     const link = event.target.closest('a')
     if (!link) return
 
@@ -230,25 +201,217 @@ function setupClickInterceptor(filterType) {
     if (!href || !href.includes('rita-go')) return
 
     // Check if filter is missing
-    if (!href.includes('filter=')) {
+    if (!href.includes(`filter=${filterType}`)) {
       event.preventDefault()
 
       let newHref
       try {
         const url = new URL(href, window.location.origin)
+        url.searchParams.delete('filter')
         url.searchParams.set('filter', filterType)
-        newHref = url.toString()
+        newHref = url.pathname + url.search + url.hash
       } catch (error) {
-        newHref = href + `?filter=${filterType}`
+        const cleanHref = href.split('?')[0]
+        newHref = cleanHref + `?filter=${filterType}`
       }
 
-      console.log(`🔄 Intercepted click, adding filter: ${href} → ${newHref}`)
       window.location.href = newHref
     }
   }
 
-  document.addEventListener('click', handleLinkClick)
-  console.log('🎯 Click interceptor activated')
+  document.addEventListener('click', clickHandler, true)
+
+  // Store persistence mechanisms globally for cleanup
+  window.filterPersistence = {
+    interval,
+    observer,
+    clickHandler,
+    filterType,
+  }
+}
+
+/**
+ * COMPREHENSIVE link updating with performance optimizations
+ */
+function updateAllLinksComprehensively(filterType) {
+  // Optimized selectors - removed heavy 'a' selector for better performance
+  const selectors = [
+    '.menu__link', // Sidebar menu
+    '.theme-doc-sidebar-item-link a', // Sidebar items
+    '.navbar__item a', // Navbar
+    '.pagination-nav a', // Next/prev
+    '.table-of-contents a', // TOC
+    '.theme-doc-breadcrumbs a', // Breadcrumbs
+    'a[href*="/rita-go"]', // Any rita-go link
+    'a[href^="/rita-go"]', // Links starting with /rita-go
+    '[class*="sidebar"] a', // Any sidebar
+    '[class*="menu"] a', // Any menu
+    'nav a', // Any nav
+    '.docusaurus-tag-list a', // Tag lists
+  ]
+
+  let grandTotal = 0
+
+  selectors.forEach(selector => {
+    try {
+      const links = document.querySelectorAll(selector)
+
+      links.forEach(link => {
+        const href = link.getAttribute('href')
+        if (!href || !href.includes('rita-go')) return
+
+        // PERFORMANCE: Skip if link already has correct filter
+        if (filterType !== 'none' && href.includes(`filter=${filterType}`))
+          return
+        if (filterType === 'none' && !href.includes('filter=')) return
+
+        const originalHref = href
+        let newHref
+
+        try {
+          if (href.startsWith('http')) {
+            // Absolute URL
+            const url = new URL(href)
+            url.searchParams.delete('filter')
+            if (filterType !== 'none') {
+              url.searchParams.set('filter', filterType)
+            }
+            newHref = url.toString()
+          } else {
+            // Relative URL
+            const url = new URL(href, window.location.origin)
+            url.searchParams.delete('filter')
+            if (filterType !== 'none') {
+              url.searchParams.set('filter', filterType)
+            }
+            newHref = url.pathname + url.search + url.hash
+          }
+
+          if (newHref !== originalHref) {
+            link.setAttribute('href', newHref)
+            grandTotal++
+          }
+        } catch (error) {
+          // Fallback for problematic URLs
+          const cleanHref = href.split('?')[0]
+          if (filterType !== 'none') {
+            newHref = cleanHref + `?filter=${filterType}`
+          } else {
+            newHref = cleanHref
+          }
+
+          if (newHref !== originalHref) {
+            link.setAttribute('href', newHref)
+            grandTotal++
+          }
+        }
+      })
+    } catch (error) {
+      // Silently skip problematic selectors
+    }
+  })
+
+  return grandTotal
+}
+
+/**
+ * Load filterable data with correct structure handling
+ */
+export async function loadFilterableData() {
+  try {
+    const response = await fetch('/data/filterableData.json')
+
+    if (!response.ok) {
+      return []
+    }
+
+    const rawData = await response.json()
+
+    // The file structure has allPages as the main array
+    let filterableData
+    if (rawData && Array.isArray(rawData.allPages)) {
+      filterableData = rawData.allPages
+    } else if (Array.isArray(rawData)) {
+      filterableData = rawData
+    } else {
+      return []
+    }
+
+    return filterableData
+  } catch (error) {
+    return []
+  }
+}
+
+/**
+ * FIXED: Smart filtering with DOM readiness check and retry mechanism
+ */
+export async function applySimpleFiltering() {
+  if (typeof window === 'undefined') return
+
+  const activeFilter = getFilterFromURL()
+
+  // Show everything when no filter is active
+  if (activeFilter === 'none' || activeFilter === 'both') {
+    showAllSidebarItems()
+    return
+  }
+
+  // Load the filterable data first
+  const filterableData = await loadFilterableData()
+
+  // DOM readiness check with retry mechanism
+  let sidebarLinks = document.querySelectorAll('.menu__link')
+  let retryCount = 0
+
+  // Retry if no sidebar links found (DOM not ready)
+  while (sidebarLinks.length === 0 && retryCount < 5) {
+    await new Promise(resolve => setTimeout(resolve, 200)) // Wait 200ms
+    sidebarLinks = document.querySelectorAll('.menu__link')
+    retryCount++
+  }
+
+  // If still no links found, exit gracefully
+  if (sidebarLinks.length === 0) {
+    return
+  }
+
+  sidebarLinks.forEach(link => {
+    const href = link.getAttribute('href')
+    const sidebarItem =
+      link.closest('.theme-doc-sidebar-item-link') ||
+      link.closest('[class*="sidebar-item"]') ||
+      link.closest('.menu__list-item')
+
+    if (href && sidebarItem) {
+      const cleanHref = stripQueryParams(href)
+      const pageData = filterableData.find(item => item.url === cleanHref)
+
+      // Always show items without filtering badges
+      if (!pageData?.badges) {
+        sidebarItem.style.display = ''
+        return
+      }
+
+      // Check if item should be visible based on active filter
+      let shouldShow = false
+
+      if (activeFilter === 'user') {
+        shouldShow = pageData.badges.users === true
+      } else if (activeFilter === 'admin') {
+        shouldShow = pageData.badges.admin === true
+      }
+
+      if (shouldShow) {
+        sidebarItem.style.display = ''
+      } else {
+        sidebarItem.style.display = 'none'
+      }
+    }
+  })
+
+  // Always show all categories
+  showAllCategories()
 }
 
 /**
@@ -264,117 +427,30 @@ function stripQueryParams(url) {
 }
 
 /**
- * Load pre-computed filter lists from JSON
+ * Show all sidebar items and categories
  */
-async function loadFilterLists() {
-  if (filterLists) return filterLists
-
-  try {
-    const response = await fetch('/data/filterableData.json')
-    if (!response.ok) {
-      console.warn('Could not load filterable data:', response.status)
-      return null
-    }
-    const data = await response.json()
-    filterLists = data.filterLists
-    console.log('📋 Loaded filter lists')
-    return filterLists
-  } catch (error) {
-    console.error('Failed to load filter lists:', error)
-    return null
-  }
-}
-
-/**
- * Apply filtering with fixed category URL support
- */
-export async function applySimpleFiltering() {
-  if (typeof window === 'undefined') return
-
-  const activeFilter = getFilterFromURL()
-  currentFilter = activeFilter
-  console.log('🎯 Applying filtering, filter:', activeFilter)
-
-  // Load pre-computed filter lists
-  const lists = await loadFilterLists()
-  if (!lists) {
-    console.error('❌ Could not load filter lists')
-    return
-  }
-
-  // Get the list of URLs to show for current filter
-  let urlsToShow = []
-
-  if (activeFilter === 'admin') {
-    urlsToShow = lists.adminFilter.map(item => item.url)
-  } else if (activeFilter === 'user') {
-    urlsToShow = lists.userFilter.map(item => item.url)
-  } else {
-    urlsToShow = lists.noFilter.map(item => item.url)
-  }
-
-  console.log(
-    `📋 Filter '${activeFilter}' should show ${urlsToShow.length} items`,
+function showAllSidebarItems() {
+  const allSidebarItems = document.querySelectorAll(
+    '.theme-doc-sidebar-item-link, .menu__list-item, [class*="sidebar-item"]',
   )
 
-  // Apply to sidebar
-  const sidebarLinks = document.querySelectorAll('.menu__link')
-  let visibleCount = 0
-  let hiddenCount = 0
-
-  sidebarLinks.forEach(link => {
-    const href = link.getAttribute('href')
-    const sidebarItem =
-      link.closest('.theme-doc-sidebar-item-link') ||
-      link.closest('[class*="sidebar-item"]') ||
-      link.closest('.menu__list-item')
-
-    if (href && sidebarItem) {
-      const cleanHref = stripQueryParams(href)
-      const shouldShow = urlsToShow.includes(cleanHref)
-
-      if (shouldShow) {
-        sidebarItem.style.display = ''
-        visibleCount++
-      } else {
-        sidebarItem.style.display = 'none'
-        hiddenCount++
-      }
-    }
+  allSidebarItems.forEach(item => {
+    item.style.display = ''
   })
 
-  hideEmptyCategories()
-
-  console.log(
-    `🎨 Filtering complete: ${visibleCount} visible, ${hiddenCount} hidden`,
-  )
-
-  // Restart link persistence after filtering
-  if (activeFilter !== 'none') {
-    setTimeout(() => {
-      updateAllLinks(activeFilter)
-    }, 100)
-  }
+  showAllCategories()
 }
 
 /**
- * Hide empty sidebar categories
+ * Always show all categories
  */
-function hideEmptyCategories() {
-  const categories = document.querySelectorAll(
+function showAllCategories() {
+  const allCategories = document.querySelectorAll(
     '.theme-doc-sidebar-item-category, [class*="sidebar-category"]',
   )
 
-  categories.forEach(category => {
-    const visibleChildren = category.querySelectorAll(
-      '.theme-doc-sidebar-item-link:not([style*="display: none"]), .menu__list-item:not([style*="display: none"])',
-    )
-
-    if (visibleChildren.length === 0) {
-      category.style.display = 'none'
-    } else {
-      category.style.display = ''
-    }
+  allCategories.forEach(category => {
+    category.style.display = ''
   })
 }
 
@@ -388,35 +464,39 @@ export async function getFilteredPageCount() {
     return null
   }
 
-  const lists = await loadFilterLists()
-  if (!lists) return null
+  const filterableData = await loadFilterableData()
 
-  if (activeFilter === 'admin') {
-    return lists.adminFilter.length
-  } else if (activeFilter === 'user') {
-    return lists.userFilter.length
-  }
+  const visiblePages = filterableData.filter(page => {
+    if (!page.badges) return true
 
-  return null
+    if (activeFilter === 'user') {
+      return page.badges.users === true
+    } else if (activeFilter === 'admin') {
+      return page.badges.admin === true
+    }
+
+    return true
+  })
+
+  return visiblePages.length
 }
 
 /**
- * Initialize filtering with robust persistence
+ * Initialize filtering with optimized performance
  */
 export function initializeSimpleFiltering() {
-  console.log('🚀 Initializing robust filtering with persistence')
-
   const activeFilter = getFilterFromURL()
-  currentFilter = activeFilter
 
-  // Start persistence if filter is active
+  // ADDED: Setup History API interception FIRST
+  setupHistoryAPIInterception()
+
+  // CRITICAL: Start persistence if filter is active on page load
   if (activeFilter !== 'none') {
-    console.log('🔗 Filter active, starting comprehensive persistence')
-    startLinkPersistence(activeFilter)
+    startUltraRobustPersistence(activeFilter)
   }
 
-  // Apply sidebar filtering
+  // Increased delay for better timing with build performance
   setTimeout(() => {
     applySimpleFiltering()
-  }, 300)
+  }, 500) // Increased from 300ms to 500ms
 }
