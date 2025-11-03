@@ -1,7 +1,13 @@
-// src/utils/urlFilterUtils.js - DEBUG VERSION TO IDENTIFY BADGE LOGIC ISSUE
+// src/utils/urlFilterUtils.js - ENHANCED WITH URL PARAMETER INJECTION
 /**
- * 4-state filter system with DEBUGGING: 'none', 'user', 'admin', 'both'
+ * 4-state filter system with URL parameter injection: 'none', 'user', 'admin', 'both'
+ * When a filter is active, ALL internal navigation will preserve the filter parameter
  */
+
+// Global state to track if filter injection is active
+let isFilterInjectionActive = false
+let currentActiveFilter = 'none'
+let navigationListenerAttached = false
 
 /**
  * Get current filter from URL parameter
@@ -20,7 +26,7 @@ export function getFilterFromURL() {
 }
 
 /**
- * Set filter in URL parameter with better persistence
+ * Enhanced: Set filter in URL parameter with automatic injection for all future navigation
  */
 export function setFilterInURL(filterType) {
   if (typeof window === 'undefined') return
@@ -34,14 +40,21 @@ export function setFilterInURL(filterType) {
     url.pathname,
   )
 
+  // Update current filter state
+  currentActiveFilter = filterType
+
   if (
     filterType === 'user' ||
     filterType === 'admin' ||
     filterType === 'both'
   ) {
     url.searchParams.set('filter', filterType)
+    // Enable filter injection for all future navigation
+    enableFilterInjection(filterType)
   } else {
     url.searchParams.delete('filter')
+    // Disable filter injection
+    disableFilterInjection()
   }
 
   window.history.replaceState({ filter: filterType }, '', url.toString())
@@ -51,6 +64,136 @@ export function setFilterInURL(filterType) {
   setTimeout(() => {
     applySimpleFiltering()
   }, 50)
+}
+
+/**
+ * NEW: Enable automatic filter parameter injection for all internal navigation
+ */
+function enableFilterInjection(filterType) {
+  isFilterInjectionActive = true
+  currentActiveFilter = filterType
+
+  console.log('🎯 ENABLING filter injection mode for:', filterType)
+
+  // Attach navigation listener if not already attached
+  if (!navigationListenerAttached) {
+    attachNavigationListener()
+  }
+}
+
+/**
+ * NEW: Disable automatic filter parameter injection
+ */
+function disableFilterInjection() {
+  isFilterInjectionActive = false
+  currentActiveFilter = 'none'
+
+  console.log('⭕ DISABLING filter injection mode')
+
+  // Keep listener attached for performance, just disable the injection logic
+}
+
+/**
+ * NEW: Attach navigation listener to intercept all link clicks
+ */
+function attachNavigationListener() {
+  if (navigationListenerAttached) return
+
+  console.log('🔧 Attaching navigation listener for filter injection')
+
+  // Intercept all clicks on the document
+  document.addEventListener('click', handleNavigationClick, true)
+
+  // Also intercept programmatic navigation via history API
+  const originalPushState = window.history.pushState
+  const originalReplaceState = window.history.replaceState
+
+  window.history.pushState = function (...args) {
+    const url = args[2]
+    if (url && isFilterInjectionActive) {
+      args[2] = injectFilterIntoURL(url)
+    }
+    return originalPushState.apply(this, args)
+  }
+
+  window.history.replaceState = function (...args) {
+    const url = args[2]
+    if (url && isFilterInjectionActive && !url.includes('filter=')) {
+      args[2] = injectFilterIntoURL(url)
+    }
+    return originalReplaceState.apply(this, args)
+  }
+
+  navigationListenerAttached = true
+}
+
+/**
+ * NEW: Handle click events and inject filter parameters into internal links
+ */
+function handleNavigationClick(event) {
+  // Only inject if filter injection is active
+  if (!isFilterInjectionActive) return
+
+  // Find the closest link element
+  let link = event.target.closest('a')
+  if (!link) return
+
+  const href = link.getAttribute('href')
+  if (!href) return
+
+  // Only modify internal links (relative paths or same origin)
+  if (isInternalLink(href)) {
+    const enhancedHref = injectFilterIntoURL(href)
+
+    // Only modify if the URL actually changed
+    if (enhancedHref !== href) {
+      console.log('🔄 Injecting filter into link:', href, '->', enhancedHref)
+      link.setAttribute('href', enhancedHref)
+    }
+  }
+}
+
+/**
+ * NEW: Check if a URL is an internal link
+ */
+function isInternalLink(href) {
+  // Relative paths are internal
+  if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+    return true
+  }
+
+  // Same origin URLs are internal
+  try {
+    const url = new URL(href, window.location.origin)
+    return url.origin === window.location.origin
+  } catch {
+    return false
+  }
+}
+
+/**
+ * NEW: Inject current filter parameter into a URL
+ */
+function injectFilterIntoURL(originalUrl) {
+  if (!isFilterInjectionActive || currentActiveFilter === 'none') {
+    return originalUrl
+  }
+
+  try {
+    const url = new URL(originalUrl, window.location.origin)
+
+    // Don't inject if filter parameter already exists
+    if (url.searchParams.has('filter')) {
+      return originalUrl
+    }
+
+    // Add the current filter parameter
+    url.searchParams.set('filter', currentActiveFilter)
+
+    return url.pathname + url.search + url.hash
+  } catch {
+    return originalUrl
+  }
 }
 
 /**
@@ -259,12 +402,18 @@ export async function getFilteredPageCount() {
 }
 
 /**
- * Initialize filtering on page load
+ * Initialize filtering on page load with enhanced navigation support
  */
 export function initializeSimpleFiltering() {
-  console.log('🚀 Initializing simple filtering system')
+  console.log('🚀 Initializing simple filtering system with URL injection')
   console.log('📍 Current URL:', window.location.href)
   console.log('🔍 Current filter from URL:', getFilterFromURL())
+
+  // Initialize filter injection based on current URL
+  const currentFilter = getFilterFromURL()
+  if (currentFilter !== 'none') {
+    enableFilterInjection(currentFilter)
+  }
 
   setTimeout(() => {
     applySimpleFiltering()

@@ -1,4 +1,4 @@
-// src/components/FilterControls/index.js - FIXED STATE UPDATES AND PERSISTENCE
+// src/components/FilterControls/index.js - ENHANCED WITH URL PARAMETER INJECTION SUPPORT
 import React, { useState, useEffect } from 'react'
 import { useLocation } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
@@ -49,7 +49,7 @@ function EmbeddedFilterControlsComponent() {
     })
   }, [location.search, location.pathname]) // FIXED: Watch both search and pathname
 
-  // FIXED: Handle user toggle click with immediate state update
+  // ENHANCED: Handle user toggle click with URL parameter injection
   const handleUserToggle = () => {
     const newUserState = !userToggle
     console.log('👤 User toggle clicked:', userToggle, '->', newUserState)
@@ -62,23 +62,23 @@ function EmbeddedFilterControlsComponent() {
     if (newUserState && adminToggle) {
       // Both will be on
       console.log('🔄 Setting filter to: both')
-      setFilterInURL('both')
+      setFilterInURL('both') // This will now enable URL injection for all navigation
     } else if (newUserState && !adminToggle) {
       // User only
       console.log('👤 Setting filter to: user')
-      setFilterInURL('user')
+      setFilterInURL('user') // This will now enable URL injection for all navigation
     } else if (!newUserState && adminToggle) {
       // Admin only
       console.log('🔧 Setting filter to: admin')
-      setFilterInURL('admin')
+      setFilterInURL('admin') // This will now enable URL injection for all navigation
     } else {
       // Both off
       console.log('⭕ Setting filter to: none')
-      setFilterInURL('none')
+      setFilterInURL('none') // This will now disable URL injection
     }
   }
 
-  // FIXED: Handle admin toggle click with immediate state update
+  // ENHANCED: Handle admin toggle click with URL parameter injection
   const handleAdminToggle = () => {
     const newAdminState = !adminToggle
     console.log('🔧 Admin toggle clicked:', adminToggle, '->', newAdminState)
@@ -91,23 +91,23 @@ function EmbeddedFilterControlsComponent() {
     if (userToggle && newAdminState) {
       // Both will be on
       console.log('🔄 Setting filter to: both')
-      setFilterInURL('both')
+      setFilterInURL('both') // This will now enable URL injection for all navigation
     } else if (!userToggle && newAdminState) {
       // Admin only
       console.log('🔧 Setting filter to: admin')
-      setFilterInURL('admin')
+      setFilterInURL('admin') // This will now enable URL injection for all navigation
     } else if (userToggle && !newAdminState) {
       // User only
       console.log('👤 Setting filter to: user')
-      setFilterInURL('user')
+      setFilterInURL('user') // This will now enable URL injection for all navigation
     } else {
       // Both off
       console.log('⭕ Setting filter to: none')
-      setFilterInURL('none')
+      setFilterInURL('none') // This will now disable URL injection
     }
   }
 
-  // Display text logic
+  // ENHANCED: Display text logic - shows "All content" when both toggles are on
   const getDisplayText = () => {
     if (loading) return 'Loading...'
 
@@ -125,14 +125,14 @@ function EmbeddedFilterControlsComponent() {
         ? `Admin content (${pageCount} pages)`
         : 'Admin content'
     } else if (userToggle && adminToggle) {
-      // Both on - show all content, no text
-      return null
+      // Both on - show "All content" as per screenshot requirements
+      return 'All content'
     }
 
     return null
   }
 
-  // FIXED: Toggle switch component with better visual feedback
+  // ENHANCED: Toggle switch component with better visual feedback
   const ToggleSwitch = ({ checked, onChange, label, icon }) => (
     <div
       style={{
@@ -208,7 +208,7 @@ function EmbeddedFilterControlsComponent() {
         fontFamily: 'var(--ifm-font-family-base)',
       }}
     >
-      {/* Header and display text */}
+      {/* Header and display text - FIXED header text to match screenshot */}
       <div
         style={{
           marginBottom: '12px',
@@ -222,7 +222,7 @@ function EmbeddedFilterControlsComponent() {
             marginBottom: getDisplayText() ? '4px' : '0px',
           }}
         >
-          📚 Filter Content
+          Filter Results by User
         </div>
         {getDisplayText() && (
           <div
@@ -246,7 +246,7 @@ function EmbeddedFilterControlsComponent() {
         <ToggleSwitch
           checked={userToggle}
           onChange={handleUserToggle}
-          label='User'
+          label='Users'
           icon='👤'
         />
 
