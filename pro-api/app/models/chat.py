@@ -1,4 +1,4 @@
-# app/models/chat.py
+# COMPLETE CORRECTED VERSION - pro-api/app/models/chat.py
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -44,11 +44,19 @@ class ChatResponse(BaseModel):
     conversation_id: Optional[str] = Field(None, description="Conversation identifier")
 
 class ChatHealthCheck(BaseModel):
-    """Health check response for chat service"""
+    """Health check response for Pro chat service - CORRECTED VERSION"""
+    status: str = Field("healthy", description="Overall health status")
+    can_chat: bool = Field(False, description="Whether chat service is ready")
+    model_loaded: bool = Field(False, description="Whether AI model is loaded")
+    last_response_time: Optional[float] = Field(None, description="Last response time in seconds")
+    error_rate: float = Field(0.0, description="Current error rate")
+    pro_version_support: Dict[str, bool] = Field(default_factory=dict, description="Supported Pro versions")
+    documentation_loaded: bool = Field(False, description="Whether documentation is loaded")
+    
+    # Additional Pro-specific health indicators (keeping original fields for compatibility)
     chat_ready: bool = Field(False, description="Whether chat service is ready")
     gemini_available: bool = Field(False, description="Whether Gemini service is available")
     search_ready: bool = Field(False, description="Whether search service is ready")
-    model_loaded: bool = Field(False, description="Whether AI model is loaded")
 
 class ErrorResponse(BaseModel):
     """Error response model"""

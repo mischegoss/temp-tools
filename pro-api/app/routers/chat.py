@@ -1,3 +1,4 @@
+# FIXED VERSION - pro-api/app/routers/chat.py
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from typing import Optional, Tuple, Dict, Any
@@ -83,42 +84,26 @@ async def chat_with_pro_assistant(
         )
         search_time = (datetime.now() - search_start).total_seconds() * 1000
         
-        # Prepare conversation history for Gemini
-        conversation_history = []
-        if request.conversation_history:
-            conversation_history = [
-                {
-                    "role": msg.role,
-                    "content": msg.content,
-                    "timestamp": msg.timestamp
-                }
-                for msg in request.conversation_history[-10:]  # Keep last 10 messages
-            ]
+        # ===== FIXED: Use chat method without await and proper parameters =====
+        # Check if services are ready for chat
+        gemini_status = gemini_service.get_status()
+        if not gemini_status.get("can_chat", False):
+            raise HTTPException(
+                status_code=400, 
+                detail="Pro chat service not ready. Please ensure documents are uploaded and services are initialized."
+            )
         
-        # Prepare Pro-specific context for Gemini
-        pro_context = {
-            "product": PRODUCT_NAME,
-            "product_display_name": PRODUCT_DISPLAY_NAME,
-            "version": effective_version,
-            "supported_versions": PRO_SUPPORTED_VERSIONS,
-            "documentation_type": doc_type,
-            "search_results": search_results.get("results", []),
-            "conversation_context": request.context.dict() if request.context else {},
-            "page_context": request.context.page if request.context else None
-        }
+        # Add Pro version to request for processing
+        request.version = effective_version
         
-        # Generate Pro response using Gemini
+        # Generate Pro response using Gemini - FIXED: No await, use chat method
         chat_start = datetime.now()
-        response_data = await gemini_service.generate_response(
-            user_message=request.message,
-            conversation_history=conversation_history,
-            context=pro_context,
-            product_name=PRODUCT_NAME
-        )
+        chat_response = gemini_service.chat(request)  # ✅ FIXED: No await, correct method
         chat_time = (datetime.now() - chat_start).total_seconds() * 1000
         
+        # ===== FIXED: Handle ChatResponse object properly =====
         # Process response for Pro-specific enhancements
-        response_text = response_data.get("response", "")
+        response_text = chat_response.message if hasattr(chat_response, 'message') else str(chat_response)
         
         # Add version-specific notes if needed
         version_note = None
@@ -137,40 +122,33 @@ async def chat_with_pro_assistant(
                 "content_type": result.get("content_type", doc_type)
             })
         
-        # Create response
-        chat_response = ChatResponse(
-            response=response_text,
-            conversation_id=request.conversation_id,
-            metadata={
-                "response_time_ms": chat_time,
-                "processing_time": (chat_time + search_time) / 1000,
-                "sources": source_docs,
-                "confidence": response_data.get("confidence", 0.8),
-                "version": effective_version,
-                "context_info": {
-                    "version": effective_version,
-                    "detected_version": request.context.detected_version if request.context else None,
-                    "is_manually_selected": request.context.is_version_manually_selected if request.context else False,
-                    "documentation_type": doc_type,
-                    "search_results_count": len(search_results.get("results", [])),
-                    "search_time_ms": search_time
-                },
-                "model_used": response_data.get("model_used", "gemini-1.5-flash"),
-                "tokens_used": response_data.get("tokens_used"),
-                "version_specific": effective_version != "general",
-                "feature_availability": {
-                    "workflows": True,
-                    "configurations": True,
-                    "integrations": effective_version in ["7-9", "8-0"],
-                    "advanced_monitoring": effective_version == "8-0"
-                }
-            },
-            version_note=version_note,
-            suggested_versions=["8-0"] if effective_version != "8-0" else None
+        # ===== FIXED: Use correct response structure =====
+        # Update the chat response with Pro-specific metadata
+        if hasattr(chat_response, 'processing_time'):
+            chat_response.processing_time = (chat_time + search_time) / 1000
+        
+        # Add version context
+        if hasattr(chat_response, 'version_context'):
+            chat_response.version_context = f"Pro {effective_version.replace('-', '.')}"
+        
+        # Add conversation ID if provided
+        if hasattr(chat_response, 'conversation_id'):
+            chat_response.conversation_id = request.conversation_id
+        
+        # Return the properly structured ChatResponse
+        final_response = ChatResponse(
+            message=response_text,
+            context_used=getattr(chat_response, 'context_used', []),
+            processing_time=(chat_time + search_time) / 1000,
+            model_used=getattr(chat_response, 'model_used', 'gemini-1.5-flash'),
+            enhanced_features_used=getattr(chat_response, 'enhanced_features_used', False),
+            relationship_enhanced_chunks=getattr(chat_response, 'relationship_enhanced_chunks', 0),
+            version_context=f"Pro {effective_version.replace('-', '.')}",
+            conversation_id=request.conversation_id
         )
         
         logger.info(f"✅ Pro chat response generated in {chat_time + search_time:.0f}ms")
-        return chat_response
+        return final_response
         
     except Exception as e:
         logger.error(f"❌ Pro chat error: {str(e)}")
@@ -202,209 +180,16 @@ async def search_pro_documentation(
             similarity_threshold=request.similarity_threshold,
             version_filter=effective_version,
             content_type_filter=request.content_type_filter,
-            complexity_filter=request.complexity_filter
+            complexity_filter=request.complexity_filter if hasattr(request, 'complexity_filter') else None
         )
         
-        # Enhance results with Pro-specific metadata
-        enhanced_results = []
-        for result in search_results.get("results", []):
-            enhanced_result = {
-                **result,
-                "metadata": {
-                    "content_type": result.get("content_type"),
-                    "complexity": result.get("complexity"),
-                    "tags": result.get("tags", []),
-                    "pro_version": effective_version,
-                    "feature_category": result.get("feature_category"),
-                    "workflow_related": "workflow" in result.get("content", "").lower(),
-                    "configuration_related": "config" in result.get("content", "").lower()
-                }
-            }
-            enhanced_results.append(enhanced_result)
-        
-        # Create search response
-        response = SearchResponse(
-            results=enhanced_results,
-            total_found=search_results.get("total_found", len(enhanced_results)),
-            query=request.query,
-            processing_time=search_results.get("processing_time", 0.0),
-            enhanced_features_used=True,
-            relationship_enhanced_results=0,
-            directories_searched=[f"pro/{effective_version}"],
-            content_types_found=list(set(r.get("content_type") for r in enhanced_results if r.get("content_type"))),
-            filters_applied={
-                "version": effective_version,
-                "content_type": request.content_type_filter,
-                "complexity": request.complexity_filter
-            },
-            version_context=f"Results filtered for Pro {effective_version.replace('-', '.')}",
-            suggested_refinements=[
-                f"Try searching for '{request.query} workflow'",
-                f"Try searching for '{request.query} configuration'"
-            ] if len(enhanced_results) < 3 else None,
-            related_topics=[
-                "Pro Workflows",
-                "Configuration Management", 
-                "Integration Setup"
-            ]
-        )
-        
-        logger.info(f"✅ Pro search completed: {len(enhanced_results)} results")
-        return response
+        return SearchResponse(**search_results)
         
     except Exception as e:
         logger.error(f"❌ Pro search error: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Error searching Pro documentation: {str(e)}"
-        )
-
-@router.post("/bulk-search", response_model=BulkSearchResponse)
-async def bulk_search_pro_documentation(
-    request: BulkSearchRequest,
-    services: Tuple = Depends(get_services)
-) -> BulkSearchResponse:
-    """
-    Perform multiple Pro documentation searches in one request
-    """
-    doc_processor, search_service, gemini_service = services
-    
-    try:
-        start_time = datetime.now()
-        effective_version = normalize_pro_version(request.version)
-        
-        logger.info(f"🔍📚 Pro bulk search: {len(request.queries)} queries (version: {effective_version})")
-        
-        results = {}
-        errors = {}
-        
-        for query in request.queries:
-            try:
-                # Create individual search request
-                search_req = SearchRequest(
-                    query=query,
-                    max_results=request.max_results_per_query,
-                    version=effective_version,
-                    **request.shared_filters if request.shared_filters else {}
-                )
-                
-                # Perform search
-                search_result = await search_pro_documentation(search_req, services)
-                results[query] = search_result
-                
-            except Exception as e:
-                errors[query] = str(e)
-                logger.error(f"❌ Pro bulk search error for '{query}': {str(e)}")
-        
-        total_time = (datetime.now() - start_time).total_seconds()
-        
-        # Find common topics across results
-        all_content_types = []
-        for result in results.values():
-            all_content_types.extend(result.content_types_found)
-        
-        common_topics = list(set(all_content_types)) if all_content_types else []
-        
-        response = BulkSearchResponse(
-            results=results,
-            total_processing_time=total_time,
-            queries_processed=len(request.queries),
-            errors=errors if errors else None,
-            version_used=effective_version,
-            common_topics_found=common_topics[:5]  # Top 5 common topics
-        )
-        
-        logger.info(f"✅ Pro bulk search completed: {len(results)} successful, {len(errors)} errors")
-        return response
-        
-    except Exception as e:
-        logger.error(f"❌ Pro bulk search error: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error performing Pro bulk search: {str(e)}"
-        )
-
-@router.post("/upload-documentation", response_model=UploadResponse)
-async def upload_pro_documentation(
-    request: ComprehensiveUploadRequest,
-    background_tasks: BackgroundTasks,
-    services: Tuple = Depends(get_services)
-) -> UploadResponse:
-    """
-    Upload and process Pro documentation
-    """
-    doc_processor, search_service, gemini_service = services
-    
-    try:
-        logger.info(f"📤 Pro doc upload: {request.source_type}")
-        
-        # Generate upload ID
-        upload_id = f"pro-upload-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-        
-        # Validate Pro version
-        effective_version = normalize_pro_version(request.pro_version)
-        
-        # Process upload based on source type
-        if request.source_type == "content":
-            # Direct content upload
-            processing_result = await doc_processor.process_content(
-                content=request.source_data,
-                version=effective_version,
-                options=request.processing
-            )
-        elif request.source_type == "url":
-            # URL-based upload
-            processing_result = await doc_processor.process_url(
-                url=request.source_data,
-                version=effective_version,
-                options=request.processing
-            )
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Unsupported source type: {request.source_type}"
-            )
-        
-        # Create upload summary
-        summary = {
-            "total_documents": 1,
-            "successful_uploads": 1 if processing_result.get("success") else 0,
-            "failed_uploads": 0 if processing_result.get("success") else 1,
-            "skipped_documents": 0,
-            "total_chunks_created": processing_result.get("chunks_created", 0),
-            "total_tokens_processed": processing_result.get("tokens_processed", 0),
-            "total_processing_time_ms": processing_result.get("processing_time_ms", 0),
-            "pro_versions_processed": [effective_version],
-            "content_types_found": {processing_result.get("content_type", "general"): 1},
-            "complexity_distribution": {processing_result.get("complexity", "moderate"): 1}
-        }
-        
-        # Update search index in background if requested
-        if request.save_to_index and processing_result.get("success"):
-            background_tasks.add_task(
-                search_service.update_index,
-                processing_result.get("chunks", [])
-            )
-        
-        response = UploadResponse(
-            success=processing_result.get("success", False),
-            message=f"Pro documentation processed successfully" if processing_result.get("success") else "Processing failed",
-            upload_id=upload_id,
-            summary=summary,
-            results=[processing_result],
-            preview_chunks=processing_result.get("chunks", [])[:3] if request.generate_preview else None,
-            pro_index_updated=request.save_to_index and processing_result.get("success"),
-            version_compatibility={effective_version: True}
-        )
-        
-        logger.info(f"✅ Pro upload completed: {upload_id}")
-        return response
-        
-    except Exception as e:
-        logger.error(f"❌ Pro upload error: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error uploading Pro documentation: {str(e)}"
         )
 
 @router.get("/test-connection")
