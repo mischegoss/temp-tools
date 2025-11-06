@@ -22,7 +22,7 @@ MAX_SEARCH_RESULTS = 5
 SIMILARITY_THRESHOLD = 0.3
 
 # Gemini settings
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash") 
 MAX_CONTEXT_CHUNKS = 5
 MAX_TOKENS_PER_CHUNK = 800
 

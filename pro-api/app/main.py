@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from pathlib import Path
 
 # Import Pro-specific services
 from app.services.document_processor import DocumentProcessor
@@ -29,80 +30,109 @@ search_service = None
 gemini_service = None
 services_initialized = False
 
+def detect_environment():
+    """Detect if running in Docker or local development"""
+    # Check for Docker-specific indicators
+    is_docker = (
+        os.path.exists('/.dockerenv') or 
+        os.getenv('K_SERVICE') is not None or  # Cloud Run
+        os.path.exists('/home/appuser') or
+        os.getenv('RUNNING_IN_DOCKER') == 'true'
+    )
+    return 'docker' if is_docker else 'local'
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events using lifespan context manager for Pro API"""
     global sentence_model, startup_time, models_loaded
     global doc_processor, search_service, gemini_service, services_initialized
     
-    # CRITICAL: Set offline mode FIRST, before any imports or model loading
-    # This must be the very first thing to prevent HuggingFace API calls
-    os.environ['HF_HUB_OFFLINE'] = '1'
-    os.environ['TRANSFORMERS_OFFLINE'] = '1'
-    
     # Startup
     startup_time = time.time()
-    logger.info("Starting up Pro Chatbot API...")
+    environment = detect_environment()
+    logger.info(f"Starting up Pro Chatbot API in {environment} environment...")
     
     try:
-        
-        # Ensure cache directories are set (should match Dockerfile runtime ENV)
-        # These should already be set in Dockerfile, but we verify them here
-        cache_dir = os.getenv('SENTENCE_TRANSFORMERS_HOME', '/home/appuser/.cache/torch/sentence_transformers')
-        
-        # Verify cache exists before trying to load
-        from pathlib import Path
-        cache_path = Path(cache_dir)
-        if cache_path.exists():
-            logger.info(f"✅ Model cache found at: {cache_dir}")
-            cache_files = list(cache_path.rglob('*'))
-            logger.info(f"✅ Cache contains {len(cache_files)} items")
+        # Environment-specific setup
+        if environment == 'docker':
+            # Docker/Production setup with offline mode
+            os.environ['HF_HUB_OFFLINE'] = '1'
+            os.environ['TRANSFORMERS_OFFLINE'] = '1'
+            
+            # Use Docker cache paths
+            cache_dir = os.getenv('SENTENCE_TRANSFORMERS_HOME', '/home/appuser/.cache/torch/sentence_transformers')
+            
+            # Verify cache exists
+            cache_path = Path(cache_dir)
+            if cache_path.exists():
+                logger.info(f"✅ Model cache found at: {cache_dir}")
+                cache_files = list(cache_path.rglob('*'))
+                logger.info(f"✅ Cache contains {len(cache_files)} items")
+            else:
+                logger.error(f"❌ Cache directory not found at: {cache_dir}")
+                raise RuntimeError(f"Model cache not found at {cache_dir}. Docker build may have failed.")
+            
+            # Load model from cache
+            model_path = cache_dir + '/sentence-transformers_all-MiniLM-L6-v2'
+            if os.path.exists(model_path):
+                sentence_model = SentenceTransformer(model_path)
+            else:
+                sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+                
         else:
-            logger.error(f"❌ Cache directory not found at: {cache_dir}")
-            raise RuntimeError(f"Model cache not found at {cache_dir}. Docker build may have failed.")
+            # Local development setup
+            logger.info("🧑‍💻 Local development mode - downloading model if needed...")
+            
+            # Don't force offline mode in local development
+            if 'HF_HUB_OFFLINE' in os.environ:
+                del os.environ['HF_HUB_OFFLINE']
+            if 'TRANSFORMERS_OFFLINE' in os.environ:
+                del os.environ['TRANSFORMERS_OFFLINE']
+            
+            # Load model normally (will download if not cached)
+            sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         
-        # Load sentence transformer model ONCE from cache
-        model_start = time.time()
-        logger.info("📚 Loading sentence transformer model for Pro from cache...")
+        # Test the model
+        model_load_start = time.time()
+        logger.info("Testing model functionality...")
+        test_encoding = sentence_model.encode("test sentence for Pro API")
+        model_load_time = time.time() - model_load_start
+        logger.info(f"✅ Model test successful. Embedding dimension: {len(test_encoding)}")
+        logger.info(f"Model loaded/tested in {model_load_time:.2f} seconds")
         
-        sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', 
-                                           cache_folder=cache_dir,
-                                           device='cpu')
+        # Pre-warm the model for faster first response
+        logger.info("Pre-warming model for faster Pro responses...")
+        warmup_start = time.time()
+        sentence_model.encode([
+            "how to create Pro workflow",
+            "what is Resolve Pro", 
+            "troubleshoot Pro issue",
+            "configure Pro settings",
+            "Pro workflow activities",
+            "Pro monitoring and alerts"
+        ])
+        warmup_time = time.time() - warmup_start
+        logger.info(f"Model pre-warmed in {warmup_time:.2f} seconds")
         
-        model_load_time = time.time() - model_start
         models_loaded = True
         
-        logger.info(f"✅ Model loaded successfully in {model_load_time:.2f}s")
-        
-        # Pre-warm the model with a test embedding for Pro
-        warmup_start = time.time()
-        logger.info("🔥 Pre-warming model for Pro documentation...")
-        test_embedding = sentence_model.encode(["Pro workflow configuration documentation"])
-        warmup_time = time.time() - warmup_start
-        
-        logger.info(f"✅ Model pre-warmed in {warmup_time:.2f}s")
-        logger.info(f"   - Test embedding shape: {test_embedding.shape}")
-        
-        # Initialize Pro-specific services with the SHARED model instance
+        # Initialize business services with shared model
+        logger.info("Initializing Pro business services with shared model instance...")
         service_start = time.time()
-        logger.info("🚀 Initializing Pro services...")
         
-        # DocumentProcessor with Pro-specific settings
-        doc_processor = DocumentProcessor(
-            sentence_model=sentence_model,  # Shared model instance!
-            product_name="pro"
-        )
+        # Initialize document processor with shared model
+        doc_processor = DocumentProcessor()
+        doc_processor.initialize(shared_model=sentence_model)
+        logger.info("✅ Pro document processor initialized (using shared model)")
         
-        # SearchService with Pro context
-        search_service = SearchService(
-            sentence_model=sentence_model,  # Same shared instance!
-            product_name="pro"
-        )
+        # Initialize search service
+        search_service = SearchService(doc_processor)
+        search_service.initialize()
+        logger.info("✅ Pro search service initialized")
         
-        # GeminiService with Pro-optimized prompts
-        gemini_service = GeminiService(
-            product_name="pro"
-        )
+        # Initialize Gemini service with Pro configuration
+        gemini_service = GeminiService(product_name="pro")
+        logger.info("✅ Pro Gemini service initialized")
         
         service_init_time = time.time() - service_start
         services_initialized = True
@@ -110,14 +140,17 @@ async def lifespan(app: FastAPI):
         startup_duration = time.time() - startup_time
         
         logger.info("🎉 Pro Chatbot API startup completed!")
+        logger.info(f"   - Environment: {environment}")
         logger.info(f"   - Service initialization: {service_init_time:.2f}s")
         logger.info("💡 Memory optimized: Single shared sentence transformer model instance for Pro")
-        logger.info(f"   - Model load time: {model_load_time:.2f}s (from Docker cache)")
+        logger.info(f"   - Model load time: {model_load_time:.2f}s")
         logger.info(f"   - Warmup time: {warmup_time:.2f}s")
         logger.info(f"   - Total startup: {startup_duration:.2f}s")
         
     except Exception as e:
         logger.error(f"Failed to initialize Pro services during startup: {e}")
+        import traceback
+        traceback.print_exc()
         models_loaded = False
         services_initialized = False
         raise
@@ -130,7 +163,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app with lifespan events
 app = FastAPI(
     title="Pro Chatbot API",
-    description="AI-powered chatbot for Resolve Pro documentation with optimized cold start performance",
+    description="AI-powered chatbot for Resolve Pro documentation with Gemini 2.5 Flash",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -147,6 +180,32 @@ app.add_middleware(
 # Include Pro chat router
 app.include_router(chat_router)
 
+@app.get("/")
+async def root():
+    """Root endpoint with Pro service information"""
+    return {
+        "message": "Pro Chatbot API - Optimized for Fast Cold Starts",
+        "product": PRODUCT_DISPLAY_NAME,
+        "version": "1.0.0",
+        "status": "running" if (models_loaded and services_initialized) else "starting",
+        "ready_for_chat": models_loaded and services_initialized,
+        "default_version": PRO_DEFAULT_VERSION,
+        "documentation": {
+            "health_check": "/health",
+            "service_warmup": "/warmup",
+            "detailed_status": "/status",
+            "api_endpoints": "/api/v1/*"
+        },
+        "optimization_features": [
+            "Model pre-downloaded and cached",
+            "Model loaded once from cache at startup",
+            "Shared model instance across services (50% memory reduction)",
+            "No duplicate model loading",
+            "Pre-warmed model for faster first response",
+            "Optimized for both local development and Cloud Run deployment"
+        ]
+    }
+
 @app.get("/health")
 async def health_check():
     """Basic health check endpoint for Pro API"""
@@ -158,7 +217,8 @@ async def health_check():
         "uptime_seconds": time.time() - startup_time if startup_time else 0,
         "ready_for_chat": models_loaded and services_initialized,
         "memory_optimized": True,
-        "default_version": PRO_DEFAULT_VERSION
+        "default_version": PRO_DEFAULT_VERSION,
+        "environment": detect_environment()
     }
 
 @app.get("/warmup")
@@ -170,46 +230,32 @@ async def warmup():
     global models_loaded, services_initialized
     
     if not models_loaded or not services_initialized:
-        raise HTTPException(status_code=503, detail="Services not ready")
+        raise HTTPException(status_code=503, detail="Pro services not ready")
     
     try:
         # Test Pro-specific embedding
         test_query = "How do I configure Pro workflows?"
-        test_embedding = sentence_model.encode([test_query])
+        test_embedding = sentence_model.encode(test_query)
         
-        # Test Pro search functionality
-        test_search = await search_service.search_similarity(test_query, max_results=1)
-        
-        # Test Pro Gemini service
-        test_status = gemini_service.get_status()
+        # Test Gemini service if available
+        gemini_status = gemini_service.get_status() if gemini_service else {"ready": False}
         
         return {
             "status": "warmed_up",
-            "product": "pro",
-            "embedding_test": {
-                "query": test_query,
-                "embedding_shape": test_embedding.shape,
-                "success": True
-            },
-            "search_test": {
-                "results_found": len(test_search.get("results", [])),
-                "success": True
-            },
-            "gemini_status": test_status,
-            "all_systems_ready": True
+            "model_test": "passed",
+            "embedding_dimension": len(test_embedding),
+            "gemini_ready": gemini_status.get("ready", False),
+            "pro_optimized": True,
+            "test_query": test_query
         }
     except Exception as e:
-        return {
-            "status": "warmup_failed", 
-            "error": str(e),
-            "models_loaded": models_loaded,
-            "services_initialized": services_initialized
-        }
+        logger.error(f"Warmup test failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Warmup failed: {str(e)}")
 
 @app.get("/status")
 async def detailed_status():
     """
-    Detailed status endpoint showing Pro model state and service performance metrics
+    Detailed status endpoint showing model state and service performance metrics for Pro
     """
     # Get detailed service status if available
     doc_status = doc_processor.get_status() if doc_processor else {"ready": False}
@@ -217,9 +263,9 @@ async def detailed_status():
     gemini_status = gemini_service.get_status() if gemini_service else {"ready": False}
     
     return {
-        "service": f"{PRODUCT_DISPLAY_NAME} Chatbot API",
+        "service": "Pro Chatbot API",
         "status": "running" if (models_loaded and services_initialized) else "starting",
-        "product": "pro",
+        "environment": detect_environment(),
         "models": {
             "sentence_transformer": {
                 "loaded": sentence_model is not None,
@@ -238,7 +284,7 @@ async def detailed_status():
             "startup_time_seconds": time.time() - startup_time if startup_time else 0,
             "models_loaded": models_loaded,
             "services_initialized": services_initialized,
-            "chat_ready": gemini_status.get("can_chat", False),
+            "chat_ready": gemini_status.get("can_chat", False) if gemini_service else False,
             "first_response_optimized": True
         },
         "memory_optimization": {
@@ -249,7 +295,8 @@ async def detailed_status():
         "pro_specific": {
             "default_version": PRO_DEFAULT_VERSION,
             "supported_versions": ["7-8", "7-9", "8-0", "general"],
-            "version_aware": True
+            "version_aware": True,
+            "product_name": PRODUCT_DISPLAY_NAME
         },
         "endpoints": {
             "health": "/health",
@@ -260,38 +307,6 @@ async def detailed_status():
             "chat": "/api/v1/chat (POST)",
             "test_connection": "/api/v1/test-connection"
         }
-    }
-
-# Root endpoint
-@app.get("/")
-async def root():
-    """Root endpoint with Pro service information"""
-    return {
-        "message": f"{PRODUCT_DISPLAY_NAME} Chatbot API - Optimized for Fast Cold Starts",
-        "product": "pro",
-        "version": "1.0.0",
-        "status": "running" if (models_loaded and services_initialized) else "starting",
-        "ready_for_chat": models_loaded and services_initialized,
-        "documentation": {
-            "health_check": "/health",
-            "service_warmup": "/warmup",
-            "detailed_status": "/status",
-            "api_endpoints": "/api/v1/*"
-        },
-        "pro_features": [
-            "Version-aware responses (Pro 7.8, 7.9, 8.0)",
-            "Workflow and configuration expertise", 
-            "Integration and administration guidance",
-            "Context-aware documentation search"
-        ],
-        "optimization_features": [
-            "Model pre-downloaded in Docker image",
-            "Model loaded once from cache at startup",
-            "Shared model instance across services (50% memory reduction)",
-            "No duplicate model loading",
-            "Pre-warmed model for faster first response",
-            "Optimized for Cloud Run deployment"
-        ]
     }
 
 # Error handlers

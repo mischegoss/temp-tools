@@ -9,12 +9,14 @@ import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 from app.config import GEMINI_MODEL, PRODUCT_DISPLAY_NAME, PRO_SUPPORTED_VERSIONS
+from app.config_loader import load_environment
 
 logger = logging.getLogger(__name__)
 
 class GeminiService:
     """
     Pro-specific Gemini AI service for generating contextual responses about Pro documentation
+    Compatible with google-generativeai==0.3.2 and flexible router calling patterns
     """
     
     def __init__(self, product_name: str = "pro"):
@@ -35,14 +37,17 @@ class GeminiService:
     def _initialize_gemini(self):
         """Initialize Gemini model with Pro-specific configuration"""
         try:
-            # Configure Gemini API
-            api_key = os.getenv("GOOGLE_API_KEY")
+            # Load environment using config loader (consistent with Actions API)
+            env = load_environment()
+            
+            # Configure Gemini API using GOOGLE_API_KEY (for compatibility)
+            api_key = os.getenv("GOOGLE_API_KEY") or env.get('gemini_api_key')
             if not api_key:
                 raise ValueError("GOOGLE_API_KEY environment variable not set")
             
             genai.configure(api_key=api_key)
             
-            # Create model with Pro-optimized settings
+            # Create model with Pro-optimized settings (compatible with 0.3.2)
             generation_config = {
                 "temperature": 0.7,  # Balanced creativity for Pro responses
                 "top_p": 0.9,
@@ -70,281 +75,268 @@ class GeminiService:
                 },
             ]
             
+            # Initialize the Gemini model (compatible with 0.3.2 - no system_instruction)
             self.model = genai.GenerativeModel(
-                model_name=self.model_name,
+                model_name=env.get('gemini_model', 'gemini-2.5-flash'),
                 generation_config=generation_config,
-                safety_settings=safety_settings,
-                system_instruction=self._get_pro_system_prompt()
+                safety_settings=safety_settings
             )
+            
+            logger.info(f"🚀 Pro Gemini model initialized: {env.get('gemini_model', 'gemini-2.5-flash')}")
+            logger.info(f"🔑 API key configured successfully")
             
         except Exception as e:
             logger.error(f"❌ Failed to initialize Pro Gemini service: {e}")
             raise
 
-    def _get_pro_system_prompt(self) -> str:
-        """Get Pro-specific system prompt for Gemini"""
-        return f"""You are RANI, an AI assistant specifically designed to help with {PRODUCT_DISPLAY_NAME} documentation. You are an expert in workflows, configurations, integrations, monitoring, and troubleshooting for Resolve Pro.
-
-CORE DIRECTIVES:
-1. **Product Focus**: Always focus on {PRODUCT_DISPLAY_NAME} features, capabilities, and best practices
-2. **Version Awareness**: Consider the specific Pro version context provided in each request
-3. **Accuracy**: Base all responses on the provided documentation context. Never invent features or steps
-4. **Clarity**: Provide clear, actionable guidance suitable for technical users
-5. **Completeness**: Address the user's question thoroughly while staying focused on Pro
-
-RESPONSE STRUCTURE:
-1. **Direct Answer**: Start with a clear, direct answer to the user's question
-2. **Detailed Guidance**: Provide step-by-step instructions or detailed explanations
-3. **Pro Context**: Highlight Pro-specific features, benefits, or considerations
-4. **Best Practices**: Include relevant Pro best practices or recommendations
-5. **Version Notes**: Mention version-specific differences when relevant
-6. **Sources**: Reference the documentation sections used (without inventing sources)
-
-PRO-SPECIFIC EXPERTISE:
-- Workflow Design and Management
-- Activity Configuration and Troubleshooting  
-- Integration Setup (APIs, databases, third-party systems)
-- Monitoring and Alerting Configuration
-- Performance Optimization
-- Security and Access Management
-- Administration and Maintenance
-- Troubleshooting and Diagnostics
-
-VERSION HANDLING:
-- Pro 7.8: Focus on core workflow and monitoring capabilities
-- Pro 7.9: Include enhanced integration features and improved UI
-- Pro 8.0: Emphasize latest features, improved performance, and new integrations
-- General: Provide answers applicable across current supported versions
-
-RESPONSE QUALITY:
-- Use technical terminology appropriately
-- Provide specific configuration examples when possible
-- Include relevant Pro feature names and menu paths
-- Suggest related Pro capabilities when helpful
-- Maintain professional, helpful tone
-
-Remember: You are the expert Pro assistant. Users rely on you for accurate, actionable Pro guidance."""
-
-    async def generate_response(
-        self, 
-        user_message: str,
-        conversation_history: Optional[List[Dict]] = None,
-        context: Optional[Dict[str, Any]] = None,
-        product_name: str = "pro"
-    ) -> Dict[str, Any]:
-        """
-        Generate Pro-specific response using Gemini with context awareness
-        """
-        start_time = time.time()
-        
+    def test_connection(self) -> Dict[str, Any]:
+        """Test Gemini API connection with Pro context"""
         try:
-            # Build the comprehensive prompt for Pro
-            full_prompt = self._build_pro_prompt(
-                user_message=user_message,
-                conversation_history=conversation_history or [],
-                context=context or {}
-            )
+            test_prompt = f"""You are RANI, the AI assistant for {PRODUCT_DISPLAY_NAME}. 
+            Please respond with a brief test message confirming you can help with Pro documentation."""
             
-            logger.info(f"🤖 Pro Gemini generating response for: {user_message[:50]}...")
-            logger.info(f"   Context: {len(context.get('search_results', []))} search results")
-            logger.info(f"   Version: {context.get('version', 'not specified')}")
-            
-            # Generate response
-            response = await asyncio.get_event_loop().run_in_executor(
-                None, self._generate_sync, full_prompt
-            )
-            
-            response_time = (time.time() - start_time) * 1000
-            
-            # Update metrics
-            self.request_count += 1
-            self.total_response_time += response_time
-            self.last_response_time = response_time
-            
-            # Extract response text
-            response_text = response.text if hasattr(response, 'text') else str(response)
-            
-            logger.info(f"✅ Pro response generated in {response_time:.0f}ms")
+            start_time = time.time()
+            response = self.model.generate_content(test_prompt)
+            response_time = time.time() - start_time
             
             return {
-                "response": response_text,
-                "model_used": self.model_name,
-                "response_time_ms": response_time,
-                "tokens_used": self._estimate_tokens(response_text),
-                "confidence": 0.85,  # Base confidence for Pro responses
-                "context_used": len(context.get('search_results', [])),
-                "version_specific": context.get('version') != 'general'
+                "success": True,
+                "model": self.model_name,
+                "response_time": round(response_time, 3),
+                "test_response": response.text[:200] + "..." if len(response.text) > 200 else response.text,
+                "pro_ready": True,
+                "supported_versions": PRO_SUPPORTED_VERSIONS
             }
             
         except Exception as e:
-            self.error_count += 1
-            logger.error(f"❌ Pro Gemini error: {str(e)}")
-            
-            # Return fallback response
+            logger.error(f"❌ Pro Gemini connection test failed: {e}")
             return {
-                "response": self._get_pro_fallback_response(user_message),
-                "model_used": self.model_name,
-                "response_time_ms": (time.time() - start_time) * 1000,
+                "success": False,
                 "error": str(e),
-                "confidence": 0.1,
-                "fallback_used": True
+                "model": self.model_name,
+                "pro_ready": False
             }
 
-    def _generate_sync(self, prompt: str):
-        """Synchronous generation for executor"""
-        return self.model.generate_content(prompt)
+    def get_status(self) -> Dict[str, Any]:
+        """Get comprehensive Pro Gemini service status"""
+        uptime = time.time() - self.startup_time
+        avg_response_time = self.total_response_time / max(self.request_count, 1)
+        
+        return {
+            "ready": self.model is not None,
+            "can_chat": self.model is not None,
+            "model": self.model_name,
+            "product": self.product_name,
+            "uptime_seconds": round(uptime, 1),
+            "requests_processed": self.request_count,
+            "errors": self.error_count,
+            "success_rate": round((self.request_count - self.error_count) / max(self.request_count, 1), 3),
+            "average_response_time": round(avg_response_time, 3),
+            "last_response_time": self.last_response_time,
+            "supported_versions": PRO_SUPPORTED_VERSIONS,
+            "enhanced_features_available": True,
+            "pro_specific": {
+                "version_aware": True,
+                "workflow_support": True,
+                "integration_guidance": True,
+                "troubleshooting_support": True
+            }
+        }
 
-    def _build_pro_prompt(
-        self, 
-        user_message: str,
-        conversation_history: List[Dict],
-        context: Dict[str, Any]
-    ) -> str:
+    def generate_response(self, user_message: str = None, prompt: str = None, 
+                          context_chunks: List = None, version: str = "8-0", 
+                          conversation_history: List = None, **kwargs) -> str:
         """
-        Build comprehensive Pro-specific prompt with context
+        Public method to generate response using Gemini
+        This method is expected by the chat router
+        Flexible parameter handling to work with different calling patterns
         """
-        # Extract Pro context
-        pro_version = context.get('version', '8-0')
-        doc_type = context.get('documentation_type', 'general')
-        search_results = context.get('search_results', [])
-        page_context = context.get('page_context')
+        try:
+            if not self.model:
+                return self._get_pro_fallback_response("Service temporarily unavailable")
+            
+            # Handle flexible parameter input
+            if prompt:
+                # If prompt is provided directly, use it
+                final_prompt = prompt
+            elif user_message:
+                # If user_message is provided, build a Pro prompt
+                final_prompt = self._build_pro_prompt(
+                    user_message, 
+                    context_chunks or [], 
+                    version, 
+                    conversation_history or []
+                )
+            else:
+                raise ValueError("Either 'prompt' or 'user_message' must be provided")
+            
+            # Generate content with retry logic
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    response = self.model.generate_content(final_prompt)
+                    
+                    if response and response.text:
+                        # Update tracking
+                        self.request_count += 1
+                        return response.text
+                    else:
+                        logger.warning(f"⚠️ Empty response from Gemini on attempt {attempt + 1}")
+                        
+                except Exception as retry_error:
+                    logger.warning(f"⚠️ Gemini generation attempt {attempt + 1} failed: {retry_error}")
+                    if attempt == max_retries - 1:
+                        raise retry_error
+                    time.sleep(0.5 * (attempt + 1))  # Exponential backoff
+            
+            return self._get_pro_fallback_response("Could not generate response after retries")
+            
+        except Exception as e:
+            self.error_count += 1
+            logger.error(f"❌ Pro Gemini response generation failed: {e}")
+            return self._get_pro_fallback_response(f"Error: {str(e)}")
+
+    def chat(self, request) -> object:
+        """
+        Generate Pro-specific chat response using Gemini with conversation history support
+        """
+        from app.models.chat import ChatResponse, ContextChunk
         
-        # Build context section
-        context_section = ""
-        if search_results:
-            context_section = "\n### RELEVANT PRO DOCUMENTATION:\n"
-            for i, result in enumerate(search_results[:5], 1):
-                context_section += f"\n**Source {i}: {result.get('page_title', 'Unknown')}**\n"
-                context_section += f"URL: {result.get('source_url', '')}\n"
-                if result.get('header'):
-                    context_section += f"Section: {result.get('header')}\n"
-                context_section += f"Content: {result.get('content', '')[:800]}...\n"
-                context_section += f"Relevance: {result.get('similarity_score', 0):.2f}\n"
+        start_time = time.time()
+        self.request_count += 1
         
-        # Build conversation context
-        conversation_context = ""
-        if conversation_history:
-            conversation_context = "\n### CONVERSATION HISTORY:\n"
-            for msg in conversation_history[-3:]:  # Last 3 messages
-                role = msg.get('role', 'user')
-                content = msg.get('content', '')
-                conversation_context += f"{role.upper()}: {content[:200]}...\n"
+        try:
+            # Get search service from the initialized services
+            import app.main as main_app
+            search_service = main_app.search_service
+            
+            if not search_service or not search_service.ready:
+                logger.warning("🔍 Search service not ready for Pro chat")
+                return self._generate_fallback_response(request.message)
+            
+            # Build Pro-specific prompt with conversation history
+            conversation_history = getattr(request, 'conversation_history', []) or []
+            
+            # Use generate_response method for consistency
+            response_text = self.generate_response(
+                user_message=request.message,
+                context_chunks=[],
+                version=getattr(request, 'version', '8-0'),
+                conversation_history=conversation_history
+            )
+            
+            # Calculate processing time
+            processing_time = time.time() - start_time
+            self.last_response_time = round(processing_time, 3)
+            self.total_response_time += processing_time
+            
+            # Create and return response
+            return ChatResponse(
+                message=response_text,
+                context_used=[],  # For now, empty context
+                processing_time=self.last_response_time,
+                model_used=self.model_name,
+                enhanced_features_used=False,
+                relationship_enhanced_chunks=0,
+                version_context=f"Pro {getattr(request, 'version', '8-0').replace('-', '.')}",
+                conversation_id=getattr(request, 'conversation_id', None)
+            )
+            
+        except Exception as e:
+            self.error_count += 1
+            logger.error(f"❌ Pro chat request failed: {e}")
+            return self._generate_fallback_response(request.message, str(e))
+
+    def _build_pro_prompt(self, user_message: str, context_chunks: List, version: str = "8-0", conversation_history: List = None) -> str:
+        """Build Pro-specific prompt with version context and conversation history"""
         
         # Build version context
-        version_context = f"\n### PRO VERSION CONTEXT:\n"
-        version_context += f"Target Version: Pro {pro_version.replace('-', '.')}\n"
-        version_context += f"Documentation Type: {doc_type}\n"
-        if page_context:
-            version_context += f"Current Page: {page_context}\n"
-        version_context += f"Supported Versions: {', '.join(PRO_SUPPORTED_VERSIONS)}\n"
+        version_display = version.replace('-', '.')
         
-        # Build the complete prompt
-        prompt = f"""# {PRODUCT_DISPLAY_NAME} ASSISTANT REQUEST
+        # Build conversation history section
+        history_section = ""
+        if conversation_history and len(conversation_history) > 0:
+            history_section = "\n\nCONVERSATION HISTORY:\n"
+            for msg in conversation_history[-5:]:  # Last 5 messages only
+                role = msg.get('role', 'user')
+                content = msg.get('content', '')
+                if isinstance(msg, dict):
+                    history_section += f"{role.upper()}: {content}\n"
+                elif hasattr(msg, 'role') and hasattr(msg, 'content'):
+                    history_section += f"{msg.role.upper()}: {msg.content}\n"
+        
+        # Build the complete prompt with system instruction embedded
+        prompt = f"""You are RANI, an AI assistant specifically designed to help users with Resolve Pro documentation and features. You are an expert in Pro workflows, configurations, integrations, monitoring, administration, and troubleshooting.
 
-{version_context}
+CORE EXPERTISE AREAS:
+- **Workflow Management**: Design, creation, modification, and optimization of Pro workflows
+- **Activity Configuration**: Setup and troubleshooting of workflow activities and actions  
+- **Integration Solutions**: API integrations, database connections, third-party system connectivity
+- **Monitoring & Alerting**: Dashboard configuration, alert setup, performance monitoring
+- **Administration**: User management, permissions, system configuration, maintenance
+- **Troubleshooting**: Diagnostics, error resolution, performance optimization
 
-{context_section}
+USER CONTEXT:
+- User is asking about Pro {version_display}
+- Product: {PRODUCT_DISPLAY_NAME}
 
-{conversation_context}
+{history_section}
 
-### USER QUESTION:
-{user_message}
+USER QUESTION: {user_message}
 
-### RESPONSE INSTRUCTIONS:
-Generate a comprehensive, accurate response about {PRODUCT_DISPLAY_NAME} based on the provided documentation context. Focus on Pro version {pro_version.replace('-', '.')} capabilities and ensure your response is:
+RESPONSE GUIDELINES:
+1. **Pro-Focused**: Always prioritize Pro-specific solutions and capabilities
+2. **Version-Aware**: Consider the Pro {version_display} context in your response
+3. **Accurate**: Provide reliable information about Pro features and functionality
+4. **Actionable**: Provide clear, step-by-step guidance when possible
+5. **Complete**: Address all aspects of the user's question thoroughly
+6. **Context-Aware**: Consider the conversation history when relevant
 
-1. **Technically Accurate**: Base your response only on the provided documentation
-2. **Pro-Specific**: Focus on Pro features, workflows, and capabilities
-3. **Version-Aware**: Consider the specific Pro version context
-4. **Actionable**: Provide clear steps or guidance where applicable
-5. **Complete**: Address all aspects of the user's question
-6. **Well-Structured**: Use clear headings and formatting
-
-If the question relates to workflows, include specific Pro workflow guidance.
-If about configuration, provide Pro-specific configuration steps.
-If about integrations, focus on Pro's integration capabilities.
-If about troubleshooting, provide Pro diagnostic and resolution steps.
-
-Begin your response now:"""
+Please provide a helpful, accurate response about {PRODUCT_DISPLAY_NAME}:"""
 
         return prompt
 
-    def _get_pro_fallback_response(self, user_message: str) -> str:
-        """
-        Generate fallback response for Pro when Gemini fails
-        """
-        return f"""I'd be glad to help you with {PRODUCT_DISPLAY_NAME}! However, I'm experiencing some technical difficulties right now.
+    def _generate_response(self, prompt: str) -> str:
+        """Generate response using Gemini with enhanced error handling (private method)"""
+        return self.generate_response(prompt=prompt)  # Delegate to public method
+
+    def _generate_fallback_response(self, user_message: str, error: str = None) -> object:
+        """Generate fallback response when Gemini fails"""
+        from app.models.chat import ChatResponse
+        
+        fallback_text = self._get_pro_fallback_response(user_message, error)
+        
+        return ChatResponse(
+            message=fallback_text,
+            context_used=[],
+            processing_time=0.1,
+            model_used="fallback",
+            enhanced_features_used=False,
+            relationship_enhanced_chunks=0,
+            version_context="Pro (fallback mode)"
+        )
+
+    def _get_pro_fallback_response(self, user_message: str, error: str = None) -> str:
+        """Generate fallback response for Pro when Gemini fails"""
+        base_response = f"""I'd be glad to help you with {PRODUCT_DISPLAY_NAME}! However, I'm experiencing some technical difficulties right now.
 
 For immediate assistance with Pro, I recommend:
 
 1. **Browse the Pro Documentation**: Check the specific section related to your question
-2. **Pro Workflows**: If asking about workflows, look at the workflow designer documentation
+2. **Pro Workflows**: If asking about workflows, look at the workflow designer documentation  
 3. **Configuration Help**: For setup questions, check the administration guides
 4. **Integration Support**: For integration questions, review the API and integration documentation
 
 Your question about "{user_message[:100]}..." is important, and I want to make sure you get accurate information. Please try again in a moment, or contact Pro support for immediate assistance.
 
 I apologize for the inconvenience!"""
-
-    def _estimate_tokens(self, text: str) -> int:
-        """Rough token estimation for Pro responses"""
-        return len(text.split()) * 1.3  # Rough approximation
-
-    def get_status(self) -> Dict[str, Any]:
-        """Get Pro Gemini service status"""
-        avg_response_time = (
-            self.total_response_time / self.request_count 
-            if self.request_count > 0 else 0
-        )
         
-        error_rate = (
-            self.error_count / self.request_count 
-            if self.request_count > 0 else 0
-        )
+        if error and not error.startswith("Error:"):
+            base_response += f"\n\n*Technical details: {error}*"
         
-        return {
-            "ready": self.model is not None,
-            "can_chat": self.model is not None,
-            "model_loaded": self.model is not None,
-            "model_name": self.model_name,
-            "product": self.product_name,
-            "uptime_seconds": time.time() - self.startup_time,
-            "requests_processed": self.request_count,
-            "error_count": self.error_count,
-            "error_rate": error_rate,
-            "average_response_time_ms": avg_response_time,
-            "last_response_time_ms": self.last_response_time,
-            "pro_optimized": True,
-            "supported_versions": PRO_SUPPORTED_VERSIONS,
-            "version_aware": True
-        }
+        return base_response
 
-    async def test_connection(self) -> Dict[str, Any]:
-        """Test Pro Gemini connection and functionality"""
-        try:
-            test_message = "How do I create a workflow in Pro?"
-            test_context = {
-                "version": "8-0",
-                "documentation_type": "workflow",
-                "search_results": []
-            }
-            
-            response = await self.generate_response(
-                user_message=test_message,
-                context=test_context
-            )
-            
-            return {
-                "status": "connected",
-                "test_successful": True,
-                "test_response_time_ms": response.get("response_time_ms"),
-                "model_responding": True
-            }
-            
-        except Exception as e:
-            return {
-                "status": "error",
-                "test_successful": False,
-                "error": str(e),
-                "model_responding": False
-            }
+    def __del__(self):
+        """Cleanup when service is destroyed"""
+        if hasattr(self, 'model') and self.model:
+            logger.info(f"🧹 Pro Gemini service cleanup completed")
