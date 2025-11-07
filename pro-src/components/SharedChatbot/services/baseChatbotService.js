@@ -1,5 +1,5 @@
 // src/components/SharedChatbot/services/baseChatbotService.js
-// Base chatbot service for all product chatbots - FIXED for Cloud Run APIs
+// COMPLETE base chatbot service for all product chatbots
 
 class BaseChatbotService {
   constructor(config) {
@@ -8,23 +8,14 @@ class BaseChatbotService {
     this.apiBaseUrl = config.apiBaseUrl
     this.endpoints = config.endpoints
 
-    // Server state tracking
     this.isServerAwake = false
     this.lastHealthCheck = null
     this.healthCheckInterval = config.healthCheckInterval || 30000
-
-    // Request settings
     this.requestTimeout = config.requestTimeout || 30000
     this.maxRetries = config.maxRetries || 3
-
-    // Wake up state
     this.isWakingUp = false
   }
 
-  /**
-   * Make HTTP request to API with proper error handling
-   * FIXED: Handle Cloud Run API response format correctly
-   */
   async makeRequest(endpoint, options = {}) {
     const url = `${this.apiBaseUrl}${endpoint}`
 
@@ -38,7 +29,6 @@ class BaseChatbotService {
       ...options,
     }
 
-    // Add timeout
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout)
 
@@ -48,13 +38,11 @@ class BaseChatbotService {
       const response = await fetch(url, requestOptions)
       clearTimeout(timeoutId)
 
-      // Check if response is ok
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
 
-      // Parse JSON response
       let data
       try {
         data = await response.json()
@@ -62,10 +50,9 @@ class BaseChatbotService {
         throw new Error(`Invalid JSON response: ${parseError.message}`)
       }
 
-      // FIXED: Cloud Run APIs typically return data in this format
       return {
         success: true,
-        data: data, // Don't wrap in another data property
+        data: data,
         status: response.status,
       }
     } catch (error) {
@@ -79,9 +66,6 @@ class BaseChatbotService {
     }
   }
 
-  /**
-   * Retry request with exponential backoff
-   */
   async retryRequest(requestFn, maxRetries = null) {
     const retries = maxRetries || this.maxRetries
     let lastError
@@ -93,10 +77,9 @@ class BaseChatbotService {
         lastError = error
 
         if (attempt === retries) {
-          break // Don't delay on final attempt
+          break
         }
 
-        // Exponential backoff: 1s, 2s, 4s, 8s...
         const delay = Math.min(1000 * Math.pow(2, attempt), 10000)
         console.warn(
           `Request failed, retrying in ${delay}ms... (attempt ${attempt + 1}/${
@@ -111,9 +94,6 @@ class BaseChatbotService {
     throw lastError
   }
 
-  /**
-   * Check server health
-   */
   async checkHealth() {
     try {
       const result = await this.makeRequest(this.endpoints.health, {
@@ -135,12 +115,9 @@ class BaseChatbotService {
     }
   }
 
-  /**
-   * Wake up Cloud Run server with progress updates
-   */
   async wakeUpServer(onProgress = null) {
     if (this.isWakingUp) {
-      return // Already waking up
+      return
     }
 
     this.isWakingUp = true
@@ -149,11 +126,10 @@ class BaseChatbotService {
       onProgress?.('Checking server status...')
       console.log(`☕ Waking up ${this.productName} server...`)
 
-      // Try health check with retries
       await this.retryRequest(async () => {
         onProgress?.('Attempting to connect...')
         return await this.checkHealth()
-      }, 5) // More retries for wake-up
+      }, 5)
 
       onProgress?.('Server is ready!')
       console.log(`✅ ${this.productName} server successfully woken up`)
@@ -170,17 +146,11 @@ class BaseChatbotService {
     }
   }
 
-  /**
-   * Check if last health check is still valid
-   */
   isHealthCheckValid() {
     if (!this.lastHealthCheck) return false
     return Date.now() - this.lastHealthCheck < this.healthCheckInterval
   }
 
-  /**
-   * Ensure server is awake before making requests
-   */
   async ensureServerAwake(onProgress = null) {
     if (this.isServerAwake && this.isHealthCheckValid()) {
       return true
@@ -189,20 +159,14 @@ class BaseChatbotService {
     return await this.wakeUpServer(onProgress)
   }
 
-  /**
-   * Base sendMessage implementation (to be overridden by product services)
-   * FIXED: Standard format for all product APIs
-   */
   async sendMessage(message, conversationHistory = []) {
     if (!message || typeof message !== 'string') {
       throw new Error('Message must be a non-empty string')
     }
 
     try {
-      // Ensure server is awake first
       await this.ensureServerAwake()
 
-      // Format request body to match backend expectations
       const requestBody = {
         message: message.trim(),
         conversation_history: conversationHistory.map(msg => ({
@@ -224,10 +188,7 @@ class BaseChatbotService {
         })
       })
 
-      // FIXED: Handle different API response formats
       const responseData = result.data
-
-      // Check for message in different possible fields
       const responseMessage =
         responseData.message || responseData.response || responseData.text
 
@@ -265,9 +226,6 @@ class BaseChatbotService {
     }
   }
 
-  /**
-   * Base search implementation
-   */
   async searchDocumentation(query) {
     if (!query || typeof query !== 'string') {
       throw new Error('Query must be a non-empty string')
@@ -305,9 +263,6 @@ class BaseChatbotService {
     }
   }
 
-  /**
-   * Get status of the API service
-   */
   async getStatus() {
     try {
       const result = await this.makeRequest(this.endpoints.status, {
@@ -331,9 +286,6 @@ class BaseChatbotService {
     }
   }
 
-  /**
-   * Generic error fallback message (to be overridden by product services)
-   */
   getErrorFallbackMessage(error) {
     const errorMessage = error.message.toLowerCase()
 
