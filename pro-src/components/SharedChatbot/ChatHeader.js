@@ -94,18 +94,35 @@ const ChatHeader = ({
       alignItems: 'center',
       justifyContent: 'center',
       transition: 'background 0.2s',
-      pointerEvents: 'auto', // Allow button clicks
     },
-    messageCount: {
-      fontSize: '11px',
-      color: 'rgba(255,255,255,0.8)',
-      pointerEvents: 'none',
+    // Full header (when expanded)
+    headerFull: {
+      background:
+        productConfig?.gradient ||
+        'linear-gradient(135deg, #17a2b8 0%, #20c997 100%)',
+      color: 'white',
+      padding: '20px',
+      textAlign: 'center',
+      position: 'sticky',
+      top: 0,
+      zIndex: 10,
+      flexShrink: 0,
+      borderTopLeftRadius: '16px',
+      borderTopRightRadius: '16px',
     },
-    dragHint: {
-      fontSize: '10px',
-      opacity: 0.6,
-      fontStyle: 'italic',
-      pointerEvents: 'none',
+    headerTitle: {
+      margin: '0 0 8px 0',
+      fontSize: '18px',
+      fontWeight: '600',
+    },
+    headerSubtitle: {
+      margin: 0,
+      fontSize: '14px',
+      opacity: 0.9,
+    },
+    icon: {
+      fontSize: '20px',
+      marginBottom: '4px',
     },
   }
 
@@ -113,80 +130,92 @@ const ChatHeader = ({
     .compact-header-button:hover {
       background: rgba(255,255,255,0.3) !important;
     }
-    
-    .compact-header-button:active {
-      background: rgba(255,255,255,0.4) !important;
+
+    .chat-header-draggable {
+      cursor: ${isDragging ? 'grabbing !important' : 'grab !important'};
     }
 
-    .chat-header-draggable:hover .window-size-indicator {
-      opacity: 1 !important;
-    }
-
-    .chat-header-draggable:active {
-      cursor: grabbing !important;
+    .chat-header-draggable * {
+      cursor: ${isDragging ? 'grabbing !important' : 'grab !important'};
     }
   `
 
-  const handleMouseDown = e => {
-    // Only start drag if clicking on the header background, not buttons
-    if (e.target.closest('.compact-header-button')) {
-      return
+  const handleHeaderClick = () => {
+    if (isCompactHeader) {
+      setIsHeaderExpanded(!isHeaderExpanded)
     }
-    onDragStart(e)
   }
 
-  return (
-    <>
-      <style>{cssString}</style>
-      <div
-        style={styles.headerCompact}
-        className='chat-header-draggable'
-        onMouseDown={handleMouseDown}
-        title='Drag to move window'
-      >
-        <div style={styles.compactHeaderLeft}>
-          <h3 style={styles.compactHeaderTitle}>Ask RANI</h3>
-          <div style={styles.compactHeaderSubtitle}>
-            {productConfig?.productName || 'Documentation'} Help
+  // Show compact header by default (for fixed widget)
+  if (isCompactHeader || userMessageCount > 0) {
+    return (
+      <>
+        <style>{cssString}</style>
+        <div
+          style={styles.headerCompact}
+          className='chat-header-draggable'
+          onMouseDown={onDragStart}
+        >
+          <div style={styles.compactHeaderLeft} onClick={handleHeaderClick}>
+            <div style={styles.compactHeaderTitle}>
+              {productConfig?.icon || '💬'}{' '}
+              {productConfig?.productName || 'Assistant'}
+            </div>
+            {userMessageCount > 0 && (
+              <div style={styles.compactHeaderSubtitle}>
+                {userMessageCount}{' '}
+                {userMessageCount === 1 ? 'question' : 'questions'}
+              </div>
+            )}
           </div>
-        </div>
 
-        <div style={styles.compactHeaderCenter}>
-          {/* Removed window size indicator */}
-        </div>
-
-        <div style={styles.compactHeaderRight}>
-          {/* Message count indicator */}
-          {userMessageCount > 0 && (
-            <div style={styles.messageCount}>
-              {userMessageCount} message{userMessageCount !== 1 ? 's' : ''}
+          {windowSize && (
+            <div style={styles.compactHeaderCenter}>
+              <div style={styles.windowSizeIndicator}>
+                {windowSize.width}×{windowSize.height}
+              </div>
             </div>
           )}
 
-          {/* Clear chat button - only show if there are messages */}
-          {messages.length > 0 && (
+          <div style={styles.compactHeaderRight}>
             <button
               style={styles.compactHeaderButton}
               className='compact-header-button'
               onClick={handleClearChat}
-              title='Clear conversation'
-              aria-label='Clear conversation'
+              title='Clear chat'
             >
               🗑️
             </button>
-          )}
-
-          {/* Close button */}
-          <button
-            style={styles.compactHeaderButton}
-            className='compact-header-button'
-            onClick={onClose}
-            title='Close chat'
-            aria-label='Close chat'
-          >
-            ×
-          </button>
+            <button
+              style={styles.compactHeaderButton}
+              className='compact-header-button'
+              onClick={onClose}
+              title='Close chat'
+            >
+              ✕
+            </button>
+          </div>
         </div>
+      </>
+    )
+  }
+
+  // Show full header (for modal or initial state)
+  return (
+    <>
+      <style>{cssString}</style>
+      <div style={styles.headerFull} onMouseDown={onDragStart}>
+        <div style={styles.icon}>{productConfig?.icon || '💬'}</div>
+        <h3 style={styles.headerTitle}>
+          {productConfig?.welcomeMessage?.split('.')[0] ||
+            `${productConfig?.productName || 'AI'} Assistant`}
+        </h3>
+        <p style={styles.headerSubtitle}>
+          {pageContext?.title
+            ? `Ask me about "${pageContext.title}"`
+            : productConfig?.placeholderText ||
+              'Ask me anything about the documentation'}
+        </p>
       </div>
     </>
   )

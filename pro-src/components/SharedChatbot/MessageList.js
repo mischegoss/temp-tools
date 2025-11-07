@@ -12,6 +12,7 @@ const MessageList = ({
   serverStatus = 'ready',
   wakeUpProgress = null,
   messagesEndRef,
+  messagesContainerRef,
   feedback = {},
   handleFeedback,
   retryMessage,
@@ -77,85 +78,135 @@ const MessageList = ({
     
     /* Enhanced animations for thinking vs typing */
     @keyframes thinking {
-      0%, 80%, 100% { transform: scale(1); opacity: 0.4; }
-      40% { transform: scale(1.2); opacity: 1; }
+      0%, 80%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+      }
+      40% { 
+        transform: scale(1.3); 
+        opacity: 0.8; 
+      }
     }
     
     @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-      30% { transform: translateY(-10px); opacity: 1; }
+      0%, 60%, 100% {
+        transform: translateY(0px);
+        opacity: 1;
+      }
+      30% {
+        transform: translateY(-6px);
+        opacity: 0.7;
+      }
     }
     
     @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
+      0%, 100% {
+        opacity: 0.4;
+      }
+      50% {
+        opacity: 1;
+      }
     }
     
-    /* Thinking dots - slower, more contemplative */
+    /* Thinking animation styles */
+    .thinking-icon {
+      font-size: 16px;
+      margin-right: 8px;
+      animation: thinking 1.5s ease-in-out infinite;
+    }
+    
     .thinking-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+      width: 4px;
+      height: 4px;
       background: ${productConfig?.primaryColor || '#17a2b8'};
-      animation: thinking 2s infinite;
-      margin-right: 3px;
-    }
-    
-    .thinking-dot:nth-child(2) { animation-delay: 300ms; }
-    .thinking-dot:nth-child(3) { animation-delay: 600ms; }
-    .thinking-dot:nth-child(4) { animation-delay: 900ms; }
-    
-    /* Typing dots - faster, more active */
-    .typing-dot {
-      width: 5px;
-      height: 5px;
       border-radius: 50%;
-      background: ${productConfig?.secondaryColor || '#20c997'};
-      animation: typing 1.4s infinite;
-      margin-right: 3px;
+      margin: 0 2px;
+      animation: pulse 1.4s ease-in-out infinite;
     }
     
-    .typing-dot:nth-child(2) { animation-delay: 200ms; }
-    .typing-dot:nth-child(3) { animation-delay: 400ms; }
-    .typing-dot:nth-child(4) { animation-delay: 600ms; }
+    .thinking-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
     
-    /* Text animation for smooth transitions */
-    .activity-text {
+    .thinking-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    .thinking-text {
       margin-left: 8px;
       font-size: 12px;
       color: #6c757d;
       font-weight: 500;
-      transition: all 0.3s ease;
     }
     
-    .thinking-text {
-      color: ${productConfig?.primaryColor || '#17a2b8'};
+    /* Typing animation styles */
+    .typing-icon {
+      font-size: 16px;
+      margin-right: 8px;
+      animation: typing 1.2s ease-in-out infinite;
+    }
+    
+    .typing-dot {
+      width: 4px;
+      height: 4px;
+      background: ${productConfig?.primaryColor || '#20c997'};
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typing 1.0s ease-in-out infinite;
+    }
+    
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.3s;
     }
     
     .typing-text {
-      color: ${productConfig?.secondaryColor || '#20c997'};
-    }
-    
-    /* Brain icon for thinking state */
-    .thinking-icon {
-      font-size: 14px;
-      margin-right: 6px;
-      animation: pulse 2s infinite;
-    }
-    
-    /* Keyboard icon for typing state */
-    .typing-icon {
+      margin-left: 8px;
       font-size: 12px;
-      margin-right: 6px;
-      animation: pulse 1s infinite;
+      color: #6c757d;
+      font-weight: 500;
+    }
+    
+    /* Activity text animations */
+    .activity-text {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .chatbot-messages {
+        padding: 12px;
+      }
+      
+      .activity-indicator {
+        padding: 10px 12px;
+        max-width: 200px;
+      }
+      
+      .thinking-icon, .typing-icon {
+        font-size: 14px;
+      }
+      
+      .thinking-text, .typing-text {
+        font-size: 11px;
+      }
+    }
+    
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .thinking-icon, .typing-icon, 
+      .thinking-dot, .typing-dot, 
+      .activity-text {
+        animation: none !important;
+      }
     }
   `
 
-  // Enhanced activity indicator that handles both thinking and typing
+  // Render activity indicator (thinking or typing)
   const renderActivityIndicator = () => {
-    // Don't show anything if neither thinking nor typing
-    if (!isThinking && !isTyping) return null
-
     if (isThinking) {
       return (
         <div style={styles.activityIndicator}>
@@ -164,7 +215,7 @@ const MessageList = ({
           <div className='thinking-dot'></div>
           <div className='thinking-dot'></div>
           <span className='activity-text thinking-text'>
-            RANI is thinking...
+            {productConfig?.productName || 'AI'} is thinking...
           </span>
         </div>
       )
@@ -177,7 +228,9 @@ const MessageList = ({
           <div className='typing-dot'></div>
           <div className='typing-dot'></div>
           <div className='typing-dot'></div>
-          <span className='activity-text typing-text'>RANI is typing...</span>
+          <span className='activity-text typing-text'>
+            {productConfig?.productName || 'AI'} is typing...
+          </span>
         </div>
       )
     }
@@ -185,38 +238,34 @@ const MessageList = ({
     return null
   }
 
-  // Show welcome message if no messages and not loading
-  const showWelcomeMessage =
-    messages.length === 0 &&
-    !isThinking &&
-    !isTyping &&
-    serverStatus === 'ready'
-
   return (
     <>
       <style>{cssString}</style>
       <div
         style={styles.messagesContainer}
         className='chatbot-messages'
+        ref={messagesContainerRef}
         onScroll={onScroll}
       >
         {/* Server wake up status */}
         {serverStatus === 'waking' && wakeUpProgress && (
           <div style={styles.wakeUpStatus}>
-            <div>Starting AI Assistant...</div>
-            <div style={{ fontSize: '11px', marginTop: '6px' }}>
+            <div>
+              Starting {productConfig?.productName || 'AI'} Assistant...
+            </div>
+            <div style={{ fontSize: '12px', marginTop: '8px' }}>
               {wakeUpProgress}
             </div>
           </div>
         )}
 
-        {/* Welcome message for empty chat */}
-        {showWelcomeMessage && (
+        {/* Welcome message when no messages */}
+        {messages.length === 0 && !isThinking && !isTyping && (
           <div style={styles.welcomeMessage}>
-            👋 Hi! I'm RANI, your AI assistant for{' '}
-            {productConfig?.productName || 'Documentation'}.
-            <br />
-            How can I help you today?
+            {productConfig?.welcomeMessage ||
+              `👋 Hi! I'm your ${
+                productConfig?.productName || 'AI'
+              } assistant. How can I help you today?`}
           </div>
         )}
 
@@ -225,12 +274,12 @@ const MessageList = ({
           <MessageBubble
             key={message.id}
             message={message}
-            productConfig={productConfig}
             feedback={feedback[message.id]}
             onFeedback={feedbackType =>
-              handleFeedback(message.id, feedbackType)
+              handleFeedback?.(message.id, feedbackType)
             }
-            onRetry={() => retryMessage(message.id)}
+            onRetry={() => retryMessage?.(message.id)}
+            productConfig={productConfig}
           />
         ))}
 

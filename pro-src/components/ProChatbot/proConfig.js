@@ -1,49 +1,41 @@
 // src/components/ProChatbot/proConfig.js
-// Configuration for Pro product chatbot with advanced version detection
-// UPDATED: API URL changed to new Cloud Run deployment
+// Configuration for Pro product chatbot - matches Pro-API expectations
 
 export const PRO_CHATBOT_CONFIG = {
   // Product identification
   productName: 'Pro',
   productDisplayName: 'Resolve Pro',
 
-  // API configuration - UPDATED: New Cloud Run URL
-  apiBaseUrl: 'https://pro-chatbot-api-146019630513.us-central1.run.app',
+  // API configuration - FIXED to match Pro-API
+  apiBaseUrl: 'https://pro-chatbot-api-716168339016.us-central1.run.app',
 
-  // Version handling - Pro has specific version patterns
-  defaultVersion: '8-0', // Current version appears as /pro/ (no version in URL)
-  versionDetectionPattern: /\/pro\/(\d+\.\d+)/i, // Only match explicit versions like /pro/7.9/
+  // Version handling - Pro uses hyphenated versions
+  defaultVersion: '8-0',
+  versionDetectionPattern: /\/pro\/([\d.-]+)/i,
 
-  // Available versions for selection - ONLY 3 supported versions
-  availableVersions: [
-    { value: '7-8', label: '7.8', displayName: 'Pro 7.8' },
-    { value: '7-9', label: '7.9', displayName: 'Pro 7.9' },
-    { value: '8-0', label: '8.0', displayName: 'Pro 8.0 (Latest)' },
-    { value: 'general', label: 'General', displayName: 'General (Pro 8.0)' },
-  ],
-
-  // API endpoints (relative to apiBaseUrl)
+  // API endpoints (relative to apiBaseUrl) - FIXED to match Pro-API routes
   endpoints: {
     chat: '/api/v1/chat',
     search: '/api/v1/search',
-    status: '/api/v1/status',
+    status: '/status',
     health: '/health',
-    warmup: '/warmup', // Added warmup endpoint
+    warmup: '/warmup',
     upload: '/api/v1/upload-documentation',
+    testConnection: '/api/v1/test-connection',
   },
 
-  // Visual styling - Green theme matching the Pro card
-  gradient: 'linear-gradient(135deg, #0f4f3c 0%, #16a085 100%)', // Dark green to teal
-  primaryColor: '#0f4f3c',
-  secondaryColor: '#16a085',
-  shadowColor: 'rgba(15, 79, 60, 0.4)',
+  // Visual styling - Blue-green theme matching the Pro card
+  gradient: 'linear-gradient(135deg, #17a2b8 0%, #20c997 100%)', // Teal gradient
+  primaryColor: '#17a2b8',
+  secondaryColor: '#20c997',
+  shadowColor: 'rgba(23, 162, 184, 0.4)',
 
   // UI customization
-  icon: '💬', // Chat bubble icon
+  icon: '💼', // Professional briefcase icon
   buttonText: 'Pro Assistant',
   welcomeMessage:
-    "👋 Hi! I'm RANI, your AI assistant for Pro documentation. I can help you with workflows, configurations, integrations, and more!",
-  placeholderText: 'Ask about Pro workflows, activities, or configurations...',
+    "👋 Hi! I'm RANI, your AI assistant for Pro documentation. I can help you with workflows, automation, configuration, and troubleshooting!",
+  placeholderText: 'Ask about Pro workflows, configuration, or features...',
 
   // Support and help
   supportUrl: 'mailto:pro-support@company.com?subject=Pro Documentation Help',
@@ -61,28 +53,49 @@ export const PRO_CHATBOT_CONFIG = {
     supportTicket: true,
     messageChunking: true,
     sourceLinks: true,
-    versionSelection: true, // Enable version selection feature
+    versionSelection: true, // Pro-specific: version switching
   },
 
-  // Pro-specific version mappings - ONLY supported versions
+  // Pro-specific version mappings - URL format to API format
   versionMappings: {
-    7.8: '7-8',
-    7.9: '7-9',
-    8.0: '8-0',
-    7.8: '7-8',
-    7.9: '7-9',
     '8.0': '8-0',
-    '7-8': '7-8',
-    '7-9': '7-9',
+    7.9: '7-9',
+    7.8: '7-8',
+    7.7: '7-7',
+    7.6: '7-6',
+    7.5: '7-5',
+    // Also handle hyphenated versions
     '8-0': '8-0',
-    general: '8-0', // General = current version (8.0) ONLY
-    latest: '8-0',
+    '7-9': '7-9',
+    '7-8': '7-8',
+    '7-7': '7-7',
+    '7-6': '7-6',
+    '7-5': '7-5',
   },
+
+  // Available versions for selection
+  availableVersions: [
+    { value: '8-0', label: 'Pro 8.0 (Current)' },
+    { value: '7-9', label: 'Pro 7.9' },
+    { value: '7-8', label: 'Pro 7.8' },
+    { value: '7-7', label: 'Pro 7.7' },
+    { value: '7-6', label: 'Pro 7.6' },
+    { value: '7-5', label: 'Pro 7.5' },
+    { value: 'general', label: 'General (All Versions)' },
+  ],
 
   // Request timeouts and retries
   requestTimeout: 30000,
   maxRetries: 3,
   healthCheckInterval: 30000,
+
+  // Pro-specific API settings
+  apiSettings: {
+    maxResults: 5,
+    similarityThreshold: 0.3,
+    maxConversationHistory: 10,
+    chunkSize: 800,
+  },
 }
 
 export default PRO_CHATBOT_CONFIG

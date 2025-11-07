@@ -1,5 +1,6 @@
 // src/components/SharedChatbot/ChatInput.js
 // Enhanced ChatInput with product-specific styling and compact design
+// FIXED: Removed CSS property conflicts
 
 import React from 'react'
 
@@ -42,6 +43,15 @@ const ChatInput = ({
       maxHeight: '80px',
       transition: 'border-color 0.2s, opacity 0.2s',
       fontFamily: 'var(--ifm-font-family-base)',
+      // FIXED: Use only border-color, not mixed with border shorthand
+      borderColor: '#e1e5e9',
+    },
+    messageInputFocused: {
+      borderColor: productConfig?.primaryColor || '#17a2b8',
+    },
+    messageInputDisabled: {
+      opacity: 0.6,
+      borderColor: '#dee2e6',
     },
     sendButton: {
       width: '36px',
@@ -58,138 +68,108 @@ const ChatInput = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: canSendMessage ? '0 2px 6px rgba(23, 162, 184, 0.3)' : 'none',
-      transition: 'all 0.2s',
+      boxShadow: canSendMessage
+        ? `0 2px 8px ${productConfig?.shadowColor || 'rgba(23, 162, 184, 0.3)'}`
+        : 'none',
+      transition: 'all 0.2s ease',
+      flexShrink: 0,
     },
-    footerActions: {
+    actionButtons: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      gap: '8px',
-    },
-    supportButton: {
-      background: '#f8f9fa',
-      border: '1px solid #dee2e6',
-      color: '#495057',
-      padding: '6px 10px',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '11px',
-      fontWeight: '500',
-      flex: 1,
-      transition: 'all 0.2s',
-    },
-    copyButton: {
-      background: '#e3f2fd',
-      border: '1px solid #90caf9',
-      color: '#1976d2',
-      padding: '6px 10px',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '11px',
-      fontWeight: '500',
-      flex: 1,
-      transition: 'all 0.2s',
+      marginTop: '4px',
     },
     statusIndicator: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
       fontSize: '10px',
       color: '#6c757d',
+      fontWeight: '500',
     },
-    statusDot: {
-      width: '6px',
-      height: '6px',
-      borderRadius: '50%',
+    actionButtonsRight: {
+      display: 'flex',
+      gap: '8px',
+    },
+    actionButton: {
+      background: 'none',
+      border: 'none',
+      color: productConfig?.primaryColor || '#17a2b8',
+      fontSize: '10px',
+      cursor: 'pointer',
+      textDecoration: 'underline',
+      padding: '2px 4px',
+      borderRadius: '3px',
+      transition: 'background 0.2s',
     },
   }
 
-  // Get status dot color based on server status
-  function getStatusColor() {
-    switch (serverStatus) {
-      case 'ready':
-        return '#28a745'
-      case 'loading':
-        return '#ffc107'
-      case 'error':
-        return '#dc3545'
-      case 'waking':
-        return '#17a2b8'
-      default:
-        return '#6c757d'
-    }
+  const getStatusText = () => {
+    if (isThinking) return 'AI is thinking...'
+    if (isTyping) return 'AI is typing...'
+    if (isLoading) return 'Sending...'
+    if (serverStatus === 'waking') return 'Starting up...'
+    if (serverStatus === 'error') return 'Connection error'
+    return `${productConfig?.productName || 'AI'} is ready`
   }
 
-  // Get status text
-  function getStatusText() {
-    if (isThinking) return 'Thinking...'
-    if (isTyping) return 'Typing...'
-    if (isLoading) return 'Loading...'
+  const getInputStyle = () => {
+    let style = { ...styles.messageInput }
 
-    switch (serverStatus) {
-      case 'ready':
-        return 'Online'
-      case 'waking':
-        return 'Starting...'
-      case 'error':
-        return 'Offline'
-      default:
-        return 'Connecting...'
-    }
-  }
-
-  // Get button content based on state
-  function getButtonContent() {
-    if (isThinking) return '🧠'
-    if (isTyping) return '⌨️'
-    if (isLoading)
-      return <span style={{ animation: 'spin 1s linear infinite' }}>⟳</span>
-    return '→'
-  }
-
-  // Handle input focus styles
-  const getInputStyles = () => {
-    const baseStyles = { ...styles.messageInput }
-
-    if (isThinking || isTyping) {
-      baseStyles.opacity = 0.7
-      baseStyles.pointerEvents = 'none'
-    } else {
-      baseStyles.borderColor = inputValue
-        ? productConfig?.primaryColor || '#17a2b8'
-        : '#e1e5e9'
+    if (isLoading || isThinking || isTyping) {
+      style = { ...style, ...styles.messageInputDisabled }
     }
 
-    return baseStyles
+    return style
   }
 
   const cssString = `
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    .chatbot-support-button:hover {
-      background: #e9ecef !important;
-    }
-    
-    .chatbot-copy-button:hover {
-      background: #bbdefb !important;
-    }
-    
-    .chat-send-button:hover:not(:disabled) {
-      transform: scale(1.05);
-    }
-    
-    .chat-send-button:active:not(:disabled) {
-      transform: scale(0.95);
-    }
-    
-    .chat-input:focus {
+    .chat-input-focused {
       border-color: ${productConfig?.primaryColor || '#17a2b8'} !important;
+      box-shadow: 0 0 0 1px ${
+        productConfig?.primaryColor || '#17a2b8'
+      }33 !important;
+    }
+
+    .send-button:hover:enabled {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px ${
+        productConfig?.shadowColor || 'rgba(23, 162, 184, 0.4)'
+      };
+    }
+
+    .send-button:active:enabled {
+      transform: translateY(0);
+    }
+
+    .action-button:hover {
+      background: rgba(23, 162, 184, 0.1);
+    }
+
+    .message-input::placeholder {
+      color: #9ca3af;
+    }
+
+    /* Auto-resize textarea */
+    .message-input {
+      overflow: hidden;
+      min-height: 36px;
     }
   `
+
+  const handleInputChange = e => {
+    const value = e.target.value
+    setInputValue(value)
+
+    // Auto-resize textarea
+    const textarea = e.target
+    textarea.style.height = 'auto'
+    textarea.style.height = Math.min(textarea.scrollHeight, 80) + 'px'
+  }
+
+  const handleSendClick = () => {
+    if (canSendMessage) {
+      sendMessage()
+    }
+  }
 
   return (
     <>
@@ -198,65 +178,55 @@ const ChatInput = ({
         <div style={styles.inputContainer}>
           <textarea
             ref={inputRef}
-            style={getInputStyles()}
-            className='chat-input'
+            style={getInputStyle()}
+            className='message-input'
             value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
+            onFocus={e => e.target.classList.add('chat-input-focused')}
+            onBlur={e => e.target.classList.remove('chat-input-focused')}
             placeholder={
-              isThinking
-                ? 'RANI is thinking...'
-                : isTyping
-                ? 'RANI is typing...'
-                : `Ask about ${
-                    productConfig?.productName || 'documentation'
-                  }...`
+              productConfig?.placeholderText ||
+              `Ask about ${productConfig?.productName || 'documentation'}...`
             }
-            disabled={isThinking || isTyping}
+            disabled={isLoading || isThinking || isTyping}
             rows={1}
           />
           <button
             style={styles.sendButton}
-            className='chat-send-button'
-            onClick={sendMessage}
+            className='send-button'
+            onClick={handleSendClick}
             disabled={!canSendMessage}
-            title={
-              isThinking
-                ? 'RANI is thinking...'
-                : isTyping
-                ? 'RANI is typing...'
-                : 'Send message'
-            }
+            title={canSendMessage ? 'Send message' : 'Type a message first'}
           >
-            {getButtonContent()}
+            {isLoading || isThinking || isTyping ? '⏳' : '➤'}
           </button>
         </div>
 
-        <div style={styles.footerActions}>
-          <button
-            style={styles.supportButton}
-            className='chatbot-support-button'
-            onClick={handleSupportClick}
-            title='Copy chat and open support'
-          >
-            📧 Support
-          </button>
-          <button
-            style={styles.copyButton}
-            className='chatbot-copy-button'
-            onClick={handleCopyChatClick}
-            title='Copy chat summary'
-          >
-            📋 Copy Chat
-          </button>
-          <div style={styles.statusIndicator}>
-            <div
-              style={{
-                ...styles.statusDot,
-                background: getStatusColor(),
-              }}
-            ></div>
-            <span>{getStatusText()}</span>
+        <div style={styles.actionButtons}>
+          <div style={styles.statusIndicator}>{getStatusText()}</div>
+
+          <div style={styles.actionButtonsRight}>
+            {handleCopyChatClick && (
+              <button
+                style={styles.actionButton}
+                className='action-button'
+                onClick={handleCopyChatClick}
+                title='Copy conversation'
+              >
+                📋 Copy Chat
+              </button>
+            )}
+            {handleSupportClick && (
+              <button
+                style={styles.actionButton}
+                className='action-button'
+                onClick={handleSupportClick}
+                title='Contact support'
+              >
+                📧 Support
+              </button>
+            )}
           </div>
         </div>
       </div>

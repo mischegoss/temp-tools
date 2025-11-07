@@ -1,6 +1,6 @@
 // src/components/ProChatbot/ProChatbotService.js
-// Pro-specific chatbot service extending the base service
-// UPDATED: Fixed request/response format for Cloud Run API
+// COMPLETE Pro-specific chatbot service extending the base service
+// FIXED: Full implementation with proper error handling
 
 import BaseChatbotService from '../SharedChatbot/services/baseChatbotService'
 import PRO_CHATBOT_CONFIG from './proConfig'
@@ -15,7 +15,7 @@ class ProChatbotService extends BaseChatbotService {
   /**
    * Set version manually (for version selector)
    */
-  setVersion(version) {
+  setSelectedVersion(version) {
     this.currentSelectedVersion = version
     console.log(`📌 Pro version manually set to: ${version}`)
   }
@@ -25,10 +25,19 @@ class ProChatbotService extends BaseChatbotService {
    */
   getVersionInfo() {
     const effectiveVersion = this.getEffectiveVersion()
-    const versionConfig = this.config.availableVersions.find(
-      v => v.value === effectiveVersion,
-    )
-    return versionConfig || { value: effectiveVersion, label: effectiveVersion }
+    const detectedVersion = this.detectVersion()
+
+    return {
+      effective: {
+        version: effectiveVersion,
+        label: effectiveVersion.replace('-', '.'),
+      },
+      detected: {
+        version: detectedVersion,
+        label: detectedVersion.replace('-', '.'),
+      },
+      isManuallySelected: this.currentSelectedVersion !== null,
+    }
   }
 
   /**
@@ -100,50 +109,24 @@ class ProChatbotService extends BaseChatbotService {
   }
 
   /**
-   * Warm up the Pro API for faster responses
-   */
-  async warmUpAPI() {
-    try {
-      const warmupResponse = await this.makeRequest(this.endpoints.warmup, {
-        method: 'GET',
-      })
-      console.log('🔥 Pro API warmed up successfully')
-      return warmupResponse
-    } catch (error) {
-      console.warn('⚠️ Pro API warmup failed:', error.message)
-      // Don't throw error - warmup failure shouldn't block chat
-    }
-  }
-
-  /**
-   * Enhanced ensureServerAwake with API warmup
-   */
-  async ensureServerAwake(onProgress = null) {
-    if (this.isServerAwake && this.isHealthCheckValid()) {
-      return true
-    }
-
-    // Wake up server first
-    await this.wakeUpServer(onProgress)
-
-    // Warm up API for faster responses
-    await this.warmUpAPI()
-
-    return true
-  }
-
-  /**
-   * Enhanced sendMessage with Pro-specific context and version awareness
-   * UPDATED: Fixed request format for Cloud Run API
+   * COMPLETE Pro sendMessage implementation with comprehensive error handling
    */
   async sendMessage(message, conversationHistory = []) {
+    if (!message || typeof message !== 'string') {
+      return {
+        success: false,
+        error: 'Message must be a non-empty string',
+        message: 'Please provide a valid message.',
+      }
+    }
+
     const effectiveVersion = this.getEffectiveVersion()
     const detectedVersion = this.detectVersion()
     const currentPage =
       typeof window !== 'undefined' ? window.location.pathname : '/'
 
-    // FIXED: Updated request format to match Cloud Run API expectations
-    const enhancedRequestBody = {
+    // Pro-API specific request format
+    const requestBody = {
       message: message.trim(),
       version: effectiveVersion,
       conversation_history: conversationHistory.map(msg => ({
@@ -160,44 +143,93 @@ class ProChatbotService extends BaseChatbotService {
     }
 
     try {
+      // Ensure server is awake first
+      console.log('🔍 Ensuring Pro server is awake...')
       await this.ensureServerAwake()
+      console.log('✅ Pro server is ready')
 
       console.log('💼 Sending Pro message:', {
-        message: message.substring(0, 50) + '...',
+        message: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+        messageLength: message.length,
         effectiveVersion,
         detectedVersion,
         isManuallySelected: this.currentSelectedVersion !== null,
         page: currentPage,
+        apiUrl: `${this.apiBaseUrl}${this.endpoints.chat}`,
       })
 
+      // Make the API request with retries
       const result = await this.retryRequest(async () => {
-        return await this.makeRequest(this.endpoints.chat, {
+        console.log('📡 Making Pro API request...')
+        const response = await this.makeRequest(this.endpoints.chat, {
           method: 'POST',
-          body: JSON.stringify(enhancedRequestBody),
+          body: JSON.stringify(requestBody),
         })
+        console.log('📨 Pro API raw response:', {
+          success: response?.success,
+          hasData: !!response?.data,
+          dataKeys: response?.data ? Object.keys(response.data) : [],
+        })
+        return response
       })
 
-      // FIXED: Updated response field mapping for Cloud Run API
-      if (!result.data.message) {
-        throw new Error('Invalid response format from Pro API')
+      // Validate the API response structure
+      if (!result || !result.success) {
+        const errorMsg =
+          result?.error || result?.message || 'API request failed'
+        console.error('❌ Pro API request unsuccessful:', {
+          success: result?.success,
+          error: errorMsg,
+          status: result?.status,
+        })
+        throw new Error(`Pro API request failed: ${errorMsg}`)
       }
 
-      console.log('🤖 Pro AI Response received')
+      if (!result.data) {
+        console.error('❌ Pro API returned no data:', result)
+        throw new Error('Pro API returned empty response data')
+      }
+
+      // Check for the response message in different possible fields
+      const responseData = result.data
+      const responseMessage =
+        responseData.message ||
+        responseData.response ||
+        responseData.text ||
+        responseData.answer
+
+      if (!responseMessage) {
+        console.error('❌ Pro API response missing message field:', {
+          responseData,
+          availableFields: Object.keys(responseData),
+        })
+        throw new Error('Pro API response missing message content')
+      }
+
+      console.log('🤖 Pro AI Response processed successfully:', {
+        messageLength: responseMessage.length,
+        processingTime: responseData.processing_time,
+        contextUsed: responseData.context_used?.length || 0,
+        conversationId: responseData.conversation_id,
+        modelUsed: responseData.model_used || 'unknown',
+      })
+
+      // Return successful response
       return {
         success: true,
-        message: result.data.message, // FIXED: API returns 'message' field
+        message: responseMessage,
         metadata: {
-          responseTime: result.data.processing_time
-            ? result.data.processing_time * 1000
-            : null, // FIXED: Convert seconds to ms
-          sources: result.data.context_used || [], // FIXED: API returns 'context_used'
-          confidence: null, // API doesn't return confidence
-          modelUsed: result.data.model_used || 'gemini-2.5-flash',
-          versionContext: result.data.version_context,
-          enhancedFeaturesUsed: result.data.enhanced_features_used || false,
+          responseTime: responseData.processing_time
+            ? responseData.processing_time * 1000 // Convert seconds to ms
+            : responseData.response_time_ms || null,
+          sources: responseData.context_used || responseData.sources || [],
+          confidence: responseData.confidence || null,
+          modelUsed: responseData.model_used || 'gemini-2.5-flash',
+          versionContext: responseData.version_context,
+          enhancedFeaturesUsed: responseData.enhanced_features_used || false,
           relationshipEnhancedChunks:
-            result.data.relationship_enhanced_chunks || 0,
-          conversationId: result.data.conversation_id,
+            responseData.relationship_enhanced_chunks || 0,
+          conversationId: responseData.conversation_id,
           version: effectiveVersion,
           contextInfo: {
             version: effectiveVersion,
@@ -208,22 +240,46 @@ class ProChatbotService extends BaseChatbotService {
         },
       }
     } catch (error) {
-      console.error('❌ Pro chat failed:', error.message)
+      // Comprehensive error handling with detailed logging
+      const errorMessage = error?.message || 'Unknown error occurred'
+      const errorType = error?.constructor?.name || 'Unknown'
+
+      const errorDetails = {
+        errorType,
+        errorMessage,
+        originalError: error,
+        apiUrl: `${this.apiBaseUrl}${this.endpoints.chat}`,
+        effectiveVersion,
+        currentPage,
+        serverStatus: this.isServerAwake ? 'awake' : 'sleeping',
+        requestBody: {
+          ...requestBody,
+          message: requestBody.message.substring(0, 50) + '...', // Truncate for logging
+        },
+      }
+
+      console.error('❌ Pro chat request failed completely:', errorDetails)
+
+      // Return structured error response
       return {
         success: false,
-        error: error.message,
+        error: errorMessage, // This was undefined before!
         message: this.getErrorFallbackMessage(error),
+        errorDetails, // Include for debugging (optional)
       }
     }
   }
 
   /**
    * Enhanced search with Pro version context
-   * UPDATED: Fixed search request format for Cloud Run API
    */
   async searchDocumentation(query) {
     if (!query || typeof query !== 'string') {
-      throw new Error('Query must be a non-empty string')
+      return {
+        success: false,
+        error: 'Query must be a non-empty string',
+        results: [],
+      }
     }
 
     try {
@@ -231,18 +287,28 @@ class ProChatbotService extends BaseChatbotService {
 
       const effectiveVersion = this.getEffectiveVersion()
 
+      console.log('🔍 Pro documentation search:', {
+        query: query.substring(0, 50) + '...',
+        effectiveVersion,
+        apiUrl: `${this.apiBaseUrl}${this.endpoints.search}`,
+      })
+
       const result = await this.retryRequest(async () => {
         return await this.makeRequest(this.endpoints.search, {
           method: 'POST',
           body: JSON.stringify({
             query: query.trim(),
-            version: effectiveVersion, // FIXED: Keep version, remove product
+            version: effectiveVersion,
             max_results: 5,
             similarity_threshold: 0.3,
             content_type_filter: null,
           }),
         })
       })
+
+      if (!result?.success || !result?.data) {
+        throw new Error('Search API returned invalid response')
+      }
 
       return {
         success: true,
@@ -254,7 +320,10 @@ class ProChatbotService extends BaseChatbotService {
         },
       }
     } catch (error) {
-      console.error('❌ Pro documentation search failed:', error.message)
+      console.error('❌ Pro documentation search failed:', {
+        error: error.message,
+        query: query.substring(0, 50) + '...',
+      })
       return {
         success: false,
         error: error.message,
@@ -264,42 +333,77 @@ class ProChatbotService extends BaseChatbotService {
   }
 
   /**
-   * Pro-specific error messages
+   * Pro-specific error messages with context
    */
   getErrorFallbackMessage(error) {
-    const errorMessage = error.message.toLowerCase()
+    const errorMessage = (error?.message || '').toLowerCase()
 
     if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
-      return `I'm having trouble connecting to the Pro AI backend. Let me direct you to our support team for immediate assistance.`
+      return `I'm having trouble connecting to the Pro AI system. This might be a temporary network issue. Please check your connection and try again.`
     }
 
-    if (errorMessage.includes('server') || errorMessage.includes('startup')) {
-      return `The Pro AI service is starting up. Please try again in a few moments.`
+    if (
+      errorMessage.includes('server') ||
+      errorMessage.includes('startup') ||
+      errorMessage.includes('fetch')
+    ) {
+      return `The Pro AI service appears to be starting up or temporarily unavailable. This usually takes 30-60 seconds. Please try again in a moment.`
     }
 
     if (errorMessage.includes('version')) {
-      return `I encountered an issue with version-specific content. Try selecting a different version or contact support.`
+      return `I encountered an issue with version-specific content for Pro ${this.getEffectiveVersion().replace(
+        '-',
+        '.',
+      )}. Try selecting a different version or contact support.`
     }
 
-    return `I'm experiencing some technical difficulties with the Pro assistant. Please try again or contact support if the issue persists.`
+    if (errorMessage.includes('cors') || errorMessage.includes('blocked')) {
+      return `I'm unable to reach the Pro AI service due to a connectivity issue. Please try refreshing the page or contact support.`
+    }
+
+    if (errorMessage.includes('json') || errorMessage.includes('parse')) {
+      return `I received an unexpected response from the Pro AI service. The development team has been notified. Please try again.`
+    }
+
+    if (errorMessage.includes('401') || errorMessage.includes('403')) {
+      return `Authentication issue with the Pro AI service. Please refresh the page or contact support.`
+    }
+
+    if (
+      errorMessage.includes('500') ||
+      errorMessage.includes('502') ||
+      errorMessage.includes('503')
+    ) {
+      return `The Pro AI service is experiencing technical difficulties. Please try again in a few minutes.`
+    }
+
+    // Generic fallback with error details for debugging
+    return `I'm experiencing technical difficulties with the Pro assistant. Error: "${
+      error?.message || 'Unknown error'
+    }". Please try again or contact support if the issue persists.`
   }
 
   /**
-   * Test connection to Pro API
+   * Test connection to Pro API with detailed diagnostics
    */
   async testConnection() {
     try {
+      console.log('🔧 Testing Pro API connection...')
+
       const result = await this.makeRequest('/api/v1/test-connection', {
         method: 'GET',
       })
 
-      console.log('✅ Pro API connection test successful')
+      console.log('✅ Pro API connection test successful:', result)
       return {
         success: true,
         data: result.data,
       }
     } catch (error) {
-      console.error('❌ Pro API connection test failed:', error.message)
+      console.error('❌ Pro API connection test failed:', {
+        error: error.message,
+        apiUrl: this.apiBaseUrl,
+      })
       return {
         success: false,
         error: error.message,
@@ -308,25 +412,80 @@ class ProChatbotService extends BaseChatbotService {
   }
 
   /**
-   * Get Pro API status
+   * Get Pro API status with enhanced diagnostics
    */
   async getProStatus() {
     try {
+      console.log('📊 Checking Pro API status...')
+
       const result = await this.makeRequest('/status', {
         method: 'GET',
       })
 
+      console.log('✅ Pro API status check successful:', result.data)
       return {
         success: true,
         status: result.data,
       }
     } catch (error) {
-      console.error('❌ Pro API status check failed:', error.message)
+      console.error('❌ Pro API status check failed:', {
+        error: error.message,
+        apiUrl: this.apiBaseUrl,
+      })
       return {
         success: false,
         error: error.message,
         status: { server_status: 'unavailable' },
       }
+    }
+  }
+
+  /**
+   * Warm up the Pro API for faster responses
+   */
+  async warmUpAPI() {
+    try {
+      console.log('🔥 Warming up Pro API...')
+      const warmupResponse = await this.makeRequest('/warmup', {
+        method: 'GET',
+      })
+      console.log('✅ Pro API warmed up successfully')
+      return warmupResponse
+    } catch (error) {
+      console.warn(
+        '⚠️ Pro API warmup failed (this is usually okay):',
+        error.message,
+      )
+      // Don't throw error - warmup failure shouldn't block chat
+    }
+  }
+
+  /**
+   * Enhanced ensureServerAwake with comprehensive diagnostics
+   */
+  async ensureServerAwake(onProgress = null) {
+    if (this.isServerAwake && this.isHealthCheckValid()) {
+      console.log('✅ Pro server already awake and healthy')
+      return true
+    }
+
+    try {
+      onProgress?.('Checking Pro API availability...')
+      console.log('☕ Ensuring Pro server is awake...')
+
+      // Wake up server first
+      await this.wakeUpServer(onProgress)
+
+      // Warm up API for faster responses
+      onProgress?.('Optimizing Pro API performance...')
+      await this.warmUpAPI()
+
+      console.log('✅ Pro server is fully ready')
+      return true
+    } catch (error) {
+      console.error('❌ Failed to ensure Pro server is awake:', error.message)
+      onProgress?.('Failed to connect to Pro service')
+      throw error
     }
   }
 }

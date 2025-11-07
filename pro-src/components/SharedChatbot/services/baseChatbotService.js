@@ -1,50 +1,80 @@
 // src/components/SharedChatbot/services/baseChatbotService.js
-// Base service class for chatbot API communication - shared across all products
+// Base chatbot service for all product chatbots - FIXED for Cloud Run APIs
 
 class BaseChatbotService {
   constructor(config) {
     this.config = config
-    this.apiBaseUrl = config.apiBaseUrl
     this.productName = config.productName
+    this.apiBaseUrl = config.apiBaseUrl
     this.endpoints = config.endpoints
 
-    // Health check state
+    // Server state tracking
     this.isServerAwake = false
     this.lastHealthCheck = null
-    this.healthCheckInterval = 30000 // 30 seconds
-    this.isWakingUp = false
+    this.healthCheckInterval = config.healthCheckInterval || 30000
 
-    // Request configuration
-    this.requestTimeout = 30000 // 30 seconds
-    this.maxRetries = 3
-    this.retryDelay = 1000 // 1 second
+    // Request settings
+    this.requestTimeout = config.requestTimeout || 30000
+    this.maxRetries = config.maxRetries || 3
+
+    // Wake up state
+    this.isWakingUp = false
   }
 
   /**
-   * Make HTTP request with retry logic
+   * Make HTTP request to API with proper error handling
+   * FIXED: Handle Cloud Run API response format correctly
    */
   async makeRequest(endpoint, options = {}) {
     const url = `${this.apiBaseUrl}${endpoint}`
+
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+    }
+
     const requestOptions = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      timeout: this.requestTimeout,
+      method: 'GET',
+      headers: { ...defaultHeaders, ...options.headers },
       ...options,
     }
 
-    try {
-      const response = await fetch(url, requestOptions)
+    // Add timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout)
 
+    try {
+      requestOptions.signal = controller.signal
+
+      const response = await fetch(url, requestOptions)
+      clearTimeout(timeoutId)
+
+      // Check if response is ok
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
 
-      const data = await response.json()
-      return { success: true, data, status: response.status }
+      // Parse JSON response
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        throw new Error(`Invalid JSON response: ${parseError.message}`)
+      }
+
+      // FIXED: Cloud Run APIs typically return data in this format
+      return {
+        success: true,
+        data: data, // Don't wrap in another data property
+        status: response.status,
+      }
     } catch (error) {
-      console.error(`❌ Request failed to ${url}:`, error.message)
+      clearTimeout(timeoutId)
+
+      if (error.name === 'AbortError') {
+        throw new Error(`Request timeout after ${this.requestTimeout}ms`)
+      }
+
       throw error
     }
   }
@@ -52,23 +82,28 @@ class BaseChatbotService {
   /**
    * Retry request with exponential backoff
    */
-  async retryRequest(requestFn, maxRetries = this.maxRetries) {
+  async retryRequest(requestFn, maxRetries = null) {
+    const retries = maxRetries || this.maxRetries
     let lastError
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         return await requestFn()
       } catch (error) {
         lastError = error
 
-        if (attempt === maxRetries) {
-          throw error
+        if (attempt === retries) {
+          break // Don't delay on final attempt
         }
 
-        const delay = this.retryDelay * Math.pow(2, attempt - 1)
-        console.log(
-          `🔄 Retry attempt ${attempt}/${maxRetries} after ${delay}ms...`,
+        // Exponential backoff: 1s, 2s, 4s, 8s...
+        const delay = Math.min(1000 * Math.pow(2, attempt), 10000)
+        console.warn(
+          `Request failed, retrying in ${delay}ms... (attempt ${attempt + 1}/${
+            retries + 1
+          })`,
         )
+
         await new Promise(resolve => setTimeout(resolve, delay))
       }
     }
@@ -77,47 +112,42 @@ class BaseChatbotService {
   }
 
   /**
-   * Health check endpoint
+   * Check server health
    */
   async checkHealth() {
     try {
-      const result = await this.makeRequest(
-        this.endpoints.health || '/health',
-        {
-          method: 'GET',
-        },
-      )
+      const result = await this.makeRequest(this.endpoints.health, {
+        method: 'GET',
+      })
 
       this.isServerAwake = true
       this.lastHealthCheck = Date.now()
 
-      return {
-        success: true,
-        status: result.data,
-      }
+      console.log(`✅ ${this.productName} API health check passed`)
+      return result
     } catch (error) {
       this.isServerAwake = false
-      return {
-        success: false,
-        error: error.message,
-        status: { server_status: 'unavailable' },
-      }
+      console.warn(
+        `⚠️ ${this.productName} API health check failed:`,
+        error.message,
+      )
+      throw error
     }
   }
 
   /**
-   * Wake up server (for Cloud Run cold starts)
+   * Wake up Cloud Run server with progress updates
    */
   async wakeUpServer(onProgress = null) {
     if (this.isWakingUp) {
-      return false
+      return // Already waking up
     }
 
     this.isWakingUp = true
 
     try {
       onProgress?.('Checking server status...')
-      console.log('☕ Waking up server...')
+      console.log(`☕ Waking up ${this.productName} server...`)
 
       // Try health check with retries
       await this.retryRequest(async () => {
@@ -126,10 +156,13 @@ class BaseChatbotService {
       }, 5) // More retries for wake-up
 
       onProgress?.('Server is ready!')
-      console.log('✅ Server successfully woken up')
+      console.log(`✅ ${this.productName} server successfully woken up`)
       return true
     } catch (error) {
-      console.error('❌ Failed to wake up server:', error.message)
+      console.error(
+        `❌ Failed to wake up ${this.productName} server:`,
+        error.message,
+      )
       onProgress?.('Failed to start server')
       throw new Error(`Server startup failed: ${error.message}`)
     } finally {
@@ -157,7 +190,8 @@ class BaseChatbotService {
   }
 
   /**
-   * Send chat message to AI backend
+   * Base sendMessage implementation (to be overridden by product services)
+   * FIXED: Standard format for all product APIs
    */
   async sendMessage(message, conversationHistory = []) {
     if (!message || typeof message !== 'string') {
@@ -176,7 +210,6 @@ class BaseChatbotService {
           content: msg.text,
           timestamp: msg.timestamp?.toISOString() || new Date().toISOString(),
         })),
-        product: this.productName.toLowerCase(),
       }
 
       console.log(
@@ -191,23 +224,39 @@ class BaseChatbotService {
         })
       })
 
-      // Validate response structure
-      if (!result.data.response) {
-        throw new Error('Invalid response format from server')
+      // FIXED: Handle different API response formats
+      const responseData = result.data
+
+      // Check for message in different possible fields
+      const responseMessage =
+        responseData.message || responseData.response || responseData.text
+
+      if (!responseMessage) {
+        throw new Error(
+          'Invalid response format from server - no message found',
+        )
       }
 
       console.log(`🤖 ${this.productName} AI Response received`)
       return {
         success: true,
-        message: result.data.response,
+        message: responseMessage,
         metadata: {
-          responseTime: result.data.response_time_ms || null,
-          sources: result.data.sources || [],
-          confidence: result.data.confidence || null,
+          responseTime:
+            responseData.response_time_ms ||
+            responseData.processing_time * 1000 ||
+            null,
+          sources: responseData.sources || responseData.context_used || [],
+          confidence: responseData.confidence || null,
+          modelUsed: responseData.model_used || responseData.model || 'unknown',
+          conversationId: responseData.conversation_id || null,
         },
       }
     } catch (error) {
-      console.error(`❌ ${this.productName} chat failed:`, error.message)
+      console.error(
+        `❌ ${this.productName} send message failed:`,
+        error.message,
+      )
       return {
         success: false,
         error: error.message,
@@ -217,7 +266,7 @@ class BaseChatbotService {
   }
 
   /**
-   * Search documentation directly
+   * Base search implementation
    */
   async searchDocumentation(query) {
     if (!query || typeof query !== 'string') {
@@ -232,7 +281,8 @@ class BaseChatbotService {
           method: 'POST',
           body: JSON.stringify({
             query: query.trim(),
-            product: this.productName.toLowerCase(),
+            max_results: 5,
+            similarity_threshold: 0.3,
           }),
         })
       })
@@ -246,10 +296,7 @@ class BaseChatbotService {
         },
       }
     } catch (error) {
-      console.error(
-        `❌ ${this.productName} documentation search failed:`,
-        error.message,
-      )
+      console.error(`❌ ${this.productName} search failed:`, error.message)
       return {
         success: false,
         error: error.message,
@@ -259,7 +306,7 @@ class BaseChatbotService {
   }
 
   /**
-   * Get server status information
+   * Get status of the API service
    */
   async getStatus() {
     try {
@@ -272,6 +319,10 @@ class BaseChatbotService {
         status: result.data,
       }
     } catch (error) {
+      console.error(
+        `❌ ${this.productName} status check failed:`,
+        error.message,
+      )
       return {
         success: false,
         error: error.message,
@@ -281,20 +332,20 @@ class BaseChatbotService {
   }
 
   /**
-   * Get appropriate error fallback message
+   * Generic error fallback message (to be overridden by product services)
    */
   getErrorFallbackMessage(error) {
     const errorMessage = error.message.toLowerCase()
 
     if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
-      return `I'm having trouble connecting to the ${this.productName} AI backend. Let me direct you to our support team for immediate assistance.`
+      return `I'm having trouble connecting to the ${this.productName} AI service. Please try again in a moment.`
     }
 
     if (errorMessage.includes('server') || errorMessage.includes('startup')) {
       return `The ${this.productName} AI service is starting up. Please try again in a few moments.`
     }
 
-    return `I'm experiencing some technical difficulties with the ${this.productName} assistant. Please try again or contact support if the issue persists.`
+    return `I'm experiencing some technical difficulties. Please try again or contact support if the issue persists.`
   }
 }
 

@@ -1,5 +1,6 @@
 // src/components/SharedChatbot/hooks/useSharedChatbot.js
 // Enhanced chatbot hook adapted from working chatbot for multi-product use
+// FIXED: Added proper null checks and type validation
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 
@@ -97,95 +98,128 @@ export const useSharedChatbot = (productConfig, apiService) => {
     )
   }, [])
 
-  const removeMessage = useCallback(messageId => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId))
+  // Clear conversation
+  const clearConversation = useCallback(() => {
+    setMessages([])
+    setInputValue('')
+    setFeedback({})
+    setConnectionError(null)
+    console.log(
+      `🧹 ${productConfig?.productName || 'Chat'} conversation cleared`,
+    )
+  }, [productConfig?.productName])
+
+  // Handle feedback
+  const handleFeedback = useCallback((messageId, feedbackType) => {
+    setFeedback(prev => ({ ...prev, [messageId]: feedbackType }))
+    console.log(`👍 Feedback for message ${messageId}: ${feedbackType}`)
   }, [])
 
-  const removeMessagesAfter = useCallback(timestamp => {
-    setMessages(prev => prev.filter(msg => msg.timestamp <= timestamp))
-  }, [])
+  // Retry failed message
+  const retryMessage = useCallback(
+    async messageId => {
+      const messageToRetry = messages.find(msg => msg.id === messageId)
+      if (!messageToRetry) return
 
-  // Get optimized conversation history
-  const getOptimizedConversationHistory = useCallback(() => {
-    const MAX_HISTORY_MESSAGES = 10
-    const MAX_CONTEXT_CHARS = 4000
+      // Find the user message that preceded this failed message
+      const messageIndex = messages.findIndex(msg => msg.id === messageId)
+      if (messageIndex > 0) {
+        const userMessage = messages[messageIndex - 1]
+        if (userMessage.sender === 'user') {
+          // Remove the failed message and retry
+          setMessages(prev => prev.filter(msg => msg.id !== messageId))
+          await sendMessage(userMessage.text)
+        }
+      }
+    },
+    [messages],
+  )
 
-    let history = messages
-      .filter(msg => msg.status === 'sent' || msg.sender === 'bot')
-      .slice(-MAX_HISTORY_MESSAGES)
-
-    // Trim if total context is too large
-    let totalChars = history.reduce((sum, msg) => sum + msg.text.length, 0)
-
-    while (totalChars > MAX_CONTEXT_CHARS && history.length > 2) {
-      history = history.slice(1) // Remove oldest message
-      totalChars = history.reduce((sum, msg) => sum + msg.text.length, 0)
-    }
-
-    return history
-  }, [messages])
-
-  // Enhanced send message with immediate thinking state
+  // Enhanced send message with proper validation
   const sendMessage = useCallback(
     async (messageText = null) => {
-      const message = (messageText || inputValue).trim()
-      if (!message || isLoading || isThinking || isTyping) return false
-
-      // Clear input if using current input value
-      if (!messageText) {
-        setInputValue('')
-      }
-
-      // IMMEDIATE FEEDBACK: Set thinking state right away
-      setIsThinking(true)
-      setIsLoading(true)
-
-      // Create user message
-      const userMessage = {
-        id: Date.now(),
-        text: message,
-        sender: 'user',
-        timestamp: new Date(),
-        status: 'sending',
-      }
-
-      addMessage(userMessage)
-
       try {
-        // Ensure server is ready
-        if (serverStatus !== 'ready') {
-          const serverReady = await ensureServerReady()
-          if (!serverReady) {
-            setIsThinking(false)
-            setIsLoading(false)
-            updateMessage(userMessage.id, { status: 'failed' })
-            return false
-          }
+        // FIXED: Proper null checks and type validation
+        let message = messageText
+
+        // If no messageText provided, use inputValue
+        if (message === null || message === undefined) {
+          message = inputValue
         }
 
-        // Update user message status
-        updateMessage(userMessage.id, { status: 'sent' })
+        // Ensure message is a string
+        if (typeof message !== 'string') {
+          console.warn('Invalid message type:', typeof message, message)
+          return false
+        }
 
-        // TRANSITION: From thinking to typing when server starts responding
-        setIsThinking(false)
-        setIsTyping(true)
+        // Trim the message
+        message = message.trim()
 
-        // Get optimized conversation history for better context
-        const conversationHistory = getOptimizedConversationHistory()
+        // Check if message is empty
+        if (!message) {
+          console.warn('Empty message, not sending')
+          return false
+        }
 
-        // Debug logging for context
         console.log(
-          `📝 Sending ${productConfig.productName} message with context:`,
+          `💬 Sending ${productConfig?.productName || 'Chat'} message:`,
           {
             message:
-              message.substring(0, 100) + (message.length > 100 ? '...' : ''),
-            contextMessages: conversationHistory.length,
-            totalContextChars: conversationHistory.reduce(
-              (sum, msg) => sum + msg.text.length,
-              0,
-            ),
+              message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+            messageLength: message.length,
+            inputValueLength:
+              typeof inputValue === 'string' ? inputValue.length : 'N/A',
           },
         )
+
+        // Clear input if we're using inputValue
+        if (messageText === null || messageText === undefined) {
+          setInputValue('')
+        }
+
+        // Set loading states
+        setIsLoading(true)
+        setIsThinking(true)
+        setConnectionError(null)
+
+        // Ensure server is ready
+        const serverReady = await ensureServerReady()
+        if (!serverReady) {
+          setIsLoading(false)
+          setIsThinking(false)
+          return false
+        }
+
+        // Create user message
+        const userMessage = {
+          id: Date.now(),
+          text: message,
+          sender: 'user',
+          timestamp: new Date(),
+          status: 'sent',
+        }
+
+        addMessage(userMessage)
+
+        // Prepare conversation history (last 10 messages for context)
+        const conversationHistory = messages.slice(-10)
+
+        console.log(`📝 ${productConfig?.productName || 'Chat'} context:`, {
+          historyLength: conversationHistory.length,
+          contextMessages: conversationHistory.length,
+          totalContextChars: conversationHistory.reduce(
+            (sum, msg) =>
+              sum + (typeof msg.text === 'string' ? msg.text.length : 0),
+            0,
+          ),
+        })
+
+        // Transition from thinking to typing
+        setTimeout(() => {
+          setIsThinking(false)
+          setIsTyping(true)
+        }, 1000)
 
         // Send to API
         const response = await apiService.sendMessage(
@@ -207,7 +241,9 @@ export const useSharedChatbot = (productConfig, apiService) => {
           addMessage(botMessage)
 
           console.log(
-            `✅ ${productConfig.productName} conversation completed successfully`,
+            `✅ ${
+              productConfig?.productName || 'Chat'
+            } conversation completed successfully`,
           )
         } else {
           // Handle API error
@@ -215,7 +251,9 @@ export const useSharedChatbot = (productConfig, apiService) => {
             id: Date.now() + 1,
             text:
               response.message ||
-              `Sorry, I'm having trouble connecting to the ${productConfig.productName} documentation system.`,
+              `Sorry, I'm having trouble connecting to the ${
+                productConfig?.productName || 'AI'
+              } documentation system.`,
             sender: 'bot',
             timestamp: new Date(),
             status: 'error',
@@ -224,7 +262,7 @@ export const useSharedChatbot = (productConfig, apiService) => {
 
           addMessage(errorMessage)
           console.error(
-            `❌ ${productConfig.productName} API error:`,
+            `❌ ${productConfig?.productName || 'Chat'} API error:`,
             response.error,
           )
         }
@@ -232,13 +270,13 @@ export const useSharedChatbot = (productConfig, apiService) => {
         return true
       } catch (error) {
         console.error(
-          `❌ ${productConfig.productName} send message failed:`,
+          `❌ ${productConfig?.productName || 'Chat'} send message failed:`,
           error,
         )
 
         const errorMessage = {
           id: Date.now() + 1,
-          text: `I'm experiencing technical difficulties. Please try again or contact support.`,
+          text: `I'm experiencing technical difficulties. Please try again or contact support if the issue persists.`,
           sender: 'bot',
           timestamp: new Date(),
           status: 'error',
@@ -246,8 +284,6 @@ export const useSharedChatbot = (productConfig, apiService) => {
         }
 
         addMessage(errorMessage)
-        updateMessage(userMessage.id, { status: 'failed' })
-
         return false
       } finally {
         setIsLoading(false)
@@ -257,113 +293,76 @@ export const useSharedChatbot = (productConfig, apiService) => {
     },
     [
       inputValue,
-      isLoading,
-      isThinking,
-      isTyping,
-      serverStatus,
+      setInputValue,
       productConfig,
+      messages,
       apiService,
       addMessage,
-      updateMessage,
       ensureServerReady,
-      getOptimizedConversationHistory,
     ],
   )
 
-  // Retry failed message
-  const retryMessage = useCallback(
-    async messageId => {
-      const messageToRetry = messages.find(msg => msg.id === messageId)
-      if (!messageToRetry) return
-
-      // Remove failed messages after this timestamp
-      removeMessagesAfter(messageToRetry.timestamp)
-
-      // If it's a user message, resend it
-      if (messageToRetry.sender === 'user') {
-        await sendMessage(messageToRetry.text)
-      }
-    },
-    [messages, removeMessagesAfter, sendMessage],
-  )
-
-  // Handle key press in input
+  // Handle key press
   const handleKeyPress = useCallback(
-    e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
+    event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
         sendMessage()
       }
     },
     [sendMessage],
   )
 
-  // Feedback handling
-  const handleFeedback = useCallback(
-    (messageId, feedbackType) => {
-      setFeedback(prev => ({
-        ...prev,
-        [messageId]: {
-          type: feedbackType,
-          timestamp: new Date(),
-        },
-      }))
-
-      console.log(`📊 ${productConfig.productName} feedback:`, {
-        messageId,
-        feedbackType,
-      })
-    },
-    [productConfig],
-  )
-
-  // Clear chat
-  const handleClearChat = useCallback(() => {
-    setMessages([])
-    setFeedback({})
-    setInputValue('')
-    console.log(`🗑️ ${productConfig.productName} chat cleared`)
-  }, [productConfig])
+  // Can send message validation
+  const canSendMessage =
+    !isLoading &&
+    !isThinking &&
+    !isTyping &&
+    typeof inputValue === 'string' &&
+    inputValue.trim().length > 0
 
   // Copy chat functionality
   const handleCopyChatClick = useCallback(() => {
     const chatSummary = messages
-      .map(msg => `${msg.sender === 'user' ? 'You' : 'RANI'}: ${msg.text}`)
+      .map(msg => {
+        const sender =
+          msg.sender === 'bot' ? productConfig?.productName || 'AI' : 'User'
+        const status = msg.isError ? ' [ERROR]' : ''
+        return `${sender}${status}: ${msg.text}`
+      })
       .join('\n\n')
 
-    const fullSummary = `${
-      productConfig.productName
-    } Chat Summary\n${'='.repeat(30)}\n\n${chatSummary}`
-
     navigator.clipboard
-      .writeText(fullSummary)
+      .writeText(chatSummary)
       .then(() => {
-        console.log(`📋 ${productConfig.productName} chat copied to clipboard`)
+        console.log('Chat copied to clipboard')
       })
       .catch(err => {
         console.error('Failed to copy chat:', err)
       })
-  }, [messages, productConfig])
+  }, [messages, productConfig?.productName])
 
-  // Support functionality
+  // Support click functionality
   const handleSupportClick = useCallback(() => {
-    handleCopyChatClick() // Auto-copy chat
+    const chatSummary = messages
+      .map(msg => {
+        const sender =
+          msg.sender === 'bot' ? productConfig?.productName || 'AI' : 'User'
+        return `${sender}: ${msg.text}`
+      })
+      .join('\n\n')
 
-    // You can customize this URL for each product
-    const supportUrl =
-      productConfig.supportUrl || 'mailto:support@yourcompany.com'
-    window.open(supportUrl, '_blank')
+    const supportUrl = productConfig?.supportUrl || 'mailto:support@company.com'
+    const subject = `${
+      productConfig?.productName || 'Documentation'
+    } Help Request`
+    const body = `Hi, I need help with the following conversation:\n\n${chatSummary}`
 
-    console.log(`📧 ${productConfig.productName} support contacted`)
-  }, [handleCopyChatClick, productConfig])
-
-  // Calculate if send is possible
-  const canSendMessage =
-    inputValue.trim().length > 0 &&
-    !isLoading &&
-    !isThinking &&
-    !isTyping &&
-    serverStatus === 'ready'
+    const mailtoUrl = `${supportUrl}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`
+    window.open(mailtoUrl, '_blank')
+  }, [messages, productConfig])
 
   return {
     // State
@@ -387,23 +386,17 @@ export const useSharedChatbot = (productConfig, apiService) => {
     // Actions
     sendMessage,
     retryMessage,
+    clearConversation,
     handleKeyPress,
     handleFeedback,
-    handleClearChat,
-    handleCopyChatClick,
-    handleSupportClick,
+    handleScroll,
     scrollToBottom,
     forceScrollToBottom,
-    handleScroll,
+    handleCopyChatClick,
+    handleSupportClick,
 
-    // Computed
+    // Computed values
     canSendMessage,
-
-    // Utils
-    addMessage,
-    updateMessage,
-    removeMessage,
-    ensureServerReady,
   }
 }
 
