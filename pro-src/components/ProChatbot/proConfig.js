@@ -1,13 +1,14 @@
 // src/components/ProChatbot/proConfig.js
 // Configuration for Pro product chatbot with advanced version detection
+// UPDATED: API URL changed to new Cloud Run deployment
 
 export const PRO_CHATBOT_CONFIG = {
   // Product identification
   productName: 'Pro',
   productDisplayName: 'Resolve Pro',
 
-  // API configuration
-  apiBaseUrl: 'https://pro-chatbot-api-716168339016.us-central1.run.app',
+  // API configuration - UPDATED: New Cloud Run URL
+  apiBaseUrl: 'https://pro-chatbot-api-146019630513.us-central1.run.app',
 
   // Version handling - Pro has specific version patterns
   defaultVersion: '8-0', // Current version appears as /pro/ (no version in URL)
@@ -27,6 +28,7 @@ export const PRO_CHATBOT_CONFIG = {
     search: '/api/v1/search',
     status: '/api/v1/status',
     health: '/health',
+    warmup: '/warmup', // Added warmup endpoint
     upload: '/api/v1/upload-documentation',
   },
 

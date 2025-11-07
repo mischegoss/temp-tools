@@ -1,5 +1,6 @@
 // src/components/ProChatbot/ProChatbotService.js
-// Pro-specific chatbot service extending the base service with version awareness
+// Pro-specific chatbot service extending the base service
+// UPDATED: Fixed request/response format for Cloud Run API
 
 import BaseChatbotService from '../SharedChatbot/services/baseChatbotService'
 import PRO_CHATBOT_CONFIG from './proConfig'
@@ -8,13 +9,30 @@ class ProChatbotService extends BaseChatbotService {
   constructor() {
     super(PRO_CHATBOT_CONFIG)
     this.productName = 'Pro'
-    this.currentSelectedVersion = null // User-selected version override
+    this.currentSelectedVersion = null // Track manually selected version
+  }
+
+  /**
+   * Set version manually (for version selector)
+   */
+  setVersion(version) {
+    this.currentSelectedVersion = version
+    console.log(`📌 Pro version manually set to: ${version}`)
+  }
+
+  /**
+   * Get version info for display
+   */
+  getVersionInfo() {
+    const effectiveVersion = this.getEffectiveVersion()
+    const versionConfig = this.config.availableVersions.find(
+      v => v.value === effectiveVersion,
+    )
+    return versionConfig || { value: effectiveVersion, label: effectiveVersion }
   }
 
   /**
    * Detect Pro version from current URL
-   * Current version (8.0) appears as /pro/ with no version number
-   * Older versions appear as /pro/7.9/, /pro/7.8/, etc.
    */
   detectVersion() {
     if (typeof window === 'undefined') return this.config.defaultVersion
@@ -25,7 +43,7 @@ class ProChatbotService extends BaseChatbotService {
     if (match) {
       const rawVersion = match[1]
 
-      // Use version mapping to normalize (7.9 → 7-9)
+      // Use version mapping to normalize (e.g., "7.9" -> "7-9")
       const normalizedVersion = this.config.versionMappings[rawVersion]
       if (normalizedVersion) {
         return normalizedVersion
@@ -35,65 +53,19 @@ class ProChatbotService extends BaseChatbotService {
       return rawVersion.replace(/\./g, '-')
     }
 
-    // No version in URL = current version (8.0)
-    // This handles URLs like /pro/workflows/ vs /pro/7.9/workflows/
+    // Default to current version if not explicitly versioned
     return this.config.defaultVersion
   }
 
   /**
-   * Get the effective version (user-selected or detected)
+   * Get effective version (manual override > detected > default)
    */
   getEffectiveVersion() {
-    return this.currentSelectedVersion || this.detectVersion()
-  }
-
-  /**
-   * Set user-selected version override
-   */
-  setSelectedVersion(version) {
-    this.currentSelectedVersion = version
-    console.log(`📋 Pro version manually set to: ${version}`)
-  }
-
-  /**
-   * Clear user-selected version (revert to auto-detection)
-   */
-  clearSelectedVersion() {
-    this.currentSelectedVersion = null
-    console.log('🔄 Pro version selection cleared, reverting to auto-detection')
-  }
-
-  /**
-   * Get version display info for UI
-   */
-  getVersionInfo() {
-    const detectedVersion = this.detectVersion()
-    const effectiveVersion = this.getEffectiveVersion()
-    const isManuallySelected = this.currentSelectedVersion !== null
-
-    const detectedVersionInfo = this.config.availableVersions.find(
-      v => v.value === detectedVersion,
-    )
-    const effectiveVersionInfo = this.config.availableVersions.find(
-      v => v.value === effectiveVersion,
-    )
-
-    return {
-      detected: {
-        version: detectedVersion,
-        label: detectedVersionInfo?.label || detectedVersion,
-        displayName:
-          detectedVersionInfo?.displayName || `Pro ${detectedVersion}`,
-      },
-      effective: {
-        version: effectiveVersion,
-        label: effectiveVersionInfo?.label || effectiveVersion,
-        displayName:
-          effectiveVersionInfo?.displayName || `Pro ${effectiveVersion}`,
-      },
-      isManuallySelected,
-      availableVersions: this.config.availableVersions,
+    if (this.currentSelectedVersion) {
+      return this.currentSelectedVersion
     }
+
+    return this.detectVersion()
   }
 
   /**
@@ -128,7 +100,41 @@ class ProChatbotService extends BaseChatbotService {
   }
 
   /**
+   * Warm up the Pro API for faster responses
+   */
+  async warmUpAPI() {
+    try {
+      const warmupResponse = await this.makeRequest(this.endpoints.warmup, {
+        method: 'GET',
+      })
+      console.log('🔥 Pro API warmed up successfully')
+      return warmupResponse
+    } catch (error) {
+      console.warn('⚠️ Pro API warmup failed:', error.message)
+      // Don't throw error - warmup failure shouldn't block chat
+    }
+  }
+
+  /**
+   * Enhanced ensureServerAwake with API warmup
+   */
+  async ensureServerAwake(onProgress = null) {
+    if (this.isServerAwake && this.isHealthCheckValid()) {
+      return true
+    }
+
+    // Wake up server first
+    await this.wakeUpServer(onProgress)
+
+    // Warm up API for faster responses
+    await this.warmUpAPI()
+
+    return true
+  }
+
+  /**
    * Enhanced sendMessage with Pro-specific context and version awareness
+   * UPDATED: Fixed request format for Cloud Run API
    */
   async sendMessage(message, conversationHistory = []) {
     const effectiveVersion = this.getEffectiveVersion()
@@ -136,25 +142,20 @@ class ProChatbotService extends BaseChatbotService {
     const currentPage =
       typeof window !== 'undefined' ? window.location.pathname : '/'
 
-    // Add Pro-specific context to the request
+    // FIXED: Updated request format to match Cloud Run API expectations
     const enhancedRequestBody = {
       message: message.trim(),
+      version: effectiveVersion,
       conversation_history: conversationHistory.map(msg => ({
         role: msg.sender === 'bot' ? 'assistant' : 'user',
         content: msg.text,
         timestamp: msg.timestamp?.toISOString() || new Date().toISOString(),
       })),
-      product: 'pro',
-      version: effectiveVersion,
+      conversation_id: `pro-chat-${Date.now()}`,
       context: {
         page: currentPage,
-        product_full_name: 'Resolve Pro',
         documentation_type: this.detectDocumentationType(currentPage),
-        detected_version: detectedVersion,
-        is_version_manually_selected: this.currentSelectedVersion !== null,
-        is_latest_version: effectiveVersion === '8-0',
-        available_versions: this.config.availableVersions.map(v => v.value),
-        version_display_info: this.getVersionInfo(),
+        user_role: 'user',
       },
     }
 
@@ -176,21 +177,27 @@ class ProChatbotService extends BaseChatbotService {
         })
       })
 
-      if (!result.data.response) {
+      // FIXED: Updated response field mapping for Cloud Run API
+      if (!result.data.message) {
         throw new Error('Invalid response format from Pro API')
       }
 
       console.log('🤖 Pro AI Response received')
       return {
         success: true,
-        message: result.data.response,
+        message: result.data.message, // FIXED: API returns 'message' field
         metadata: {
-          responseTime:
-            result.data.response_time_ms ||
-            result.data.processing_time * 1000 ||
-            null,
-          sources: result.data.sources || [],
-          confidence: result.data.confidence || null,
+          responseTime: result.data.processing_time
+            ? result.data.processing_time * 1000
+            : null, // FIXED: Convert seconds to ms
+          sources: result.data.context_used || [], // FIXED: API returns 'context_used'
+          confidence: null, // API doesn't return confidence
+          modelUsed: result.data.model_used || 'gemini-2.5-flash',
+          versionContext: result.data.version_context,
+          enhancedFeaturesUsed: result.data.enhanced_features_used || false,
+          relationshipEnhancedChunks:
+            result.data.relationship_enhanced_chunks || 0,
+          conversationId: result.data.conversation_id,
           version: effectiveVersion,
           contextInfo: {
             version: effectiveVersion,
@@ -212,6 +219,7 @@ class ProChatbotService extends BaseChatbotService {
 
   /**
    * Enhanced search with Pro version context
+   * UPDATED: Fixed search request format for Cloud Run API
    */
   async searchDocumentation(query) {
     if (!query || typeof query !== 'string') {
@@ -228,12 +236,10 @@ class ProChatbotService extends BaseChatbotService {
           method: 'POST',
           body: JSON.stringify({
             query: query.trim(),
-            product: 'pro',
-            version: effectiveVersion,
-            context: {
-              version_filter:
-                effectiveVersion !== 'general' ? effectiveVersion : null,
-            },
+            version: effectiveVersion, // FIXED: Keep version, remove product
+            max_results: 5,
+            similarity_threshold: 0.3,
+            content_type_filter: null,
           }),
         })
       })
@@ -276,6 +282,52 @@ class ProChatbotService extends BaseChatbotService {
     }
 
     return `I'm experiencing some technical difficulties with the Pro assistant. Please try again or contact support if the issue persists.`
+  }
+
+  /**
+   * Test connection to Pro API
+   */
+  async testConnection() {
+    try {
+      const result = await this.makeRequest('/api/v1/test-connection', {
+        method: 'GET',
+      })
+
+      console.log('✅ Pro API connection test successful')
+      return {
+        success: true,
+        data: result.data,
+      }
+    } catch (error) {
+      console.error('❌ Pro API connection test failed:', error.message)
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+  }
+
+  /**
+   * Get Pro API status
+   */
+  async getProStatus() {
+    try {
+      const result = await this.makeRequest('/status', {
+        method: 'GET',
+      })
+
+      return {
+        success: true,
+        status: result.data,
+      }
+    } catch (error) {
+      console.error('❌ Pro API status check failed:', error.message)
+      return {
+        success: false,
+        error: error.message,
+        status: { server_status: 'unavailable' },
+      }
+    }
   }
 }
 
