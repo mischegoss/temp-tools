@@ -1,13 +1,13 @@
 // src/components/ProChatbot/proConfig.js
-// Configuration for Pro product chatbot - matches Pro-API expectations
+// Configuration for Pro product chatbot - UPDATED to match Pro-API
 
 export const PRO_CHATBOT_CONFIG = {
   // Product identification
   productName: 'Pro',
   productDisplayName: 'Resolve Pro',
 
-  // API configuration - FIXED to match Pro-API
-  apiBaseUrl: 'https://pro-chatbot-api-716168339016.us-central1.run.app',
+  // API configuration - FIXED to match the provided Pro-API URL
+  apiBaseUrl: 'https://pro-chatbot-api-146019630513.us-central1.run.app',
 
   // Version handling - Pro uses hyphenated versions
   defaultVersion: '8-0',
