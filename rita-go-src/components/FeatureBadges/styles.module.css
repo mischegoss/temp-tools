@@ -1,0 +1,245 @@
+/* src/components/FeatureBadges/styles.module.css - CORRECTED WITH ORIGINAL BRAND COLORS */
+
+/* Badge structure (keep these) */
+.badgeBar {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding: 0;
+}
+
+.badgeBox {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  font-family: var(--ifm-font-family-base);
+  width: 100%;
+  margin: 16px 0;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.badgeSection {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.badgeSection:last-child {
+  margin-bottom: 0;
+}
+
+.badgeSection.withDivider {
+  border-top: 2px solid #d1d5db;
+  margin-top: 16px;
+  padding-top: 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.badgeLabel {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  font-family: var(--ifm-font-family-base);
+  min-width: 50px;
+  margin-right: 8px;
+}
+
+.badgeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  font-family: var(--ifm-font-family-base);
+}
+
+/* CORRECTED: Original brand colors - same colors as before */
+.badge.users {
+  background-color: var(--brand-blue);
+  color: white;
+}
+
+.badge.admin {
+  background-color: var(--brand-aqua);
+  color: white;
+}
+
+.badge.both {
+  background: linear-gradient(
+    135deg,
+    var(--brand-blue) 0%,
+    var(--brand-aqua) 100%
+  );
+  color: white;
+}
+
+/* CORRECTED: Plan badges - same colors as before */
+.badge.trial {
+  background-color: #cc7a00;
+  color: white;
+}
+
+.badge.premium {
+  background-color: var(--brand-green);
+  color: white;
+}
+
+.badge.enterprise {
+  background-color: var(--brand-black-700);
+  color: white;
+}
+
+/* Alternative structure (for compatibility) */
+.badgeContainer {
+  background-color: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0 24px 0;
+}
+
+.badgeGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.badgeDivider {
+  height: 1px;
+  background-color: var(--ifm-color-emphasis-300);
+  margin: 8px 0 -8px 0;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .badgeBox {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .badgeSection.withDivider {
+  border-top-color: #475569;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .badgeLabel {
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .badgeContainer {
+  background-color: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+[data-theme='dark'] .badgeDivider {
+  background-color: var(--ifm-color-emphasis-400);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .badgeBox {
+    margin: 12px 0;
+    padding: 12px;
+  }
+
+  .badgeContainer {
+    padding: 12px;
+    margin: 12px 0 20px 0;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .badgeGroup {
+    gap: 4px;
+  }
+
+  .badgeSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding: 6px 0;
+  }
+
+  .badgeSection.withDivider {
+    margin-top: 12px;
+    padding-top: 16px;
+    border-top-width: 2px;
+  }
+
+  .badgeLabel {
+    font-size: 13px;
+    margin-bottom: 4px;
+    margin-right: 0;
+  }
+
+  .badgeList {
+    gap: 4px;
+    width: 100%;
+  }
+}
+
+/* Integration with Docusaurus content area */
+[class*='docPage'] .badgeBar {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+/* Position after breadcrumbs if they exist */
+.theme-doc-breadcrumbs + * .badgeBar,
+[class*='breadcrumbs'] + * .badgeBar {
+  margin-top: 1rem;
+}
+
+/* Ensure proper spacing in content */
+.badgeBox + h1,
+.badgeBox + h2,
+.badgeBox + h3,
+.badgeBox + p {
+  margin-top: 1rem;
+}
+
+/* Ensure full width in content containers */
+.badgeBox {
+  position: static;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Hover effects */
+.badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .badge:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure full width in content containers */
+.markdown > .badgeBar,
+[class*='docItemContainer'] .badgeBar,
+[class*='docMainContainer'] .badgeBar {
+  width: 100%;
+  max-width: none;
+}
