@@ -1,0 +1,68 @@
+{
+  "id": "unique-video-identifier",
+  "title": "Video Title",
+  "description": "Brief description of what the video covers and its main purpose",
+  "videoUrl": "https://www.youtube.com/watch?v=VIDEO_ID or https://vimeo.com/VIDEO_ID",
+  "videoId": "VIDEO_ID",
+  "duration": "MM:SS",
+  "level": "automation-design | integrations | beginner | intermediate | advanced",
+  "category": "Platform Overview | Enterprise Features | Analytics | Concepts | etc.",
+  "tags": ["tag1", "tag2", "tag3"],
+  "publishDate": "YYYY-MM-DD",
+  "thumbnailUrl": null,
+  "thumbnailFileName": "optional-custom-thumbnail.jpg",
+  "product": "actions | pro | express | insights",
+  "featured": true,
+  "platform": "youtube | vimeo",
+  "template": "informational",
+
+  "keyConcepts": [
+    {
+      "icon": "🔍",
+      "title": "Concept Name",
+      "content": "Detailed explanation of the key concept covered in this video. This should provide context and understanding of the topic."
+    },
+    {
+      "icon": "⚡",
+      "title": "Another Concept",
+      "content": "Another important concept that viewers will learn about from this video."
+    },
+    {
+      "icon": "🎯",
+      "title": "Third Concept",
+      "content": "Additional concept or feature that is explained in the video content."
+    }
+  ],
+
+  "learningResources": [
+    {
+      "title": "Related Documentation",
+      "description": "Description of what this resource covers",
+      "link": "/docs/path/to/documentation"
+    },
+    {
+      "title": "Additional Guide",
+      "description": "Another helpful resource for deeper learning",
+      "link": "/docs/path/to/guide"
+    }
+  ],
+
+  "documentResources": [
+    {
+      "title": "Quick Reference Guide",
+      "description": "Brief description of what this document contains",
+      "type": "PDF",
+      "link": "/downloads/reference-guide.pdf"
+    },
+    {
+      "title": "Template Package",
+      "description": "Downloadable templates or examples",
+      "type": "ZIP",
+      "link": "/downloads/templates.zip"
+    }
+  ],
+
+  "tutorialSteps": null,
+  "learningObjectives": null,
+  "estimatedTime": null
+}
