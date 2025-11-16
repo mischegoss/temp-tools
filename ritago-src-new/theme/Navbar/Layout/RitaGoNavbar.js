@@ -4,7 +4,6 @@ import Link from '@docusaurus/Link'
 import NavigationDropdowns from './NavigationDropdowns'
 import RitaGoSearch from '../../../components/RitaGoSearch/index.js'
 import MobileSidebar from './MobileSidebar' // Your custom component
-import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment'
 import styles from './styles.module.css'
 
 export default function RitaGoNavbar(props) {
@@ -64,7 +63,7 @@ export default function RitaGoNavbar(props) {
       <nav className={`navbar navbar--fixed-top ${styles.navbarActions}`}>
         <div className='navbar__inner'>
           <div className='navbar__brand'>
-            <Link to='/' className='navbar__brand'>
+            <Link to='/rita-go/beta2025' className='navbar__brand'>
               <div className='navbar__logo'>
                 <img
                   src='/img/Resolve-Logo-Full-Color-RGB.svg'
@@ -81,55 +80,49 @@ export default function RitaGoNavbar(props) {
           </div>
 
           <div className='navbar__items navbar__items--right'>
-            {/* Rita Go Search Component */}
             <RitaGoSearch />
+          </div>
 
-            {/* Mobile toggle button */}
-            <button
-              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-              className={styles.navbarToggle}
-              style={{
-                display: 'none',
-                color: 'var(--color-text-primary)',
-                cursor: 'pointer',
-                padding: '0.5rem',
-                borderRadius: '4px',
-                transition: 'background 0.2s ease',
-                fontSize: '1.125rem',
-                border: 'none',
-                background: 'none',
-              }}
+          {/* Mobile menu toggle */}
+          <div
+            className={styles.navbarToggle}
+            role='button'
+            tabIndex={0}
+            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setIsMobileSidebarOpen(!isMobileSidebarOpen)
+              }
+            }}
+          >
+            <svg
+              width='30'
+              height='30'
+              viewBox='0 0 30 30'
+              role='img'
+              focusable='false'
             >
-              ☰
-            </button>
+              <title>Menu</title>
+              <path
+                stroke='currentColor'
+                strokeLinecap='round'
+                strokeMiterlimit='10'
+                strokeWidth='2'
+                d='m4 7h22M4 15h22M4 23h22'
+              />
+            </svg>
           </div>
         </div>
 
         {/* Mobile sidebar */}
         <MobileSidebar
+          logoSrc='/img/Resolve-Logo-Full-Color-RGB.svg'
+          logoLink='/rita-go/beta2025'
+          showRaniButton={false}
           isOpen={isMobileSidebarOpen}
           onClose={() => setIsMobileSidebarOpen(false)}
         />
       </nav>
-
-      {/* Mobile responsive styles */}
-      <style>
-        {`
-          @media (max-width: 996px) {
-            .navbar__items--center {
-              display: none !important;
-            }
-            
-            .navbar__items--right .rita-go-search {
-              display: none !important;
-            }
-            
-            .${styles.navbarToggle} {
-              display: block !important;
-            }
-          }
-        `}
-      </style>
     </>
   )
 }

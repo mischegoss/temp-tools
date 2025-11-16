@@ -160,7 +160,7 @@ const RitaGoSearch = () => {
         <input
           ref={inputRef}
           type='text'
-          placeholder='Search Rita Go...'
+          placeholder='Search Rita GO...'
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

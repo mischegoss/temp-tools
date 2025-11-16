@@ -2,12 +2,12 @@ export const ritagoDocsNavData = {
   sectionTitle: 'Documentation quick navigation',
   exploreButton: {
     to: '/rita-go/intro',
-    text: 'Explore Rita Go Docs',
+    text: 'Explore RITA Go Docs',
   },
   navItems: [
     {
       title: 'Getting Started',
-      description: 'Explore Rita Go features and capabilities',
+      description: 'Explore RITA Go features and capabilities',
       link: '/rita-go/category/getting-started',
     },
     {

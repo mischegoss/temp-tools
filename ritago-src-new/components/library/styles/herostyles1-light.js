@@ -203,6 +203,17 @@ const heroStyles = {
     textAlign: 'center', // Center text for square cards
   },
 
+  // Card content area with proper flexbox behavior
+  cardContentStyle: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    height: '100%',
+    width: '100%',
+    textAlign: 'left', // Left-align card content for better readability
+  },
+
   // Card description with brand typography
   cardDescriptionStyle: {
     fontSize: '1rem',
@@ -244,6 +255,39 @@ const heroStyles = {
     marginRight: '16px',
     marginBottom: '8px',
     fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+  },
+
+  // Coming Soon Banner Styles
+  comingSoonBannerStyle: {
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '25px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    zIndex: 2,
+    minWidth: '85px',
+    textAlign: 'center',
+    fontFamily: "'SeasonMix', system-ui, -apple-system, sans-serif",
+    background: 'var(--brand-blue)', // Same blue as banner button
+    boxShadow: '0 3px 12px rgba(0, 80, 199, 0.4)', // Blue shadow
+  },
+
+  // Disabled Card Overlay
+  disabledCardOverlayStyle: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: '9px',
+    pointerEvents: 'none',
+    zIndex: 1,
   },
 
   // Responsive breakpoints following brand guidelines

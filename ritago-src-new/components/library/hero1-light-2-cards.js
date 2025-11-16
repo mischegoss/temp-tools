@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from '@docusaurus/Link'
 import { Grid, Box } from '@mui/material'
-import heroStyles from '../library/styles/herostyles1-light.js'
+import heroStyles from './styles/herostyles1-light.js'
 import { heroData as defaultHeroData } from '../Actions/data/herodata.js'
 
 const Hero1 = ({ heroData = defaultHeroData }) => {
@@ -161,16 +161,17 @@ const Hero1 = ({ heroData = defaultHeroData }) => {
                 lg: 4, // 3 cards per row on desktop (33% width each)
               }}
             >
-              <Link
-                to={generateLink(card, index)}
-                style={{ textDecoration: 'none' }}
-              >
-                <Box
-                  style={heroStyles.lightCardStyle}
-                  className='brand-hover'
-                  onMouseEnter={handleCardMouseEnter}
-                  onMouseLeave={handleCardMouseLeave}
-                >
+              {card.comingSoon ? (
+                // Disabled card (no link)
+                <Box style={heroStyles.lightCardStyle} className='brand-hover'>
+                  {/* Coming Soon Banner */}
+                  <div style={heroStyles.comingSoonBannerStyle}>
+                    Coming Soon
+                  </div>
+
+                  {/* Overlay */}
+                  <div style={heroStyles.disabledCardOverlayStyle}></div>
+
                   <div style={heroStyles.iconContainerStyle}>
                     <div style={heroStyles.lightIconStyle}>
                       {iconMap[index]}
@@ -178,7 +179,27 @@ const Hero1 = ({ heroData = defaultHeroData }) => {
                   </div>
                   <h3 style={heroStyles.lightCardTitleStyle}>{card.title}</h3>
                 </Box>
-              </Link>
+              ) : (
+                // Normal clickable card
+                <Link
+                  to={generateLink(card, index)}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Box
+                    style={heroStyles.lightCardStyle}
+                    className='brand-hover'
+                    onMouseEnter={handleCardMouseEnter}
+                    onMouseLeave={handleCardMouseLeave}
+                  >
+                    <div style={heroStyles.iconContainerStyle}>
+                      <div style={heroStyles.lightIconStyle}>
+                        {iconMap[index]}
+                      </div>
+                    </div>
+                    <h3 style={heroStyles.lightCardTitleStyle}>{card.title}</h3>
+                  </Box>
+                </Link>
+              )}
             </Grid>
           ))}
         </Grid>
