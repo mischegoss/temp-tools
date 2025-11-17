@@ -1,6 +1,9 @@
-// src/utils/urlFilterUtils.js - WORKING VERSION + History API Interception
+// src/utils/urlFilterUtils.js - UPDATED WITH ADMIN/OWNER NORMALIZATION
+import { normalizeAdminKey } from './terminology'
+
 /**
  * 4-state filter system with WORKING persistence: 'none', 'user', 'admin', 'both'
+ * UPDATED: Now accepts both 'admin' and 'owner' in front matter
  */
 
 /**
@@ -148,152 +151,75 @@ function startUltraRobustPersistence(filterType) {
   // Strategy 3: Mutation observer for dynamic content
   const observer = new MutationObserver(mutations => {
     let shouldUpdate = false
-
     mutations.forEach(mutation => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const hasRitaGoLinks =
-              node.querySelectorAll &&
-              node.querySelectorAll('a[href*="rita-go"]').length > 0
-            const isRitaGoLink =
-              node.tagName === 'A' && node.href && node.href.includes('rita-go')
-
-            if (hasRitaGoLinks || isRitaGoLink) {
+          if (node.nodeType === 1) {
+            // Element node
+            if (
+              node.tagName === 'A' ||
+              node.querySelector?.('a') ||
+              node.classList?.contains('menu__link')
+            ) {
               shouldUpdate = true
             }
           }
         })
       }
-
-      if (
-        mutation.type === 'attributes' &&
-        mutation.target.tagName === 'A' &&
-        mutation.attributeName === 'href'
-      ) {
-        const href = mutation.target.getAttribute('href')
-        if (href && href.includes('rita-go')) {
-          shouldUpdate = true
-        }
-      }
     })
 
     if (shouldUpdate) {
-      setTimeout(() => {
-        updateAllLinksComprehensively(filterType)
-      }, 100)
+      setTimeout(() => updateAllLinksComprehensively(filterType), 100)
     }
   })
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
-    attributes: true,
-    attributeFilter: ['href'],
   })
 
-  // Strategy 4: Click interceptor as final backup
+  // Strategy 4: Click handler for immediate link updates
   const clickHandler = event => {
-    const link = event.target.closest('a')
-    if (!link) return
-
-    const href = link.getAttribute('href')
-    if (!href || !href.includes('rita-go')) return
-
-    // Check if filter is missing
-    if (!href.includes(`filter=${filterType}`)) {
-      event.preventDefault()
-
-      let newHref
-      try {
-        const url = new URL(href, window.location.origin)
-        url.searchParams.delete('filter')
-        url.searchParams.set('filter', filterType)
-        newHref = url.pathname + url.search + url.hash
-      } catch (error) {
-        const cleanHref = href.split('?')[0]
-        newHref = cleanHref + `?filter=${filterType}`
-      }
-
-      window.location.href = newHref
-    }
+    // Small delay to let navigation start, then update new page links
+    setTimeout(() => updateAllLinksComprehensively(filterType), 50)
   }
 
   document.addEventListener('click', clickHandler, true)
 
-  // Store persistence mechanisms globally for cleanup
+  // Store persistence state
   window.filterPersistence = {
+    filterType,
     interval,
     observer,
     clickHandler,
-    filterType,
   }
 }
 
 /**
- * COMPREHENSIVE link updating with performance optimizations
+ * UPDATE ALL LINKS - More comprehensive and optimized
  */
 function updateAllLinksComprehensively(filterType) {
-  // Optimized selectors - removed heavy 'a' selector for better performance
-  const selectors = [
-    '.menu__link', // Sidebar menu
-    '.theme-doc-sidebar-item-link a', // Sidebar items
-    '.navbar__item a', // Navbar
-    '.pagination-nav a', // Next/prev
-    '.table-of-contents a', // TOC
-    '.theme-doc-breadcrumbs a', // Breadcrumbs
-    'a[href*="/rita-go"]', // Any rita-go link
-    'a[href^="/rita-go"]', // Links starting with /rita-go
-    '[class*="sidebar"] a', // Any sidebar
-    '[class*="menu"] a', // Any menu
-    'nav a', // Any nav
-    '.docusaurus-tag-list a', // Tag lists
-  ]
+  if (typeof window === 'undefined') return 0
 
   let grandTotal = 0
+
+  // Define selectors in order of priority
+  const selectors = [
+    'a[href*="rita-go"]', // Rita Go links
+    '.menu__link', // Sidebar navigation
+    '.navbar__link', // Navbar links
+    'a[href^="/rita-go"]', // Relative Rita Go links
+    'a[href*="/rita-go/"]', // Any Rita Go paths
+  ]
 
   selectors.forEach(selector => {
     try {
       const links = document.querySelectorAll(selector)
-
       links.forEach(link => {
-        const href = link.getAttribute('href')
-        if (!href || !href.includes('rita-go')) return
-
-        // PERFORMANCE: Skip if link already has correct filter
-        if (filterType !== 'none' && href.includes(`filter=${filterType}`))
-          return
-        if (filterType === 'none' && !href.includes('filter=')) return
-
-        const originalHref = href
-        let newHref
-
-        try {
-          if (href.startsWith('http')) {
-            // Absolute URL
-            const url = new URL(href)
-            url.searchParams.delete('filter')
-            if (filterType !== 'none') {
-              url.searchParams.set('filter', filterType)
-            }
-            newHref = url.toString()
-          } else {
-            // Relative URL
-            const url = new URL(href, window.location.origin)
-            url.searchParams.delete('filter')
-            if (filterType !== 'none') {
-              url.searchParams.set('filter', filterType)
-            }
-            newHref = url.pathname + url.search + url.hash
-          }
-
-          if (newHref !== originalHref) {
-            link.setAttribute('href', newHref)
-            grandTotal++
-          }
-        } catch (error) {
-          // Fallback for problematic URLs
-          const cleanHref = href.split('?')[0]
+        const originalHref = link.getAttribute('href')
+        if (originalHref) {
+          let newHref
+          const cleanHref = originalHref.split('?')[0]
           if (filterType !== 'none') {
             newHref = cleanHref + `?filter=${filterType}`
           } else {
@@ -316,6 +242,7 @@ function updateAllLinksComprehensively(filterType) {
 
 /**
  * Load filterable data with correct structure handling
+ * UPDATED: Now normalizes admin/owner front matter
  */
 export async function loadFilterableData() {
   try {
@@ -337,7 +264,16 @@ export async function loadFilterableData() {
       return []
     }
 
-    return filterableData
+    // UPDATED: Normalize admin/owner keys in each item's badges
+    return filterableData.map(item => {
+      if (item.badges) {
+        return {
+          ...item,
+          badges: normalizeAdminKey(item.badges),
+        }
+      }
+      return item
+    })
   } catch (error) {
     return []
   }
@@ -345,6 +281,7 @@ export async function loadFilterableData() {
 
 /**
  * FIXED: Smart filtering with DOM readiness check and retry mechanism
+ * UPDATED: Uses normalized data but keeps same filtering logic
  */
 export async function applySimpleFiltering() {
   if (typeof window === 'undefined') return
@@ -357,7 +294,7 @@ export async function applySimpleFiltering() {
     return
   }
 
-  // Load the filterable data first
+  // Load the filterable data first (now normalized)
   const filterableData = await loadFilterableData()
 
   // DOM readiness check with retry mechanism
@@ -394,6 +331,7 @@ export async function applySimpleFiltering() {
       }
 
       // Check if item should be visible based on active filter
+      // NOTE: Still uses 'admin' key internally after normalization
       let shouldShow = false
 
       if (activeFilter === 'user') {
@@ -456,6 +394,7 @@ function showAllCategories() {
 
 /**
  * Get count of filtered pages for display
+ * UPDATED: Uses normalized data
  */
 export async function getFilteredPageCount() {
   const activeFilter = getFilterFromURL()
@@ -472,6 +411,7 @@ export async function getFilteredPageCount() {
     if (activeFilter === 'user') {
       return page.badges.users === true
     } else if (activeFilter === 'admin') {
+      // NOTE: Still uses 'admin' key internally after normalization
       return page.badges.admin === true
     }
 

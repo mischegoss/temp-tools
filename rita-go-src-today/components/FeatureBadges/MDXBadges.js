@@ -1,8 +1,9 @@
-// src/components/FeatureBadges/MDXBadges.js - FINAL CORRECTED VERSION
+// src/components/FeatureBadges/MDXBadges.js - UPDATED WITH OWNER TERMINOLOGY
 import React, { useState, useEffect } from 'react'
 import { useLocation } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 import styles from './styles.module.css'
+import { normalizeAdminKey, getRoleBadgeConfig } from '../../utils/terminology'
 
 function FeatureBadgesComponent() {
   const location = useLocation()
@@ -17,10 +18,12 @@ function FeatureBadgesComponent() {
         if (response.ok) {
           const badgeData = await response.json()
           // FIXED: Direct lookup instead of array find
-          const currentPageBadges = badgeData[location.pathname]
+          const rawBadges = badgeData[location.pathname]
 
-          if (currentPageBadges) {
-            setBadges(currentPageBadges)
+          if (rawBadges) {
+            // UPDATED: Normalize admin/owner front matter before using
+            const normalizedBadges = normalizeAdminKey(rawBadges)
+            setBadges(normalizedBadges)
           } else {
             setBadges(null)
           }
@@ -40,18 +43,13 @@ function FeatureBadgesComponent() {
     return null
   }
 
-  // Determine user role badges
+  // UPDATED: Use centralized role badge configuration
   const getRoleBadges = () => {
-    if (badges.users && badges.admin)
-      return [{ label: 'Users & Admin', type: 'both' }]
-    if (badges.admin && !badges.users)
-      return [{ label: 'Admin', type: 'admin' }]
-    if (badges.users && !badges.admin)
-      return [{ label: 'Users', type: 'users' }]
-    return []
+    const roleConfig = getRoleBadgeConfig(badges.users, badges.admin)
+    return roleConfig ? [roleConfig] : []
   }
 
-  // Determine plan badges
+  // Determine plan badges (unchanged)
   const getPlanBadges = () => {
     const planBadges = []
     if (badges.trial) planBadges.push({ label: 'Trial', type: 'trial' })

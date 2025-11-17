@@ -1,9 +1,9 @@
-// RitaGoNavbar.js - Based on ActionsNavbar but for Rita Go
+// RitaGoNavbar.js - REMOVED SUPPORT WITH NAVIGATIONDROPDOWNS-RITA
 import React, { useState } from 'react'
 import Link from '@docusaurus/Link'
-import NavigationDropdowns from './NavigationDropdowns'
+import NavigationDropdowns from './NavigationDropdowns-RITA'
 import RitaGoSearch from '../../../components/RitaGoSearch/index.js'
-import MobileSidebar from './MobileSidebar' // Your custom component
+import MobileSidebar from './MobileSidebar' // Your custom- component
 import styles from './styles.module.css'
 
 export default function RitaGoNavbar(props) {

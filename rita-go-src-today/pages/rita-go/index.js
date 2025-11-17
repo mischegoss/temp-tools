@@ -184,9 +184,10 @@ const RitaGoLanding = () => {
           <div style={styles.badge}>Beta Docs Now Available</div>
           <h1 style={styles.title}>RITA Go Documentation</h1>
           <p style={styles.subtitle}>
-            The comprehensive RITA Go help documentation is currently being
-            prepared. In the meantime, preview the RITA Go Beta docs and sign up
-            for early access to RITA Go below.
+            🚧 We're working on providing a comprehensive help experience
+            including tutorials, videos, and step-by-step guides for both users
+            and owners. In the meantime, checkout out the RITA Go Beta docs and
+            sign up for early access to RITA Go below.
           </p>
         </div>
 
@@ -209,9 +210,8 @@ const RitaGoLanding = () => {
             >
               <h4 style={styles.previewTitle}>📚 RITA Go Beta Documentation</h4>
               <p style={styles.previewDescription}>
-                Check out the better docs here - explore the latest RITA Go
-                features, setup guides, and comprehensive documentation for the
-                beta release.
+                Already have access to RITA Go Beta? Check out the beta
+                documentation here.
               </p>
               <button
                 style={styles.betaButton}
@@ -235,7 +235,7 @@ const RitaGoLanding = () => {
         <div style={styles.ctaSection}>
           <h3 style={styles.ctaTitle}>Ready to Transform Your Service Desk?</h3>
           <p style={styles.ctaDescription}>
-            Sign up now and be first in line for the RITA Go free trial
+            Need access to RITA Go? Sign up now for the RITA Go free trial
             waitlist.
           </p>
           <button

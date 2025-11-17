@@ -1,0 +1,329 @@
+/* Rita Go Search Styles - Navbar Optimized */
+
+.ritaGoSearchContainer {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  font-family: var(--ifm-font-family-base);
+}
+
+/* Search Input Container */
+.searchInputContainer {
+  position: relative;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1.5px solid var(--brand-grey-600);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: var(--brand-white);
+  color: var(--brand-black);
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: 'SeasonMix', var(--ifm-font-family-base);
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: var(--brand-black);
+  box-shadow: 0 0 0 2px rgba(0, 80, 199, 0.2);
+}
+
+.searchInput::placeholder {
+  color: var(--brand-grey-700);
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+/* Search Dropdown */
+.searchDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: 4px;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  height: 400px; /* Fixed height */
+}
+
+/* Scrollable Results Container */
+.resultsContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Important for flex child scrolling */
+}
+
+/* Fixed Filter Section */
+.fixedFilterSection {
+  flex-shrink: 0; /* Prevent shrinking */
+  background-color: var(--brand-grey-50);
+  border-top: 1px solid var(--brand-grey-400);
+}
+
+/* Filter Section */
+.filterSection {
+  padding: 12px 16px;
+}
+
+.filterCheckboxes {
+  display: flex;
+  gap: 16px;
+}
+
+.filterCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--brand-black);
+  user-select: none;
+  font-weight: 500;
+}
+
+.filterCheckbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--brand-blue);
+  cursor: pointer;
+}
+
+.filterCheckbox span {
+  font-weight: 600;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+/* Results List */
+.resultsList {
+  padding: 0;
+  margin: 0;
+}
+
+.resultItem {
+  padding: 12px 16px !important;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.resultItem:hover {
+  background-color: var(--brand-grey-100) !important;
+  border-left-color: var(--brand-blue);
+}
+
+.resultItem.Mui-selected {
+  background-color: var(--brand-grey-200) !important;
+  border-left-color: var(--brand-blue) !important;
+}
+
+/* Result Content Layout */
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.resultMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 0;
+}
+
+/* No Results */
+.noResults {
+  padding: 24px;
+  text-align: center;
+}
+
+/* Responsive Design for Navbar */
+@media (max-width: 768px) {
+  .ritaGoSearchContainer {
+    max-width: 200px;
+  }
+  
+  .searchInput {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .resultHeader {
+    gap: 6px;
+  }
+  
+  .resultItem {
+    padding: 10px 12px !important;
+  }
+  
+  .filterSection {
+    padding: 10px 12px;
+  }
+  
+  .filterCheckbox {
+    font-size: 11px;
+  }
+}
+
+/* Dark Mode Support */
+[data-theme='dark'] .searchInput {
+  background-color: var(--brand-black-600);
+  border-color: var(--brand-grey-500);
+  color: var(--brand-white);
+}
+
+[data-theme='dark'] .searchInput:focus {
+  border-color: var(--brand-grey-300);
+  box-shadow: 0 0 0 2px rgba(0, 80, 199, 0.3);
+}
+
+[data-theme='dark'] .searchInput::placeholder {
+  color: var(--brand-grey-300);
+  font-weight: 500;
+}
+
+[data-theme='dark'] .searchDropdown {
+  background-color: var(--brand-black-600);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .resultItem:hover {
+  background-color: var(--brand-black-500) !important;
+  border-left-color: var(--brand-blue);
+}
+
+[data-theme='dark'] .resultItem.Mui-selected {
+  background-color: var(--brand-black-400) !important;
+  border-left-color: var(--brand-blue) !important;
+}
+
+[data-theme='dark'] .fixedFilterSection {
+  background-color: var(--brand-black-500);
+  border-top-color: var(--brand-grey-500);
+}
+
+[data-theme='dark'] .filterCheckbox {
+  color: var(--brand-white);
+}
+
+/* Scrollbar styling for results container */
+.resultsContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resultsContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.resultsContainer::-webkit-scrollbar-thumb {
+  background: var(--brand-grey-600);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+.resultsContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-grey-700);
+  opacity: 0.8;
+}
+
+[data-theme='dark'] .resultsContainer::-webkit-scrollbar-thumb {
+  background: var(--brand-grey-400);
+}
+
+[data-theme='dark'] .resultsContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-grey-300);
+}
+
+/* Accessibility */
+.searchInput:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+.resultItem:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: -2px;
+}
+
+/* Animation */
+.searchDropdown {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Badge hover effects */
+.MuiChip-root:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+/* Scrollbar styling for dropdown */
+.searchDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.searchDropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.searchDropdown::-webkit-scrollbar-thumb {
+  background: #1a202c;
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+.searchDropdown::-webkit-scrollbar-thumb:hover {
+  opacity: 0.5;
+}
+
+[data-theme='dark'] .searchDropdown::-webkit-scrollbar-thumb {
+  background: var(--brand-grey-400);
+}
+
+/* Focus states for better accessibility */
+.filterButtons .MuiButton-root:focus {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+/* Ensure proper contrast */
+.resultContent * {
+  color: inherit;
+}
+
+/* Smooth transitions */
+* {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}

@@ -1,4 +1,4 @@
-// src/components/FilterControls/index.js - ENHANCED WITH URL PARAMETER INJECTION SUPPORT
+// src/components/FilterControls/index.js - UPDATED WITH OWNER TERMINOLOGY
 import React, { useState, useEffect } from 'react'
 import { useLocation } from '@docusaurus/router'
 import BrowserOnly from '@docusaurus/BrowserOnly'
@@ -7,6 +7,7 @@ import {
   setFilterInURL,
   getFilteredPageCount,
 } from '../../utils/urlFilterUtils'
+import { USER_ROLES, FILTER_TERMINOLOGY } from '../../utils/terminology'
 
 function EmbeddedFilterControlsComponent() {
   const location = useLocation()
@@ -117,16 +118,16 @@ function EmbeddedFilterControlsComponent() {
     } else if (userToggle && !adminToggle) {
       // User only
       return pageCount !== null
-        ? `User content (${pageCount} pages)`
-        : 'User content'
+        ? `${USER_ROLES.USERS_CONTENT} (${pageCount} pages)`
+        : USER_ROLES.USERS_CONTENT
     } else if (!userToggle && adminToggle) {
-      // Admin only
+      // Admin only - UPDATED: Now shows "Owner content" instead of "Admin content"
       return pageCount !== null
-        ? `Admin content (${pageCount} pages)`
-        : 'Admin content'
+        ? `${USER_ROLES.ADMIN_CONTENT} (${pageCount} pages)`
+        : USER_ROLES.ADMIN_CONTENT
     } else if (userToggle && adminToggle) {
       // Both on - show "All content" as per screenshot requirements
-      return 'All content'
+      return USER_ROLES.ALL_CONTENT
     }
 
     return null
@@ -208,7 +209,7 @@ function EmbeddedFilterControlsComponent() {
         fontFamily: 'var(--ifm-font-family-base)',
       }}
     >
-      {/* Header and display text - FIXED header text to match screenshot */}
+      {/* Header and display text - UPDATED: Uses centralized terminology */}
       <div
         style={{
           marginBottom: '12px',
@@ -222,7 +223,7 @@ function EmbeddedFilterControlsComponent() {
             marginBottom: getDisplayText() ? '4px' : '0px',
           }}
         >
-          Filter Results by User
+          {FILTER_TERMINOLOGY.HEADER_TEXT}
         </div>
         {getDisplayText() && (
           <div
@@ -246,15 +247,15 @@ function EmbeddedFilterControlsComponent() {
         <ToggleSwitch
           checked={userToggle}
           onChange={handleUserToggle}
-          label='Users'
-          icon='👤'
+          label={USER_ROLES.USERS_LABEL}
+          icon={FILTER_TERMINOLOGY.USERS_ICON}
         />
 
         <ToggleSwitch
           checked={adminToggle}
           onChange={handleAdminToggle}
-          label='Admin'
-          icon='🔧'
+          label={USER_ROLES.ADMIN_LABEL} // UPDATED: Now shows "Owner" instead of "Admin"
+          icon={FILTER_TERMINOLOGY.ADMIN_ICON}
         />
       </div>
     </div>
