@@ -43,83 +43,78 @@ const ChatHeader = ({
       gap: '2px',
       cursor: isDragging ? 'grabbing' : 'grab',
       flex: 1,
+      minWidth: 0,
     },
     compactHeaderTitle: {
-      fontSize: '14px',
+      fontSize: '16px',
       fontWeight: '600',
-      margin: 0,
-      pointerEvents: 'none',
+      color: 'white',
+      lineHeight: '1.2',
     },
     compactHeaderSubtitle: {
-      fontSize: '11px',
-      opacity: 0.9,
-      margin: 0,
-      background: 'rgba(255,255,255,0.2)',
-      padding: '2px 6px',
-      borderRadius: '8px',
-      fontWeight: '500',
-      pointerEvents: 'none',
+      fontSize: '12px',
+      color: 'rgba(255, 255, 255, 0.8)',
+      lineHeight: '1.2',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
     },
-    // REMOVED: compactHeaderCenter and windowSizeIndicator
     compactHeaderRight: {
       display: 'flex',
-      gap: '6px',
-      pointerEvents: 'auto',
+      gap: '8px',
+      flexShrink: 0,
     },
     compactHeaderButton: {
-      background: 'rgba(255,255,255,0.2)',
+      background: 'rgba(255, 255, 255, 0.2)',
       border: 'none',
       color: 'white',
-      width: '28px',
-      height: '28px',
+      width: '32px',
+      height: '32px',
       borderRadius: '6px',
       cursor: 'pointer',
-      fontSize: '14px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      fontSize: '14px',
       transition: 'background 0.2s',
-      pointerEvents: 'auto',
-      position: 'relative',
-      zIndex: 11,
     },
     headerFull: {
       background:
         productConfig?.gradient ||
         'linear-gradient(135deg, #17a2b8 0%, #20c997 100%)',
       color: 'white',
-      padding: '20px',
+      padding: '24px',
       textAlign: 'center',
-      position: 'sticky',
-      top: 0,
-      zIndex: 10,
-      flexShrink: 0,
       borderTopLeftRadius: '12px',
       borderTopRightRadius: '12px',
+      userSelect: 'none',
+      cursor: isDragging ? 'grabbing' : 'grab',
+    },
+    icon: {
+      fontSize: '24px',
+      marginBottom: '8px',
     },
     headerTitle: {
       margin: '0 0 8px 0',
       fontSize: '18px',
       fontWeight: '600',
+      color: 'white',
     },
     headerSubtitle: {
       margin: 0,
       fontSize: '14px',
-      opacity: 0.9,
-    },
-    icon: {
-      fontSize: '20px',
-      marginBottom: '4px',
+      color: 'rgba(255, 255, 255, 0.9)',
+      lineHeight: '1.4',
     },
   }
 
   const cssString = `
     .compact-header-button:hover {
-      background: rgba(255,255,255,0.3) !important;
+      background: rgba(255, 255, 255, 0.3) !important;
     }
 
     .compact-header-button:active {
-      background: rgba(255,255,255,0.4) !important;
+      background: rgba(255, 255, 255, 0.4) !important;
     }
 
     .chat-header-draggable {
@@ -128,6 +123,18 @@ const ChatHeader = ({
 
     .header-drag-zone {
       cursor: ${isDragging ? 'grabbing !important' : 'grab !important'};
+    }
+
+    .beta-tag {
+      background: #007bff;
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 6px;
+      margin-left: 6px;
+      display: inline-block;
+      vertical-align: middle;
     }
   `
 
@@ -188,6 +195,7 @@ const ChatHeader = ({
             <div style={styles.compactHeaderTitle}>
               {productConfig?.icon && <span>{productConfig.icon} </span>}
               {productConfig?.productName || 'Assistant'}
+              <span className='beta-tag'>BETA</span>
             </div>
             {userMessageCount > 0 && (
               <div style={styles.compactHeaderSubtitle}>

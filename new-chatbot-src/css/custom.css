@@ -391,3 +391,31 @@ a[href^="https://"]::after:not(.keep-external-icon)
 {
   display: none !important;
 }
+
+/* Ensure footer is always below viewport on load */
+.main-wrapper {
+  min-height: 100vh !important;
+}
+
+/* Alternative - target the main content container */
+#__docusaurus {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.main-wrapper {
+  flex: 1 !important;
+}
+
+/* More specific for docs pages */
+.theme-doc-root,
+[class*='docMainContainer'] {
+  min-height: calc(100vh - var(--ifm-navbar-height, 60px)) !important;
+}
+
+/* Ensure content area fills remaining space */
+.theme-doc-root .container,
+.markdown {
+  min-height: calc(100vh - var(--ifm-navbar-height, 60px) - 40px) !important;
+}

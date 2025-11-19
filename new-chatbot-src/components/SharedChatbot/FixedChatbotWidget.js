@@ -21,9 +21,12 @@ const FixedChatbotWidgetComponent = ({
   const [resizeDirection, setResizeDirection] = useState('')
   const [windowSize, setWindowSize] = useState({ width: 380, height: 600 })
 
-  // Track original and current positions separately
-  const originalPosition = { right: 20, bottom: 80 }
-  const [windowPosition, setWindowPosition] = useState(originalPosition)
+  // Fixed default position + user customization
+  const defaultPosition = { right: 20, bottom: 20 }
+  const [windowPosition, setWindowPosition] = useState(defaultPosition)
+
+  // Simple show/hide based on footer overlap
+  const [isHiddenByFooter, setIsHiddenByFooter] = useState(false)
 
   // Integrate chat functionality
   const chatHookProps = useSharedChatbot(productConfig, apiService)
@@ -38,7 +41,7 @@ const FixedChatbotWidgetComponent = ({
     chatHookProps.clearConversation() // This will show the toast notification
   }, [chatHookProps.clearConversation])
 
-  // Refs for drag/resize functionality
+  // Refs for drag and resize functionality
   const chatWindowRef = useRef(null)
   const dragStartPos = useRef({ x: 0, y: 0 })
   const dragStartWindowPos = useRef({ right: 0, bottom: 0 })
@@ -57,45 +60,58 @@ const FixedChatbotWidgetComponent = ({
     onChatStateChange?.({ isOpen: true, product: productConfig.productName })
   }
 
-  // Reset to original position when closing
+  // Close chat and reset to default position
   const handleClose = () => {
     setIsOpen(false)
-    // Reset to original position when closing
-    setWindowPosition(originalPosition)
-    console.log('✅ Chat closed, position reset to original')
+    // Reset to default position when closing
+    setWindowPosition(defaultPosition)
+    console.log('✅ Chat closed, position reset to default')
     onChatStateChange?.({ isOpen: false, product: productConfig.productName })
   }
 
-  // Position management with bounds checking
+  // Simple footer overlap detection - hide button when footer appears in button area
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const checkPosition = () => {
-      const buttonWidth = isOpen ? windowSize.width : 240
-      const buttonHeight = isOpen ? windowSize.height : 96
+    const checkFooterOverlap = () => {
+      const footer = document.querySelector('.footer')
+      if (!footer) {
+        setIsHiddenByFooter(false)
+        return
+      }
 
-      const maxRight = window.innerWidth - buttonWidth
-      const maxBottom = window.innerHeight - buttonHeight
+      const footerRect = footer.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
 
-      setWindowPosition(prev => ({
-        right: Math.max(10, Math.min(maxRight - 10, prev.right)),
-        bottom: Math.max(80, Math.min(maxBottom - 10, prev.bottom)),
-      }))
+      // Button area: 20px from bottom, with button height
+      const buttonHeight = isOpen ? windowSize.height : 48
+      const buttonBottom = 20
+      const buttonTop = buttonBottom + buttonHeight
+
+      // Hide if footer overlaps with button area (footer top is above button bottom)
+      const footerOverlapsButton = footerRect.top < viewportHeight - buttonTop
+
+      setIsHiddenByFooter(footerOverlapsButton)
     }
 
-    checkPosition()
-    window.addEventListener('resize', checkPosition)
-    return () => window.removeEventListener('resize', checkPosition)
+    checkFooterOverlap()
+    window.addEventListener('scroll', checkFooterOverlap, { passive: true })
+    window.addEventListener('resize', checkFooterOverlap)
+
+    return () => {
+      window.removeEventListener('scroll', checkFooterOverlap)
+      window.removeEventListener('resize', checkFooterOverlap)
+    }
   }, [isOpen, windowSize])
 
-  // Reset position when chat is closed
+  // Ensure position reset when chat is closed
   useEffect(() => {
     if (!isOpen) {
-      setWindowPosition(originalPosition)
+      setWindowPosition(defaultPosition)
     }
   }, [isOpen])
 
-  // Improved drag functionality with better button exclusion
+  // Drag functionality with simple constraints
   const handleDragStart = useCallback(
     e => {
       if (!isOpen || isResizing) return
@@ -139,6 +155,7 @@ const FixedChatbotWidgetComponent = ({
       const deltaX = e.clientX - dragStartPos.current.x
       const deltaY = e.clientY - dragStartPos.current.y
 
+      // Simple viewport constraints - no complex footer logic during drag
       const newRight = Math.max(
         10,
         Math.min(
@@ -148,7 +165,7 @@ const FixedChatbotWidgetComponent = ({
       )
 
       const newBottom = Math.max(
-        80,
+        20, // Simple minimum bottom
         Math.min(
           window.innerHeight - windowSize.height - 10,
           dragStartWindowPos.current.bottom - deltaY,
@@ -165,7 +182,7 @@ const FixedChatbotWidgetComponent = ({
     console.log('✅ Drag ended')
   }, [])
 
-  // Resize functionality
+  // Resize functionality with position adjustments
   const handleResizeStart = useCallback(
     (e, direction) => {
       if (!isOpen) return
@@ -222,12 +239,13 @@ const FixedChatbotWidgetComponent = ({
         )
       }
 
+      // Keep within viewport bounds
       newRight = Math.max(
         10,
         Math.min(window.innerWidth - newWidth - 10, newRight),
       )
       newBottom = Math.max(
-        80,
+        20,
         Math.min(window.innerHeight - newHeight - 10, newBottom),
       )
 
@@ -242,7 +260,7 @@ const FixedChatbotWidgetComponent = ({
     setResizeDirection('')
   }, [])
 
-  // Global mouse event handlers
+  // Global mouse event handlers for drag and resize
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleDragMove)
@@ -281,15 +299,19 @@ const FixedChatbotWidgetComponent = ({
       bottom: `${windowPosition.bottom}px`,
       zIndex: 9999,
       fontFamily: 'var(--ifm-font-family-base)',
+      // Simple hide when footer overlaps
+      opacity: isHiddenByFooter ? 0 : 1,
+      visibility: isHiddenByFooter ? 'hidden' : 'visible',
+      transition: 'opacity 0.3s ease',
     },
     widget: {
-      width: isOpen ? `${windowSize.width}px` : '240px',
-      height: isOpen ? `${windowSize.height}px` : '96px',
+      width: isOpen ? `${windowSize.width}px` : '120px',
+      height: isOpen ? `${windowSize.height}px` : '48px',
       transition:
         isOpen && !isDragging && !isResizing
           ? 'none'
           : 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-      borderRadius: isOpen ? '12px' : '48px',
+      borderRadius: isOpen ? '12px' : '24px',
       overflow: 'hidden',
       boxShadow: isOpen
         ? '0 8px 32px rgba(0, 0, 0, 0.12)'
@@ -297,7 +319,7 @@ const FixedChatbotWidgetComponent = ({
             productConfig.shadowColor || 'rgba(23, 162, 184, 0.4)'
           }`,
       position: 'relative',
-      cursor: isOpen && !isResizing ? 'default' : 'pointer',
+      cursor: isOpen && !isResizing && !isDragging ? 'default' : 'pointer',
     },
     // Toast style matches copy chat notification
     toastStyle: {
@@ -414,10 +436,23 @@ const FixedChatbotWidgetComponent = ({
         </div>
       )}
 
-      <div style={styles.widget} ref={chatWindowRef}>
+      <div
+        style={styles.widget}
+        onClick={!isOpen ? handleOpen : undefined}
+        ref={chatWindowRef}
+      >
         {isOpen ? (
           <>
-            {/* Resize handles - only on desktop */}
+            <ChatWindow
+              {...chatHookProps}
+              productConfig={productConfig}
+              onClose={handleClose}
+              onDragStart={handleDragStart}
+              windowSize={windowSize}
+              isDragging={isDragging}
+              isResizing={isResizing}
+            />
+            {/* Resize handles for desktop */}
             {!isMobile && (
               <>
                 <div
@@ -432,7 +467,10 @@ const FixedChatbotWidgetComponent = ({
                   onMouseDown={e => handleResizeStart(e, 'bottom')}
                 />
                 <div
-                  style={{ ...styles.resizeHandle, ...styles.resizeHandleLeft }}
+                  style={{
+                    ...styles.resizeHandle,
+                    ...styles.resizeHandleLeft,
+                  }}
                   onMouseDown={e => handleResizeStart(e, 'left')}
                 />
                 <div
@@ -447,51 +485,37 @@ const FixedChatbotWidgetComponent = ({
                     ...styles.resizeHandle,
                     ...styles.resizeHandleTopLeft,
                   }}
-                  onMouseDown={e => handleResizeStart(e, 'topleft')}
+                  onMouseDown={e => handleResizeStart(e, 'top-left')}
                 />
                 <div
                   style={{
                     ...styles.resizeHandle,
                     ...styles.resizeHandleTopRight,
                   }}
-                  onMouseDown={e => handleResizeStart(e, 'topright')}
+                  onMouseDown={e => handleResizeStart(e, 'top-right')}
                 />
                 <div
                   style={{
                     ...styles.resizeHandle,
                     ...styles.resizeHandleBottomLeft,
                   }}
-                  onMouseDown={e => handleResizeStart(e, 'bottomleft')}
+                  onMouseDown={e => handleResizeStart(e, 'bottom-left')}
                 />
                 <div
                   style={{
                     ...styles.resizeHandle,
                     ...styles.resizeHandleBottomRight,
                   }}
-                  onMouseDown={e => handleResizeStart(e, 'bottomright')}
+                  onMouseDown={e => handleResizeStart(e, 'bottom-right')}
                 />
               </>
             )}
-
-            <ChatWindow
-              productConfig={productConfig}
-              apiService={apiService}
-              onClose={handleClose}
-              onDragStart={handleDragStart}
-              isCompactMode={true}
-              hasInteracted={hasInteracted}
-              windowSize={windowSize}
-              isDragging={isDragging}
-              isResizing={isResizing}
-              handleClearChat={handleClearChat}
-              {...chatHookProps}
-            />
           </>
         ) : (
           <ChatbotButton
             productConfig={productConfig}
             onClick={handleOpen}
-            size='large'
+            size='medium'
           />
         )}
       </div>
@@ -499,13 +523,10 @@ const FixedChatbotWidgetComponent = ({
   )
 }
 
-// Wrap with BrowserOnly for SSR compatibility
-const FixedChatbotWidget = props => {
+export default function FixedChatbotWidget(props) {
   return (
-    <BrowserOnly fallback={<div style={{ display: 'none' }} />}>
+    <BrowserOnly fallback={<div></div>}>
       {() => <FixedChatbotWidgetComponent {...props} />}
     </BrowserOnly>
   )
 }
-
-export default FixedChatbotWidget
