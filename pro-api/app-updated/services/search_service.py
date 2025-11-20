@@ -34,6 +34,23 @@ class SearchService:
             logger.error(f"Failed to initialize search service: {e}")
             self.ready = False
             raise
+
+    def sync_with_document_processor(self) -> bool:
+        """
+        Sync SearchService with latest DocumentProcessor data
+        CRITICAL FIX: This makes uploaded data accessible for search
+        """
+        try:
+            if self.document_processor:
+                self.embeddings = self.document_processor.embeddings
+                self.chunk_data = self.document_processor.chunk_data
+                self.metadata = self.document_processor.metadata
+                logger.info(f"🔄 SearchService synced: {len(self.chunk_data)} chunks, {len(self.embeddings) if self.embeddings is not None else 0} embeddings")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Failed to sync SearchService: {e}")
+            return False
     
     def get_status(self) -> Dict[str, Any]:
         """Get search service status"""
@@ -107,11 +124,11 @@ class SearchService:
                 "error": str(e)
             }
     
-    async def search_similarity(self, query: str, max_results: int = 5, 
-                               similarity_threshold: float = 0.3,
-                               version_filter: str = None,
-                               content_type_filter: str = None,
-                               complexity_filter: str = None) -> Dict[str, Any]:
+    def search_similarity(self, query: str, max_results: int = 5,  # ✅ FIXED: Removed async
+                         similarity_threshold: float = 0.3,
+                         version_filter: str = None,
+                         content_type_filter: str = None,
+                         complexity_filter: str = None) -> Dict[str, Any]:
         """
         Search for similar chunks using similarity search
         This method is expected by the chat router
@@ -123,6 +140,7 @@ class SearchService:
                     "results": [],
                     "total_found": 0,
                     "processing_time": 0.0,
+                    "query": query,  # ✅ FIXED: Added missing query field
                     "enhanced_features_used": False,
                     "relationship_enhanced_results": 0,
                     "message": "No documentation data available. Please upload Pro documentation first."
@@ -135,6 +153,7 @@ class SearchService:
                     "results": [],
                     "total_found": 0,
                     "processing_time": 0.0,
+                    "query": query,  # ✅ FIXED: Added missing query field
                     "enhanced_features_used": False,
                     "relationship_enhanced_results": 0,
                     "error": "Document processor not ready"
@@ -189,6 +208,7 @@ class SearchService:
                 "results": results,
                 "total_found": len(results),
                 "processing_time": processing_time,
+                "query": query,  # ✅ FIXED: Added missing query field
                 "enhanced_features_used": False,
                 "relationship_enhanced_results": 0,
                 "filters_applied": {
@@ -205,6 +225,7 @@ class SearchService:
                 "results": [],
                 "total_found": 0,
                 "processing_time": 0.0,
+                "query": query,  # ✅ FIXED: Added missing query field
                 "enhanced_features_used": False,
                 "relationship_enhanced_results": 0,
                 "error": str(e)

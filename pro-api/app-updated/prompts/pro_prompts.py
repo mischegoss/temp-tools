@@ -17,6 +17,64 @@ GUIDELINES:
 - Keep responses concise but complete
 - Support follow-up questions naturally"""
 
+# Simple response formats for compatibility - kept minimal but functional
+PRO_RESPONSE_FORMATS = {
+    "workflow": """
+### RESPONSE STRUCTURE: Pro Workflow Guidance
+1. **Direct Answer**: Start with "For Pro workflows, [direct answer to the question]."
+2. **Workflow Steps**: Provide numbered steps for workflow creation or modification
+3. **Sources**: Cite relevant Pro workflow documentation sections
+""",
+
+    "configuration": """
+### RESPONSE STRUCTURE: Pro Configuration Guidance  
+1. **Configuration Overview**: Start with "To configure this in Pro, [direct approach]."
+2. **Access Path**: Provide exact menu navigation (e.g., "Go to Administration > System Settings")
+3. **Configuration Steps**: Detailed step-by-step configuration instructions
+4. **Sources**: Reference Pro administration and configuration documentation
+""",
+
+    "integration": """
+### RESPONSE STRUCTURE: Pro Integration Guidance
+1. **Integration Approach**: Start with "Pro supports this integration through [method/approach]."
+2. **Prerequisites**: Required Pro version, permissions, or system requirements
+3. **Setup Process**: Step-by-step integration configuration in Pro
+4. **Sources**: Cite Pro integration and API documentation
+""",
+
+    "troubleshooting": """
+### RESPONSE STRUCTURE: Pro Troubleshooting Guidance
+1. **Problem Recognition**: Start with "This Pro issue typically indicates [diagnosis]."
+2. **Immediate Steps**: Quick diagnostic or resolution steps to try first
+3. **Resolution Steps**: Detailed troubleshooting procedure using Pro tools
+4. **Sources**: Reference Pro troubleshooting and diagnostic documentation
+""",
+
+    "administration": """
+### RESPONSE STRUCTURE: Pro Administration Guidance
+1. **Admin Overview**: Start with "In Pro administration, this requires [approach/permissions]."
+2. **Access Requirements**: Required Pro admin permissions and access levels
+3. **Administrative Steps**: Detailed admin procedure with Pro-specific considerations
+4. **Sources**: Cite Pro administration and user management documentation
+""",
+
+    "monitoring": """
+### RESPONSE STRUCTURE: Pro Monitoring Guidance
+1. **Monitoring Overview**: Start with "Pro provides [monitoring capabilities] for this."
+2. **Dashboard Setup**: How to configure Pro dashboards for this monitoring need
+3. **Alert Setup**: Configuring Pro alerts and notifications
+4. **Sources**: Reference Pro monitoring, analytics, and dashboard documentation
+""",
+
+    "general": """
+### RESPONSE STRUCTURE: General Pro Information
+1. **Pro Overview**: Start with "Resolve Pro provides [capability/feature] to address this."
+2. **Core Features**: Key Pro features relevant to the question
+3. **Implementation**: How to implement or access this in Pro
+4. **Sources**: Cite all referenced Pro documentation sources
+"""
+}
+
 # Simple response building - no complex templates
 def build_pro_prompt(user_message: str, context_section: str, question_type: str, version: str = "8-0") -> str:
     """Build clean Pro prompt focused on solutions."""
