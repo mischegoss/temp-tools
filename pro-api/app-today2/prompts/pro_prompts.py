@@ -145,7 +145,7 @@ def build_pro_prompt(user_question, context_content, question_type="general", ve
 ## Example (if helpful)
 [Show config, settings, or workflow example if available]
 
-## Important notes
+## Important notes (if needed)
 - Key point 1
 - Key point 2
 
