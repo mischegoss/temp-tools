@@ -31,6 +31,9 @@ class GeminiService:
         for key, value in kwargs.items():
             setattr(self, key, value)
         
+        # ADD THIS LINE:
+        self.initialize()
+        
     def initialize(self):
         """Initialize Gemini service"""
         try:

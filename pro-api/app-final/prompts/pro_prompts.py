@@ -1,6 +1,6 @@
-# Pro-specific prompts and response formats for Gemini AI responses
+# Pro-specific prompts and response formats for Gemini AI responses with MANDATORY SOURCE CITATIONS
 
-# Core system prompt for Pro documentation assistance
+# Core system prompt for Pro documentation assistance with SOURCE CITATION REQUIREMENTS
 PRO_SYSTEM_PROMPT = """You are RANI, an AI assistant specifically designed to help users with Resolve Pro documentation and features. You are an expert in Pro workflows, configurations, integrations, monitoring, administration, and troubleshooting.
 
 CORE EXPERTISE AREAS:
@@ -17,6 +17,15 @@ RESPONSE PRINCIPLES:
 3. **Accuracy-First**: Base all responses strictly on provided documentation context
 4. **Actionable Guidance**: Provide clear, step-by-step instructions when possible
 5. **Context-Sensitive**: Tailor responses to the user's specific Pro environment and needs
+6. **SOURCE CITATION MANDATORY**: ALWAYS include documentation sources at the end of every response
+
+CRITICAL SOURCE CITATION REQUIREMENTS:
+- EVERY response MUST end with a "## Sources" section
+- Include ALL source URLs from the documentation context
+- Format as clickable links: [Page Title](URL)
+- If context has section anchors, include the specific section
+- NEVER respond without including sources when documentation is provided
+- Sources verify accuracy and allow users to read more details
 
 RESPONSE QUALITY STANDARDS:
 - Use proper Pro terminology and feature names
@@ -25,10 +34,11 @@ RESPONSE QUALITY STANDARDS:
 - Mention version-specific differences when relevant
 - Reference related Pro capabilities that might be helpful
 - Maintain a professional, helpful tone throughout
+- ALWAYS conclude with properly formatted documentation sources
 
-Remember: Users depend on you for accurate, actionable Pro guidance. Never invent features or procedures not found in the documentation."""
+Remember: Users depend on you for accurate, actionable Pro guidance with verifiable sources. Never provide information without citing the specific documentation sources when available."""
 
-# Response format templates for different types of Pro queries
+# Response format templates for different types of Pro queries with MANDATORY SOURCE SECTIONS
 PRO_RESPONSE_FORMATS = {
     "workflow": """
 ### RESPONSE STRUCTURE: Pro Workflow Guidance
@@ -39,7 +49,13 @@ PRO_RESPONSE_FORMATS = {
 5. **Version Notes**: Mention any version-specific workflow features or differences
 6. **Best Practices**: Include Pro workflow optimization tips
 7. **Related Features**: Suggest complementary Pro workflow capabilities
-8. **Sources**: Cite relevant Pro workflow documentation sections
+8. **Sources**: MANDATORY - List all documentation sources used, formatted as clickable links
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [Creating Workflows](https://docs.resolve.io/pro/workflows/creating-workflows/)
+- [Workflow Activities](https://docs.resolve.io/pro/workflows/activities/#activity-library)
+- [Pro Best Practices](https://docs.resolve.io/pro/administration/best-practices/)
 """,
 
     "configuration": """
@@ -51,7 +67,12 @@ PRO_RESPONSE_FORMATS = {
 5. **Version Considerations**: Note any version-specific configuration differences
 6. **Validation**: How to verify the configuration is working correctly
 7. **Troubleshooting**: Common configuration issues and solutions
-8. **Sources**: Reference Pro administration and configuration documentation
+8. **Sources**: MANDATORY - Reference Pro administration and configuration documentation
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [System Configuration](https://docs.resolve.io/pro/administration/system-configuration/)
+- [Pro Settings Guide](https://docs.resolve.io/pro/configuration/settings/)
 """,
 
     "integration": """
@@ -64,7 +85,12 @@ PRO_RESPONSE_FORMATS = {
 6. **Authentication**: Pro authentication methods and security considerations
 7. **Testing & Validation**: How to test and validate the Pro integration
 8. **Monitoring**: How to monitor integration health and performance in Pro
-9. **Sources**: Cite Pro integration and API documentation
+9. **Sources**: MANDATORY - Cite Pro integration and API documentation
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [Integration Hub](https://docs.resolve.io/pro/integrations/overview/)
+- [API Documentation](https://docs.resolve.io/pro/api/getting-started/)
 """,
 
     "troubleshooting": """
@@ -77,7 +103,12 @@ PRO_RESPONSE_FORMATS = {
 6. **Prevention**: How to prevent this issue using Pro best practices
 7. **Escalation Path**: When and how to escalate if basic troubleshooting fails
 8. **Pro Monitoring**: Set up Pro monitoring to prevent future occurrences
-9. **Sources**: Reference Pro troubleshooting and diagnostic documentation
+9. **Sources**: MANDATORY - Reference Pro troubleshooting and diagnostic documentation
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [Troubleshooting Guide](https://docs.resolve.io/pro/troubleshooting/common-issues/)
+- [Diagnostics Tools](https://docs.resolve.io/pro/administration/diagnostics/)
 """,
 
     "administration": """
@@ -91,7 +122,12 @@ PRO_RESPONSE_FORMATS = {
 7. **User Impact**: How changes affect Pro users and their workflows
 8. **Backup/Recovery**: Backup considerations before making administrative changes
 9. **Monitoring**: How to monitor the impact using Pro's admin tools
-10. **Sources**: Cite Pro administration and user management documentation
+10. **Sources**: MANDATORY - Cite Pro administration and user management documentation
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [User Management](https://docs.resolve.io/pro/administration/user-management/)
+- [Admin Interface](https://docs.resolve.io/pro/administration/interface/)
 """,
 
     "monitoring": """
@@ -105,7 +141,12 @@ PRO_RESPONSE_FORMATS = {
 7. **Thresholds**: Recommended Pro monitoring thresholds and baselines
 8. **Integration**: Connecting Pro monitoring with external tools if needed
 9. **Reporting**: Pro reporting capabilities and scheduled reports
-10. **Sources**: Reference Pro monitoring, analytics, and dashboard documentation
+10. **Sources**: MANDATORY - Reference Pro monitoring, analytics, and dashboard documentation
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [Monitoring Setup](https://docs.resolve.io/pro/monitoring/dashboard-setup/)
+- [Analytics Guide](https://docs.resolve.io/pro/analytics/overview/)
 """,
 
     "general": """
@@ -118,7 +159,12 @@ PRO_RESPONSE_FORMATS = {
 6. **Best Practices**: Pro-specific best practices and recommendations
 7. **Related Capabilities**: Other Pro features that complement this functionality
 8. **Learning Resources**: Relevant Pro documentation sections for deeper learning
-9. **Sources**: Cite all referenced Pro documentation sources
+9. **Sources**: MANDATORY - Cite all referenced Pro documentation sources
+
+EXAMPLE SOURCES SECTION:
+## Sources
+- [Pro User Guide](https://docs.resolve.io/pro/user-guide/)
+- [Getting Started](https://docs.resolve.io/pro/getting-started/)
 """
 }
 
@@ -162,7 +208,7 @@ Version-specific features will be noted where relevant.
 """
 }
 
-# No context response for when documentation search returns no results
+# Enhanced no context response with source placeholders
 PRO_NO_CONTEXT_RESPONSE = """I'd be glad to help you with Resolve Pro! While I don't have specific information about this topic in my current documentation access, I can guide you to the right Pro resources.
 
 **For immediate Pro assistance:**
@@ -178,13 +224,49 @@ PRO_NO_CONTEXT_RESPONSE = """I'd be glad to help you with Resolve Pro! While I d
 - Monitoring and Performance Optimization
 - User Management and Security
 
-Try rephrasing your question with specific Pro feature names, or browse the Pro documentation sections most relevant to your needs. For complex Pro implementations, consider contacting Pro support for specialized assistance.
+Try rephrasing your question with specific Pro feature names, or browse the Pro documentation sections most relevant to your needs.
+
+## Sources
+- [Pro Documentation](https://docs.resolve.io/pro/) - Complete Pro documentation
+- [Pro Support](https://resolve.io/support) - Contact Pro support for specialized assistance
 
 What specific aspect of Pro would you like to explore further?"""
 
-def build_pro_prompt(user_message: str, context_section: str, question_type: str, version: str = "8-0") -> str:
+def format_source_citations(context_chunks):
     """
-    Build complete Pro-specific prompt for Gemini with context and version awareness.
+    Format source citations from context chunks into proper markdown links
+    """
+    if not context_chunks:
+        return "- Pro Documentation (no specific sources available)"
+    
+    citations = []
+    seen_urls = set()
+    
+    for chunk in context_chunks:
+        source_url = chunk.get('source_url') or chunk.get('source', '')
+        page_title = (
+            chunk.get('page_title') or 
+            chunk.get('metadata', {}).get('page_title') or
+            chunk.get('metadata', {}).get('title') or
+            'Pro Documentation'
+        )
+        
+        # Clean up page title
+        if ' - ' in page_title:
+            page_title = page_title.split(' - ')[0]
+        
+        if source_url and source_url.startswith('http') and source_url not in seen_urls:
+            citations.append(f"- [{page_title}]({source_url})")
+            seen_urls.add(source_url)
+        elif page_title not in [c.split('](')[0][2:] for c in citations if '](http' in c]:
+            citations.append(f"- {page_title}")
+    
+    return "\n".join(citations) if citations else "- Pro Documentation (sources processing)"
+
+def build_pro_prompt(user_message: str, context_section: str, question_type: str, 
+                    version: str = "8-0", context_chunks: list = None) -> str:
+    """
+    Build complete Pro-specific prompt for Gemini with context, version awareness, and source citations.
     """
     
     # Get response format for the question type
@@ -193,7 +275,10 @@ def build_pro_prompt(user_message: str, context_section: str, question_type: str
     # Get version-specific guidance
     version_context = PRO_VERSION_GUIDANCE.get(version, PRO_VERSION_GUIDANCE["general"])
     
-    # Build the complete prompt
+    # Format available source citations
+    formatted_sources = format_source_citations(context_chunks or [])
+    
+    # Build the complete prompt with source enforcement
     prompt = f"""{PRO_SYSTEM_PROMPT}
 
 {version_context}
@@ -205,13 +290,28 @@ def build_pro_prompt(user_message: str, context_section: str, question_type: str
 Here is the official Resolve Pro documentation relevant to the user's question. Base your entire response on this information and Pro best practices.
 
 {context_section}
+
+### AVAILABLE SOURCES FOR CITATION
+You MUST include these specific sources in your response:
+{formatted_sources}
+
 ---
 
 ### USER QUESTION ({question_type.upper()} TYPE - PRO {version.replace('-', '.')})
 {user_message}
 
 ---
-### PRO RESPONSE GENERATION CHECKLIST
+### CRITICAL PRO RESPONSE REQUIREMENTS
+
+**SOURCE CITATION IS MANDATORY:**
+1. EVERY response MUST end with "## Sources" section
+2. Include ALL provided source URLs as clickable links
+3. Format: [Page Title](URL) or [Section Title](URL#anchor)
+4. Use the exact URLs provided in the context chunks
+5. NEVER respond without including sources when documentation is provided
+6. If no sources available, acknowledge this limitation
+
+**PRO RESPONSE GENERATION CHECKLIST:**
 Before generating your response, ensure you follow these critical Pro guidelines:
 
 1. **Pro Accuracy**: Have you based your response entirely on the Pro documentation context provided?
@@ -220,20 +320,29 @@ Before generating your response, ensure you follow these critical Pro guidelines
 4. **Actionable Steps**: Have you provided clear, actionable guidance that Pro users can follow?
 5. **Pro Best Practices**: Have you included relevant Pro best practices and optimization tips?
 6. **Completeness**: Does your response fully address the user's Pro-related question?
-7. **Context Sources**: Have you properly referenced the Pro documentation sections used?
+7. **SOURCE CITATION**: Have you included the mandatory "## Sources" section with ALL provided URLs?
 
-Generate your comprehensive Pro response now, starting with "I'd be glad to help you with Resolve Pro":"""
+**RESPONSE FORMAT ENFORCEMENT:**
+Your response MUST follow this structure:
+[Your helpful Pro guidance content]
+
+## Sources
+{formatted_sources}
+
+Generate your comprehensive Pro response now, starting with "I'd be glad to help you with Resolve Pro" and ending with the mandatory Sources section:"""
 
     return prompt
 
-# Error and fallback response templates
+# Enhanced error and fallback response templates with sources
 PRO_ERROR_RESPONSES = {
     "api_error": """I apologize, but I'm experiencing technical difficulties accessing the Pro documentation system right now. 
 
 For immediate Pro assistance:
-- **Pro Support**: Contact Pro technical support for urgent issues
-- **Pro Documentation**: Access the official Pro documentation directly
-- **Pro Community**: Check Pro user forums and community resources
+
+## Sources
+- [Pro Support](https://resolve.io/support) - Contact Pro technical support for urgent issues
+- [Pro Documentation](https://docs.resolve.io/pro/) - Access the official Pro documentation directly
+- [Pro Community](https://community.resolve.io/pro) - Check Pro user forums and community resources
 
 Please try your question again in a moment, or contact Pro support if you need immediate assistance with critical Pro operations.""",
 
@@ -250,6 +359,11 @@ This might mean:
 - Browse Pro integration documentation for connectivity questions
 - Review Pro troubleshooting guides for issue resolution
 
+## Sources
+- [Pro Documentation](https://docs.resolve.io/pro/) - Browse the complete Pro documentation
+- [Pro Search](https://docs.resolve.io/pro/search/) - Use the Pro documentation search
+- [Pro Support](https://resolve.io/support) - Contact Pro support for specialized guidance
+
 Would you like me to help you explore related Pro capabilities or guide you to the most relevant Pro documentation sections?""",
 
     "version_mismatch": """The information I found may not be specific to your Pro version. Pro features and interfaces can vary between versions (7.8, 7.9, 8.0).
@@ -260,7 +374,21 @@ Would you like me to help you explore related Pro capabilities or guide you to t
 - Review version-specific Pro documentation for your environment
 - Consider Pro upgrade benefits if you're using an older version
 
-What Pro version are you currently using? This will help me provide more targeted guidance."""
+## Sources
+- [Pro Version Comparison](https://docs.resolve.io/pro/versions/) - Compare Pro versions
+- [Pro Upgrade Guide](https://docs.resolve.io/pro/upgrade/) - Pro upgrade information
+- [Pro Support](https://resolve.io/support) - Version-specific support
+
+What Pro version are you currently using? This will help me provide more targeted guidance.""",
+
+    "context_insufficient": """I can provide some general Pro guidance, but I don't have complete context for your specific question.
+
+## Sources
+- [Pro Documentation](https://docs.resolve.io/pro/) - Complete Pro documentation
+- [Pro Getting Started](https://docs.resolve.io/pro/getting-started/) - Pro basics and initial setup
+- [Pro Support](https://resolve.io/support) - Pro technical support
+
+For the most accurate information, please refer to the Pro documentation or contact Pro support."""
 }
 
 def get_pro_fallback_response(error_type: str = "api_error") -> str:
@@ -333,3 +461,18 @@ def detect_pro_version_from_question(question: str) -> str:
             return version.replace(".", "-")  # Return normalized version
     
     return "8-0"  # Default to latest version
+
+# Template for injecting sources into any response that lacks them
+def ensure_sources_in_response(response_content: str, context_chunks: list) -> str:
+    """
+    Ensure response includes sources section, adding if missing
+    """
+    if "## Sources" in response_content:
+        return response_content
+    
+    formatted_sources = format_source_citations(context_chunks)
+    
+    return f"""{response_content}
+
+## Sources
+{formatted_sources}"""
