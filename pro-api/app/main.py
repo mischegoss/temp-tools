@@ -134,6 +134,10 @@ async def lifespan(app: FastAPI):
         gemini_service = GeminiService(product_name="pro")
         logger.info("✅ Pro Gemini service initialized")
         
+        # CRITICAL FIX: Inject search service to avoid circular import
+        gemini_service.set_search_service(search_service)
+        logger.info("✅ Search service injected into Gemini service")
+        
         service_init_time = time.time() - service_start
         services_initialized = True
         

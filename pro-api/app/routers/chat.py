@@ -1,4 +1,4 @@
-# CORRECTED VERSION - pro-api-NEW/app/routers/chat.py
+# CORRECTED VERSION - pro-api/app/routers/chat.py
 # Fixed the "await" issue that was causing HTTP 500 errors
 # ADDED: Missing upload-documentation endpoint
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks
@@ -15,9 +15,7 @@ from app.models.metadata import StatusResponse, ProcessingStatus
 from app.config import (
     PRODUCT_NAME, 
     PRODUCT_DISPLAY_NAME, 
-    PRO_SUPPORTED_VERSIONS,
-    normalize_pro_version,
-    detect_pro_documentation_type
+    PRO_SUPPORTED_VERSIONS
 )
 
 logger = logging.getLogger(__name__)
@@ -59,11 +57,8 @@ async def chat_with_pro_documentation(
     doc_processor, search_service, gemini_service = services
     
     try:
-        # Validate and normalize Pro version
-        effective_version = normalize_pro_version(request.version)
-        
-        # Detect documentation type from context
-        doc_type = detect_pro_documentation_type(request.message)
+        # Simplified version handling
+        effective_version = request.version or "8-0"
         
         logger.info(f"💬 Pro chat request: '{request.message[:50]}...' (version: {effective_version})")
         
@@ -74,8 +69,7 @@ async def chat_with_pro_documentation(
             query=request.message,
             max_results=5,
             similarity_threshold=0.2,
-            version_filter=effective_version,
-            content_type_filter=doc_type
+            version_filter=effective_version if effective_version != "general" else None
         )
         
         search_time = (datetime.now() - search_start).total_seconds() * 1000
@@ -99,74 +93,40 @@ async def chat_with_pro_documentation(
         if effective_version != "8-0":
             response_text += f"\n\n*Note: This response is specific to Pro version {effective_version.replace('-', '.')}. Some features may differ in other versions.*"
         
-        # Prepare source documents
-        source_docs = []
-        for result in search_results.get("results", []):
-            source_docs.append({
-                "title": result.get("page_title", ""),
-                "url": result.get("source_url", ""),
-                "section": result.get("header", ""),
-                "relevance_score": result.get("similarity_score", 0.0),
-                "version": effective_version,
-                "content_type": result.get("content_type", doc_type)
-            })
+        logger.info(f"✅ Pro chat completed: search={search_time:.1f}ms, chat={chat_time:.1f}ms")
         
-        # Return the properly structured ChatResponse
-        final_response = ChatResponse(
+        return ChatResponse(
             message=response_text,
-            context_used=[
-                {
-                    "content": result.get("content", ""),
-                    "source": result.get("source_url", ""),
-                    "score": result.get("similarity_score", 0.0),
-                    "metadata": {
-                        "page_title": result.get("page_title", ""),
-                        "version": effective_version
-                    }
-                } for result in search_results.get("results", [])[:3]
-            ],
-            processing_time=(chat_time + search_time) / 1000,
+            context_used=search_results.get("results", []),
+            processing_time=(search_time + chat_time) / 1000,
             model_used="gemini-2.5-flash",
-            enhanced_features_used=True,
-            relationship_enhanced_chunks=len(search_results.get("results", [])),
-            version_context=f"Pro {effective_version.replace('-', '.')}",
+            enhanced_features_used=search_results.get("enhanced_features_used", False),
+            relationship_enhanced_chunks=search_results.get("relationship_enhanced_results", 0),
+            version_context=effective_version,
             conversation_id=request.conversation_id
         )
-        
-        logger.info(f"✅ Pro chat response generated in {chat_time + search_time:.0f}ms")
-        return final_response
         
     except Exception as e:
         logger.error(f"❌ Pro chat error: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Error generating Pro response: {str(e)}"
+            detail=f"Error processing Pro chat request: {str(e)}"
         )
 
 @router.post("/search", response_model=SearchResponse)
-async def search_pro_documentation(
-    request: SearchRequest,
-    services: Tuple = Depends(get_services)
-) -> SearchResponse:
-    """
-    Search Pro documentation with version and content type filtering
-    """
-    doc_processor, search_service, gemini_service = services
-    
+async def search_pro_documentation(request: SearchRequest, services: Tuple = Depends(get_services)):
+    """Search Pro documentation with enhanced version filtering"""
     try:
-        # Validate and normalize Pro version
-        effective_version = normalize_pro_version(request.version)
+        doc_proc, search_svc, gemini_svc = services
         
-        logger.info(f"🔍 Pro search: '{request.query}' (version: {effective_version})")
+        logger.info(f"🔍 Pro search: '{request.query[:50]}...'")
         
-        # Perform search with Pro-specific parameters
-        search_results = await search_service.search_similarity(
+        # Use existing search_similarity method with Pro enhancements
+        search_results = await search_svc.search_similarity(
             query=request.query,
             max_results=request.max_results,
-            similarity_threshold=request.similarity_threshold,
-            version_filter=effective_version,
-            content_type_filter=request.content_type_filter,
-            complexity_filter=request.complexity_filter if hasattr(request, 'complexity_filter') else None
+            similarity_threshold=0.3,
+            version_filter=getattr(request, 'version', None)
         )
         
         return SearchResponse(**search_results)
@@ -179,7 +139,7 @@ async def search_pro_documentation(
         )
 
 # ========================================
-# ADDED: MISSING UPLOAD DOCUMENTATION ENDPOINT
+# UPLOAD DOCUMENTATION ENDPOINT WITH CRITICAL PERSISTENCE FIX
 # ========================================
 
 # Upload status tracking
@@ -206,7 +166,7 @@ def detect_upload_format(data: dict) -> str:
 def process_comprehensive_json_simple(data: dict, source: str) -> dict:
     """
     Process comprehensive JSON format for Pro documentation upload
-    Simple processing that works with Pro's DocumentProcessor
+    MODIFIED: Now returns processed_chunks for persistence
     """
     start_time = datetime.now()
     
@@ -262,6 +222,7 @@ def process_comprehensive_json_simple(data: dict, source: str) -> dict:
             "upload_type": "comprehensive",
             "pro_version": pro_version,
             "enhanced_features": enhanced_features,
+            "chunks_data": processed_chunks,  # CRITICAL: Return actual chunks for persistence
             "documentation_stats": {
                 "generation_timestamp": data.get('_GENERATED'),
                 "product": pro_product,
@@ -287,7 +248,7 @@ async def upload_documentation(
     source: str = "pro-uploaded-docs",
     services = Depends(get_services)
 ):
-    """Upload and process Pro documentation JSON file - CORRECTED for Pro API"""
+    """Upload and process Pro documentation JSON file - WITH CRITICAL PERSISTENCE FIX"""
     try:
         doc_proc, search_svc, gemini_svc = services
         
@@ -312,12 +273,47 @@ async def upload_documentation(
         
         # Process based on format
         if upload_format == "comprehensive":
-            # FIXED: Use simple processing that works with Pro's DocumentProcessor
+            # Process chunks
             result = process_comprehensive_json_simple(data, source)
             
             if result["success"]:
                 logger.info(f"✅ Pro comprehensive processing completed: {result['processed_chunks']} chunks")
+                
+                # 🚨 CRITICAL FIX: Update DocumentProcessor with processed chunks
+                try:
+                    processed_chunks = result.get("chunks_data", [])
+                    if processed_chunks:
+                        update_result = doc_proc.update_with_processed_chunks(processed_chunks)
+                        logger.info(f"✅ DocumentProcessor updated: {update_result}")
+                        
+                        # Force SearchService to sync using the original sync method
+                        if hasattr(search_svc, '_sync_with_document_processor'):
+                            sync_success = search_svc._sync_with_document_processor()
+                            logger.info(f"✅ SearchService synced via _sync_with_document_processor: {sync_success}")
+                            logger.info(f"✅ SearchService now has: {len(search_svc.chunk_data)} chunks available for search")
+                        else:
+                            # Fallback to manual sync if method doesn't exist
+                            search_svc.embeddings = doc_proc.embeddings
+                            search_svc.chunk_data = doc_proc.chunk_data
+                            search_svc.metadata = doc_proc.metadata
+                            logger.info(f"✅ SearchService synced manually: {len(search_svc.chunk_data)} chunks")
+                        
+                        # Update response with persistence info
+                        result["persistence_info"] = {
+                            "chunks_stored": update_result["total_chunks"],
+                            "embeddings_generated": True,
+                            "search_ready": len(search_svc.chunk_data) > 0
+                        }
+                    else:
+                        logger.warning("⚠️ No chunks to persist from processing result")
+                        
+                except Exception as persist_error:
+                    logger.error(f"❌ Failed to persist chunks: {persist_error}")
+                    # Don't fail the upload - just log the persistence issue
+                    result["persistence_error"] = str(persist_error)
             
+            # Clean up result for response (remove internal data)
+            result.pop("chunks_data", None)
             return UploadResponse(**result)
                 
         elif upload_format == "legacy":
@@ -376,9 +372,7 @@ async def get_upload_status(upload_id: str) -> UploadStatus:
         current_document=status_data.get("current"),
         estimated_completion=status_data.get("eta"),
         errors_encountered=status_data.get("errors", 0),
-        last_error=status_data.get("last_error"),
-        pro_features_detected=status_data.get("pro_features", 0),
-        current_pro_version=status_data.get("version")
+        last_error=status_data.get("last_error")
     )
 
 @router.get("/test-connection")

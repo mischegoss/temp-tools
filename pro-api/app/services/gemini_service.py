@@ -1,137 +1,69 @@
+# COMPLETE FIXED VERSION - app/services/gemini_service.py
+# CRITICAL FIX: Actually uses context_chunks in prompts for proper source attribution
+# Fixed integration with search results
+
 import os
 import time
 import logging
-import asyncio
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-
+from typing import List, Dict, Any, Optional
 import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
-from app.config import GEMINI_MODEL, PRODUCT_DISPLAY_NAME, PRO_SUPPORTED_VERSIONS
-from app.config_loader import load_environment
+from app.config import GEMINI_MODEL, MAX_CONTEXT_CHUNKS, MAX_TOKENS_PER_CHUNK, PRODUCT_DISPLAY_NAME, PRO_SUPPORTED_VERSIONS
+from app.prompts.pro_prompts import PRO_SYSTEM_PROMPT, PRO_RESPONSE_FORMATS
 
 logger = logging.getLogger(__name__)
 
 class GeminiService:
-    """
-    Pro-specific Gemini AI service for generating contextual responses about Pro documentation
-    Compatible with google-generativeai==0.3.2 and flexible router calling patterns
-    """
-    
     def __init__(self, product_name: str = "pro"):
-        self.product_name = product_name
-        self.model_name = GEMINI_MODEL
+        """Initialize Gemini service for Pro"""
         self.model = None
+        self.model_name = GEMINI_MODEL
+        self.product_name = product_name
+        
+        # Performance tracking
         self.request_count = 0
         self.error_count = 0
-        self.total_response_time = 0
+        self.total_response_time = 0.0
         self.last_response_time = None
-        self.startup_time = time.time()
         
-        # Initialize Gemini
+        # Initialize Gemini API
         self._initialize_gemini()
-        
-        logger.info(f"✅ Pro Gemini service initialized with model: {self.model_name}")
-
+    
     def _initialize_gemini(self):
-        """Initialize Gemini model with Pro-specific configuration"""
+        """Initialize the Gemini API"""
         try:
-            # Load environment using config loader (consistent with Actions API)
-            env = load_environment()
-            
-            # Configure Gemini API using GOOGLE_API_KEY (for compatibility)
-            api_key = os.getenv("GOOGLE_API_KEY") or env.get('gemini_api_key')
+            api_key = os.getenv('GEMINI_API_KEY')
             if not api_key:
-                raise ValueError("GOOGLE_API_KEY environment variable not set")
+                logger.warning("⚠️ GEMINI_API_KEY not found - Gemini service will be limited")
+                return
             
             genai.configure(api_key=api_key)
-            
-            # Create model with Pro-optimized settings (compatible with 0.3.2)
-            generation_config = {
-                "temperature": 0.7,  # Balanced creativity for Pro responses
-                "top_p": 0.9,
-                "top_k": 40,
-                "max_output_tokens": 2048,
-            }
-            
-            # Safety settings optimized for technical Pro documentation
-            safety_settings = [
-                {
-                    "category": HarmCategory.HARM_CATEGORY_HARASSMENT,
-                    "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                },
-                {
-                    "category": HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                    "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                },
-                {
-                    "category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                    "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                },
-                {
-                    "category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                    "threshold": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                },
-            ]
-            
-            # Initialize the Gemini model (compatible with 0.3.2 - no system_instruction)
             self.model = genai.GenerativeModel(
-                model_name=env.get('gemini_model', 'gemini-2.5-flash'),
-                generation_config=generation_config,
-                safety_settings=safety_settings
+                model_name=self.model_name,
+                generation_config={
+                    "temperature": 0.7,
+                    "top_p": 0.8,
+                    "top_k": 40,
+                    "max_output_tokens": 2048,
+                }
             )
-            
-            logger.info(f"🚀 Pro Gemini model initialized: {env.get('gemini_model', 'gemini-2.5-flash')}")
-            logger.info(f"🔑 API key configured successfully")
+            logger.info(f"✅ Gemini service initialized with model: {self.model_name}")
             
         except Exception as e:
-            logger.error(f"❌ Failed to initialize Pro Gemini service: {e}")
-            raise
-
-    def test_connection(self) -> Dict[str, Any]:
-        """Test Gemini API connection with Pro context"""
-        try:
-            test_prompt = f"""You are RANI, the AI assistant for {PRODUCT_DISPLAY_NAME}. 
-            Please respond with a brief test message confirming you can help with Pro documentation."""
-            
-            start_time = time.time()
-            response = self.model.generate_content(test_prompt)
-            response_time = time.time() - start_time
-            
-            return {
-                "success": True,
-                "model": self.model_name,
-                "response_time": round(response_time, 3),
-                "test_response": response.text[:200] + "..." if len(response.text) > 200 else response.text,
-                "pro_ready": True,
-                "supported_versions": PRO_SUPPORTED_VERSIONS
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Pro Gemini connection test failed: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "model": self.model_name,
-                "pro_ready": False
-            }
-
+            logger.error(f"❌ Failed to initialize Gemini service: {e}")
+            self.model = None
+    
     def get_status(self) -> Dict[str, Any]:
-        """Get comprehensive Pro Gemini service status"""
-        uptime = time.time() - self.startup_time
-        avg_response_time = self.total_response_time / max(self.request_count, 1)
-        
+        """Get Gemini service status"""
         return {
             "ready": self.model is not None,
+            "model_loaded": self.model is not None,
+            "model_name": self.model_name,
             "can_chat": self.model is not None,
-            "model": self.model_name,
-            "product": self.product_name,
-            "uptime_seconds": round(uptime, 1),
-            "requests_processed": self.request_count,
-            "errors": self.error_count,
-            "success_rate": round((self.request_count - self.error_count) / max(self.request_count, 1), 3),
-            "average_response_time": round(avg_response_time, 3),
+            "request_count": self.request_count,
+            "error_count": self.error_count,
+            "error_rate": self.error_count / max(1, self.request_count),
+            "average_response_time": self.total_response_time / max(1, self.request_count),
             "last_response_time": self.last_response_time,
             "supported_versions": PRO_SUPPORTED_VERSIONS,
             "enhanced_features_available": True,
@@ -147,9 +79,7 @@ class GeminiService:
                           context_chunks: List = None, version: str = "8-0", 
                           conversation_history: List = None, **kwargs) -> str:
         """
-        Public method to generate response using Gemini
-        This method is expected by the chat router
-        Flexible parameter handling to work with different calling patterns
+        CRITICAL FIX: Actually uses context_chunks in prompt generation
         """
         try:
             if not self.model:
@@ -160,8 +90,8 @@ class GeminiService:
                 # If prompt is provided directly, use it
                 final_prompt = prompt
             elif user_message:
-                # If user_message is provided, build a Pro prompt
-                final_prompt = self._build_pro_prompt(
+                # FIXED: Build a Pro prompt that actually uses context_chunks
+                final_prompt = self._build_pro_prompt_with_context(
                     user_message, 
                     context_chunks or [], 
                     version, 
@@ -187,7 +117,7 @@ class GeminiService:
                     logger.warning(f"⚠️ Gemini generation attempt {attempt + 1} failed: {retry_error}")
                     if attempt == max_retries - 1:
                         raise retry_error
-                    time.sleep(0.5 * (attempt + 1))  # Exponential backoff
+                    time.sleep(0.5 * (attempt + 1))
             
             return self._get_pro_fallback_response("Could not generate response after retries")
             
@@ -196,31 +126,187 @@ class GeminiService:
             logger.error(f"❌ Pro Gemini response generation failed: {e}")
             return self._get_pro_fallback_response(f"Error: {str(e)}")
 
+    def _build_pro_prompt_with_context(self, user_message: str, context_chunks: List, version: str = "8-0", conversation_history: List = None) -> str:
+        """
+        CRITICAL FIX: Build Pro-specific prompt that actually uses context chunks
+        """
+        
+        # Build version context
+        version_display = version.replace('-', '.')
+        
+        # Process context chunks into useful context
+        context_section = ""
+        if context_chunks:
+            logger.info(f"📝 Building prompt with {len(context_chunks)} context chunks")
+            
+            context_section = "RELEVANT DOCUMENTATION CONTEXT:\n\n"
+            for i, chunk in enumerate(context_chunks[:MAX_CONTEXT_CHUNKS]):
+                # Handle both dict and object formats
+                if hasattr(chunk, 'get'):
+                    # Dictionary format from search results
+                    content = chunk.get('content', '')
+                    source = chunk.get('source_url', chunk.get('source', 'Pro Documentation'))
+                    page_title = chunk.get('page_title', '')
+                    header = chunk.get('header', '')
+                    score = chunk.get('similarity_score', chunk.get('score', 0))
+                elif hasattr(chunk, '__dict__'):
+                    # Object format
+                    content = getattr(chunk, 'content', '')
+                    source = getattr(chunk, 'source', 'Pro Documentation')
+                    page_title = getattr(chunk, 'page_title', '')
+                    header = getattr(chunk, 'header', '')
+                    score = getattr(chunk, 'score', 0)
+                else:
+                    # Unknown format
+                    logger.warning(f"Unknown chunk format: {type(chunk)}")
+                    continue
+                
+                # Truncate content if too long
+                if len(content) > MAX_TOKENS_PER_CHUNK:
+                    content = content[:MAX_TOKENS_PER_CHUNK] + "..."
+                
+                # Build context entry
+                source_info = f"Source: {source}"
+                if page_title:
+                    source_info += f" | Page: {page_title}"
+                if header:
+                    source_info += f" | Section: {header}"
+                source_info += f" | Relevance: {score:.3f}"
+                
+                context_section += f"--- Context {i+1} ---\n"
+                context_section += f"{source_info}\n\n"
+                context_section += f"{content}\n\n"
+            
+            context_section += "--- End Context ---\n\n"
+        else:
+            logger.info("📝 Building prompt with no context chunks")
+        
+        # Process conversation history
+        history_section = ""
+        if conversation_history:
+            logger.info(f"💬 Adding {len(conversation_history)} conversation history items")
+            history_section = "CONVERSATION HISTORY:\n\n"
+            
+            for msg in conversation_history[-5:]:  # Last 5 messages
+                try:
+                    # Handle both dict and object formats safely
+                    if hasattr(msg, 'get'):
+                        role = msg.get('role', 'unknown')
+                        content = msg.get('content', '')
+                    elif hasattr(msg, 'role'):
+                        role = msg.role
+                        content = msg.content
+                    else:
+                        # Skip unknown formats
+                        logger.warning(f"Unknown message format: {type(msg)}")
+                        continue
+                    
+                    # Truncate long messages
+                    if len(content) > 200:
+                        content = content[:200] + "..."
+                    
+                    role_display = "User" if role == "user" else "Assistant"
+                    history_section += f"{role_display}: {content}\n\n"
+                    
+                except Exception as msg_error:
+                    logger.warning(f"Error processing conversation message: {msg_error}")
+                    continue
+            
+            history_section += "--- End History ---\n\n"
+        
+        # Choose appropriate response format based on message content
+        doc_type = self._detect_documentation_type(user_message)
+        response_format = PRO_RESPONSE_FORMATS.get(doc_type, PRO_RESPONSE_FORMATS["general"])
+        
+        # Build the complete prompt
+        prompt = f"""{PRO_SYSTEM_PROMPT}
+
+{response_format}
+
+VERSION CONTEXT: You are providing guidance for {PRODUCT_DISPLAY_NAME} version {version_display}.
+
+{history_section}{context_section}USER QUESTION: {user_message}
+
+INSTRUCTIONS:
+1. **Use the provided context**: Base your response primarily on the documentation context provided above
+2. **Cite sources**: When referencing information from the context, mention the specific source
+3. **Be Pro version-aware**: Consider the Pro {version_display} context in your response
+4. **Stay focused**: Address the user's specific question directly
+5. **Provide actionable guidance**: Include specific steps, menu paths, or configuration details when relevant
+
+Please provide a helpful, accurate response about {PRODUCT_DISPLAY_NAME}:"""
+
+        logger.info(f"📝 Built prompt with context: {len(context_chunks)} chunks, {len(conversation_history or [])} history items")
+        return prompt
+
+    def _detect_documentation_type(self, message: str) -> str:
+        """Detect Pro documentation type from message content"""
+        message_lower = message.lower()
+        
+        if any(word in message_lower for word in ['workflow', 'activity', 'action', 'process']):
+            return 'workflow'
+        elif any(word in message_lower for word in ['config', 'setting', 'setup', 'admin', 'configure']):
+            return 'configuration'
+        elif any(word in message_lower for word in ['integration', 'api', 'connect', 'webhook']):
+            return 'integration'
+        elif any(word in message_lower for word in ['error', 'problem', 'issue', 'troubleshoot', 'debug']):
+            return 'troubleshooting'
+        elif any(word in message_lower for word in ['monitor', 'alert', 'dashboard', 'report']):
+            return 'monitoring'
+        elif any(word in message_lower for word in ['user', 'permission', 'role', 'access']):
+            return 'administration'
+        else:
+            return 'general'
+
+    def set_search_service(self, search_service):
+        """Set search service reference to avoid circular imports"""
+        self.search_service = search_service
+
     def chat(self, request) -> object:
         """
-        Generate Pro-specific chat response using Gemini with conversation history support
+        CRITICAL FIX: Generate Pro chat response with search integration
         """
-        from app.models.chat import ChatResponse, ContextChunk
+        from app.models.chat import ChatResponse
         
         start_time = time.time()
         self.request_count += 1
         
         try:
-            # Get search service from the initialized services
-            import app.main as main_app
-            search_service = main_app.search_service
+            # Use injected search service instead of importing main
+            search_service = getattr(self, 'search_service', None)
             
             if not search_service or not search_service.ready:
                 logger.warning("🔍 Search service not ready for Pro chat")
                 return self._generate_fallback_response(request.message)
             
-            # Build Pro-specific prompt with conversation history
+            # CRITICAL FIX: Actually perform search to get context
+            logger.info(f"🔍 Performing search for chat context: '{request.message[:50]}...'")
+            
+            try:
+                # Use the search method to get context (synchronous)
+                from app.models.search import SearchRequest
+                search_request = SearchRequest(
+                    query=request.message,
+                    max_results=3,
+                    similarity_threshold=0.2,
+                    version=getattr(request, 'version', '8-0')
+                )
+                search_results = search_service.search(search_request)
+                
+                context_chunks = search_results.get('results', [])
+                logger.info(f"📝 Found {len(context_chunks)} context chunks for chat")
+                
+            except Exception as search_error:
+                logger.warning(f"Search failed, proceeding without context: {search_error}")
+                context_chunks = []
+            
+            # Build conversation history
             conversation_history = getattr(request, 'conversation_history', []) or []
             
-            # Use generate_response method for consistency
+            # FIXED: Use actual context chunks in response generation
             response_text = self.generate_response(
                 user_message=request.message,
-                context_chunks=[],
+                context_chunks=context_chunks,  # FIXED: Pass actual search results
                 version=getattr(request, 'version', '8-0'),
                 conversation_history=conversation_history
             )
@@ -230,14 +316,32 @@ class GeminiService:
             self.last_response_time = round(processing_time, 3)
             self.total_response_time += processing_time
             
+            # FIXED: Build context_used with actual search results
+            context_used = []
+            for chunk in context_chunks[:3]:  # Top 3 for context_used
+                try:
+                    context_used.append({
+                        "content": chunk.get('content', ''),
+                        "source": chunk.get('source_url', chunk.get('source', 'Pro Documentation')),
+                        "score": chunk.get('similarity_score', chunk.get('score', 0)),
+                        "metadata": {
+                            "page_title": chunk.get('page_title', ''),
+                            "header": chunk.get('header', ''),
+                            "version": getattr(request, 'version', '8-0')
+                        }
+                    })
+                except Exception as chunk_error:
+                    logger.warning(f"Error processing context chunk: {chunk_error}")
+                    continue
+            
             # Create and return response
             return ChatResponse(
                 message=response_text,
-                context_used=[],  # For now, empty context
+                context_used=context_used,  # FIXED: Actual context from search
                 processing_time=self.last_response_time,
                 model_used=self.model_name,
-                enhanced_features_used=False,
-                relationship_enhanced_chunks=0,
+                enhanced_features_used=len(context_chunks) > 0,  # True if we found context
+                relationship_enhanced_chunks=len(context_chunks),
                 version_context=f"Pro {getattr(request, 'version', '8-0').replace('-', '.')}",
                 conversation_id=getattr(request, 'conversation_id', None)
             )
@@ -246,59 +350,6 @@ class GeminiService:
             self.error_count += 1
             logger.error(f"❌ Pro chat request failed: {e}")
             return self._generate_fallback_response(request.message, str(e))
-
-    def _build_pro_prompt(self, user_message: str, context_chunks: List, version: str = "8-0", conversation_history: List = None) -> str:
-        """Build Pro-specific prompt with version context and conversation history"""
-        
-        # Build version context
-        version_display = version.replace('-', '.')
-        
-        # Build conversation history section
-        history_section = ""
-        if conversation_history and len(conversation_history) > 0:
-            history_section = "\n\nCONVERSATION HISTORY:\n"
-            for msg in conversation_history[-5:]:  # Last 5 messages only
-                role = msg.get('role', 'user')
-                content = msg.get('content', '')
-                if isinstance(msg, dict):
-                    history_section += f"{role.upper()}: {content}\n"
-                elif hasattr(msg, 'role') and hasattr(msg, 'content'):
-                    history_section += f"{msg.role.upper()}: {msg.content}\n"
-        
-        # Build the complete prompt with system instruction embedded
-        prompt = f"""You are RANI, an AI assistant specifically designed to help users with Resolve Pro documentation and features. You are an expert in Pro workflows, configurations, integrations, monitoring, administration, and troubleshooting.
-
-CORE EXPERTISE AREAS:
-- **Workflow Management**: Design, creation, modification, and optimization of Pro workflows
-- **Activity Configuration**: Setup and troubleshooting of workflow activities and actions  
-- **Integration Solutions**: API integrations, database connections, third-party system connectivity
-- **Monitoring & Alerting**: Dashboard configuration, alert setup, performance monitoring
-- **Administration**: User management, permissions, system configuration, maintenance
-- **Troubleshooting**: Diagnostics, error resolution, performance optimization
-
-USER CONTEXT:
-- User is asking about Pro {version_display}
-- Product: {PRODUCT_DISPLAY_NAME}
-
-{history_section}
-
-USER QUESTION: {user_message}
-
-RESPONSE GUIDELINES:
-1. **Pro-Focused**: Always prioritize Pro-specific solutions and capabilities
-2. **Version-Aware**: Consider the Pro {version_display} context in your response
-3. **Accurate**: Provide reliable information about Pro features and functionality
-4. **Actionable**: Provide clear, step-by-step guidance when possible
-5. **Complete**: Address all aspects of the user's question thoroughly
-6. **Context-Aware**: Consider the conversation history when relevant
-
-Please provide a helpful, accurate response about {PRODUCT_DISPLAY_NAME}:"""
-
-        return prompt
-
-    def _generate_response(self, prompt: str) -> str:
-        """Generate response using Gemini with enhanced error handling (private method)"""
-        return self.generate_response(prompt=prompt)  # Delegate to public method
 
     def _generate_fallback_response(self, user_message: str, error: str = None) -> object:
         """Generate fallback response when Gemini fails"""

@@ -85,7 +85,9 @@ class SearchService:
                     chunk = self.chunk_data[idx] if idx < len(self.chunk_data) else {}
                     results.append({
                         "content": chunk.get("content", ""),
-                        "source": chunk.get("source", ""),
+                        "source": chunk.get("source_url", f"Pro Documentation"),  # ✅ FIXED: source_url
+                        "source_url": chunk.get("source_url", ""),  # ✅ ADDED: explicit URL field
+                        "page_title": chunk.get("page_title", ""),  # ✅ ADDED: page title
                         "score": float(similarities[idx]),
                         "metadata": chunk.get("metadata", {})
                     })
@@ -169,7 +171,9 @@ class SearchService:
                     
                     results.append({
                         "content": chunk.get("content", ""),
-                        "source": chunk.get("source", f"Pro Documentation"),
+                        "source": chunk.get("source_url", f"Pro Documentation"),  # ✅ FIXED: source_url
+                        "source_url": chunk.get("source_url", ""),  # ✅ ADDED: explicit URL field
+                        "page_title": chunk.get("page_title", ""),  # ✅ ADDED: page title
                         "score": float(similarities[idx]),
                         "metadata": {
                             **chunk.get("metadata", {}),
@@ -185,7 +189,7 @@ class SearchService:
                 "results": results,
                 "total_found": len(results),
                 "processing_time": processing_time,
-                "enhanced_features_used": False,  # No enhanced features in basic implementation
+                "enhanced_features_used": False,
                 "relationship_enhanced_results": 0,
                 "filters_applied": {
                     "version": version_filter,

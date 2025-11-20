@@ -1,4 +1,6 @@
-# app/models/search.py
+# COMPLETE FIXED VERSION - app/models/search.py
+# Added missing similarity_threshold field and proper integration
+
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -7,6 +9,7 @@ class SearchRequest(BaseModel):
     """Search request model for Pro documentation"""
     query: str = Field(..., description="Search query text")
     max_results: int = Field(5, ge=1, le=20, description="Maximum number of results to return")
+    similarity_threshold: float = Field(0.3, description="Minimum similarity threshold")  # FIXED: Added missing field
     version: Optional[str] = Field("8-0", description="Pro version to search within")
     content_type_filter: Optional[str] = Field(None, description="Filter by content type")
     complexity_filter: Optional[str] = Field(None, description="Filter by complexity level")

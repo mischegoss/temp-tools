@@ -70,3 +70,42 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f"Failed to generate embeddings: {e}")
             raise
+
+    def update_with_processed_chunks(self, processed_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Update DocumentProcessor with processed chunks and generate embeddings
+        CRITICAL: This is what makes uploaded chunks available for search
+        """
+        if not self.model_loaded:
+            raise RuntimeError("Model not initialized. Call initialize() first.")
+        
+        try:
+            # Extract content for embedding generation
+            chunk_texts = [chunk.get('content', '') for chunk in processed_chunks]
+            
+            # Generate embeddings for new chunks
+            logger.info(f"🔄 Generating embeddings for {len(chunk_texts)} chunks...")
+            new_embeddings = self.generate_embeddings(chunk_texts)
+            
+            # Update stored data
+            if self.embeddings is None:
+                # First upload
+                self.embeddings = new_embeddings
+                self.chunk_data = processed_chunks.copy()
+                logger.info(f"✅ Initial data loaded: {len(self.chunk_data)} chunks")
+            else:
+                # Append to existing data
+                self.embeddings = np.vstack([self.embeddings, new_embeddings])
+                self.chunk_data.extend(processed_chunks)
+                logger.info(f"✅ Data appended: {len(self.chunk_data)} total chunks")
+            
+            return {
+                "success": True,
+                "total_chunks": len(self.chunk_data),
+                "new_chunks_added": len(processed_chunks),
+                "embeddings_shape": self.embeddings.shape if self.embeddings is not None else None
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to update DocumentProcessor: {e}")
+            raise RuntimeError(f"Failed to update document processor: {e}")
