@@ -75,17 +75,41 @@ class DocumentProcessor:
         """
         Update DocumentProcessor with processed chunks and generate embeddings
         CRITICAL: This is what makes uploaded chunks available for search
+        FIXED: Now includes page titles and headers in embeddings for better search results
         """
         if not self.model_loaded:
             raise RuntimeError("Model not initialized. Call initialize() first.")
         
         try:
-            # Extract content for embedding generation
-            chunk_texts = [chunk.get('content', '') for chunk in processed_chunks]
+            # ✅ FIXED: Include page title, header, and content in embeddings
+            chunk_texts = []
+            for chunk in processed_chunks:
+                # Build enhanced text for embedding that includes context
+                page_title = chunk.get('page_title', '')
+                header = chunk.get('header', '')
+                content = chunk.get('content', '')
+                
+                # Combine title, header, and content for better semantic matching
+                enhanced_text_parts = []
+                if page_title:
+                    enhanced_text_parts.append(page_title)
+                if header and header != page_title:  # Avoid duplication
+                    enhanced_text_parts.append(header)
+                if content:
+                    enhanced_text_parts.append(content)
+                
+                # Join with separator for clear context boundaries
+                enhanced_text = ' | '.join(enhanced_text_parts)
+                chunk_texts.append(enhanced_text)
             
-            # Generate embeddings for new chunks
-            logger.info(f"🔄 Generating embeddings for {len(chunk_texts)} chunks...")
+            # Generate embeddings for new chunks with enhanced context
+            logger.info(f"🔄 Generating embeddings for {len(chunk_texts)} chunks (with titles & headers)...")
             new_embeddings = self.generate_embeddings(chunk_texts)
+            
+            # Log embedding quality metrics
+            logger.info(f"  - New embeddings shape: {new_embeddings.shape}")
+            logger.info(f"  - Embedding dimension: {new_embeddings.shape[1]}")
+            logger.info(f"  - Enhanced text sample (first chunk): {chunk_texts[0][:200]}...")
             
             # Update stored data
             if self.embeddings is None:
@@ -93,19 +117,27 @@ class DocumentProcessor:
                 self.embeddings = new_embeddings
                 self.chunk_data = processed_chunks.copy()
                 logger.info(f"✅ Initial data loaded: {len(self.chunk_data)} chunks")
+                logger.info(f"   - Embeddings shape: {self.embeddings.shape}")
+                logger.info(f"   - Context-enhanced embeddings (titles + headers + content)")
             else:
                 # Append to existing data
+                old_count = len(self.chunk_data)
                 self.embeddings = np.vstack([self.embeddings, new_embeddings])
                 self.chunk_data.extend(processed_chunks)
-                logger.info(f"✅ Data appended: {len(self.chunk_data)} total chunks")
+                logger.info(f"✅ Data appended: {old_count} → {len(self.chunk_data)} total chunks")
+                logger.info(f"   - Embeddings shape: {self.embeddings.shape}")
             
             return {
                 "success": True,
                 "total_chunks": len(self.chunk_data),
                 "new_chunks_added": len(processed_chunks),
-                "embeddings_shape": self.embeddings.shape if self.embeddings is not None else None
+                "embeddings_shape": self.embeddings.shape if self.embeddings is not None else None,
+                "enhanced_embeddings": True,
+                "embedding_strategy": "title + header + content"
             }
             
         except Exception as e:
             logger.error(f"❌ Failed to update DocumentProcessor: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             raise RuntimeError(f"Failed to update document processor: {e}")

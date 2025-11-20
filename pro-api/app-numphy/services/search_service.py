@@ -75,7 +75,8 @@ class SearchService:
         For now, returns empty results when no data is available
         """
         try:
-            if not self.embeddings or len(self.chunk_data) == 0:
+            # ✅ FIXED: Check for None explicitly
+            if self.embeddings is None or len(self.chunk_data) == 0:
                 logger.warning("No search data available - returning empty results")
                 return {
                     "results": [],
@@ -102,9 +103,9 @@ class SearchService:
                     chunk = self.chunk_data[idx] if idx < len(self.chunk_data) else {}
                     results.append({
                         "content": chunk.get("content", ""),
-                        "source": chunk.get("source_url", f"Pro Documentation"),  # ✅ FIXED: source_url
-                        "source_url": chunk.get("source_url", ""),  # ✅ ADDED: explicit URL field
-                        "page_title": chunk.get("page_title", ""),  # ✅ ADDED: page title
+                        "source": chunk.get("source_url", f"Pro Documentation"),
+                        "source_url": chunk.get("source_url", ""),
+                        "page_title": chunk.get("page_title", ""),
                         "score": float(similarities[idx]),
                         "metadata": chunk.get("metadata", {})
                     })
@@ -124,7 +125,7 @@ class SearchService:
                 "error": str(e)
             }
     
-    def search_similarity(self, query: str, max_results: int = 5,  # ✅ FIXED: Removed async
+    def search_similarity(self, query: str, max_results: int = 5,
                          similarity_threshold: float = 0.3,
                          version_filter: str = None,
                          content_type_filter: str = None,
@@ -133,14 +134,19 @@ class SearchService:
         Search for similar chunks using similarity search
         This method is expected by the chat router
         """
+        
+        # ✅ CRITICAL DEBUG LINE - Shows if embeddings exist and their shape
+        logger.info(f"🔍 SEARCH DEBUG: query='{query}', chunks={len(self.chunk_data)}, embeddings_shape={self.embeddings.shape if self.embeddings is not None else None}, threshold={similarity_threshold}")
+        
         try:
-            if not self.embeddings or len(self.chunk_data) == 0:
+            # ✅ CRITICAL FIX: Check for None explicitly, not truthiness (Line 141 fix)
+            if self.embeddings is None or len(self.chunk_data) == 0:
                 logger.warning("No search data available for similarity search - returning empty results")
                 return {
                     "results": [],
                     "total_found": 0,
                     "processing_time": 0.0,
-                    "query": query,  # ✅ FIXED: Added missing query field
+                    "query": query,
                     "enhanced_features_used": False,
                     "relationship_enhanced_results": 0,
                     "message": "No documentation data available. Please upload Pro documentation first."
@@ -153,7 +159,7 @@ class SearchService:
                     "results": [],
                     "total_found": 0,
                     "processing_time": 0.0,
-                    "query": query,  # ✅ FIXED: Added missing query field
+                    "query": query,
                     "enhanced_features_used": False,
                     "relationship_enhanced_results": 0,
                     "error": "Document processor not ready"
@@ -167,8 +173,14 @@ class SearchService:
             # Compute similarities
             similarities = cosine_similarity([query_embedding], self.embeddings)[0]
             
+            # ✅ ADD DEBUG INFO - Show similarity score distribution
+            logger.info(f"🔍 SIMILARITY SCORES: max={np.max(similarities):.4f}, min={np.min(similarities):.4f}, mean={np.mean(similarities):.4f}, above_threshold={np.sum(similarities >= similarity_threshold)}")
+            
             # Get top results above threshold
             top_indices = np.argsort(similarities)[::-1][:max_results * 2]  # Get more to filter
+            
+            # ✅ SHOW TOP SCORES EVEN IF BELOW THRESHOLD
+            logger.info(f"🔍 TOP 5 SCORES: {[f'{similarities[i]:.4f}' for i in top_indices[:5]]}")
             
             results = []
             for idx in top_indices:
@@ -178,21 +190,38 @@ class SearchService:
                 if similarities[idx] >= similarity_threshold:
                     chunk = self.chunk_data[idx] if idx < len(self.chunk_data) else {}
                     
-                    # Apply filters if specified
-                    if version_filter and chunk.get("version") and version_filter not in chunk.get("version", ""):
-                        continue
+                    # ✅ FIXED: Version filter checks metadata.version
+                    if version_filter:
+                        chunk_version = chunk.get("metadata", {}).get("version", "")
+                        if chunk_version and version_filter not in chunk_version:
+                            logger.debug(f"Skipping chunk due to version filter: {chunk_version} vs {version_filter}")
+                            continue
                     
-                    if content_type_filter and chunk.get("content_type") != content_type_filter:
-                        continue
+                    # ✅ OPTION A FIX: Don't filter if content_type_filter is "general"
+                    if content_type_filter and content_type_filter != "general":
+                        chunk_content_type = chunk.get("content_type")
+                        # Handle both dict and string formats
+                        if isinstance(chunk_content_type, dict):
+                            # Extract type from dict: {'type': 'documentation', 'category': 'pro'}
+                            chunk_type = chunk_content_type.get("category", chunk_content_type.get("type", ""))
+                        else:
+                            chunk_type = str(chunk_content_type) if chunk_content_type else ""
                         
+                        # Skip if content type doesn't match (flexible matching)
+                        if chunk_type and content_type_filter not in chunk_type and chunk_type != content_type_filter:
+                            logger.debug(f"Skipping chunk due to content_type filter: {chunk_type} vs {content_type_filter}")
+                            continue
+                    
+                    # Apply complexity filter if specified
                     if complexity_filter and chunk.get("complexity") != complexity_filter:
+                        logger.debug(f"Skipping chunk due to complexity filter")
                         continue
                     
                     results.append({
                         "content": chunk.get("content", ""),
-                        "source": chunk.get("source_url", f"Pro Documentation"),  # ✅ FIXED: source_url
-                        "source_url": chunk.get("source_url", ""),  # ✅ ADDED: explicit URL field
-                        "page_title": chunk.get("page_title", ""),  # ✅ ADDED: page title
+                        "source": chunk.get("source_url", f"Pro Documentation"),
+                        "source_url": chunk.get("source_url", ""),
+                        "page_title": chunk.get("page_title", ""),
                         "score": float(similarities[idx]),
                         "metadata": {
                             **chunk.get("metadata", {}),
@@ -204,11 +233,13 @@ class SearchService:
             
             processing_time = (datetime.now() - start_time).total_seconds()
             
+            logger.info(f"✅ SEARCH COMPLETE: found {len(results)} results in {processing_time:.3f}s")
+            
             return {
                 "results": results,
                 "total_found": len(results),
                 "processing_time": processing_time,
-                "query": query,  # ✅ FIXED: Added missing query field
+                "query": query,
                 "enhanced_features_used": False,
                 "relationship_enhanced_results": 0,
                 "filters_applied": {
@@ -221,11 +252,13 @@ class SearchService:
             
         except Exception as e:
             logger.error(f"Similarity search failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return {
                 "results": [],
                 "total_found": 0,
                 "processing_time": 0.0,
-                "query": query,  # ✅ FIXED: Added missing query field
+                "query": query,
                 "enhanced_features_used": False,
                 "relationship_enhanced_results": 0,
                 "error": str(e)

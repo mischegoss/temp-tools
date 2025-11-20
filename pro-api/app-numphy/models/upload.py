@@ -28,7 +28,7 @@ class UploadResponse(BaseModel):
     """Upload response"""
     success: bool = Field(..., description="Whether upload was successful")
     message: str = Field(..., description="Response message")
-    chunks_processed: int = Field(0, description="Number of chunks processed")
+    processed_chunks: int = Field(0, description="Number of chunks processed")  # ✅ FIXED: Changed from chunks_processed
     processing_time: float = Field(0.0, description="Time taken to process")
     upload_id: Optional[str] = Field(None, description="Upload identifier")
     status: UploadStatus = Field(UploadStatus.COMPLETED, description="Upload status")
