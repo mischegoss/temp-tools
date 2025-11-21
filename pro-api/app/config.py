@@ -13,6 +13,18 @@ METADATA_FILE = DATA_DIR / "metadata.json"
 CHUNKS_FILE = DATA_DIR / "documentation-chunks.json"
 LAST_PROCESSED_FILE = DATA_DIR / "last_processed.json"
 
+# ========================================
+# GOOGLE CLOUD STORAGE CONFIGURATION
+# ========================================
+GCS_PROJECT_ID = os.getenv("GCS_PROJECT_ID", "gen-lang-client-0962398129")
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "pro-chatbot-data")
+GCS_EMBEDDINGS_PATH = "embeddings"
+GCS_CHUNKS_PATH = "chunks"
+GCS_METADATA_PATH = "metadata"
+
+# Enable GCS storage in production (Cloud Run), disable for local development
+USE_GCS_STORAGE = os.getenv("USE_GCS_STORAGE", str(IS_CLOUD_RUN)).lower() in ('true', '1', 'yes')
+
 # Sentence transformer settings
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 EMBEDDING_DIMENSION = 384

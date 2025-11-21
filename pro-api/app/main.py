@@ -120,15 +120,30 @@ async def lifespan(app: FastAPI):
         logger.info("Initializing Pro business services with shared model instance...")
         service_start = time.time()
         
-        # Initialize document processor with shared model
+        # Initialize document processor with shared model (this loads from GCS)
         doc_processor = DocumentProcessor()
         doc_processor.initialize(shared_model=sentence_model)
         logger.info("✅ Pro document processor initialized (using shared model)")
+        
+        # NEW: Log GCS data load status
+        doc_status = doc_processor.get_status()
+        if doc_status.get('chunks_count', 0) > 0:
+            logger.info(f"📦 Loaded {doc_status['chunks_count']} chunks from GCS persistence")
+            logger.info(f"   Embeddings: {doc_status.get('embeddings_count', 0)} vectors ready")
+        else:
+            logger.info("📂 No existing data in GCS - starting fresh")
         
         # Initialize search service
         search_service = SearchService(doc_processor)
         search_service.initialize()
         logger.info("✅ Pro search service initialized")
+        
+        # NEW: Log search service data sync status
+        search_stats = search_service.get_search_stats()
+        if search_stats.get('total_chunks', 0) > 0:
+            logger.info(f"🔍 Search service ready with {search_stats['total_chunks']} searchable chunks")
+        else:
+            logger.info("🔍 Search service ready (waiting for data upload)")
         
         # Initialize Gemini service with Pro configuration
         gemini_service = GeminiService(product_name="pro")
@@ -150,6 +165,12 @@ async def lifespan(app: FastAPI):
         logger.info(f"   - Model load time: {model_load_time:.2f}s")
         logger.info(f"   - Warmup time: {warmup_time:.2f}s")
         logger.info(f"   - Total startup: {startup_duration:.2f}s")
+        
+        # NEW: GCS persistence summary
+        if doc_status.get('gcs_enabled'):
+            logger.info("🗄️  GCS persistence: ENABLED")
+        else:
+            logger.info("📁 GCS persistence: DISABLED (local/development mode)")
         
     except Exception as e:
         logger.error(f"Failed to initialize Pro services during startup: {e}")
@@ -206,6 +227,7 @@ async def root():
             "Shared model instance across services (50% memory reduction)",
             "No duplicate model loading",
             "Pre-warmed model for faster first response",
+            "GCS persistence for documentation data",
             "Optimized for both local development and Cloud Run deployment"
         ]
     }
@@ -213,6 +235,8 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Basic health check endpoint for Pro API"""
+    doc_status = doc_processor.get_status() if doc_processor else {"gcs_enabled": False}
+    
     return {
         "status": "healthy",
         "product": "pro",
@@ -221,6 +245,8 @@ async def health_check():
         "uptime_seconds": time.time() - startup_time if startup_time else 0,
         "ready_for_chat": models_loaded and services_initialized,
         "memory_optimized": True,
+        "gcs_persistence": doc_status.get("gcs_enabled", False),
+        "data_loaded": doc_status.get("chunks_count", 0) > 0,
         "default_version": PRO_DEFAULT_VERSION,
         "environment": detect_environment()
     }
@@ -295,6 +321,12 @@ async def detailed_status():
             "shared_model": True,
             "model_loaded_once": True,
             "estimated_memory_savings": "~50% reduction from avoiding duplicate model loading"
+        },
+        "persistence": {
+            "gcs_enabled": doc_status.get("gcs_enabled", False),
+            "chunks_loaded": doc_status.get("chunks_count", 0),
+            "embeddings_loaded": doc_status.get("embeddings_count", 0),
+            "data_persisted": doc_status.get("gcs_enabled", False) and doc_status.get("chunks_count", 0) > 0
         },
         "pro_specific": {
             "default_version": PRO_DEFAULT_VERSION,
