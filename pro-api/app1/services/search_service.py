@@ -132,14 +132,14 @@ class SearchService:
                          complexity_filter: str = None) -> Dict[str, Any]:
         """
         Search for similar chunks using similarity search
-        This method is expected by the chat router
+        ✅ SURGICAL FIX: Search all versions but prefer version-matching chunks
         """
         
         # ✅ CRITICAL DEBUG LINE - Shows if embeddings exist and their shape
         logger.info(f"🔍 SEARCH DEBUG: query='{query}', chunks={len(self.chunk_data)}, embeddings_shape={self.embeddings.shape if self.embeddings is not None else None}, threshold={similarity_threshold}")
         
         try:
-            # ✅ CRITICAL FIX: Check for None explicitly, not truthiness (Line 141 fix)
+            # ✅ CRITICAL FIX: Check for None explicitly, not truthiness
             if self.embeddings is None or len(self.chunk_data) == 0:
                 logger.warning("No search data available for similarity search - returning empty results")
                 return {
@@ -176,38 +176,38 @@ class SearchService:
             # ✅ ADD DEBUG INFO - Show similarity score distribution
             logger.info(f"🔍 SIMILARITY SCORES: max={np.max(similarities):.4f}, min={np.min(similarities):.4f}, mean={np.mean(similarities):.4f}, above_threshold={np.sum(similarities >= similarity_threshold)}")
             
-            # Get top results above threshold
-            top_indices = np.argsort(similarities)[::-1][:max_results * 2]  # Get more to filter
+            # ✅ SURGICAL FIX: Get more results initially to allow for sorting
+            # We'll get 2x max_results, then sort by version match + similarity
+            top_indices = np.argsort(similarities)[::-1][:max_results * 2]
             
             # ✅ SHOW TOP SCORES EVEN IF BELOW THRESHOLD
             logger.info(f"🔍 TOP 5 SCORES: {[f'{similarities[i]:.4f}' for i in top_indices[:5]]}")
             
             results = []
             for idx in top_indices:
-                if len(results) >= max_results:
-                    break
-                    
                 if similarities[idx] >= similarity_threshold:
                     chunk = self.chunk_data[idx] if idx < len(self.chunk_data) else {}
                     
-                    # ✅ FIXED: Version filter checks metadata.version
-                    if version_filter:
-                        chunk_version = chunk.get("metadata", {}).get("version", "")
-                        if chunk_version and version_filter not in chunk_version:
-                            logger.debug(f"Skipping chunk due to version filter: {chunk_version} vs {version_filter}")
-                            continue
+                    # ✅ SURGICAL FIX: Don't filter out by version, but track if it matches
+                    chunk_version = chunk.get("metadata", {}).get("version", "")
+                    matches_version = False
                     
-                    # ✅ OPTION A FIX: Don't filter if content_type_filter is "general"
+                    if version_filter and chunk_version:
+                        # Normalize versions for comparison
+                        normalized_chunk = chunk_version.replace('.', '-').replace('production-', '').replace('-only', '').lower()
+                        normalized_filter = version_filter.replace('.', '-').lower()
+                        matches_version = (normalized_filter in normalized_chunk or normalized_chunk == "general")
+                    
+                    # Apply content_type filter if specified
                     if content_type_filter and content_type_filter != "general":
                         chunk_content_type = chunk.get("content_type")
                         # Handle both dict and string formats
                         if isinstance(chunk_content_type, dict):
-                            # Extract type from dict: {'type': 'documentation', 'category': 'pro'}
                             chunk_type = chunk_content_type.get("category", chunk_content_type.get("type", ""))
                         else:
                             chunk_type = str(chunk_content_type) if chunk_content_type else ""
                         
-                        # Skip if content type doesn't match (flexible matching)
+                        # Skip if content type doesn't match
                         if chunk_type and content_type_filter not in chunk_type and chunk_type != content_type_filter:
                             logger.debug(f"Skipping chunk due to content_type filter: {chunk_type} vs {content_type_filter}")
                             continue
@@ -228,16 +228,34 @@ class SearchService:
                             "version_context": version_filter,
                             "content_type": chunk.get("content_type", "general"),
                             "complexity": chunk.get("complexity", "intermediate")
-                        }
+                        },
+                        "_version_match": matches_version,  # Internal flag for sorting
+                        "_similarity": float(similarities[idx])  # Keep for sorting
                     })
+            
+            # ✅ SURGICAL FIX: Sort to prefer version-matching chunks, then by similarity
+            # This ensures version-appropriate URLs appear first when available
+            results.sort(key=lambda x: (
+                not x.get("_version_match", False),  # False sorts first (matches on top)
+                -x.get("_similarity", 0)  # Then by similarity (highest first)
+            ))
+            
+            # Clean up internal flags and take top max_results
+            final_results = []
+            version_matched_count = 0
+            for result in results[:max_results]:
+                if result.pop("_version_match", False):
+                    version_matched_count += 1
+                result.pop("_similarity", None)
+                final_results.append(result)
             
             processing_time = (datetime.now() - start_time).total_seconds()
             
-            logger.info(f"✅ SEARCH COMPLETE: found {len(results)} results in {processing_time:.3f}s")
+            logger.info(f"✅ SEARCH COMPLETE: found {len(final_results)} results ({version_matched_count} version-matched) in {processing_time:.3f}s")
             
             return {
-                "results": results,
-                "total_found": len(results),
+                "results": final_results,
+                "total_found": len(final_results),
                 "processing_time": processing_time,
                 "query": query,
                 "enhanced_features_used": False,
@@ -247,7 +265,8 @@ class SearchService:
                     "content_type": content_type_filter, 
                     "complexity": complexity_filter
                 },
-                "similarity_threshold": similarity_threshold
+                "similarity_threshold": similarity_threshold,
+                "version_matched_chunks": version_matched_count  # New stat
             }
             
         except Exception as e:

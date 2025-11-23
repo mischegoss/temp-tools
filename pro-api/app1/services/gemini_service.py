@@ -1,6 +1,7 @@
 # COMPLETE FIXED VERSION - app/services/gemini_service.py
 # CRITICAL FIX: Actually uses context_chunks in prompts for proper source attribution
 # Fixed integration with search results
+# ✅ NEW: Added expand_query() method for Fix 1
 
 import os
 import time
@@ -75,11 +76,78 @@ class GeminiService:
             }
         }
 
+    # ========================================
+    # ✅ NEW METHOD - FIX 1: QUERY EXPANSION
+    # ========================================
+    def expand_query(self, user_query: str) -> str:
+        """
+        Expand a user query into related terms for better semantic search.
+        
+        Args:
+            user_query: Original user query (e.g., "What is a filter?")
+            
+        Returns:
+            Expanded query string with related terms (e.g., "filter, filters, filtering, filter condition...")
+        """
+        if not self.model:
+            logger.warning("⚠️ Gemini not available for query expansion, using original query")
+            return user_query
+        
+        try:
+            expansion_prompt = f"""You are a Pro documentation search assistant. Expand this search query into related terms and variations.
+
+Original query: "{user_query}"
+
+Instructions:
+1. Include the original term(s)
+2. Add plural/singular variations
+3. Add related technical terms used in Pro documentation
+4. Add common synonyms and alternative phrasings
+5. Keep it focused on Pro terminology
+6. Return ONLY a comma-separated list of terms, no explanations
+
+Example:
+Query: "What is a filter?"
+Expansion: "filter, filters, filtering, filter condition, filter criteria, filter rule, data filtering, apply filter, filter configuration"
+
+Now expand this query: "{user_query}"
+
+Return only the comma-separated terms:"""
+
+            response = self.model.generate_content(
+                expansion_prompt,
+                generation_config={
+                    "temperature": 0.3,  # Lower temperature for consistent expansions
+                    "max_output_tokens": 150,  # Keep it concise
+                }
+            )
+            
+            if response and response.text:
+                expanded_query = response.text.strip()
+                logger.info(f"🔍 Expanded query: '{user_query}' → '{expanded_query}'")
+                return expanded_query
+            else:
+                logger.warning("⚠️ Query expansion returned empty, using original query")
+                return user_query
+                
+        except Exception as e:
+            logger.warning(f"⚠️ Query expansion failed: {e}, using original query")
+            return user_query
+
     def generate_response(self, user_message: str = None, prompt: str = None, 
                           context_chunks: List = None, version: str = "8-0", 
-                          conversation_history: List = None, **kwargs) -> str:
+                          conversation_history: List = None, block_urls: bool = False, **kwargs) -> str:
         """
         CRITICAL FIX: Actually uses context_chunks in prompt generation
+        
+        Args:
+            user_message: User's question
+            prompt: Direct prompt (overrides user_message if provided)
+            context_chunks: Search result chunks for context
+            version: Pro version
+            conversation_history: Previous messages
+            block_urls: If True, instruct Gemini to not include any URLs (for zero-context responses)
+            **kwargs: Additional arguments
         """
         try:
             if not self.model:
@@ -95,7 +163,8 @@ class GeminiService:
                     user_message, 
                     context_chunks or [], 
                     version, 
-                    conversation_history or []
+                    conversation_history or [],
+                    block_urls=block_urls  # ✅ NEW: Pass block_urls flag
                 )
             else:
                 raise ValueError("Either 'prompt' or 'user_message' must be provided")
@@ -126,13 +195,31 @@ class GeminiService:
             logger.error(f"❌ Pro Gemini response generation failed: {e}")
             return self._get_pro_fallback_response(f"Error: {str(e)}")
 
-    def _build_pro_prompt_with_context(self, user_message: str, context_chunks: List, version: str = "8-0", conversation_history: List = None) -> str:
+    def _build_pro_prompt_with_context(self, user_message: str, context_chunks: List, version: str = "8-0", 
+                                      conversation_history: List = None, block_urls: bool = False) -> str:
         """
         CRITICAL FIX: Build Pro-specific prompt that actually uses context chunks
+        
+        Args:
+            user_message: User's question
+            context_chunks: Search result chunks
+            version: Pro version
+            conversation_history: Previous messages
+            block_urls: If True, instruct to not include URLs (for zero-context general guidance)
         """
         
         # Build version context
         version_display = version.replace('-', '.')
+        
+        # ✅ NEW: Add URL blocking instruction if requested (Fix 2)
+        url_instruction = ""
+        if block_urls:
+            url_instruction = """
+CRITICAL INSTRUCTION: This is general guidance only, not from official documentation.
+DO NOT include any URLs or documentation links in your response.
+DO NOT reference specific documentation pages.
+Clearly state this is general guidance at the start of your response.
+"""
         
         # Process context chunks into useful context
         context_section = ""
@@ -225,6 +312,8 @@ class GeminiService:
 
 VERSION CONTEXT: You are providing guidance for {PRODUCT_DISPLAY_NAME} version {version_display}.
 
+{url_instruction}
+
 {history_section}{context_section}USER QUESTION: {user_message}
 
 INSTRUCTIONS:
@@ -236,7 +325,7 @@ INSTRUCTIONS:
 
 Please provide a helpful, accurate response about {PRODUCT_DISPLAY_NAME}:"""
 
-        logger.info(f"📝 Built prompt with context: {len(context_chunks)} chunks, {len(conversation_history or [])} history items")
+        logger.info(f"📝 Built prompt with context: {len(context_chunks)} chunks, {len(conversation_history or [])} history items, block_urls={block_urls}")
         return prompt
 
     def _detect_documentation_type(self, message: str) -> str:

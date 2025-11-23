@@ -96,12 +96,13 @@ class DocumentProcessor:
         CRITICAL: This is what makes uploaded chunks available for search
         FIXED: Now includes page titles and headers in embeddings for better search results
         FIXED: Properly handles version-specific persistence to prevent data loss
+        ✅ NEW FIX: Improved version detection from chunks
         """
         if not self.model_loaded:
             raise RuntimeError("Model not initialized. Call initialize() first.")
         
         try:
-            # ✅ NEW: Detect version from uploaded chunks
+            # ✅ NEW: Detect version from uploaded chunks with improved detection
             upload_version = self._detect_version_from_chunks(processed_chunks)
             logger.info(f"📦 Processing upload for Pro version: {upload_version}")
             
@@ -153,7 +154,8 @@ class DocumentProcessor:
                 other_version_indices = []
                 
                 for idx, chunk in enumerate(self.chunk_data):
-                    chunk_version = chunk.get("metadata", {}).get("version", "")
+                    # ✅ IMPROVED: Use the same detection logic for existing chunks
+                    chunk_version = self._get_chunk_version(chunk)
                     if chunk_version != upload_version:
                         other_version_chunks.append(chunk)
                         other_version_indices.append(idx)
@@ -201,9 +203,64 @@ class DocumentProcessor:
     # NEW: VERSION-AWARE GCS PERSISTENCE METHODS
     # ========================================
     
+    def _clean_version_string(self, version: str) -> str:
+        """
+        Clean version string to normalized format (8-0, 7-9, 7-8)
+        
+        Handles formats like:
+        - "production-8-0-only" -> "8-0"
+        - "production-7-9-only" -> "7-9"
+        - "8-0" -> "8-0"
+        - "8.0" -> "8-0"
+        """
+        if not version:
+            return None
+        
+        # Remove common prefixes and suffixes
+        cleaned = version.replace('production-', '').replace('-only', '').strip()
+        
+        # Convert dots to dashes
+        cleaned = cleaned.replace('.', '-')
+        
+        # Validate format
+        if cleaned in ['8-0', '7-9', '7-8']:
+            return cleaned
+        
+        return None
+    
+    def _get_chunk_version(self, chunk: Dict[str, Any]) -> str:
+        """
+        Extract and clean version from a single chunk
+        
+        Args:
+            chunk: Chunk dictionary
+            
+        Returns:
+            Cleaned version string (e.g., "8-0", "7-9", "7-8")
+        """
+        metadata = chunk.get('metadata', {})
+        
+        # Try multiple version fields in order of preference
+        version_candidates = [
+            metadata.get('version'),
+            metadata.get('pro_version'),
+            metadata.get('version_full'),
+            metadata.get('version_dotted'),
+        ]
+        
+        # Try to clean each candidate
+        for candidate in version_candidates:
+            if candidate:
+                cleaned = self._clean_version_string(str(candidate))
+                if cleaned:
+                    return cleaned
+        
+        # Default to 8-0 if nothing found
+        return "8-0"
+    
     def _detect_version_from_chunks(self, chunks: List[Dict[str, Any]]) -> str:
         """
-        Detect Pro version from uploaded chunks
+        Detect Pro version from uploaded chunks with improved cleaning
         
         Args:
             chunks: List of processed chunks
@@ -211,19 +268,23 @@ class DocumentProcessor:
         Returns:
             Version string (e.g., "8-0", "7-9", "7-8")
         """
-        # Try to extract version from chunk metadata
-        for chunk in chunks[:5]:  # Check first 5 chunks
-            metadata = chunk.get('metadata', {})
-            
-            # Check various version fields
-            version = (
-                metadata.get('version') or 
-                metadata.get('pro_version') or
-                metadata.get('version_full', '').replace('production-', '').replace('-only', '')
-            )
-            
-            if version and version in ["8-0", "7-9", "7-8"]:
-                return version
+        if not chunks:
+            logger.warning("⚠️ No chunks provided for version detection, defaulting to 8-0")
+            return "8-0"
+        
+        # Check first 10 chunks to find version
+        check_count = min(10, len(chunks))
+        version_counts = {}
+        
+        for chunk in chunks[:check_count]:
+            version = self._get_chunk_version(chunk)
+            version_counts[version] = version_counts.get(version, 0) + 1
+        
+        # Return the most common version
+        if version_counts:
+            detected_version = max(version_counts, key=version_counts.get)
+            logger.info(f"🔍 Detected version '{detected_version}' from {check_count} chunks: {version_counts}")
+            return detected_version
         
         # Default to current version if not detected
         logger.warning("⚠️ Could not detect version from chunks, defaulting to 8-0")
