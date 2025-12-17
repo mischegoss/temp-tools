@@ -1,4 +1,3 @@
-
 import os
 import time
 import logging
@@ -9,19 +8,12 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 from pathlib import Path
 
-# Import Express-specific services
+# Import Pro-specific services
 from app.services.document_processor import DocumentProcessor
 from app.services.search_service import SearchService
 from app.services.gemini_service import GeminiService
-from app.services.chat_logger import ChatLogger
 from app.routers.chat import router as chat_router
-from app.config import (
-    PRODUCT_DISPLAY_NAME, 
-    EXPRESS_DEFAULT_VERSION, 
-    EXPRESS_SUPPORTED_VERSIONS,
-    USE_GCS_STORAGE,
-    GCS_BUCKET_NAME
-)
+from app.config import PRODUCT_DISPLAY_NAME, PRO_DEFAULT_VERSION
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,15 +24,15 @@ sentence_model = None
 startup_time = None
 models_loaded = False
 
-# Global service instances - SINGLE SOURCE OF TRUTH for Express
+# Global service instances - SINGLE SOURCE OF TRUTH for Pro
 doc_processor = None
 search_service = None
 gemini_service = None
-chat_logger = None
 services_initialized = False
 
 def detect_environment():
     """Detect if running in Docker or local development"""
+    # Check for Docker-specific indicators
     is_docker = (
         os.path.exists('/.dockerenv') or 
         os.getenv('K_SERVICE') is not None or  # Cloud Run
@@ -51,14 +43,14 @@ def detect_environment():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup and shutdown events using lifespan context manager for Express API"""
+    """Startup and shutdown events using lifespan context manager for Pro API"""
     global sentence_model, startup_time, models_loaded
-    global doc_processor, search_service, gemini_service, chat_logger, services_initialized
+    global doc_processor, search_service, gemini_service, services_initialized
     
     # Startup
     startup_time = time.time()
     environment = detect_environment()
-    logger.info(f"Starting up Express Chatbot API in {environment} environment...")
+    logger.info(f"Starting up Pro Chatbot API in {environment} environment...")
     
     try:
         # Environment-specific setup
@@ -103,21 +95,21 @@ async def lifespan(app: FastAPI):
         # Test the model
         model_load_start = time.time()
         logger.info("Testing model functionality...")
-        test_encoding = sentence_model.encode("test sentence for Express API")
+        test_encoding = sentence_model.encode("test sentence for Pro API")
         model_load_time = time.time() - model_load_start
         logger.info(f"✅ Model test successful. Embedding dimension: {len(test_encoding)}")
         logger.info(f"Model loaded/tested in {model_load_time:.2f} seconds")
         
         # Pre-warm the model for faster first response
-        logger.info("Pre-warming model for faster Express responses...")
+        logger.info("Pre-warming model for faster Pro responses...")
         warmup_start = time.time()
         sentence_model.encode([
-            "how to create Express workflow",
-            "what is Resolve Express", 
-            "troubleshoot Express issue",
-            "configure Express settings",
-            "Express workflow activities",
-            "Express monitoring and alerts"
+            "how to create Pro workflow",
+            "what is Resolve Pro", 
+            "troubleshoot Pro issue",
+            "configure Pro settings",
+            "Pro workflow activities",
+            "Pro monitoring and alerts"
         ])
         warmup_time = time.time() - warmup_start
         logger.info(f"Model pre-warmed in {warmup_time:.2f} seconds")
@@ -125,15 +117,15 @@ async def lifespan(app: FastAPI):
         models_loaded = True
         
         # Initialize business services with shared model
-        logger.info("Initializing Express business services with shared model instance...")
+        logger.info("Initializing Pro business services with shared model instance...")
         service_start = time.time()
         
         # Initialize document processor with shared model (this loads from GCS)
         doc_processor = DocumentProcessor()
         doc_processor.initialize(shared_model=sentence_model)
-        logger.info("✅ Express document processor initialized (using shared model)")
+        logger.info("✅ Pro document processor initialized (using shared model)")
         
-        # Log GCS data load status
+        # NEW: Log GCS data load status
         doc_status = doc_processor.get_status()
         if doc_status.get('chunks_count', 0) > 0:
             logger.info(f"📦 Loaded {doc_status['chunks_count']} chunks from GCS persistence")
@@ -144,55 +136,44 @@ async def lifespan(app: FastAPI):
         # Initialize search service
         search_service = SearchService(doc_processor)
         search_service.initialize()
-        logger.info("✅ Express search service initialized")
+        logger.info("✅ Pro search service initialized")
         
-        # Log search service data sync status
+        # NEW: Log search service data sync status
         search_stats = search_service.get_search_stats()
         if search_stats.get('total_chunks', 0) > 0:
             logger.info(f"🔍 Search service ready with {search_stats['total_chunks']} searchable chunks")
         else:
             logger.info("🔍 Search service ready (waiting for data upload)")
         
-        # Initialize Gemini service with Express configuration
-        gemini_service = GeminiService(product_name="express")
-        logger.info("✅ Express Gemini service initialized")
+        # Initialize Gemini service with Pro configuration
+        gemini_service = GeminiService(product_name="pro")
+        logger.info("✅ Pro Gemini service initialized")
         
-        # CRITICAL: Inject search service to avoid circular import
+        # CRITICAL FIX: Inject search service to avoid circular import
         gemini_service.set_search_service(search_service)
         logger.info("✅ Search service injected into Gemini service")
-        
-        # Initialize chat logger
-        chat_logger = ChatLogger(use_gcs=USE_GCS_STORAGE, bucket_name=GCS_BUCKET_NAME)
-        logger.info("✅ Express chat logger initialized")
         
         service_init_time = time.time() - service_start
         services_initialized = True
         
         startup_duration = time.time() - startup_time
         
-        logger.info("🎉 Express Chatbot API startup completed!")
+        logger.info("🎉 Pro Chatbot API startup completed!")
         logger.info(f"   - Environment: {environment}")
         logger.info(f"   - Service initialization: {service_init_time:.2f}s")
-        logger.info("💡 Memory optimized: Single shared sentence transformer model instance for Express")
+        logger.info("💡 Memory optimized: Single shared sentence transformer model instance for Pro")
         logger.info(f"   - Model load time: {model_load_time:.2f}s")
         logger.info(f"   - Warmup time: {warmup_time:.2f}s")
         logger.info(f"   - Total startup: {startup_duration:.2f}s")
         
-        # GCS persistence summary
+        # NEW: GCS persistence summary
         if doc_status.get('gcs_enabled'):
             logger.info("🗄️  GCS persistence: ENABLED")
         else:
             logger.info("📁 GCS persistence: DISABLED (local/development mode)")
         
-        # Chat logging status
-        chat_log_status = chat_logger.get_status()
-        if chat_log_status.get('gcs_enabled'):
-            logger.info(f"📊 Chat logging: GCS enabled (bucket: {chat_log_status.get('bucket_name')})")
-        else:
-            logger.info(f"📊 Chat logging: Local file mode ({chat_log_status.get('local_file')})")
-        
     except Exception as e:
-        logger.error(f"Failed to initialize Express services during startup: {e}")
+        logger.error(f"Failed to initialize Pro services during startup: {e}")
         import traceback
         traceback.print_exc()
         models_loaded = False
@@ -202,12 +183,12 @@ async def lifespan(app: FastAPI):
     yield  # Application runs here
     
     # Shutdown
-    logger.info("Shutting down Express Chatbot API...")
+    logger.info("Shutting down Pro Chatbot API...")
 
 # Create FastAPI app with lifespan events
 app = FastAPI(
-    title="Express Chatbot API",
-    description="AI-powered chatbot for Resolve Express documentation with Gemini 2.5 Flash",
+    title="Pro Chatbot API",
+    description="AI-powered chatbot for Resolve Pro documentation with Gemini 2.5 Flash",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -221,19 +202,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include Express chat router
+# Include Pro chat router
 app.include_router(chat_router)
 
 @app.get("/")
 async def root():
-    """Root endpoint with Express service information"""
+    """Root endpoint with Pro service information"""
     return {
-        "message": "Express Chatbot API - Optimized for Fast Cold Starts",
+        "message": "Pro Chatbot API - Optimized for Fast Cold Starts",
         "product": PRODUCT_DISPLAY_NAME,
         "version": "1.0.0",
         "status": "running" if (models_loaded and services_initialized) else "starting",
         "ready_for_chat": models_loaded and services_initialized,
-        "default_version": EXPRESS_DEFAULT_VERSION,
+        "default_version": PRO_DEFAULT_VERSION,
         "documentation": {
             "health_check": "/health",
             "service_warmup": "/warmup",
@@ -247,20 +228,18 @@ async def root():
             "No duplicate model loading",
             "Pre-warmed model for faster first response",
             "GCS persistence for documentation data",
-            "Chat interaction logging enabled",
             "Optimized for both local development and Cloud Run deployment"
         ]
     }
 
 @app.get("/health")
 async def health_check():
-    """Basic health check endpoint for Express API"""
+    """Basic health check endpoint for Pro API"""
     doc_status = doc_processor.get_status() if doc_processor else {"gcs_enabled": False}
-    chat_log_status = chat_logger.get_status() if chat_logger else {"initialized": False}
     
     return {
         "status": "healthy",
-        "product": "express",
+        "product": "pro",
         "models_loaded": models_loaded,
         "services_initialized": services_initialized,
         "uptime_seconds": time.time() - startup_time if startup_time else 0,
@@ -268,25 +247,24 @@ async def health_check():
         "memory_optimized": True,
         "gcs_persistence": doc_status.get("gcs_enabled", False),
         "data_loaded": doc_status.get("chunks_count", 0) > 0,
-        "chat_logging_enabled": chat_log_status.get("initialized", False),
-        "default_version": EXPRESS_DEFAULT_VERSION,
+        "default_version": PRO_DEFAULT_VERSION,
         "environment": detect_environment()
     }
 
 @app.get("/warmup")
 async def warmup():
     """
-    Warmup endpoint that forces model initialization and tests Express functionality.
+    Warmup endpoint that forces model initialization and tests Pro functionality.
     Useful for warming up the service after deployment.
     """
     global models_loaded, services_initialized
     
     if not models_loaded or not services_initialized:
-        raise HTTPException(status_code=503, detail="Express services not ready")
+        raise HTTPException(status_code=503, detail="Pro services not ready")
     
     try:
-        # Test Express-specific embedding
-        test_query = "How do I configure Express workflows?"
+        # Test Pro-specific embedding
+        test_query = "How do I configure Pro workflows?"
         test_embedding = sentence_model.encode(test_query)
         
         # Test Gemini service if available
@@ -297,7 +275,7 @@ async def warmup():
             "model_test": "passed",
             "embedding_dimension": len(test_embedding),
             "gemini_ready": gemini_status.get("ready", False),
-            "express_optimized": True,
+            "pro_optimized": True,
             "test_query": test_query
         }
     except Exception as e:
@@ -307,16 +285,15 @@ async def warmup():
 @app.get("/status")
 async def detailed_status():
     """
-    Detailed status endpoint showing model state and service performance metrics for Express
+    Detailed status endpoint showing model state and service performance metrics for Pro
     """
     # Get detailed service status if available
     doc_status = doc_processor.get_status() if doc_processor else {"ready": False}
     search_stats = search_service.get_search_stats() if search_service else {"ready": False}
     gemini_status = gemini_service.get_status() if gemini_service else {"ready": False}
-    chat_log_status = chat_logger.get_status() if chat_logger else {"initialized": False}
     
     return {
-        "service": "Express Chatbot API",
+        "service": "Pro Chatbot API",
         "status": "running" if (models_loaded and services_initialized) else "starting",
         "environment": detect_environment(),
         "models": {
@@ -331,8 +308,7 @@ async def detailed_status():
         "services": {
             "document_processor": doc_status,
             "search_service": search_stats,
-            "gemini_service": gemini_status,
-            "chat_logger": chat_log_status
+            "gemini_service": gemini_status
         },
         "performance": {
             "startup_time_seconds": time.time() - startup_time if startup_time else 0,
@@ -352,14 +328,9 @@ async def detailed_status():
             "embeddings_loaded": doc_status.get("embeddings_count", 0),
             "data_persisted": doc_status.get("gcs_enabled", False) and doc_status.get("chunks_count", 0) > 0
         },
-        "chat_logging": {
-            "enabled": chat_log_status.get("initialized", False),
-            "gcs_enabled": chat_log_status.get("gcs_enabled", False),
-            "storage_location": chat_log_status.get("bucket_name") or chat_log_status.get("local_file")
-        },
-        "express_specific": {
-            "default_version": EXPRESS_DEFAULT_VERSION,
-            "supported_versions": EXPRESS_SUPPORTED_VERSIONS,
+        "pro_specific": {
+            "default_version": PRO_DEFAULT_VERSION,
+            "supported_versions": ["7-8", "7-9", "8-0", "general"],
             "version_aware": True,
             "product_name": PRODUCT_DISPLAY_NAME
         },
@@ -377,11 +348,11 @@ async def detailed_status():
 # Error handlers
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
-    logger.error(f"Unhandled exception in Express API: {exc}")
+    logger.error(f"Unhandled exception in Pro API: {exc}")
     return {
         "status": "error",
         "message": "Internal server error",
-        "product": "express",
+        "product": "pro",
         "models_loaded": models_loaded,
         "services_initialized": services_initialized
     }

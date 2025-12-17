@@ -1,6 +1,11 @@
-# express-api/app/routers/chat.py
-# Updated for Express with proper version handling and chat logging
-# FIXED: Removed content_type_filter from chat endpoint to prevent over-filtering
+# CORRECTED VERSION - pro-api/app/routers/chat.py
+# Fixed the "await" issue that was causing HTTP 500 errors
+# ADDED: Missing upload-documentation endpoint with CRITICAL INTEGRATION FIX
+# ✅ NEW FIX: Proper version detection from _VERSION field (handles "production-8-0-only" etc.)
+# ✅ FIX 1: Query expansion before search
+# ✅ FIX 2: Zero results handling with no hallucinations
+# ✅ FIX 3: Unsupported version warning
+# ✅ FIX 4: Removed non-existent ENABLE_QUERY_EXPANSION import
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from typing import Optional, Tuple, Dict, Any
@@ -15,24 +20,22 @@ from app.models.metadata import StatusResponse, ProcessingStatus
 from app.config import (
     PRODUCT_NAME, 
     PRODUCT_DISPLAY_NAME, 
-    EXPRESS_SUPPORTED_VERSIONS,
-    EXPRESS_DEFAULT_VERSION,
-    normalize_express_version,
-    detect_express_documentation_type
+    PRO_SUPPORTED_VERSIONS,
+    normalize_pro_version,
+    detect_pro_documentation_type
 )
-from app.prompts.express_prompts import format_version_display
 
 logger = logging.getLogger(__name__)
 
 # Create router
-router = APIRouter(prefix="/api/v1", tags=["express-chat"])
+router = APIRouter(prefix="/api/v1", tags=["pro-chat"])
 
 def get_services() -> Tuple:
     """
-    Dependency to get initialized Express services from main app.
+    Dependency to get initialized Pro services from main app.
     No initialization - just access pre-initialized services and validate readiness.
     """
-    # Import at runtime to avoid circular import
+    # Import here to avoid circular imports
     import app.main as main_app
     
     # Get services from main app's globals
@@ -45,56 +48,53 @@ def get_services() -> Tuple:
     if not services_initialized or not all([doc_processor, search_service, gemini_service]):
         raise HTTPException(
             status_code=503, 
-            detail="Express services not ready. Please wait for application startup to complete."
+            detail="Pro services not ready. Please wait for application startup to complete."
         )
     
     return doc_processor, search_service, gemini_service
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_with_express_documentation(
+async def chat_with_pro_documentation(
     request: ChatRequest,
     services: Tuple = Depends(get_services)
 ) -> ChatResponse:
     """
-    Chat endpoint specifically for Express documentation with version awareness
+    Chat endpoint specifically for Pro documentation with version awareness
+    ✅ NEW: Query expansion, zero results handling, version warnings
     """
     doc_processor, search_service, gemini_service = services
     
     try:
-        # Validate and normalize Express version
-        effective_version = normalize_express_version(request.version)
-        original_version = request.version  # Track original for warning
+        # Validate and normalize Pro version
+        effective_version = normalize_pro_version(request.version)
+        original_version = request.version  # ✅ FIX 3: Track original for warning
         
-        # Detect documentation type from context (used for logging only now)
-        doc_type = detect_express_documentation_type(request.message)
+        # Detect documentation type from context
+        doc_type = detect_pro_documentation_type(request.message)
         
-        # Get display version for logging
-        version_display = format_version_display(effective_version)
-        
-        logger.info(f"💬 Express chat request: '{request.message[:50]}...' (version: {version_display})")
+        logger.info(f"💬 Pro chat request: '{request.message[:50]}...' (version: {effective_version})")
         
         # ========================================
-        # QUERY EXPANSION
+        # ✅ FIX 1: QUERY EXPANSION
         # ========================================
         expanded_query = gemini_service.expand_query(request.message)
         logger.info(f"🔍 Using query: '{expanded_query[:100]}...'")
         
         search_start = datetime.now()
         
-        # FIXED: Removed content_type_filter to prevent over-filtering
-        # The doc_type detection was too aggressive and filtered out relevant results
+        # Enhanced search with Pro version filtering (using expanded query)
         search_results = search_service.search_similarity(
-            query=expanded_query,
+            query=expanded_query,  # ✅ FIX 1: Use expanded query
             max_results=15,
             similarity_threshold=0.2,
             version_filter=effective_version,
-            content_type_filter=None  # FIXED: Don't filter by content type for chat
+            content_type_filter=doc_type
         )
         
         search_time = (datetime.now() - search_start).total_seconds() * 1000
         
         # ========================================
-        # ZERO RESULTS HANDLING
+        # ✅ FIX 2: ZERO RESULTS HANDLING
         # ========================================
         results_list = search_results.get("results", [])
         
@@ -109,31 +109,13 @@ async def chat_with_express_documentation(
                 context_chunks=[],  # No context from docs
                 version=effective_version,
                 conversation_history=request.conversation_history or [],
-                block_urls=True  # Prevent fake documentation URLs
+                block_urls=True  # ✅ Prevent fake documentation URLs
             )
             
             chat_time = (datetime.now() - chat_start).total_seconds() * 1000
             
             # Prepend disclaimer to response
-            response_with_disclaimer = f"**No exact matches found in Express {version_display} documentation. This is a general response:**\n\n{chat_response}"
-            
-            # NEW: Log the interaction
-            import app.main as main_app  # Import at runtime to avoid circular import
-            if main_app.chat_logger:
-                main_app.chat_logger.log_interaction(
-                    prompt=request.message,
-                    response=response_with_disclaimer,
-                    metadata={
-                        "version": effective_version,
-                        "processing_time_ms": chat_time + search_time,
-                        "conversation_id": request.conversation_id,
-                        "chunks_used": 0,
-                        "search_time_ms": search_time,
-                        "chat_time_ms": chat_time,
-                        "zero_results": True,
-                        "model_used": "gemini-2.5-flash-general"
-                    }
-                )
+            response_with_disclaimer = f"**No exact matches found in Pro {effective_version.replace('-', '.')} documentation. This is a general response:**\n\n{chat_response}"
             
             return ChatResponse(
                 message=response_with_disclaimer,
@@ -142,7 +124,7 @@ async def chat_with_express_documentation(
                 model_used="gemini-2.5-flash-general",
                 enhanced_features_used=False,
                 relationship_enhanced_chunks=0,
-                version_context=f"Express {version_display} (general)",
+                version_context=f"Pro {effective_version.replace('-', '.')} (general)",
                 conversation_id=request.conversation_id
             )
         
@@ -165,20 +147,14 @@ async def chat_with_express_documentation(
         response_text = chat_response
         
         # ========================================
-        # UNSUPPORTED VERSION WARNING
+        # ✅ FIX 3: UNSUPPORTED VERSION WARNING
         # ========================================
-        # Check if original version was valid
-        valid_express_versions = [
-            "on-premise-2-5", "on-premise-2-4", "on-premise-2-1",
-            "On-Premise 2.5", "On-Premise 2.4", "On-Premise 2.1",
-            "2.5", "2.4", "2.1", "2-5", "2-4", "2-1"
-        ]
-        if original_version and original_version not in valid_express_versions and original_version not in EXPRESS_SUPPORTED_VERSIONS:
+        if original_version and original_version not in ["8-0", "8.0", "7-9", "7.9", "7-8", "7.8"]:
             # User requested an unsupported version
-            response_text += f"\n\n*Note: This response is from Express On-Premise 2.5 (most recent version) as Express {original_version} documentation is not available.*"
-        elif effective_version != EXPRESS_DEFAULT_VERSION:
+            response_text += f"\n\n*Note: This response is from Pro 8.0 (most recent version) as Pro {original_version} documentation is not available.*"
+        elif effective_version != "8-0":
             # Add version-specific context for older versions
-            response_text += f"\n\n*Note: This response is specific to Express {version_display}. Some features may differ in other versions.*"
+            response_text += f"\n\n*Note: This response is specific to Pro {effective_version.replace('-', '.')}. Some features may differ in other versions.*"
         
         # Prepare source documents
         source_docs = []
@@ -210,58 +186,37 @@ async def chat_with_express_documentation(
             model_used="gemini-2.5-flash",
             enhanced_features_used=True,
             relationship_enhanced_chunks=len(results_list),
-            version_context=f"Express {version_display}",
+            version_context=f"Pro {effective_version.replace('-', '.')}",
             conversation_id=request.conversation_id
         )
         
-        # NEW: Log the interaction
-        import app.main as main_app  # Import at runtime to avoid circular import
-        if main_app.chat_logger:
-            main_app.chat_logger.log_interaction(
-                prompt=request.message,
-                response=response_text,
-                metadata={
-                    "version": effective_version,
-                    "processing_time_ms": chat_time + search_time,
-                    "conversation_id": request.conversation_id,
-                    "chunks_used": len(results_list),
-                    "search_time_ms": search_time,
-                    "chat_time_ms": chat_time,
-                    "model_used": "gemini-2.5-flash",
-                    "top_similarity_score": results_list[0].get("similarity_score", 0.0) if results_list else 0.0,
-                    "enhanced_features_used": True
-                }
-            )
-        
-        logger.info(f"✅ Express chat response generated in {chat_time + search_time:.0f}ms")
+        logger.info(f"✅ Pro chat response generated in {chat_time + search_time:.0f}ms")
         return final_response
         
     except Exception as e:
-        logger.error(f"❌ Express chat error: {str(e)}")
+        logger.error(f"❌ Pro chat error: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Error generating Express response: {str(e)}"
+            detail=f"Error generating Pro response: {str(e)}"
         )
 
 @router.post("/search", response_model=SearchResponse)
-async def search_express_documentation(
+async def search_pro_documentation(
     request: SearchRequest,
     services: Tuple = Depends(get_services)
 ) -> SearchResponse:
     """
-    Search Express documentation with version and content type filtering
+    Search Pro documentation with version and content type filtering
     """
     doc_processor, search_service, gemini_service = services
     
     try:
-        # Validate and normalize Express version
-        effective_version = normalize_express_version(request.version)
-        version_display = format_version_display(effective_version)
+        # Validate and normalize Pro version
+        effective_version = normalize_pro_version(request.version)
         
-        logger.info(f"🔍 Express search: '{request.query}' (version: {version_display})")
+        logger.info(f"🔍 Pro search: '{request.query}' (version: {effective_version})")
         
-        # Perform search with Express-specific parameters
-        # Note: content_type_filter IS used for explicit search requests
+        # Perform search with Pro-specific parameters
         search_results = search_service.search_similarity(
             query=request.query,
             max_results=request.max_results,
@@ -274,14 +229,14 @@ async def search_express_documentation(
         return SearchResponse(**search_results)
         
     except Exception as e:
-        logger.error(f"❌ Express search error: {str(e)}")
+        logger.error(f"❌ Pro search error: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Error searching Express documentation: {str(e)}"
+            detail=f"Error searching Pro documentation: {str(e)}"
         )
 
 # ========================================
-# UPLOAD DOCUMENTATION ENDPOINT
+# UPLOAD DOCUMENTATION ENDPOINT WITH CRITICAL INTEGRATION FIX
 # ========================================
 
 # Upload status tracking
@@ -289,11 +244,13 @@ upload_statuses: Dict[str, Dict] = {}
 
 def detect_upload_format(data: dict) -> str:
     """Detect whether uploaded JSON is comprehensive or legacy format"""
+    # Comprehensive format indicators
     comprehensive_indicators = [
         '_GENERATED', '_PRODUCT', '_TOTAL_CHUNKS', '_ENHANCED_FEATURES', 
         '_STATS', '_VERSION'
     ]
     
+    # Count how many comprehensive indicators are present
     comprehensive_count = sum(1 for indicator in comprehensive_indicators if indicator in data)
     
     if comprehensive_count >= 3:
@@ -305,51 +262,49 @@ def detect_upload_format(data: dict) -> str:
 
 def clean_version_string(version: str) -> str:
     """
-    Clean version string to normalized format for Express
+    Clean version string to normalized format (8-0, 7-9, 7-8)
     
     Handles formats like:
-    - "production-on-premise-2-5-only" -> "on-premise-2-5"
-    - "on-premise-2-5" -> "on-premise-2-5"
-    - "On-Premise 2.5" -> "on-premise-2-5"
-    - "2.5" -> "on-premise-2-5"
+    - "production-8-0-only" -> "8-0"
+    - "production-7-9-only" -> "7-9"
+    - "8-0" -> "8-0"
+    - "8.0" -> "8-0"
     """
     if not version:
-        return EXPRESS_DEFAULT_VERSION
+        return "8-0"
     
     # Remove common prefixes and suffixes
     cleaned = version.replace('production-', '').replace('-only', '').strip()
     
-    # Handle display format "On-Premise 2.5" -> "on-premise-2-5"
-    cleaned = cleaned.lower().replace(' ', '-').replace('.', '-')
-    
-    # Handle shorthand versions like "2-5" -> "on-premise-2-5"
-    if cleaned in ['2-5', '2-4', '2-1']:
-        cleaned = f"on-premise-{cleaned}"
+    # Convert dots to dashes
+    cleaned = cleaned.replace('.', '-')
     
     # Validate format
-    if cleaned in ['on-premise-2-5', 'on-premise-2-4', 'on-premise-2-1']:
+    if cleaned in ['8-0', '7-9', '7-8']:
         return cleaned
     
-    # Default if invalid
-    logger.warning(f"⚠️ Could not parse version '{version}', defaulting to {EXPRESS_DEFAULT_VERSION}")
-    return EXPRESS_DEFAULT_VERSION
+    # Default to 8-0 if invalid
+    logger.warning(f"⚠️ Could not parse version '{version}', defaulting to 8-0")
+    return "8-0"
 
 def process_comprehensive_json_simple(data: dict, source: str) -> dict:
     """
-    Process comprehensive JSON format for Express documentation upload
+    Process comprehensive JSON format for Pro documentation upload
+    FIXED: Now returns actual processed chunks for integration
+    ✅ NEW FIX: Properly cleans version string from _VERSION field
     """
     start_time = datetime.now()
     
     try:
         # Extract comprehensive metadata
-        express_product = data.get('_PRODUCT', 'express')
+        pro_product = data.get('_PRODUCT', 'pro')
         
-        # Clean version string from _VERSION field
-        raw_version = data.get('_VERSION', EXPRESS_DEFAULT_VERSION)
-        express_version = clean_version_string(raw_version)
-        version_display = format_version_display(express_version)
+        # ✅ CRITICAL FIX: Clean version string from _VERSION field
+        # _VERSION can be "production-8-0-only", "production-7-9-only", "8-0", etc.
+        raw_version = data.get('_VERSION', '8-0')
+        pro_version = clean_version_string(raw_version)
         
-        logger.info(f"📦 Processing Express comprehensive upload: version '{raw_version}' -> '{express_version}'")
+        logger.info(f"📦 Processing Pro comprehensive upload: version '{raw_version}' -> '{pro_version}'")
         
         total_chunks = data.get('_TOTAL_CHUNKS', 0)
         enhanced_features = data.get('_ENHANCED_FEATURES', [])
@@ -361,18 +316,17 @@ def process_comprehensive_json_simple(data: dict, source: str) -> dict:
         chunks = data.get('chunks', [])
         
         for chunk in chunks:
+            # ✅ CRITICAL FIX: Clean version from chunk metadata too
             chunk_metadata = chunk.get('metadata', {})
-            chunk_version = chunk_metadata.get('version', express_version)
+            chunk_version = chunk_metadata.get('version', pro_version)
             
             # Clean the chunk version if present
             if chunk_version:
                 chunk_version = clean_version_string(chunk_version)
             else:
-                chunk_version = express_version
+                chunk_version = pro_version
             
-            chunk_version_display = format_version_display(chunk_version)
-            
-            # Ensure chunk has all required fields for Express processing
+            # Ensure chunk has all required fields for Pro processing
             processed_chunk = {
                 'id': chunk.get('id', f'chunk-{len(processed_chunks)}'),
                 'content': chunk.get('content', ''),
@@ -382,18 +336,18 @@ def process_comprehensive_json_simple(data: dict, source: str) -> dict:
                 'page_title': chunk.get('page_title', ''),
                 'content_type': chunk.get('content_type', {
                     'type': 'documentation',
-                    'category': 'express'
+                    'category': 'pro'
                 }),
                 'complexity': chunk.get('complexity', 'moderate'),
                 'tokens': chunk.get('tokens', 0),
                 'metadata': {
                     **(chunk_metadata),
-                    'product': 'express',
-                    'version': chunk_version,
+                    'product': 'pro',
+                    'version': chunk_version,  # ✅ Now using cleaned version
                     'upload_timestamp': datetime.now().timestamp(),
-                    'express_version_display': chunk_version_display,
-                    'is_current_version': chunk_version == EXPRESS_DEFAULT_VERSION,
-                    'version_family': 'express',
+                    'pro_version_display': chunk_version.replace('-', '.'),
+                    'is_current_version': chunk_version == '8-0',
+                    'version_family': 'pro',
                     'source': source
                 }
             }
@@ -402,52 +356,52 @@ def process_comprehensive_json_simple(data: dict, source: str) -> dict:
         
         processing_time = (datetime.now() - start_time).total_seconds()
         
-        logger.info(f"✅ Processed {len(processed_chunks)} chunks for version {version_display}")
+        logger.info(f"✅ Processed {len(processed_chunks)} chunks for version {pro_version}")
         
         return {
             "success": True,
-            "message": f"Successfully processed Express comprehensive JSON with {len(processed_chunks)} chunks",
+            "message": f"Successfully processed Pro comprehensive JSON with {len(processed_chunks)} chunks",
             "processed_chunks": len(processed_chunks),
             "processing_time": processing_time,
             "upload_type": "comprehensive",
-            "express_version": express_version,
+            "pro_version": pro_version,  # ✅ Return cleaned version
             "enhanced_features": enhanced_features,
-            "processed_chunks_data": processed_chunks,
+            "processed_chunks_data": processed_chunks,  # ✅ CRITICAL FIX: Return actual chunks
             "documentation_stats": {
                 "generation_timestamp": data.get('_GENERATED'),
-                "product": express_product,
-                "version": express_version,
-                "version_display": version_display,
-                "raw_version": raw_version,
+                "product": pro_product,
+                "version": pro_version,
+                "raw_version": raw_version,  # For debugging
                 "total_chunks": total_chunks,
                 "enhanced_features_count": len(enhanced_features),
-                "express_specific_processing": True
+                "pro_specific_processing": True
             }
         }
         
     except Exception as e:
-        logger.error(f"❌ Express comprehensive processing failed: {str(e)}")
+        logger.error(f"❌ Pro comprehensive processing failed: {str(e)}")
         import traceback
         logger.error(traceback.format_exc())
         return {
             "success": False,
-            "message": f"Express comprehensive processing failed: {str(e)}",
+            "message": f"Pro comprehensive processing failed: {str(e)}",
             "processed_chunks": 0,
             "processing_time": (datetime.now() - start_time).total_seconds(),
-            "processed_chunks_data": []
+            "processed_chunks_data": []  # ✅ Return empty list on failure
         }
 
 def process_legacy_json_simple(chunks: list, source: str) -> dict:
     """
-    Process legacy JSON format for Express documentation upload
+    Process legacy JSON format for Pro documentation upload
+    FIXED: Now returns actual processed chunks for integration
     """
     start_time = datetime.now()
     
     try:
         processed_chunks = []
-        default_version_display = format_version_display(EXPRESS_DEFAULT_VERSION)
         
         for chunk in chunks:
+            # Convert legacy format to current format
             processed_chunk = {
                 'id': chunk.get('id', f'legacy-chunk-{len(processed_chunks)}'),
                 'content': chunk.get('content', ''),
@@ -457,18 +411,18 @@ def process_legacy_json_simple(chunks: list, source: str) -> dict:
                 'page_title': chunk.get('page_title', ''),
                 'content_type': {
                     'type': 'documentation',
-                    'category': 'express'
+                    'category': 'pro'
                 },
                 'complexity': 'moderate',
                 'tokens': len(chunk.get('content', '').split()),
                 'metadata': {
                     **(chunk.get('metadata', {})),
-                    'product': 'express',
-                    'version': EXPRESS_DEFAULT_VERSION,
+                    'product': 'pro',
+                    'version': '8-0',  # Default for legacy uploads
                     'upload_timestamp': datetime.now().timestamp(),
-                    'express_version_display': default_version_display,
+                    'pro_version_display': '8.0',
                     'is_current_version': True,
-                    'version_family': 'express',
+                    'version_family': 'pro',
                     'source': source,
                     'legacy_format': True
                 }
@@ -480,38 +434,37 @@ def process_legacy_json_simple(chunks: list, source: str) -> dict:
         
         return {
             "success": True,
-            "message": f"Successfully processed Express legacy JSON with {len(processed_chunks)} chunks",
+            "message": f"Successfully processed Pro legacy JSON with {len(processed_chunks)} chunks",
             "processed_chunks": len(processed_chunks),
             "processing_time": processing_time,
             "upload_type": "legacy",
-            "express_version": EXPRESS_DEFAULT_VERSION,
-            "processed_chunks_data": processed_chunks,
+            "pro_version": "8-0",
+            "processed_chunks_data": processed_chunks,  # ✅ Return actual chunks
             "documentation_stats": {
-                "product": "express",
-                "version": EXPRESS_DEFAULT_VERSION,
-                "version_display": default_version_display,
+                "product": "pro",
+                "version": "8-0",
                 "legacy_format": True,
                 "total_chunks": len(processed_chunks)
             }
         }
         
     except Exception as e:
-        logger.error(f"❌ Express legacy processing failed: {str(e)}")
+        logger.error(f"❌ Pro legacy processing failed: {str(e)}")
         return {
             "success": False,
-            "message": f"Express legacy processing failed: {str(e)}",
+            "message": f"Pro legacy processing failed: {str(e)}",
             "processed_chunks": 0,
             "processing_time": (datetime.now() - start_time).total_seconds(),
-            "processed_chunks_data": []
+            "processed_chunks_data": []  # ✅ Return empty list on failure
         }
 
 @router.post("/upload-documentation", response_model=UploadResponse)
 async def upload_documentation(
     file: UploadFile = File(...),
-    source: str = "express-uploaded-docs",
+    source: str = "pro-uploaded-docs",
     services = Depends(get_services)
 ):
-    """Upload and process Express documentation JSON file"""
+    """Upload and process Pro documentation JSON file - WITH CRITICAL INTEGRATION FIX"""
     try:
         doc_proc, search_svc, gemini_svc = services
         
@@ -532,23 +485,26 @@ async def upload_documentation(
         
         # Detect upload format
         upload_format = detect_upload_format(data)
-        logger.info(f"📦 Express upload detected format: {upload_format}")
+        logger.info(f"📦 Pro upload detected format: {upload_format}")
         
         # Process based on format
         if upload_format == "comprehensive":
+            # Process comprehensive format
             result = process_comprehensive_json_simple(data, source)
             
             if result["success"]:
-                logger.info(f"✅ Express comprehensive processing completed: {result['processed_chunks']} chunks for version {result.get('express_version', 'unknown')}")
+                logger.info(f"✅ Pro comprehensive processing completed: {result['processed_chunks']} chunks for version {result.get('pro_version', 'unknown')}")
                 
+                # ✅ CRITICAL INTEGRATION FIX: Store processed chunks in DocumentProcessor
                 try:
                     processed_chunks = result.get("processed_chunks_data", [])
                     if processed_chunks:
                         update_result = doc_proc.update_with_processed_chunks(processed_chunks)
                         logger.info(f"✅ DocumentProcessor updated: {update_result}")
                         
+                        # ✅ CRITICAL FIX: Sync SearchService with DocumentProcessor
                         sync_result = search_svc.sync_with_document_processor()
-                        logger.info(f"✅ SearchService synced: {sync_result}")
+                        logger.info(f"✅ SearchService synced via sync_with_document_processor: {sync_result}")
                     else:
                         logger.warning("⚠️ No processed chunks data to integrate")
                         
@@ -557,30 +513,34 @@ async def upload_documentation(
                     return UploadResponse(
                         success=False,
                         message=f"Upload processed but integration failed: {str(e)}",
-                        processed_chunks=0,
+                        chunks_processed=0,
                         processing_time=result.get("processing_time", 0.0)
                     )
             
+            # Remove processed_chunks_data before returning (not needed in response)
             result.pop("processed_chunks_data", None)
             return UploadResponse(**result)
                 
         elif upload_format == "legacy":
-            logger.info("📋 Processing Express legacy upload format")
+            # Process legacy format
+            logger.info("📋 Processing Pro legacy upload format")
             
             chunks = data.get('chunks', [])
             result = process_legacy_json_simple(chunks, source)
             
             if result["success"]:
-                logger.info(f"✅ Express legacy processing completed: {result['processed_chunks']} chunks")
+                logger.info(f"✅ Pro legacy processing completed: {result['processed_chunks']} chunks")
                 
+                # ✅ CRITICAL INTEGRATION FIX: Store processed chunks in DocumentProcessor
                 try:
                     processed_chunks = result.get("processed_chunks_data", [])
                     if processed_chunks:
                         update_result = doc_proc.update_with_processed_chunks(processed_chunks)
                         logger.info(f"✅ DocumentProcessor updated: {update_result}")
                         
+                        # ✅ CRITICAL FIX: Sync SearchService with DocumentProcessor
                         sync_result = search_svc.sync_with_document_processor()
-                        logger.info(f"✅ SearchService synced: {sync_result}")
+                        logger.info(f"✅ SearchService synced via sync_with_document_processor: {sync_result}")
                     else:
                         logger.warning("⚠️ No processed chunks data to integrate")
                         
@@ -589,27 +549,28 @@ async def upload_documentation(
                     return UploadResponse(
                         success=False,
                         message=f"Upload processed but integration failed: {str(e)}",
-                        processed_chunks=0,
+                        chunks_processed=0,
                         processing_time=result.get("processing_time", 0.0)
                     )
             
+            # Remove processed_chunks_data before returning (not needed in response)
             result.pop("processed_chunks_data", None)
             return UploadResponse(**result)
         
         else:
-            logger.error(f"❌ Unknown Express upload format: {upload_format}")
-            raise HTTPException(status_code=400, detail=f"Unknown Express upload format: {upload_format}")
+            logger.error(f"❌ Unknown Pro upload format: {upload_format}")
+            raise HTTPException(status_code=400, detail=f"Unknown Pro upload format: {upload_format}")
             
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Express upload failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Express upload failed: {str(e)}")
+        logger.error(f"❌ Pro upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Pro upload failed: {str(e)}")
 
 @router.get("/upload-status/{upload_id}")
 async def get_upload_status(upload_id: str) -> UploadStatus:
     """
-    Get status of an Express documentation upload operation
+    Get status of a Pro documentation upload operation
     """
     if upload_id not in upload_statuses:
         raise HTTPException(status_code=404, detail="Upload not found")
@@ -627,4 +588,3 @@ async def get_upload_status(upload_id: str) -> UploadStatus:
         errors_encountered=status_data.get("errors", 0),
         last_error=status_data.get("last_error")
     )
-

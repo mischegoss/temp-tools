@@ -16,8 +16,8 @@ LAST_PROCESSED_FILE = DATA_DIR / "last_processed.json"
 # ========================================
 # GOOGLE CLOUD STORAGE CONFIGURATION
 # ========================================
-GCS_PROJECT_ID = os.getenv("GCS_PROJECT_ID", "express-chatbot")
-GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "express-chatbot-data")
+GCS_PROJECT_ID = os.getenv("GCS_PROJECT_ID", "gen-lang-client-0962398129")
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "pro-chatbot-data")
 GCS_EMBEDDINGS_PATH = "embeddings"
 GCS_CHUNKS_PATH = "chunks"
 GCS_METADATA_PATH = "metadata"
@@ -41,51 +41,27 @@ MAX_TOKENS_PER_CHUNK = 800
 # API settings
 UPLOAD_MAX_SIZE = 50 * 1024 * 1024  # 50MB
 
-# Express-specific URL settings
+# Pro-specific URL settings
 BASE_DOCUMENTATION_URL = "https://docs.resolve.io"
-PRODUCT_NAME = "express"
-PRODUCT_DISPLAY_NAME = "Resolve Express"
+PRODUCT_NAME = "pro"
+PRODUCT_DISPLAY_NAME = "Resolve Pro"
 
-# Express version configuration
-EXPRESS_SUPPORTED_VERSIONS = [
-    "on-premise-2-5",
-    "on-premise-2-4", 
-    "on-premise-2-1",
-    "general"
-]
-EXPRESS_DEFAULT_VERSION = "on-premise-2-5"
-
-EXPRESS_VERSION_MAPPINGS = {
-    # Display format (matches UI dropdown)
-    "On-Premise 2.5": "on-premise-2-5",
-    "On-Premise 2.4": "on-premise-2-4",
-    "On-Premise 2.1": "on-premise-2-1",
-    
-    # Lowercase variations
-    "on-premise 2.5": "on-premise-2-5",
-    "on-premise 2.4": "on-premise-2-4",
-    "on-premise 2.1": "on-premise-2-1",
-    
-    # Internal format (already normalized)
-    "on-premise-2-5": "on-premise-2-5",
-    "on-premise-2-4": "on-premise-2-4",
-    "on-premise-2-1": "on-premise-2-1",
-    
-    # Shorthand versions
-    "2.5": "on-premise-2-5",
-    "2.4": "on-premise-2-4",
-    "2.1": "on-premise-2-1",
-    "2-5": "on-premise-2-5",
-    "2-4": "on-premise-2-4",
-    "2-1": "on-premise-2-1",
-    
-    # Defaults
-    "general": "on-premise-2-5",
-    "latest": "on-premise-2-5"
+# Pro version configuration
+PRO_SUPPORTED_VERSIONS = ["7-8", "7-9", "8-0", "general"]
+PRO_DEFAULT_VERSION = "8-0"
+PRO_VERSION_MAPPINGS = {
+    "7.8": "7-8",
+    "7.9": "7-9", 
+    "8.0": "8-0",
+    "7-8": "7-8",
+    "7-9": "7-9",
+    "8-0": "8-0",
+    "general": "8-0",
+    "latest": "8-0"
 }
 
-# Express-specific route patterns
-EXPRESS_ROUTE_PATTERNS = ["/express"]
+# Pro-specific route patterns
+PRO_ROUTE_PATTERNS = ["/pro"]
 
 # Logging configuration
 LOGGING_CONFIG = {
@@ -124,45 +100,45 @@ LOGGING_CONFIG = {
 }
 
 def make_absolute_url(relative_url: str) -> str:
-    """Convert relative Express documentation URL to absolute URL"""
+    """Convert relative Pro documentation URL to absolute URL"""
     if relative_url.startswith('http'):
         return relative_url  # Already absolute
     
     # Remove leading slash if present
     clean_path = relative_url.lstrip('/')
     
-    # Ensure Express prefix for relative URLs
-    if not clean_path.startswith('express/'):
-        clean_path = f"express/{clean_path}"
+    # Ensure Pro prefix for relative URLs
+    if not clean_path.startswith('pro/'):
+        clean_path = f"pro/{clean_path}"
     
     return f"{BASE_DOCUMENTATION_URL}/{clean_path}"
 
 def get_version_display_name(version: str) -> str:
-    """Get display name for Express version"""
+    """Get display name for Pro version"""
     version_displays = {
-        "on-premise-2-5": "Express On-Premise 2.5 (Latest)",
-        "on-premise-2-4": "Express On-Premise 2.4",
-        "on-premise-2-1": "Express On-Premise 2.1",
-        "general": "General (Express On-Premise 2.5)"
+        "7-8": "Pro 7.8",
+        "7-9": "Pro 7.9", 
+        "8-0": "Pro 8.0 (Latest)",
+        "general": "General (Pro 8.0)"
     }
-    return version_displays.get(version, f"Express {version}")
+    return version_displays.get(version, f"Pro {version.replace('-', '.')}")
 
-def normalize_express_version(version: str) -> str:
-    """Normalize Express version string to internal format"""
+def normalize_pro_version(version: str) -> str:
+    """Normalize Pro version string to internal format"""
     if not version:
-        return EXPRESS_DEFAULT_VERSION
+        return PRO_DEFAULT_VERSION
     
     # Use mappings to normalize
-    normalized = EXPRESS_VERSION_MAPPINGS.get(version, version)
+    normalized = PRO_VERSION_MAPPINGS.get(version, version)
     
     # Validate against supported versions
-    if normalized not in EXPRESS_SUPPORTED_VERSIONS:
-        return EXPRESS_DEFAULT_VERSION
+    if normalized not in PRO_SUPPORTED_VERSIONS:
+        return PRO_DEFAULT_VERSION
         
     return normalized
 
-def detect_express_documentation_type(pathname: str) -> str:
-    """Detect Express documentation type from path"""
+def detect_pro_documentation_type(pathname: str) -> str:
+    """Detect Pro documentation type from path"""
     lowerPath = pathname.lower()
     
     if 'workflow' in lowerPath or 'activities' in lowerPath:

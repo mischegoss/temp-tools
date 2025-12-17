@@ -8,11 +8,7 @@ from sentence_transformers import SentenceTransformer
 import logging
 from io import BytesIO
 
-from app.config import (
-    EMBEDDING_MODEL, EMBEDDING_DIMENSION, USE_GCS_STORAGE, 
-    GCS_BUCKET_NAME, GCS_EMBEDDINGS_PATH, GCS_CHUNKS_PATH,
-    EXPRESS_DEFAULT_VERSION, EXPRESS_SUPPORTED_VERSIONS
-)
+from app.config import EMBEDDING_MODEL, EMBEDDING_DIMENSION, USE_GCS_STORAGE, GCS_BUCKET_NAME, GCS_EMBEDDINGS_PATH, GCS_CHUNKS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +43,7 @@ class DocumentProcessor:
             shared_model: Pre-loaded SentenceTransformer model to share (optional)
         """
         try:
+            # Use shared model if provided, otherwise load independently
             if shared_model is not None:
                 logger.info("Using shared sentence transformer model from main application")
                 self.model = shared_model
@@ -56,7 +53,7 @@ class DocumentProcessor:
                 self.model = SentenceTransformer(EMBEDDING_MODEL)
                 self.model_loaded = True
             
-            # Load ALL versions from GCS on startup
+            # NEW: Load ALL versions from GCS on startup
             if self.gcs_enabled:
                 self.load_all_versions_from_gcs()
             
@@ -96,65 +93,81 @@ class DocumentProcessor:
     def update_with_processed_chunks(self, processed_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Update DocumentProcessor with processed chunks and generate embeddings
+        CRITICAL: This is what makes uploaded chunks available for search
+        FIXED: Now includes page titles and headers in embeddings for better search results
+        FIXED: Properly handles version-specific persistence to prevent data loss
+        ✅ NEW FIX: Improved version detection from chunks
         """
         if not self.model_loaded:
             raise RuntimeError("Model not initialized. Call initialize() first.")
         
         try:
-            # Detect version from uploaded chunks
+            # ✅ NEW: Detect version from uploaded chunks with improved detection
             upload_version = self._detect_version_from_chunks(processed_chunks)
-            logger.info(f"📦 Processing upload for Express version: {upload_version}")
+            logger.info(f"📦 Processing upload for Pro version: {upload_version}")
             
-            # Include page title, header, and content in embeddings
+            # ✅ FIXED: Include page title, header, and content in embeddings
             chunk_texts = []
             for chunk in processed_chunks:
+                # Build enhanced text for embedding that includes context
                 page_title = chunk.get('page_title', '')
                 header = chunk.get('header', '')
                 content = chunk.get('content', '')
                 
+                # Combine title, header, and content for better semantic matching
                 enhanced_text_parts = []
                 if page_title:
                     enhanced_text_parts.append(page_title)
-                if header and header != page_title:
+                if header and header != page_title:  # Avoid duplication
                     enhanced_text_parts.append(header)
                 if content:
                     enhanced_text_parts.append(content)
                 
+                # Join with separator for clear context boundaries
                 enhanced_text = ' | '.join(enhanced_text_parts)
                 chunk_texts.append(enhanced_text)
             
+            # Generate embeddings for new chunks with enhanced context
             logger.info(f"🔄 Generating embeddings for {len(chunk_texts)} chunks (with titles & headers)...")
             new_embeddings = self.generate_embeddings(chunk_texts)
             
+            # Log embedding quality metrics
             logger.info(f"  - New embeddings shape: {new_embeddings.shape}")
             logger.info(f"  - Embedding dimension: {new_embeddings.shape[1]}")
             logger.info(f"  - Enhanced text sample (first chunk): {chunk_texts[0][:200]}...")
             
-            # REPLACE version data instead of appending
+            # ✅ CRITICAL FIX: REPLACE version data instead of appending
+            # This prevents duplicate data accumulation
             if self.embeddings is None:
+                # First upload ever
                 self.embeddings = new_embeddings
                 self.chunk_data = processed_chunks.copy()
                 logger.info(f"✅ Initial data loaded: {len(self.chunk_data)} chunks")
                 logger.info(f"   - Embeddings shape: {self.embeddings.shape}")
                 logger.info(f"   - Context-enhanced embeddings (titles + headers + content)")
             else:
+                # Remove old data for this version, keep other versions
                 logger.info(f"🔄 Replacing existing {upload_version} data in memory...")
                 
+                # Separate chunks by version
                 other_version_chunks = []
                 other_version_indices = []
                 
                 for idx, chunk in enumerate(self.chunk_data):
+                    # ✅ IMPROVED: Use the same detection logic for existing chunks
                     chunk_version = self._get_chunk_version(chunk)
                     if chunk_version != upload_version:
                         other_version_chunks.append(chunk)
                         other_version_indices.append(idx)
                 
+                # Build new combined data (other versions + new upload)
                 if other_version_indices:
                     other_version_embeddings = self.embeddings[other_version_indices]
                     self.embeddings = np.vstack([other_version_embeddings, new_embeddings])
                     self.chunk_data = other_version_chunks + processed_chunks
                     logger.info(f"✅ Replaced {upload_version} data, kept {len(other_version_chunks)} chunks from other versions")
                 else:
+                    # No other versions, just use new data
                     self.embeddings = new_embeddings
                     self.chunk_data = processed_chunks.copy()
                     logger.info(f"✅ Replaced all data with {upload_version} (no other versions present)")
@@ -162,7 +175,7 @@ class DocumentProcessor:
                 logger.info(f"   - Total chunks now: {len(self.chunk_data)}")
                 logger.info(f"   - Embeddings shape: {self.embeddings.shape}")
             
-            # Save to GCS
+            # ✅ CRITICAL FIX: Save the NEW embeddings for THIS VERSION to version-specific GCS file
             if self.gcs_enabled:
                 gcs_save_success = self.save_version_to_gcs(new_embeddings, processed_chunks, upload_version)
                 if not gcs_save_success:
@@ -187,19 +200,18 @@ class DocumentProcessor:
             raise RuntimeError(f"Failed to update document processor: {e}")
     
     # ========================================
-    # VERSION-AWARE GCS PERSISTENCE METHODS
+    # NEW: VERSION-AWARE GCS PERSISTENCE METHODS
     # ========================================
     
     def _clean_version_string(self, version: str) -> str:
         """
-        Clean version string to normalized format for Express
+        Clean version string to normalized format (8-0, 7-9, 7-8)
         
         Handles formats like:
-        - "production-on-premise-2-5-only" -> "on-premise-2-5"
-        - "On-Premise 2.5" -> "on-premise-2-5"
-        - "on-premise-2-5" -> "on-premise-2-5"
-        - "2.5" -> "on-premise-2-5"
-        - "2-5" -> "on-premise-2-5"
+        - "production-8-0-only" -> "8-0"
+        - "production-7-9-only" -> "7-9"
+        - "8-0" -> "8-0"
+        - "8.0" -> "8-0"
         """
         if not version:
             return None
@@ -207,15 +219,11 @@ class DocumentProcessor:
         # Remove common prefixes and suffixes
         cleaned = version.replace('production-', '').replace('-only', '').strip()
         
-        # Handle display format "On-Premise 2.5" -> "on-premise-2-5"
-        cleaned = cleaned.lower().replace(' ', '-').replace('.', '-')
+        # Convert dots to dashes
+        cleaned = cleaned.replace('.', '-')
         
-        # Handle shorthand versions like "2-5" -> "on-premise-2-5"
-        if cleaned in ['2-5', '2-4', '2-1']:
-            cleaned = f"on-premise-{cleaned}"
-        
-        # Validate format against supported Express versions
-        if cleaned in ['on-premise-2-5', 'on-premise-2-4', 'on-premise-2-1']:
+        # Validate format
+        if cleaned in ['8-0', '7-9', '7-8']:
             return cleaned
         
         return None
@@ -228,14 +236,14 @@ class DocumentProcessor:
             chunk: Chunk dictionary
             
         Returns:
-            Cleaned version string (e.g., "on-premise-2-5")
+            Cleaned version string (e.g., "8-0", "7-9", "7-8")
         """
         metadata = chunk.get('metadata', {})
         
         # Try multiple version fields in order of preference
         version_candidates = [
             metadata.get('version'),
-            metadata.get('express_version'),
+            metadata.get('pro_version'),
             metadata.get('version_full'),
             metadata.get('version_dotted'),
         ]
@@ -247,22 +255,22 @@ class DocumentProcessor:
                 if cleaned:
                     return cleaned
         
-        # Default to Express default version if nothing found
-        return EXPRESS_DEFAULT_VERSION
+        # Default to 8-0 if nothing found
+        return "8-0"
     
     def _detect_version_from_chunks(self, chunks: List[Dict[str, Any]]) -> str:
         """
-        Detect Express version from uploaded chunks
+        Detect Pro version from uploaded chunks with improved cleaning
         
         Args:
             chunks: List of processed chunks
             
         Returns:
-            Version string (e.g., "on-premise-2-5")
+            Version string (e.g., "8-0", "7-9", "7-8")
         """
         if not chunks:
-            logger.warning(f"⚠️ No chunks provided for version detection, defaulting to {EXPRESS_DEFAULT_VERSION}")
-            return EXPRESS_DEFAULT_VERSION
+            logger.warning("⚠️ No chunks provided for version detection, defaulting to 8-0")
+            return "8-0"
         
         # Check first 10 chunks to find version
         check_count = min(10, len(chunks))
@@ -279,12 +287,12 @@ class DocumentProcessor:
             return detected_version
         
         # Default to current version if not detected
-        logger.warning(f"⚠️ Could not detect version from chunks, defaulting to {EXPRESS_DEFAULT_VERSION}")
-        return EXPRESS_DEFAULT_VERSION
+        logger.warning("⚠️ Could not detect version from chunks, defaulting to 8-0")
+        return "8-0"
     
     def load_all_versions_from_gcs(self) -> bool:
         """
-        Load ALL Express versions from GCS on startup and combine them
+        Load ALL Pro versions from GCS on startup and combine them
         
         Returns:
             True if any data loaded successfully, False otherwise
@@ -294,10 +302,10 @@ class DocumentProcessor:
             return False
         
         try:
-            logger.info("📥 Loading all Express versions from GCS...")
+            logger.info("📥 Loading all Pro versions from GCS...")
             
-            # Express versions to load
-            versions_to_load = ["on-premise-2-5", "on-premise-2-4", "on-premise-2-1"]
+            # Try to load each version
+            versions_to_load = ["8-0", "7-9", "7-8"]
             all_embeddings = []
             all_chunks = []
             loaded_versions = []
@@ -309,15 +317,19 @@ class DocumentProcessor:
                 embeddings_blob = self.gcs_bucket.blob(embeddings_blob_name)
                 chunks_blob = self.gcs_bucket.blob(chunks_blob_name)
                 
+                # Check if this version exists
                 if embeddings_blob.exists() and chunks_blob.exists():
                     try:
+                        # Load embeddings
                         embeddings_bytes = embeddings_blob.download_as_bytes()
                         embeddings_buffer = BytesIO(embeddings_bytes)
                         version_embeddings = np.load(embeddings_buffer, allow_pickle=False)
                         
+                        # Load chunks
                         chunks_json = chunks_blob.download_as_text()
                         version_chunks = json.loads(chunks_json)
                         
+                        # Accumulate
                         all_embeddings.append(version_embeddings)
                         all_chunks.extend(version_chunks)
                         loaded_versions.append(version)
@@ -329,6 +341,7 @@ class DocumentProcessor:
                 else:
                     logger.info(f"  📂 No data found for version {version}")
             
+            # Combine all loaded versions
             if all_embeddings:
                 self.embeddings = np.vstack(all_embeddings)
                 self.chunk_data = all_chunks
@@ -342,18 +355,19 @@ class DocumentProcessor:
                 
         except Exception as e:
             logger.error(f"❌ Error loading versions from GCS: {e}")
+            # Don't crash - start with empty data
             self.embeddings = None
             self.chunk_data = []
             return False
     
     def save_version_to_gcs(self, version_embeddings: np.ndarray, version_chunks: List[Dict], version: str) -> bool:
         """
-        Save a SPECIFIC Express version to its own GCS files
+        Save a SPECIFIC Pro version to its own GCS files
         
         Args:
             version_embeddings: Embeddings for this version only
             version_chunks: Chunks for this version only
-            version: Express version (e.g., "on-premise-2-5")
+            version: Pro version (e.g., "8-0", "7-9", "7-8")
             
         Returns:
             True if saved successfully, False otherwise
@@ -367,16 +381,19 @@ class DocumentProcessor:
             return False
         
         try:
-            logger.info(f"💾 Saving Express version {version} to GCS...")
+            logger.info(f"💾 Saving Pro version {version} to GCS...")
             
+            # Save embeddings for this version
             embeddings_blob_name = f"{GCS_EMBEDDINGS_PATH}/embeddings-{version}.npy"
             embeddings_blob = self.gcs_bucket.blob(embeddings_blob_name)
             
+            # Convert numpy array to bytes
             embeddings_buffer = BytesIO()
             np.save(embeddings_buffer, version_embeddings, allow_pickle=False)
             embeddings_buffer.seek(0)
             embeddings_blob.upload_from_file(embeddings_buffer, content_type='application/octet-stream')
             
+            # Save chunks for this version
             chunks_blob_name = f"{GCS_CHUNKS_PATH}/chunks-{version}.json"
             chunks_blob = self.gcs_bucket.blob(chunks_blob_name)
             chunks_json = json.dumps(version_chunks, indent=2)
