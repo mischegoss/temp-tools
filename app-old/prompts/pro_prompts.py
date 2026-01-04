@@ -1,5 +1,4 @@
 # Pro-specific prompts and response formats for Gemini AI responses
-# Phase 8: Added KB-specific prompts for Knowledge Base article responses
 
 # Clean, focused system prompt for Pro support
 PRO_SYSTEM_PROMPT = """You are RANI, a Pro documentation assistant for support staff and developers. 
@@ -57,123 +56,6 @@ GUIDELINES:
 - Keep responses concise but complete
 - Support follow-up questions naturally
 - NEVER list sources without actual URLs"""
-
-# ========================================
-# KNOWLEDGE BASE SPECIFIC PROMPTS (PHASE 8)
-# ========================================
-
-KB_SYSTEM_PROMPT = """You are RANI, a Pro support assistant providing answers from the Zendesk Knowledge Base.
-
-GOAL: Synthesize clear, actionable answers from support articles for troubleshooting and advanced configurations.
-
-IMPORTANT NOTES ABOUT KB SOURCES:
-- Knowledge Base articles require Zendesk login to access
-- These are internal support articles, not public documentation
-- They often contain troubleshooting steps, workarounds, and detailed technical procedures
-- Always note that sources require login
-
-RESPONSE FORMAT:
-1. Start with a conversational answer that addresses the question directly
-2. If the article has numbered steps, preserve them clearly
-3. Mention the Pro version if specified in the article
-4. Include any important warnings or prerequisites from the article
-
-GUIDELINES:
-- Synthesize the answer from the article content - don't just copy it verbatim
-- Preserve technical accuracy, especially for commands, paths, and configuration values
-- If the article mentions specific components (RSRemote, RSControl, etc.), include them
-- Keep procedural steps intact - these are critical for troubleshooting
-- Be concise but complete"""
-
-KB_RESPONSE_FORMAT = """
-When answering from Knowledge Base articles:
-
-1. Synthesize the answer from the primary match content
-2. DO NOT mention "(requires Zendesk login)" in the response body - this is handled in the header
-3. Format any code blocks, commands, or file paths clearly
-4. Preserve numbered steps exactly as they appear in the source
-5. Include version-specific notes if the article mentions them
-
-Example response structure:
-
-[Your synthesized answer explaining the solution]
-
-If the article contains steps, format them as:
-
-**Steps:**
-1. First step with exact commands or paths
-2. Second step
-3. Third step
-
-Include any important notes or warnings from the article.
-"""
-
-def build_kb_prompt(user_message: str, kb_article_content: str, article_title: str, 
-                    version: str = "8-0", conversation_history: list = None) -> str:
-    """
-    Build a prompt for generating responses from KB articles.
-    
-    Args:
-        user_message: User's question
-        kb_article_content: Full content from the KB article
-        article_title: Title of the KB article
-        version: Pro version context
-        conversation_history: Previous conversation messages
-        
-    Returns:
-        Complete prompt for Gemini
-    """
-    version_display = version.replace('-', '.')
-    
-    # Process conversation history
-    history_section = ""
-    if conversation_history:
-        history_section = "CONVERSATION HISTORY:\n\n"
-        for msg in conversation_history[-3:]:  # Last 3 messages for context
-            try:
-                if hasattr(msg, 'get'):
-                    role = msg.get('role', 'unknown')
-                    content = msg.get('content', '')
-                elif hasattr(msg, 'role'):
-                    role = msg.role
-                    content = msg.content
-                else:
-                    continue
-                
-                if len(content) > 200:
-                    content = content[:200] + "..."
-                
-                role_display = "User" if role == "user" else "Assistant"
-                history_section += f"{role_display}: {content}\n\n"
-            except:
-                continue
-        history_section += "--- End History ---\n\n"
-    
-    return f"""{KB_SYSTEM_PROMPT}
-
-{KB_RESPONSE_FORMAT}
-
-VERSION CONTEXT: Pro {version_display}
-
-KNOWLEDGE BASE ARTICLE:
-Title: {article_title}
-
-Content:
-{kb_article_content}
-
---- End Article ---
-
-{history_section}USER QUESTION: {user_message}
-
-INSTRUCTIONS:
-1. Synthesize a clear answer from the KB article above
-2. Address the user's specific question directly
-3. Preserve any technical details, commands, or step-by-step procedures
-4. If the article mentions specific Pro versions, note them
-5. Be conversational but technically accurate
-
-Provide your response:"""
-
 
 # Simple response formats for compatibility - kept minimal but functional
 PRO_RESPONSE_FORMATS = {
@@ -273,23 +155,6 @@ Start with a conversational answer that mentions the Pro version. Then if steps 
 📚 **Sources:**
 - [Pro Overview](https://docs.resolve.io/pro/)
 - [Feature Guide](https://docs.resolve.io/pro/features/)
-""",
-
-    # ========================================
-    # KB-SPECIFIC RESPONSE FORMAT
-    # ========================================
-    "knowledge_base": """
-### RESPONSE STRUCTURE: Knowledge Base Article Response
-Synthesize the answer from the support article content. Preserve technical accuracy.
-
-If steps are needed:
-
-**Steps:**
-1. Exact step from article
-2. Second step
-3. Third step
-
-Include any warnings or prerequisites mentioned in the article.
 """
 }
 
@@ -338,11 +203,7 @@ PRO_ERROR_RESPONSES = {
     
     "no_results": """I couldn't find specific information about this in the current Pro documentation. 
 
-Try rephrasing your question with specific Pro terms, or contact Pro support for assistance with this topic.""",
-    
-    "kb_no_results": """I couldn't find relevant support articles for this topic.
-
-Would you like me to search the official documentation instead? Or you can try rephrasing your question with specific Pro component names (RSRemote, RSControl, etc.)."""
+Try rephrasing your question with specific Pro terms, or contact Pro support for assistance with this topic."""
 }
 
 def get_pro_fallback_response(error_type: str = "api_error") -> str:

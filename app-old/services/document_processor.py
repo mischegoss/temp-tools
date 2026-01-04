@@ -8,13 +8,7 @@ from sentence_transformers import SentenceTransformer
 import logging
 from io import BytesIO
 
-from app.config import (
-    EMBEDDING_MODEL, EMBEDDING_DIMENSION, USE_GCS_STORAGE, 
-    GCS_BUCKET_NAME, GCS_EMBEDDINGS_PATH, GCS_CHUNKS_PATH,
-    # KB-specific imports
-    GCS_KB_BUCKET_NAME, GCS_KB_ARTICLES_PATH, USE_GCS_KB_STORAGE,
-    KB_ARTICLES_FILE, KB_EMBEDDINGS_FILE
-)
+from app.config import EMBEDDING_MODEL, EMBEDDING_DIMENSION, USE_GCS_STORAGE, GCS_BUCKET_NAME, GCS_EMBEDDINGS_PATH, GCS_CHUNKS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +22,7 @@ class DocumentProcessor:
         self.documentation_stats = {}
         self.model_loaded = False
         
-        # ========================================
-        # KNOWLEDGE BASE INSTANCE VARIABLES
-        # ========================================
-        self.kb_embeddings = None
-        self.kb_articles = []
-        self.kb_loaded = False
-        
-        # GCS storage initialization for docs
+        # GCS storage initialization
         self.gcs_storage = None
         self.gcs_enabled = USE_GCS_STORAGE
         if self.gcs_enabled:
@@ -47,23 +34,6 @@ class DocumentProcessor:
             except Exception as e:
                 logger.warning(f"⚠️ GCS initialization failed: {e}. Running in memory-only mode.")
                 self.gcs_enabled = False
-        
-        # ========================================
-        # KB GCS STORAGE INITIALIZATION
-        # ========================================
-        self.kb_gcs_enabled = USE_GCS_KB_STORAGE
-        self.kb_gcs_bucket = None
-        if self.kb_gcs_enabled:
-            try:
-                from google.cloud import storage
-                # Reuse client if already created
-                if not hasattr(self, 'gcs_client') or self.gcs_client is None:
-                    self.gcs_client = storage.Client()
-                self.kb_gcs_bucket = self.gcs_client.bucket(GCS_KB_BUCKET_NAME)
-                logger.info(f"✅ KB GCS storage initialized: gs://{GCS_KB_BUCKET_NAME}/")
-            except Exception as e:
-                logger.warning(f"⚠️ KB GCS initialization failed: {e}. KB running in memory-only mode.")
-                self.kb_gcs_enabled = False
         
     def initialize(self, shared_model: Optional[SentenceTransformer] = None):
         """
@@ -83,15 +53,9 @@ class DocumentProcessor:
                 self.model = SentenceTransformer(EMBEDDING_MODEL)
                 self.model_loaded = True
             
-            # Load ALL docs versions from GCS on startup
+            # NEW: Load ALL versions from GCS on startup
             if self.gcs_enabled:
                 self.load_all_versions_from_gcs()
-            
-            # ========================================
-            # NEW: Load KB articles from GCS on startup
-            # ========================================
-            if self.kb_gcs_enabled:
-                self.load_kb_from_gcs()
             
             logger.info("✅ Document processor initialized successfully")
             
@@ -107,14 +71,7 @@ class DocumentProcessor:
             "chunks_count": len(self.chunk_data),
             "embeddings_count": len(self.embeddings) if self.embeddings is not None else 0,
             "metadata_count": len(self.metadata),
-            "gcs_enabled": self.gcs_enabled,
-            # ========================================
-            # NEW: KB status fields
-            # ========================================
-            "kb_loaded": self.kb_loaded,
-            "kb_articles_count": len(self.kb_articles),
-            "kb_embeddings_count": len(self.kb_embeddings) if self.kb_embeddings is not None else 0,
-            "kb_gcs_enabled": self.kb_gcs_enabled
+            "gcs_enabled": self.gcs_enabled
         }
     
     def compute_content_hash(self, content: str) -> str:
@@ -132,251 +89,6 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f"Failed to generate embeddings: {e}")
             raise
-
-    # ========================================
-    # KNOWLEDGE BASE METHODS
-    # ========================================
-    
-    def load_kb_from_gcs(self) -> bool:
-        """
-        Load KB articles and embeddings from GCS bucket.
-        
-        KB data is stored as:
-        - gs://pro-chatbot-kb/articles/kb-articles.json
-        - gs://pro-chatbot-kb/articles/kb-embeddings.npy
-        
-        Returns:
-            True if loaded successfully, False otherwise
-        """
-        if not self.kb_gcs_enabled or self.kb_gcs_bucket is None:
-            logger.info("📁 KB GCS storage disabled, starting with empty KB data")
-            return False
-        
-        try:
-            logger.info("📥 Loading Knowledge Base articles from GCS...")
-            
-            articles_blob_name = f"{GCS_KB_ARTICLES_PATH}/{KB_ARTICLES_FILE}"
-            embeddings_blob_name = f"{GCS_KB_ARTICLES_PATH}/{KB_EMBEDDINGS_FILE}"
-            
-            articles_blob = self.kb_gcs_bucket.blob(articles_blob_name)
-            embeddings_blob = self.kb_gcs_bucket.blob(embeddings_blob_name)
-            
-            # Check if KB data exists
-            if not articles_blob.exists():
-                logger.info("📂 No KB articles found in GCS - starting fresh")
-                return False
-            
-            if not embeddings_blob.exists():
-                logger.info("📂 No KB embeddings found in GCS - starting fresh")
-                return False
-            
-            # Load articles JSON
-            articles_json = articles_blob.download_as_text()
-            kb_data = json.loads(articles_json)
-            
-            # Handle both formats: raw array or wrapped with metadata
-            if isinstance(kb_data, list):
-                self.kb_articles = kb_data
-            elif isinstance(kb_data, dict) and 'articles' in kb_data:
-                self.kb_articles = kb_data['articles']
-            else:
-                logger.error("❌ Invalid KB articles format in GCS")
-                return False
-            
-            # Load embeddings
-            embeddings_bytes = embeddings_blob.download_as_bytes()
-            embeddings_buffer = BytesIO(embeddings_bytes)
-            self.kb_embeddings = np.load(embeddings_buffer, allow_pickle=False)
-            
-            # Validate consistency
-            if len(self.kb_articles) != len(self.kb_embeddings):
-                logger.error(f"❌ KB data mismatch: {len(self.kb_articles)} articles vs {len(self.kb_embeddings)} embeddings")
-                self.kb_articles = []
-                self.kb_embeddings = None
-                return False
-            
-            self.kb_loaded = True
-            logger.info(f"✅ Loaded KB from GCS: {len(self.kb_articles)} articles")
-            logger.info(f"   Embeddings shape: {self.kb_embeddings.shape}")
-            logger.info(f"   gs://{GCS_KB_BUCKET_NAME}/{articles_blob_name}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Error loading KB from GCS: {e}")
-            self.kb_articles = []
-            self.kb_embeddings = None
-            self.kb_loaded = False
-            return False
-    
-    def save_kb_to_gcs(self) -> bool:
-        """
-        Save KB articles and embeddings to GCS bucket.
-        
-        Saves to:
-        - gs://pro-chatbot-kb/articles/kb-articles.json
-        - gs://pro-chatbot-kb/articles/kb-embeddings.npy
-        
-        Returns:
-            True if saved successfully, False otherwise
-        """
-        if not self.kb_gcs_enabled or self.kb_gcs_bucket is None:
-            logger.warning("⚠️ KB GCS storage disabled, data not persisted")
-            return False
-        
-        if self.kb_embeddings is None or len(self.kb_articles) == 0:
-            logger.warning("⚠️ No KB data to save")
-            return False
-        
-        try:
-            logger.info(f"💾 Saving Knowledge Base to GCS...")
-            
-            # Save articles JSON
-            articles_blob_name = f"{GCS_KB_ARTICLES_PATH}/{KB_ARTICLES_FILE}"
-            articles_blob = self.kb_gcs_bucket.blob(articles_blob_name)
-            articles_json = json.dumps(self.kb_articles, indent=2)
-            articles_blob.upload_from_string(articles_json, content_type='application/json')
-            
-            # Save embeddings
-            embeddings_blob_name = f"{GCS_KB_ARTICLES_PATH}/{KB_EMBEDDINGS_FILE}"
-            embeddings_blob = self.kb_gcs_bucket.blob(embeddings_blob_name)
-            embeddings_buffer = BytesIO()
-            np.save(embeddings_buffer, self.kb_embeddings, allow_pickle=False)
-            embeddings_buffer.seek(0)
-            embeddings_blob.upload_from_file(embeddings_buffer, content_type='application/octet-stream')
-            
-            logger.info(f"✅ Saved KB to GCS: {len(self.kb_articles)} articles")
-            logger.info(f"   Embeddings shape: {self.kb_embeddings.shape}")
-            logger.info(f"   gs://{GCS_KB_BUCKET_NAME}/{articles_blob_name}")
-            logger.info(f"   gs://{GCS_KB_BUCKET_NAME}/{embeddings_blob_name}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Error saving KB to GCS: {e}")
-            return False
-    
-    def update_with_kb_articles(self, articles: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Process and store KB articles with embeddings.
-        
-        IMPORTANT: Embeddings are generated from the 'search_text' field,
-        NOT the 'content' field. The search_text is optimized for search
-        (contains title + first paragraph + keywords).
-        
-        Args:
-            articles: List of KB article dictionaries from Zendesk export
-            
-        Returns:
-            Dict with processing results and statistics
-        """
-        if not self.model_loaded:
-            raise RuntimeError("Model not initialized. Call initialize() first.")
-        
-        if not articles:
-            logger.warning("⚠️ No KB articles provided")
-            return {
-                "success": False,
-                "error": "No articles provided",
-                "articles_processed": 0
-            }
-        
-        try:
-            logger.info(f"📦 Processing {len(articles)} KB articles...")
-            
-            # Validate required fields
-            required_fields = ['id', 'search_text', 'content', 'source_url', 'page_title']
-            valid_articles = []
-            skipped = 0
-            
-            for article in articles:
-                missing = [f for f in required_fields if not article.get(f)]
-                if missing:
-                    logger.warning(f"⏭️  Skipping article {article.get('id', 'unknown')}: missing {missing}")
-                    skipped += 1
-                    continue
-                valid_articles.append(article)
-            
-            if not valid_articles:
-                logger.error("❌ No valid KB articles after validation")
-                return {
-                    "success": False,
-                    "error": "No valid articles (all missing required fields)",
-                    "articles_processed": 0,
-                    "skipped": skipped
-                }
-            
-            logger.info(f"✅ Validated {len(valid_articles)} articles ({skipped} skipped)")
-            
-            # ========================================
-            # CRITICAL: Generate embeddings from search_text, NOT content
-            # ========================================
-            search_texts = [article['search_text'] for article in valid_articles]
-            
-            logger.info(f"🔄 Generating embeddings for {len(search_texts)} articles...")
-            logger.info(f"   Using 'search_text' field (title + first paragraph + keywords)")
-            
-            new_embeddings = self.generate_embeddings(search_texts)
-            
-            logger.info(f"   Embeddings shape: {new_embeddings.shape}")
-            logger.info(f"   Sample search_text: {search_texts[0][:150]}...")
-            
-            # Replace all KB data (full replacement, not append)
-            self.kb_embeddings = new_embeddings
-            self.kb_articles = valid_articles
-            self.kb_loaded = True
-            
-            logger.info(f"✅ KB data updated: {len(self.kb_articles)} articles in memory")
-            
-            # Persist to GCS if enabled
-            gcs_saved = False
-            if self.kb_gcs_enabled:
-                gcs_saved = self.save_kb_to_gcs()
-                if not gcs_saved:
-                    logger.warning("⚠️ KB data updated in memory but GCS save failed")
-            
-            # Gather statistics
-            article_types = {}
-            components = set()
-            concepts = set()
-            
-            for article in valid_articles:
-                extracted = article.get('metadata', {}).get('extracted', {})
-                
-                # Count article types
-                atype = extracted.get('article_type', 'unknown')
-                article_types[atype] = article_types.get(atype, 0) + 1
-                
-                # Collect components
-                for comp in extracted.get('components', []):
-                    components.add(comp)
-                
-                # Collect concepts
-                for concept in extracted.get('concepts', []):
-                    concepts.add(concept)
-            
-            return {
-                "success": True,
-                "articles_processed": len(valid_articles),
-                "articles_skipped": skipped,
-                "embeddings_shape": list(self.kb_embeddings.shape),
-                "gcs_persisted": gcs_saved,
-                "statistics": {
-                    "article_types": article_types,
-                    "unique_components": len(components),
-                    "unique_concepts": len(concepts),
-                    "components_list": sorted(list(components)),
-                    "top_concepts": sorted(list(concepts))[:20]
-                }
-            }
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to process KB articles: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
-            raise RuntimeError(f"Failed to process KB articles: {e}")
-
-    # ========================================
-    # EXISTING DOCS METHODS (UNCHANGED)
-    # ========================================
 
     def update_with_processed_chunks(self, processed_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -488,7 +200,7 @@ class DocumentProcessor:
             raise RuntimeError(f"Failed to update document processor: {e}")
     
     # ========================================
-    # VERSION-AWARE GCS PERSISTENCE METHODS
+    # NEW: VERSION-AWARE GCS PERSISTENCE METHODS
     # ========================================
     
     def _clean_version_string(self, version: str) -> str:

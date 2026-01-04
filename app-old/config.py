@@ -25,45 +25,6 @@ GCS_METADATA_PATH = "metadata"
 # Enable GCS storage in production (Cloud Run), disable for local development
 USE_GCS_STORAGE = os.getenv("USE_GCS_STORAGE", str(IS_CLOUD_RUN)).lower() in ('true', '1', 'yes')
 
-# ========================================
-# KNOWLEDGE BASE GCS CONFIGURATION
-# ========================================
-# Separate bucket for KB articles (distinct from docs bucket)
-GCS_KB_BUCKET_NAME = os.getenv("GCS_KB_BUCKET_NAME", "pro-chatbot-kb")
-GCS_KB_ARTICLES_PATH = "articles"
-
-# Enable GCS KB storage (follows same pattern as docs)
-USE_GCS_KB_STORAGE = os.getenv("USE_GCS_KB_STORAGE", str(IS_CLOUD_RUN)).lower() in ('true', '1', 'yes')
-
-# KB GCS file names
-KB_ARTICLES_FILE = "kb-articles.json"
-KB_EMBEDDINGS_FILE = "kb-embeddings.npy"
-
-# ========================================
-# KNOWLEDGE BASE SEARCH SETTINGS
-# ========================================
-# Minimum similarity score for KB results
-KB_SIMILARITY_THRESHOLD = float(os.getenv("KB_SIMILARITY_THRESHOLD", "0.3"))
-
-# Version scoring bonuses (additive to base similarity score)
-KB_VERSION_EXACT_BONUS = 0.15    # Article's applies_to_versions contains user's version
-KB_VERSION_ALL_BONUS = 0.05      # Article's applies_to_versions is null (applies to all)
-# No bonus (0.0) for articles that don't match user's version
-
-# Maximum additional matches to return alongside primary match
-KB_MAX_ADDITIONAL_MATCHES = int(os.getenv("KB_MAX_ADDITIONAL_MATCHES", "4"))
-
-# Keywords that trigger direct KB search (bypassing docs-first behavior)
-KB_DIRECT_SEARCH_TRIGGERS = [
-    "support",
-    "support article",
-    "support articles",
-    "zendesk",
-    "kb",
-    "knowledge base",
-    "help center"
-]
-
 # Sentence transformer settings
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 EMBEDDING_DIMENSION = 384
@@ -194,34 +155,3 @@ def detect_pro_documentation_type(pathname: str) -> str:
         return 'reference'
     
     return 'general'
-
-def detect_kb_intent(message: str) -> bool:
-    """
-    Check if user message indicates intent to search Knowledge Base directly.
-    Returns True if any KB trigger phrase is found in the message.
-    """
-    message_lower = message.lower()
-    return any(trigger in message_lower for trigger in KB_DIRECT_SEARCH_TRIGGERS)
-
-def format_kb_version_display(applies_to_versions: list) -> str:
-    """
-    Format version info for KB article display.
-    
-    Args:
-        applies_to_versions: List of version strings or None
-        
-    Returns:
-        Human-readable version string (e.g., "All versions", "Pro 8.0", "Pro 8.0, 7.9")
-    """
-    if applies_to_versions is None:
-        return "All versions"
-    
-    if not applies_to_versions:
-        return "All versions"
-    
-    # Convert internal format to display format
-    display_versions = []
-    for v in applies_to_versions:
-        display_versions.append(f"Pro {v.replace('-', '.')}")
-    
-    return ", ".join(display_versions)
