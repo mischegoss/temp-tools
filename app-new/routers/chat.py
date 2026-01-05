@@ -246,7 +246,12 @@ async def chat_with_pro_documentation(
         
         final_response = chat_response + kb_offer
         
-        # Version warning if needed
+        # Version-specific note for older versions (7-8, 7-9)
+        if effective_version != "8-0":
+            version_note = f"\n\n*Note: This response is specific to Pro {effective_version.replace('-', '.')}. Some features may differ in other versions.*"
+            final_response = final_response + version_note
+        
+        # Version warning if original version was not recognized
         if original_version and original_version not in PRO_SUPPORTED_VERSIONS:
             version_warning = f"\n\n⚠️ **Note:** Version '{original_version}' was not recognized. Showing results for Pro {effective_version.replace('-', '.')}."
             final_response = final_response + version_warning

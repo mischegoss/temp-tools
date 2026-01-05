@@ -4,6 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from pathlib import Path
@@ -13,7 +14,7 @@ from app.services.document_processor import DocumentProcessor
 from app.services.search_service import SearchService
 from app.services.gemini_service import GeminiService
 from app.routers.chat import router as chat_router
-from app.config import PRODUCT_DISPLAY_NAME, PRO_DEFAULT_VERSION
+from app.config import PRODUCT_DISPLAY_NAME, PRO_DEFAULT_VERSION, USE_GCS_KB_STORAGE
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -71,33 +72,21 @@ async def lifespan(app: FastAPI):
             else:
                 logger.error(f"❌ Cache directory not found at: {cache_dir}")
                 raise RuntimeError(f"Model cache not found at {cache_dir}. Docker build may have failed.")
-            
-            # Load model from cache
-            model_path = cache_dir + '/sentence-transformers_all-MiniLM-L6-v2'
-            if os.path.exists(model_path):
-                sentence_model = SentenceTransformer(model_path)
-            else:
-                sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-                
         else:
-            # Local development setup
-            logger.info("🧑‍💻 Local development mode - downloading model if needed...")
-            
-            # Don't force offline mode in local development
-            if 'HF_HUB_OFFLINE' in os.environ:
-                del os.environ['HF_HUB_OFFLINE']
-            if 'TRANSFORMERS_OFFLINE' in os.environ:
-                del os.environ['TRANSFORMERS_OFFLINE']
-            
-            # Load model normally (will download if not cached)
-            sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+            # Local development - normal mode
+            logger.info("Running in local development mode")
+        
+        # Load sentence transformer model
+        logger.info("Loading sentence transformer model...")
+        model_start = time.time()
+        
+        from app.config import EMBEDDING_MODEL
+        sentence_model = SentenceTransformer(EMBEDDING_MODEL)
         
         # Test the model
-        model_load_start = time.time()
-        logger.info("Testing model functionality...")
-        test_encoding = sentence_model.encode("test sentence for Pro API")
-        model_load_time = time.time() - model_load_start
-        logger.info(f"✅ Model test successful. Embedding dimension: {len(test_encoding)}")
+        test_encoding = sentence_model.encode("test")
+        model_load_time = time.time() - model_start
+        logger.info(f"✅ Model loaded successfully. Embedding dimension: {len(test_encoding)}")
         logger.info(f"Model loaded/tested in {model_load_time:.2f} seconds")
         
         # Pre-warm the model for faster first response
@@ -125,25 +114,40 @@ async def lifespan(app: FastAPI):
         doc_processor.initialize(shared_model=sentence_model)
         logger.info("✅ Pro document processor initialized (using shared model)")
         
-        # NEW: Log GCS data load status
+        # Log GCS data load status
         doc_status = doc_processor.get_status()
         if doc_status.get('chunks_count', 0) > 0:
             logger.info(f"📦 Loaded {doc_status['chunks_count']} chunks from GCS persistence")
             logger.info(f"   Embeddings: {doc_status.get('embeddings_count', 0)} vectors ready")
         else:
-            logger.info("📂 No existing data in GCS - starting fresh")
+            logger.info("📂 No existing docs data in GCS - starting fresh")
+        
+        # ========================================
+        # NEW: Log KB data load status
+        # ========================================
+        if doc_status.get('kb_loaded', False):
+            logger.info(f"📚 Loaded {doc_status.get('kb_articles_count', 0)} KB articles from GCS")
+            logger.info(f"   KB Embeddings: {doc_status.get('kb_embeddings_count', 0)} vectors ready")
+        else:
+            logger.info("📚 No KB data in GCS - KB search not available until upload")
         
         # Initialize search service
         search_service = SearchService(doc_processor)
         search_service.initialize()
         logger.info("✅ Pro search service initialized")
         
-        # NEW: Log search service data sync status
+        # Log search service data sync status
         search_stats = search_service.get_search_stats()
         if search_stats.get('total_chunks', 0) > 0:
             logger.info(f"🔍 Search service ready with {search_stats['total_chunks']} searchable chunks")
         else:
             logger.info("🔍 Search service ready (waiting for data upload)")
+        
+        # ========================================
+        # NEW: Log KB search readiness
+        # ========================================
+        if search_stats.get('kb_ready', False):
+            logger.info(f"📚 KB search ready with {search_stats.get('kb_articles_count', 0)} articles")
         
         # Initialize Gemini service with Pro configuration
         gemini_service = GeminiService(product_name="pro")
@@ -166,11 +170,19 @@ async def lifespan(app: FastAPI):
         logger.info(f"   - Warmup time: {warmup_time:.2f}s")
         logger.info(f"   - Total startup: {startup_duration:.2f}s")
         
-        # NEW: GCS persistence summary
+        # GCS persistence summary
         if doc_status.get('gcs_enabled'):
             logger.info("🗄️  GCS persistence: ENABLED")
         else:
             logger.info("📁 GCS persistence: DISABLED (local/development mode)")
+        
+        # ========================================
+        # NEW: KB GCS persistence summary
+        # ========================================
+        if doc_status.get('kb_gcs_enabled'):
+            logger.info("📚 KB GCS persistence: ENABLED")
+        else:
+            logger.info("📚 KB GCS persistence: DISABLED")
         
     except Exception as e:
         logger.error(f"Failed to initialize Pro services during startup: {e}")
@@ -219,7 +231,8 @@ async def root():
             "health_check": "/health",
             "service_warmup": "/warmup",
             "detailed_status": "/status",
-            "api_endpoints": "/api/v1/*"
+            "api_endpoints": "/api/v1/*",
+            "kb_status": "/api/v1/kb-status"  # NEW: KB status endpoint
         },
         "optimization_features": [
             "Model pre-downloaded and cached",
@@ -228,6 +241,7 @@ async def root():
             "No duplicate model loading",
             "Pre-warmed model for faster first response",
             "GCS persistence for documentation data",
+            "Knowledge Base support with version-aware search",  # NEW
             "Optimized for both local development and Cloud Run deployment"
         ]
     }
@@ -248,7 +262,14 @@ async def health_check():
         "gcs_persistence": doc_status.get("gcs_enabled", False),
         "data_loaded": doc_status.get("chunks_count", 0) > 0,
         "default_version": PRO_DEFAULT_VERSION,
-        "environment": detect_environment()
+        "environment": detect_environment(),
+        # ========================================
+        # NEW: Knowledge Base status fields
+        # ========================================
+        "kb_loaded": doc_status.get("kb_loaded", False),
+        "kb_articles_count": doc_status.get("kb_articles_count", 0),
+        "kb_gcs_enabled": doc_status.get("kb_gcs_enabled", USE_GCS_KB_STORAGE),
+        "kb_search_ready": doc_status.get("kb_loaded", False) and doc_status.get("kb_embeddings_count", 0) > 0
     }
 
 @app.get("/warmup")
@@ -270,13 +291,21 @@ async def warmup():
         # Test Gemini service if available
         gemini_status = gemini_service.get_status() if gemini_service else {"ready": False}
         
+        # ========================================
+        # NEW: Get KB status for warmup response
+        # ========================================
+        doc_status = doc_processor.get_status() if doc_processor else {}
+        
         return {
             "status": "warmed_up",
             "model_test": "passed",
             "embedding_dimension": len(test_embedding),
             "gemini_ready": gemini_status.get("ready", False),
             "pro_optimized": True,
-            "test_query": test_query
+            "test_query": test_query,
+            # NEW: KB warmup info
+            "kb_ready": doc_status.get("kb_loaded", False),
+            "kb_articles_available": doc_status.get("kb_articles_count", 0)
         }
     except Exception as e:
         logger.error(f"Warmup test failed: {e}")
@@ -296,67 +325,84 @@ async def detailed_status():
         "service": "Pro Chatbot API",
         "status": "running" if (models_loaded and services_initialized) else "starting",
         "environment": detect_environment(),
+        "uptime_seconds": time.time() - startup_time if startup_time else 0,
         "models": {
             "sentence_transformer": {
-                "loaded": sentence_model is not None,
-                "model_name": "sentence-transformers/all-MiniLM-L6-v2",
-                "ready": models_loaded,
-                "shared_instance": True,
-                "pre_warmed": True
-            }
+                "loaded": models_loaded,
+                "model_name": "all-MiniLM-L6-v2",
+                "embedding_dimension": 384
+            },
+            "gemini": gemini_status
         },
         "services": {
-            "document_processor": doc_status,
-            "search_service": search_stats,
-            "gemini_service": gemini_status
+            "document_processor": {
+                "ready": doc_status.get("ready", False),
+                "chunks_count": doc_status.get("chunks_count", 0),
+                "embeddings_count": doc_status.get("embeddings_count", 0),
+                "gcs_enabled": doc_status.get("gcs_enabled", False)
+            },
+            "search_service": {
+                "ready": search_stats.get("ready", False),
+                "total_chunks": search_stats.get("total_chunks", 0),
+                "has_embeddings": search_stats.get("has_embeddings", False)
+            }
         },
-        "performance": {
-            "startup_time_seconds": time.time() - startup_time if startup_time else 0,
-            "models_loaded": models_loaded,
-            "services_initialized": services_initialized,
-            "chat_ready": gemini_status.get("can_chat", False) if gemini_service else False,
-            "first_response_optimized": True
+        # ========================================
+        # Knowledge Base detailed status
+        # ========================================
+        "knowledge_base": {
+            "loaded": doc_status.get("kb_loaded", False),
+            "articles_count": doc_status.get("kb_articles_count", 0),
+            "embeddings_count": doc_status.get("kb_embeddings_count", 0),
+            "gcs_enabled": doc_status.get("kb_gcs_enabled", False),
+            "search_ready": search_stats.get("kb_ready", False),
+            "source": "Zendesk Help Center",
+            "requires_login": True
         },
+        "default_version": PRO_DEFAULT_VERSION,
+        "supported_versions": ["8-0", "7-9", "7-8"],
         "memory_optimization": {
             "shared_model": True,
-            "model_loaded_once": True,
-            "estimated_memory_savings": "~50% reduction from avoiding duplicate model loading"
-        },
-        "persistence": {
-            "gcs_enabled": doc_status.get("gcs_enabled", False),
-            "chunks_loaded": doc_status.get("chunks_count", 0),
-            "embeddings_loaded": doc_status.get("embeddings_count", 0),
-            "data_persisted": doc_status.get("gcs_enabled", False) and doc_status.get("chunks_count", 0) > 0
-        },
-        "pro_specific": {
-            "default_version": PRO_DEFAULT_VERSION,
-            "supported_versions": ["7-8", "7-9", "8-0", "general"],
-            "version_aware": True,
-            "product_name": PRODUCT_DISPLAY_NAME
+            "single_instance": True,
+            "pre_warmed": True
         },
         "endpoints": {
             "health": "/health",
             "warmup": "/warmup",
             "status": "/status",
-            "upload": "/api/v1/upload-documentation (POST)",
+            "upload_docs": "/api/v1/upload-documentation (POST)",
+            "upload_kb": "/api/v1/upload-kb (POST)",
             "search": "/api/v1/search (POST)",
+            "search_kb": "/api/v1/search-kb (GET)",
             "chat": "/api/v1/chat (POST)",
+            "kb_status": "/api/v1/kb-status (GET)",
             "test_connection": "/api/v1/test-connection"
         }
     }
 
-# Error handlers
+
+# ========================================
+# Exception Handler
+# ========================================
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
-    logger.error(f"Unhandled exception in Pro API: {exc}")
-    return {
-        "status": "error",
-        "message": "Internal server error",
-        "product": "pro",
-        "models_loaded": models_loaded,
-        "services_initialized": services_initialized
-    }
+    """Global exception handler for unhandled errors"""
+    logger.error(f"Unhandled exception: {exc}")
+    import traceback
+    logger.error(traceback.format_exc())
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "detail": str(exc),
+            "type": type(exc).__name__
+        }
+    )
 
+
+# ========================================
+# Main Entry Point
+# ========================================
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8080))
