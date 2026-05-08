@@ -1,0 +1,55 @@
+---
+sidebar_position: 40
+id: propertiescontrol
+title: propertiesControl
+---
+* **Description:** Dynamic properties editor for module-based Create/Update activities. Provides a Property Name/Property Value grid where users can configure field values. The available properties are loaded dynamically from a selected module/form.  
+* **Base Type:** control  
+* **Data Type:** XML or JSON (serialized property-value pairs)  
+* **Validation Rules:**  
+  1. Property names come from available fields source  
+  2. Values can be typed or selected from dropdown options  
+  3. Supports primary key designation for identifying records  
+* **Important:** This control **cannot work in isolation**. It requires:  
+  1. A parent activity of type module-table that manages module/form selection  
+  2. Dynamic fieldNameSource populated at runtime when a module/form is selected  
+  3. A parsingConfig object with structureType for serialization  
+* **Common Use Cases:** ServiceNow Create/Update Record, Jira Create/Update Issue, AD Set Property, Salesforce Create/Update Record
+
+**Required Properties:**
+
+* parsingConfig (Object): Configuration for serialization:  
+  * structureType (String): Serialization format \- "dictionary", "json", or default XML
+
+**Optional Properties:**
+
+* value (String): Initial serialized property data  
+* required (Boolean): If true, at least one property must be configured. Default is false  
+* specialFieldType (String): Type identifier for mandatory fields (e.g., "mandatoryField")  
+* customizationConfig (Object): Configuration for custom keys:  
+  * isFooterKeysCustomizable (Boolean): If true, allows adding custom property names not in the source list  
+* containsIdColumn (Boolean): If true, shows an additional "Id Name" column  
+* containsPrimaryKey (Boolean): If true, allows designating a primary key property
+
+**JSON Example (AD Set Property with JSON serialization):** 
+```
+{
+  "value": "",
+  "disabled": false,
+  "required": true,
+  "key": "FieldsList",
+  "specialFieldType": "mandatoryField",
+  "customizationConfig": {
+    "isFooterKeysCustomizable": true
+  },
+  "parsingConfig": {
+    "structureType": "json"
+  },
+  "label": "",
+  "styleClass": "one-line",
+  "baseType": "control",
+  "containsIdColumn": true,
+  "controlType": "propertiesControl"
+}
+```
+**Note:** The property dropdown options (fieldNameSource) are populated dynamically by the parent module-table activity when the user selects a Module Name and Form Name. This control will appear empty until those parent controls trigger the field loading. 

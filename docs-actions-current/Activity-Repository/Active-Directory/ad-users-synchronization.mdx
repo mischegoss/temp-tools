@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: ad-users-synchronization-activity
+title: AD Users Synchronization
+---
+
+## Activity Description
+
+Synchronizes A users/groups and their data with the Actions user list. The activity imports OUs, Groups, and Users information from Active Directory into Actions.
+
+:::note
+You may use the "AD Users Synchronization" template (residing under the Active Directory category) instead of creating it from scratch.
+:::
+
+## Output
+
+Success / Failure.
+
+## Settings
+
+
+* **Domain** – The domain to which the users belong.
+* **AD Users** – The table from which to import the users, e.g. `%ADSyncTable%`.
+* **Update existing** – By default, if a user or a group already exists in Actions (created manually before synchronization), they will not be updated. When this is checked, existing users are updated.
+* **Create New** – When this checkbox is checked existing users are created.
+* **Recursive groups** – When a group is synchronized you may decide whether to synchronize the data recursively or not. When synchronizing the data recursively, sub-groups and user data are also synchronized.
+* **Recursive OUs** – When an OU is synchronized you may decide whether to synchronize the data recursively or not. When synchronizing the data recursively, user data in sub-OUs is also synchronized.
+* **Field Mapping** – A mapping of the Actions property to the AD property.

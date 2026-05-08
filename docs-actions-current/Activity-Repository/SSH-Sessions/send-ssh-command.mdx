@@ -1,0 +1,21 @@
+---
+sidebar_position: 10
+id: send-ssh-command-activity
+title: Send SSH Command
+---
+
+## Activity Description
+
+Sends a single SSH protocol command to an open session.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **SSH Session** – The session to which the command is sent (named after the corresponding "Start SSH Session" activity).
+* **Command** – The SSH command you wish to run (e.g., `ls –la`).
+* **Wait For** – When this key is retrieved from the command's output, the activity no longer waits for further output, and returns the result to the workflow.  
+   Example: `#`

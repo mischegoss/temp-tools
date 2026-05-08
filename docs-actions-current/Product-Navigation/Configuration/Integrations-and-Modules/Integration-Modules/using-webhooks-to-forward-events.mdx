@@ -1,0 +1,45 @@
+---
+sidebar_position: 100
+id: using-webhooks-to-forward-events
+title: Using Webhooks to Forward Events
+description: The events API can be used as a webhook to forward events in your Resolve Actions instance.
+---
+
+You can use the events API as a webhook to forward events in your VAR::PRODUCT_FULL instance. This is useful in the case you record events or alerts in an outside system but want to use the automation and orchestration capabilities of Actions to remediate the issue.
+
+To use webhooks with Actions, configure your third-party application as follows:
+
+1. Add the bridge URL in the following format: `https://bridge.resolveactions.com/api/v1/gateway/PostMessage/<your_tenant_ID>`  
+   Example: `bridge.resolveactions.com/api/v1/gateway/PostMessage/CF73494Z-8235-4743-B623-16454715DF91`
+2. Add a basic authorization header.  
+   The header must consist of the **Events Client ID** and the **Events Secret Key** (see [Acquiring API Access Details](../../../../Getting-Started/Setting-Up-Hybrid-Components/acquiring-api-access-details.mdx), separated by a colon in base64 encoding.  
+   Example:  
+   ```json
+   "Authorization": "Basic Qjg0RjFCMEItMTBER … … … …"
+   ```
+   * If your connection details are as follows:
+      * **Events Client ID**: `B84F1B0B-10DF-4E4D-A748-ADEFEB47856C`
+      * **Events Secret Key**: `^J*M*YT$!MVS8AVVLXXU!@72N5L4P22Q`
+   * Then the header before base64 encoding will look like (note the colon separating the ID and the Key):
+     ```
+     B84F1B0B-10DF-4E4D-A748-ADEFEB47856C: ^J*M*YT$!MVS8AVVLXXU!@72N5L4P22Q
+     ```
+    * The header after base64 encoding will look like:
+      ```
+      Qjg0RjFCMEItMTBERi00RTRELUE3NDgtQURFRkVCNDc4NTZDOiBeSipNKllUJCFNVlM4QVZWTFhYVSFANzJONUw0UDIyUQ
+      ```
+3. Create a payload in JSON format.  
+   The payload will be automatically parsed into variables, as long as it consists of one or two levels. Any other format input will be passed as a regular event.  
+   Example of a JSON payload:    
+   ```json
+   {
+    "System" : "mysystem", 
+    "alert_type": "alert",
+    "alert_status": "critical",
+    "state": "down",
+    "information": "test alert",
+    "host": "my device",
+    "classification": "my category"
+   }
+   ```
+4. Expect a `200 OK` response.

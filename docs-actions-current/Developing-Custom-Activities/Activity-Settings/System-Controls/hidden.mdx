@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: hidden
+title: hidden
+---
+* **Description:** Hidden field for storing values not displayed to users  
+* **Base Type:** control  
+* **Data Type:** String (Hidden)  
+* **Validation Rules:**  
+  * Value is stored but not displayed  
+  * May be set programmatically  
+  * Used for internal tracking and complex data storage  
+* **Example Values:** Complex configuration objects, Internal IDs  
+* **Common Use Cases:** Internal IDs, System values, Property configurations
+
+**JSON Example:**  
+```
+{
+  "key": "internalId",
+  "label": "",
+  "baseType": "control",
+  "controlType": "hidden",
+  "value": ""
+}
+```

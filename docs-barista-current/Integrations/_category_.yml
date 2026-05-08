@@ -1,0 +1,10 @@
+position: 20
+label: Barista Integrations # This controls how it appears in the sidebar
+
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Barista Integrations
+  slug: integrations
+  

@@ -1,0 +1,21 @@
+---
+sidebar_position: 10
+id: splunk-create-event-activity
+title: Splunk Create Event
+---
+
+## Activity Description
+
+Creates a new event in Splunk according to the event data entered.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Module Name** – The name of the Splunk Module in VAR::PRODUCT_FULL.
+* **Event Index** – The name of the index field where the event will be created.
+* **Event Data** – Must be entered in the format `[ValueName]=[Value]`, with each pair separated by a comma.  
+   Example: `loglevel=1,companyname=2,username=3,password=4.`

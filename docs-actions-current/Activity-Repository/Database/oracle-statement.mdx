@@ -1,0 +1,38 @@
+---
+sidebar_position: 10
+id: oracle-statement-activity
+title: Oracle Statement
+---
+
+## Activity Description
+
+Runs an Oracle statement (INSERT, DELETE, UPDATE) on an Oracle database.
+
+:::note
+To use Oracle activities, you need to install the full administrator package of [Oracle Client](https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html) on the machine where the VAR::PRODUCT_FULL executor is installed.  
+After installing the Oracle Client, contact your Resolve representative for updating the path to the client in the activity's configuration.
+:::
+
+## Settings
+
+* **Statement** The query's text.
+* **Connection String** – Specifies the required connection string in order to connect the database.  
+  For example:
+  ```sql
+  Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=MyHost)(PORT=MyPort)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=MyOracleSID)));User Id=myUsername;Password=myPassword
+  ```
+* **User Authentication** – Determines whether a user's authentication credentials are required to execute the query (if the credentials are not specified in the clear text connection string).
+* **User name** – An Oracle user authorized to execute the query (e.g., `oradba`).
+* **Password** – The user's password.
+
+:::note
+To avoid translation of `%TEXT%` (in case `TEXT` is not a variable name), add `@` before the percentage character. For example: `Select * From TableName Where ColumnName LIKE '@%TEXT%'`.
+:::
+
+:::note
+To use multiple statements in one activity, use the following syntax: `Begin Statement 1; Statement 2; Statement 3; End;`
+:::
+
+:::note
+To use the word `variable` within a statement, use the following convention: `@%variable%` (else it is referred to as a system variable).
+:::

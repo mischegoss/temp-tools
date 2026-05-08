@@ -1,0 +1,8 @@
+position: 100
+label: System Controls
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: System Controls
+

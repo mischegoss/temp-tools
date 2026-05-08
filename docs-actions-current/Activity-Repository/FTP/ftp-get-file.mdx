@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: ftp-get-file-activity
+title: FTP Get File
+---
+
+## Activity Description
+
+Downloads a file from the FTP server.
+
+:::note
+This activity should be placed after the Start FTP Session activity and refer to the started session.
+:::
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **FTP Session** – The FTP session in which to download the file.
+* **Source File** – The path where the file is located.  
+   Example: `/download/log.txt`
+* **Target Path** – The path to which the file is downloaded.  
+   Example: `C:\log`
+* **Transfer Mode** – The FTP transfer mode.
+
+:::note
+Wildcards are supported.
+:::

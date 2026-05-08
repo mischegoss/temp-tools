@@ -1,0 +1,8 @@
+position: 10
+label: Attributes
+collapsible: true
+collapsed: true
+link:
+  type: doc
+  id: attributes-overview
+

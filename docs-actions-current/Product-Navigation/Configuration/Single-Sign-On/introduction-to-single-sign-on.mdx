@@ -1,0 +1,15 @@
+---
+sidebar_position: 10
+id: introduction-to-single-sign-on
+title: Introduction to Single Sign-On
+description: Resolve Actions can be integrated with third-party SAML Identity Providers (IdPs) such as Azure, Ping Identity, or Okta,  as well as with any custom SAML service.
+---
+
+You can integrate VAR::PRODUCT_FULL with third-party SAML Identity Providers (IdPs) such as Azure, Ping Identity, or Okta, as well as with any custom SAML service. This way, your users will be able to reuse their existing Single Sign-On (SSO) accounts on VAR::PRODUCT. VAR::PRODUCT only supports Azure Active Directory (AD) as a directory service; your IdP must also synchronize with the same Azure AD as VAR::PRODUCT.
+
+VAR::PRODUCT supports Service Provider-initiated SSO. The protocol version that VAR::PRODUCT supports is SAML 2.0.
+
+You can only integrate with a single SSO provider at any given time.
+
+You can use SSO and the local VAR::PRODUCT authentication mechanism in parallel. For example, your administrators could be using local accounts while your automation developers are on SSO accounts. You cannot log in to the same account using both local and SSO authentication, but you can provide different accounts with access to the same content using [roles and permissions](../User-Management/introduction-to-user-management.mdx).
+w

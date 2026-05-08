@@ -1,0 +1,38 @@
+---
+sidebar_position: 20
+id: setting-up-remote-executor-prerequisites
+title: Remote Executor Prerequisites
+---
+## Why a Remote Executor is Required
+
+A Remote Executor is a required component in an Actions deployment. 
+
+The Remote Executor can be any Windows server that meets the prerequisites outlined below and has outbound internet access to connect securely to the Actions platform.
+
+In addition to enabling connectivity to on-premises systems, the Remote Executor is responsible for executing and processing some workflow activities.
+
+## Requirements
+
+Make sure the following are prepared before you run the installation:
+
+* A physical or virtual machine on your premises that meets the following requirements:
+  *   OS: Windows Server 2012 or later
+  *   TLS 1.2 enabled
+  *   Additional software: 
+        *   .NET Framework 4.7.2
+        *   ASP.NET Core Runtime 8.0 [included in the installer]
+        *   .NET Desktop Runtime 9.0 [included in the installer]
+  *   CPU: 2 cores or more
+  *   RAM: 8 GB or more
+  *   Free disk space: 10 GB or more
+  *   Display resolution: 1280x720 (HD) or higher
+  *   Internet connection
+   
+
+- Required network access:
+  - The following ports must be open to allow secure communication with the Resolve Actions platform:
+    - **Port 443** - HTTPS/AMQP over WebSockets
+    - **Port 5671** - AMQP over TLS (secure message queue transport)
+    - **Port 5672** - AMQP (non-TLS messaging, usually internal or fallback)
+  - Alternatively, customers may restrict outbound connectivity to the following DNS endpoint instead of allowing access to the entire public internet on the ports listed above:
+      `b-353e6a96-c909-4160-aba0-0f2e2e2d0114.mq.us-east-1.amazonaws.com`

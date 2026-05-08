@@ -1,0 +1,37 @@
+---
+sidebar_position: 40
+id: text
+title: text
+---
+* **Description:** Static text display (read-only)  
+* **Base Type:** control  
+* **Data Type:** String  
+* **Example Values:** N/A (display only)  
+* **Common Use Cases:** Labels, Instructions, Static information display  
+* **Optional Properties:**  
+  * value (String): The text content to display  
+  * labelAsInnerHtml (Boolean): If true, the label is rendered as HTML content. Default is false
+
+**JSON Example (Plain Text):**  
+
+```
+{
+  "key": "infoLabel",
+  "label": "",
+  "baseType": "control",
+  "controlType": "text",
+  "value": "This is an informational message displayed to the user."
+}
+```
+**JSON Example (HTML Content):** 
+
+```
+{
+  "key": "htmlInfo",
+  "label": "<b>Important:</b> Please review the <a href='#'>documentation</a> before proceeding.",
+  "labelAsInnerHtml": true,
+  "baseType": "control",
+  "controlType": "text",
+  "value": ""
+}
+```

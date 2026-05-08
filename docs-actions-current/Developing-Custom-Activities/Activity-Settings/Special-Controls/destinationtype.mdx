@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: destinationtype
+title: destinationType
+---
+* **Description:** Recipient selection for notifications (User, Group, or Duty)  
+* **Base Type:** destinationType  
+* **Data Type:** User/Group/Duty selection  
+* **Validation Rules:**  
+  * Must select a valid destination type first  
+  * Then select specific recipient based on type  
+  * Validates that recipient exists in the system  
+* **Example Values:** `User: john.doe`, `Group: IT-Support`, `Duty: On-Call`  
+* **Common Use Cases:** Email recipients, Notification targets, Assignment destinations
+
+**JSON Example:**  
+```
+{
+  "key": "recipient",
+  "label": "Recipient",
+  "baseType": "destinationType",
+  "controlType": "destinationType",
+  "value": ""
+}
+```

@@ -1,0 +1,70 @@
+---
+sidebar_position: 30
+id: what-is-an-incident
+title: What is an Incident
+---
+
+An incident is an event that was parsed, resulting in the creation of the following variables:
+
+* **State:** Down/Up. **Down** implies the incident is active and may trigger a workflow (if it complies with a certain trigger). **Up** implies that the incident is a recovery and may trigger a recovery workflow (if it complies with a certain trigger).  
+  :::note
+  Events (which are not incidents) may also trigger a workflow.
+  :::
+* **Classification**: the type of the problem implied by the incoming event. 
+* **Eventname**: Device or Service. 
+* **Severity**: (optional): the severity of the incoming event. The valid values are: Critical, Major, Minor, Warning and Info.
+* **Information**: (optional): a short description of the event.
+    
+## Example
+
+The monitoring system generates the following alert:
+
+```
+70% of Disk C on server SRV1 is used
+```
+
+After parsing this event, an incident is generated with the following variable values:
+
+| Variable Name | Value |
+|---|---|
+| **State** | Down |
+| **Classification** | Disk Full|
+| **Device** | SRV1|
+|**Severity** |Major|
+|**Information**|70% of Disk C on server SRV1 is used|
+
+If after some time, the problem is not handled, the monitoring system generates another alert:
+
+```
+80% of Disk C on server SRV1 is used
+```
+
+After parsing the new event, an additional instance of the *same incident* is created, with the following variable values:
+
+| Variable Name | Value |
+|---|---|
+| **State** | Down |
+| **Classification** | Disk Full|
+| **Device** | SRV1|
+|**Severity** |Critical|
+|**Information**|80% of Disk C on server SRV1 is used|
+
+The reason for not creating a new incident is the unique Classification + Device combination, which indicates that this is another instance of an existing incident.
+
+After clearing some disk space, the monitoring system generates a recovery message:
+
+```
+50% of Disk C on server SRV1 is used
+```
+
+After parsing this event, the incident will be recovered, and the variable values will be as follows:
+
+| Variable Name | Value |
+|---|---|
+| **State** | Up |
+| **Classification** | Disk Full|
+| **Device** | SRV1|
+|**Severity** |Critical|
+|**Information**|50% of Disk C on server SRV1 is used|
+
+Still, the combination of Classification + Device did not change, therefore VAR::PRODUCT_FULL recovers the incident and does not create a new incident (or incident instance).

@@ -1,0 +1,7 @@
+position: 10
+label: Communication
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Communication

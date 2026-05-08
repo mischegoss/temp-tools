@@ -1,0 +1,152 @@
+---
+sidebar_position: 40
+id: form-fields
+title: Form Fields
+---
+
+
+## Field Types
+
+There are different types of fields and various ways to modify them to suit your needs.
+
+### Label
+
+A read-only field with no variable input presented to the User.
+
+Use this field to give a Title to your Form or to differentiate different sections of the Form.
+
+### Text
+
+A short text field where the User can type text to populate a variable.
+
+Use this field for short variables such as:
+
+*   Username
+*   Hostname
+*   Other short texts
+
+### Text Area
+
+A larger text field where the User can type text to populate a variable.
+
+Use this field for longer variables such as:
+
+*   Note
+*   Reason
+*   Journal entry
+*   Other long texts
+
+### Password
+
+A password field where the User can type a password, and the system will mask the text.
+
+### Dropdown
+
+A drop-down list, where the User can pick a variable from a designated list.
+
+The list can be populated from a fixed list of items entered in the Self Service Designer or another workflow that will run when the Form is launched and return a response with all available options.
+
+## Field Properties
+
+Each field has specific properties that can be modified to change how it looks and behaves.
+
+Hover over a field and click the pencil icon to display field properties.
+
+![FieldProperties.png](img/field-properties.png)
+
+### Label Properties
+
+#### Right to Left
+
+Choose the field's text direction.
+
+If the language you are writing is right-to-left, select **Yes**. Otherwise, leave as **No**.
+
+#### Required
+
+Set a field on the form as mandatory.
+
+Any field can be designated as mandatory. A mandatory field must be completed before the user can submit the form.
+
+:::note
+Setting a field as mandatory does not mean there is validation on the field. 
+:::
+
+#### Label
+
+Change the text in the text box to update the name of the field.
+
+Format the text with bold, italics, underline, and strike-through.
+
+You can change the text color and font size, align the text, and choose from several font options.
+
+You can also leave the label field empty. Leaving the field empty will create a space in the Form rather than displaying a real label.
+
+#### Workflow Name
+
+Selecting a workflow is optional; you can either enter a label or run a Workflow when the Form is launched, and display its result (table or text) in the Form.
+
+### Text, Text Area, and Password Properties
+
+#### Label
+
+For Text fields, when using Generate Blocks, the label will automatically be the variable's name, which you can edit to be more friendly.
+
+#### Variable Name
+
+The variable that this field references.  
+
+When the User enters a value in the portal, this field will forward the value to the Workflow.
+
+For Text fields, when using Generate Blocks, the variable name will automatically be the variable listed in the Workflow.
+
+You can choose a different variable if desired. However, you cannot use the same variable twice in the same Form. A duplicated variable will cause an error when saving.
+
+### Dropdown Properties
+
+There are two ways to populate the drop-down list so that users can select the correct drop-down property value.
+
+1.  Select a workflow that will run when this Form launches.
+2.  Create a static list of items.
+
+:::note
+This is not the same Workflow used for the Form we are building, but a different one specifically for populating this field. This Workflow will return a two-column table with this table variable in a Self Service Response activity.  
+
+The first column is the ID. The ID is the actual value used in the activity, and the second value is the Name, which appears on the list.
+:::
+
+Take these steps to select a Workflow:
+
+1.  Click the **Name** radio button.
+2.  Type the name of the desired Workflow to find it in the list.
+3.  Select the desired Workflow.  
+   When the Form launches, the Workflow selected will run first, and the Result of that Workflow will populate the dropdown list available to the user.
+
+:::note
+Use this option if the list you want to generate is dynamic and subject to change.
+:::
+
+Take these steps to create a static list of items:
+
+1.  Click the **List Items** radio button.
+2.  Type the option names that you want on the list.
+3.  Press **Enter** or click the enter icon to add the item to the list.
+4.  If you wish to delete the item, click the **Delete** icon.
+
+:::note
+Use the static list option when you do not expect the list to change and do not want to rely on an additional workflow to populate it.
+:::
+
+## Moving a Field
+
+To move a field, click and hold its four-headed arrow icon and then drag and drop it to the new location.
+
+You can move a field up or down in the field list or to the other column of the form.
+
+## Deleting a Field
+
+To delete a field, hover over it, and click the **Trash** icon.
+
+:::note
+Ensure you are deleting the correct field, as there is no confirmation warning, and you cannot undo the action.
+:::

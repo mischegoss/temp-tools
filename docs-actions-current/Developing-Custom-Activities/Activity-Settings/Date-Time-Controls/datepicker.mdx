@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: datepicker
+title: datePicker
+---
+* **Description:** Calendar-based date selection control  
+* **Base Type:** control  
+* **Data Type:** Date/Time  
+* **Validation Rules:**  
+  * Must be a valid date format  
+  * May have minimum/maximum date constraints  
+  * Format typically: YYYY-MM-DD or locale-specific  
+* **Example Values:** `2024-01-15`, `01/15/2024`  
+* **Common Use Cases:** Start/End dates, Scheduled dates, Date filters  
+* **Optional Properties:**  
+  * value (String): Default date value  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * minDate (String): Minimum selectable date  
+  * maxDate (String): Maximum selectable date
+
+**JSON Example:**  
+```
+{
+  "key": "startDate",
+  "label": "Start Date",
+  "baseType": "control",
+  "controlType": "datePicker",
+  "value": "",
+  "required": true
+}
+```

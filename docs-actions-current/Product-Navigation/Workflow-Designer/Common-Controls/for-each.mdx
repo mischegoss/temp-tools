@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: for-each
+title: For Each
+---
+The ForEach control lets you repeat an activity or set of activities for each row in a table. When given a table of data, it automatically loops through each row and runs the defined activities.
+
+#### Inputs
+
+1. **Table Variable**. The table you want to loop through written in the variable form of *%tableName%*. Tables can be memory tables, JSON objects, or derived from data mapping. A single column from the table can be specified using the variable format *%tableName.columnName%*. 
+2. **Output Variable Name**. This is the name used to reference the current row in the loop. Unique names are recommended if you plan to use multiple ForEach controls in the same workflow. 
+
+The control will run once for each row in the table. For every iteration, the **Output Variable** will hold the current row's data.
+
+#### Supports Multiple Activities
+
+You can place any activities inside the ForEach control, and they will execute in sequence for each row.
+
+#### Additional Considerations
+
+If a table as no rows, the loop is skipped. Or if the specified variable is not a table, the loop is skipped. 
+
+:::note
+The table is cached at the start of the loop and any changes made while the loop is running will not affect the current iteration.
+:::

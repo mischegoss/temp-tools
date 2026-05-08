@@ -1,0 +1,35 @@
+---
+sidebar_position: 10
+id: build-your-first-form
+title: Build Your First Form
+---
+The Self Service designer is a tool that allow you to design forms that integrate user input into preexisting workflows.
+
+For example, you might use the Self Service design to trigger a workflow that assigns VPN credentials or that generates a ticket in your Jira service. 
+
+### The Basics
+
+#### The Worfklow
+
+To create a Self Service form, you must first create a Workflow that includes an activity with variables that will map to field in your form. 
+
+For example, *Name*. If your form requires the user to enter their name, you could assign the variable *%name_input%* to an activity on your workflow.
+
+#### Self Service Response Activity
+
+You will need to include this as the final activity in your Workflow to provide confirmation of form submission to your users. You can use the same input variables in the message to confirm receipt.
+
+#### The Form
+
+Once the workflow is complete, you will create your form, using the variables from your workflow to populate the input fields.
+
+### An Example
+
+In the following example, we will create a short workflow that uses a form to create entries on a table. The table will track employees' birth dates. To populate the form, we will have employees fill in a form with their name and birthdate.
+
+The steps we will use are:
+1. [Create the Workflow](./create-the-workflow.mdx)
+2. [Create the Form](./create-the-form.mdx)
+3. [Test the Form](./test-the-form.mdx)
+
+For more information on the Self-Service Designer, see the navigation overview in [Creating a Self-Service Form](../Product-Navigation/Self-Service-Designer/Creating-a-Self-Service-Form/).

@@ -1,0 +1,7 @@
+position: 60
+label: External Development
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: External Development

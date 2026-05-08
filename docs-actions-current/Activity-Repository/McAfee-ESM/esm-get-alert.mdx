@@ -1,0 +1,21 @@
+---
+sidebar_position: 10
+id: esm-get-alert
+title: ESM Get Alert
+---
+
+## Activity Description
+
+Retrieves a list of McAfee ESM alerts according to the selected time frame and criteria.
+
+## Output
+
+A ResultSet of all matching alerts.
+
+## Settings
+* **Module Name**—The McAfee ESM module name.
+* **Time**:
+  * **Time Frame**—When selecting a time frame (either predefined or custom), only days/hours/minutes are respected. Seconds are rounded off to the nearest minute. This affects the results returned for the specific time frame. Note that time labels in date-related columns are represented in the GMT time zone.
+  * **From Time**—The start date of the time frame.
+  * **To Time**—The end date of the time frame.
+* **Filters**—Filters are applied (by the activity) to alerts that contain values in the specified field. Click **Add** to add filters to the list, or **Edit** to modify the existing filters.

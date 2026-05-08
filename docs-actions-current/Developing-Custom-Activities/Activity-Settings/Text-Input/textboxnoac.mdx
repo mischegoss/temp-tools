@@ -1,0 +1,27 @@
+---
+sidebar_position: 20
+id: textboxnoac
+title: textboxNoAc
+---
+
+* **Description:** Single-line text input without variable autocomplete functionality. Unlike the standard textbox, this control does not provide autocomplete suggestions for workflow variables (variables starting with %).  
+* **Base Type:** control  
+* **Data Type:** String  
+* **Validation Rules:**  
+  * Same as textbox but without variable autocomplete suggestions  
+  * Does not suggest %variable% completions when user types %  
+  * Used when variable substitution is not expected or desired  
+* **Example Values:** unique-identifier-123, custom-value, static-text  
+* **Common Use Cases:** Static values that should not reference workflow variables, Literal strings containing % characters, Fixed identifiers
+
+**JSON Example:**  
+
+```
+{
+  "key": "uniqueIdentifier",
+  "label": "Unique Identifier",
+  "baseType": "control",
+  "controlType": "textboxNoAc",
+  "value": ""
+}
+```

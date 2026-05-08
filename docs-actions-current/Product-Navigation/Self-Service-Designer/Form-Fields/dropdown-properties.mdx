@@ -1,0 +1,37 @@
+---
+sidebar_position: 50
+id: dropdown-properties
+title: Dropdown Properties
+---
+There are two ways to populate the drop-down list so that users can select the correct drop-down property value.
+
+1. Select a workflow that will run when this Form launches.
+2. Create a static list of items.
+
+:::note
+This is not the same Workflow used for the Form we are building, but a different one specifically for populating this field. This Workflow will return a two-column table with this table variable in a Self Service Response activity.  
+
+The first column is the ID. The ID is the actual value used in the activity, and the second value is the Name, which appears on the list.
+:::
+
+Take these steps to select a Workflow:
+
+1. Click the **Name** radio button.
+2. Type the name of the desired Workflow to find it in the list.
+3. Select the desired Workflow.  
+   When the Form launches, the Workflow selected will run first, and the Result of that Workflow will populate the dropdown list available to the user.
+
+:::note
+Use this option if the list you want to generate is dynamic and subject to change.
+:::
+
+Take these steps to create a static list of items:
+
+1. Click the **List Items** radio button.
+2. Type the option names that you want on the list.
+3. Press **Enter** or click the enter icon to add the item to the list.
+4. If you wish to delete the item, click the **Delete** icon.
+
+:::note
+Use the static list option when you do not expect the list to change and do not want to rely on an additional workflow to populate it.
+:::

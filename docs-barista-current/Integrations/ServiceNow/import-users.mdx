@@ -1,0 +1,44 @@
+---
+id: import-users
+title: Import Users from ServiceNow to Barista
+description: Directions for executing user sync.
+sidebar_position: 70
+keywords: [barista, servicenow, integrations] # Used for LLM search enrichment and internal search — include at least 4.
+tags: [integrations, servicenow] 
+---
+:::note
+The steps below are to be completed in ServiceNow, logged in as admin, and in Barista Admin.
+:::
+
+### Filter Users in ServiceNow
+
+1. Login to ServiceNow (https://[instance].service-now.com).
+2. Navigate to **Organization > Users**.  
+3. Build a query to filter the users that you will provision in ServiceNow. (for example, `active=true`).  
+4. Right-click the filter breadcrumb and select **Copy Query**.  
+5. Save the query string for use in Barista.
+
+### Sync Users in Barista
+
+1. Navigate to Barista Admin `{tenant}.espressive.com/admin`.  
+2. Navigate to **Integration Hub > ServiceNow**.  
+3. Open the **User Sync** section.  
+4. Paste the query string from ServiceNow in the **Query** field.  
+5. Click **Run**.  
+6. Review the user count and click **Yes** to confirm. *Confirm that the user count in Barista matches the number of users returned in ServiceNow for the same query. If the numbers do not match, review and correct your query before proceeding.*
+7. Wait for the sync to complete.
+
+**Sync time estimates:**
+- 1-50 users: 30-60 seconds  
+- 50-200 users: 1-3 minutes  
+- 200-500 users: 3-5 minutes  
+- 500+ users: 5-10+ minutes
+
+#### Verify Users
+
+1. In Barista Admin, navigate to **Users > List**.  
+2. Confirm ServiceNow users appear.  
+3. Check:
+   - Names are correct  
+   - Email addresses are populated  
+   - Imported users are marked **Active**

@@ -1,0 +1,35 @@
+---
+sidebar_position: 10
+id: xch-remove-mailbox-content
+title: XCH Remove Mailbox Content
+---
+
+## Activity Description
+
+Deletes all emails from a user's MS Exchange mailbox.
+
+## Settings
+
+
+* **Account Name** – The user's logon name (e.g., `John`).
+* **Host Name** – The Exchange server's name.
+* **User Name** – If required, the user name of an account that has read-write access to the host.
+* **Password** – If required, the password of the account listed in the User Name field.
+
+:::note
+This activity uses an Exchange PowerShell command. To enable this activity, define the **Mailbox Import Export** and **Support Diagnostics** roles:
+
+1. Open a Powershell window from the server where the Actions Executor is installed.
+2. Execute the following commands:
+   ```ps
+   #Enable Exchange cmdlets
+   add-pssnapin *exchange* -erroraction SilentlyContinue
+
+   New-RoleGroup -Name "Exchange Mailbox Import Export" -Roles "Mailbox Import Export" -Members "<domain\groupname>" -DisplayName "Exchange Mailbox Import Export"
+
+   #This group will provide access to mailbox import and export cmdlets within the entire Exchange organization.
+
+   New-RoleGroup -Name "Exchange Support Diagnostics" -Roles "Support Diagnostics" -Members "<domain\groupname>" -DisplayName ""Exchange Support Diagnostics"
+
+   #This group will provide access to support diagnostics cmdlets within entire Exchange organization.
+   ```

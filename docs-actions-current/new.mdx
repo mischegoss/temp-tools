@@ -1,0 +1,111 @@
+---
+sidebar_position: 2
+id: new
+title: What's New
+---
+
+### March 31, 2026
+
+#### What's New
+
+- An updated workflow designer UI enhancing:
+  - [Panel layout](../Product-Navigation/Workflow-Designer/workflow-dashboard#workflow-designer-main-window): Tabs for the Toolbox (which lists Activities and Controls) and Templates. The left-hand panel now includes a search bar and an improved collapse function to maximize workspace.
+  - [Activity Configuration](../Building-Your-Workflow/configuring-activities): Activities are configured by clicking anywhere on the activity card, which opens a right-hand configuration panel. This update also adds reminders to save changes before navigating away.
+  - [Setting the Remote Executor](../Product-Navigation/Workflow-Designer/Parameters/select-executor-module): The activity configuration panel includes a collapsed _Advanced Settings_ section containing Remote Executor settings. Activities that do not use a Remote Executor do not display this option.
+  - [Timeout Settings](../Product-Navigation/Workflow-Designer/Parameters/set-activity-timeout): Activity timeout settings are now located in the collapsed _Advanced Settings_ section alongside Remote Executor options.
+  - [Renaming an Activity](../Product-Navigation/Workflow-Designer/Parameters/update-instance-name): Activities can be renamed in the configuration panel at the top of each card using the _Display Name_ field.
+- Test an Activity: In the Workflow Designer, you can test individual activities by opening the activity configuration panel. For more information, see [Testing an Activity](../Building-Your-Workflow/test-activities).
+
+#### Bug Fixes
+
+- **Ticket: N/A:** Fixed rare issue where imported workflows did not find available modules. 
+- **Ticket: N/A:** Fixed issue where workflows failed to export.
+- **Ticket: N/A:** Fixed issue with the username variable in the Self Service Portal.
+- **Ticket: N/A:** Fixed issue where changes in a text modal window were not saved.
+- **Ticket: N/A:** Fixed issue where checkboxes in the **String Replace** activity were always selected after saving.
+- **Ticket: N/A:** Fixed issue where plan revision history used an incorrect table name in raw SQL form.
+- **Ticket: N/A:** Fixed issue where faulted WCF service proxies were not closed or removed in `UpdateModule()`, causing monitoring threads to stop running and resulting in loss of module communication.
+- **Ticket: N/A:** Fixed rare issue where select workflows could not be reopened after saving.
+- **Ticket: N/A:** Fixed issue where monitoring attempted connections to auto-created device IPs, causing repeated timeouts and infinite proxy retry loops.
+- **Ticket: N/A:** Fixed rare issue where changing the name of an activity did not update corresponding variable references in the workflow.
+- **Ticket: N/A:** Fixed issue where Self Service Variables did not populate for new logins.
+- **Ticket: N/A:** Fixed issue where creating a new user initially appeared as existing users. 
+- **Ticket: N/A:** Fixed a rare issue with engine which could cause a crash during workflow execution.
+
+
+
+### March 2, 2026
+
+#### Bug Fixes
+
+- **Ticket: N/A**: Fixed issue where the WhileActivity variable name appeared the same as the Activity name.
+- **Ticket: N/A**: Fixed issue where the Remote Actions Manager would crash without a visible error message when it was unable to connect to RabbitMQ.
+- **Ticket: N/A**: Fixed issue where the Time Savings hover on the Analytics Dashboard did not display the associated values.
+- **Ticket: N/A**: Fixed issue where OpenAPI-generated activities returned plain text instead of a ResultSet/DataTable.
+- **Ticket: N/A**: Fixed issue where OpenAPI-generated activities failed to compile.
+- **Ticket:N/A**: Fixed issue where, in the *Send Email* activity, the **To User** dropdown list showed no issue selections until the Group filter option was selected or toggled.
+- **Ticket:N/A**: Fixed issue where the *Send Email* activity's **CC user** dropdown showed no results.
+- **Ticket:N/A**: Fixed issue where GmailServiceWrapper had an IDisposable leak that caused TCP socket exhaustion.
+- **Ticket:N/A**: Fixed issue where Self-Service Form returned a silent 400 error for names containing special characters.
+
+
+### November 25, 2025
+
+#### What's New
+
+- A new version of the remote executor that we recommend you [upgrade](../getting-started/setting-up-hybrid-components/updating-the-remote-executor) at your earliest convenience.
+
+#### Bug Fixes
+
+- **Ticket: 8473**: Fixed issue where `AWSGenerateAssumeRoleCredentials` activity fails to maintain token validity in a production workflow.
+- **Ticket: N/A**: Fixed issue with an error passing variables between workflows.
+- **Ticket: N/A**: Updated the system to improve performance in production environments.
+- **Ticket: N/A**: Fixed an issue where the page could crash when changing a control type to “password” after generating a new custom activity.
+- **Ticket: N/A**: Fixed an error with loading Workflows.
+- **Ticket: N/A**: Fixed an issue with the scrollbar on Powershell activity code blocks.
+- **Ticket: N/A**: Fixed issue were parallel activities caused multiple instances of the Workflow. For more information on this fix, see [Parallel control](../Product-Navigation/Workflow-Designer/Common-Controls/parallel).
+- **Ticket: N/A**: Fixed issue where multiple Cloud Comm devices caused duplicate messages in the Remote Executor.
+- **Ticket: N/A**: Fixed issue with incorrect error alerts in the Workflow designer.
+
+### October 28, 2025
+
+#### What's New
+
+- A new version of the remote executor that we recommend you [upgrade](../getting-started/setting-up-hybrid-components/updating-the-remote-executor) at your earliest convenience.
+
+#### Bug Fixes
+
+- **Ticket: 49057/8434**: Fixed issue with PowerShell script execution from the Remote Executor.
+- **Ticket: N/A**: Fixed Activity Designer issue where saving edits failed with an error. The activity source code updates are now sent correctly to the `updateActivity` endpoint.
+- **Ticket: N/A**: Fixed issue where Connection Parameter fields did not render when adding a new Integration.
+- **Ticket: N/A**: Fixed issue causing the user's browser to occasionally crash when editing fields in the Self Service form.
+- **Ticket: N/A**: Fixed issue with **DisplayMultiValue** Activity where variable input field did not appear.
+- **Ticket: N/A**: Updated UI alignment in **SendEmail** Activity.
+- **Ticket: N/A**: Updated workflow revision history to always include the name of the user who saved the revision.
+- **Ticket: N/A**: Fixed issue where the **AdvancedCommunicate** Activity did not map the selected user to an email address.
+
+### September 8, 2025
+
+#### Bug Fixes
+
+- **Ticket: N/A**: Fixed issue in the **Date Difference Activity** where an incorrect calculation occurred when using the “use current date as first date” feature.
+- **Ticket: N/A**: Fixed issue with the hover-over display for the cost saving graph on the **Analytics Dashboard.**
+- **Ticket: N/A**: Fixed issue in the **Self-Service Designer** where titles on labels could not be updated.
+- **Ticket: N/A**: Fixed issue where **Self-Service variables** did not display correctly.
+
+### August 25, 2025
+
+#### What's New
+
+- A new version of the [remote installer](../getting-started/setting-up-hybrid-components) that we recommend you upgrade at your earliest convenience.
+- Updates to our [Slack integration](../activity-guides/slack-integration), including changes to our activity creation feature.
+
+#### Bug Fixes
+
+- **Ticket: N/A** - Fixed issue where AWS Modules did not return forms in Activities.
+- **Ticket: N/A** - Fixed issue where `Table` Global Variables could not be created or edited.
+- **Ticket: N/A** - Fixed issue where imported workflows with custom activities did not appear in the activity designer.
+- **Ticket: N/A** - Fixed issue where global variables imported with workflows did not appear in the variables list.
+- **Ticket: N/A** - Fixed issue where the output from the SelfServiceResponse Activity caused a JSON parsing error.
+- **Ticket: N/A** - Fixed issue where the `IfElseBranch` activity incorrectly evaluated the `Not Equals` condition when the source Activity output is empty.
+- **Ticket: N/A** - Fixed issue with Remote Executor running PowerShell activities.

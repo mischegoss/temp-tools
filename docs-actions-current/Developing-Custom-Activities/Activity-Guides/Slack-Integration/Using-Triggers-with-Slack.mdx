@@ -1,0 +1,44 @@
+---
+sidebar_position: 30
+id: using-triggers-with-slack
+title: Using Triggers with Slack
+---
+
+## Set a Trigger
+
+In Resolve Actions, in the top left hamburger menu, navigate to: 
+
+1. Repository > Schedules and Triggers
+2. Click the **Triggers** dropdown. 
+3. Add a trigger by clicking the plus (+) sign in the top right of the menu.
+4. Enter a **Name** for the trigger. 
+5. Click the **Enabled** checkbox. 
+6. Under the **Conditions** add a *Slack Event* Condition. 
+7. Click **Save.**
+
+#### Example
+
+You can customize your condition as necessary for your environment. An example is:
+
+- **Type**: Global Variables
+- **Object**: rawData
+- **Operator**: Contains
+- **Value**: *Slack App ID*
+
+## Configure Slack Settings
+
+In Slack, under the app settings:
+1. On the Event Subscriptions page, turn on **Enable Events**.
+2. Paste your Resolve event webhook URL into the **Request URL** field.
+3. Subscribe to the events you need. 
+
+Slack will validate the URL by sending a verification request. 
+
+## Event Handling in Workflows
+
+With triggers, you can create workflows that run based on Slack events. 
+
+
+
+
+

@@ -1,0 +1,7 @@
+position: 10
+label: Accounts
+collapsible: true
+collapsed: true
+link:
+  type: doc
+  id: introduction-to-accounts

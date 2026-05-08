@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: aws-copy-image
+title: AWS Copy Image
+---
+
+## Activity Description
+
+Copies an Amazon Web Service image from a specified region.
+
+## Output
+
+The ID of the new image.
+
+## Settings
+
+
+- **Module Name –** The name of the AWS module through which the activity will execute.
+- **Override Connection Parameters –** Copies an existing image on a different AWS account, instead of the original default account saved under the AWS module.
+- **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+- **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+- **Token** – If overriding the connection parameters set at the module level, enter a different token here.
+- **Source Image Region** – The region in which the image is located.  
+  Example: `ap-northeast-1`
+- **Source Image Name/Id** – The name or ID of the source image.  
+  Example: `AP-NE`
+- **Target Image Name** – The name of the image to be created.
+- **Target Image Description** – The description for the image to be created.

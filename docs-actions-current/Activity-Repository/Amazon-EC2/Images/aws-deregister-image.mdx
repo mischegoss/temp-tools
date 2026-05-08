@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: aws-deregister-image
+title: AWS Deregister Image
+---
+
+## Activity Description
+
+Deregisters an existing Amazon Web Service image.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+- **Module Name** – The name of the AWS module through which the activity will execute.
+- **Region** – The region in which the image will be deregistered.  
+  Example: `ap-northeast-1`
+- **Image Name/Id** – The image name or the ID of the AMI.
+- **Override Connection Parameters** – Used to deregister an image on a different AWS account, instead of the original default account saved under the AWS module.
+- **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+- **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+- **Token** – If overriding the connection parameters set at the module level, enter a different token here.

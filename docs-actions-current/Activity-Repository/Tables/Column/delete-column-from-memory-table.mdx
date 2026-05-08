@@ -1,0 +1,17 @@
+---
+sidebar_position: 10
+id: delete-column-from-memory-table
+title: Delete Column from Memory Table
+---
+
+## Activity Description
+
+Deletes columns from a table based on their index.
+
+## Settings
+* **Table Variable**—The name of the table (variable names must follow the convention %Variable%).
+* **Columns**—The name of the location of the columns to delete (set multiple columns using a comma. For example 1,2,5 or A,C,F).
+
+:::note
+If you try to delete a column that doesn't exist in the table, the activity will execute successfully but nothing will be deleted. Similarly, if you delete, for example, ten existing and five non-existing columns from a table, the activity will also execute successfully and result in the ten existing ones being deleted.
+:::

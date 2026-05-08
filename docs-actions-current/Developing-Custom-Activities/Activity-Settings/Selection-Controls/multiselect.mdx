@@ -1,0 +1,63 @@
+---
+sidebar_position: 60
+id: multiselect
+title: multiSelect
+---
+* **Description:** Selection control allowing multiple choices from a list. Displays a summary like "3 fields selected" or "1 property selected" based on the number of selections. Selected values are joined using a configurable delimiter.  
+* **Base Type:** control  
+* **Data Type:** String (selected values joined by delimiter)  
+* **Validation Rules:**  
+  * Zero or more options can be selected  
+  * Returns selected values joined by the pairsDelimiter  
+* **Example Values:** `City`, `Company` ,`Country`  (comma-delimited), `Field1\\\\nField2\\\\nField3` (newline-delimited)  
+* **Common Use Cases:** Selecting AD properties to copy, Choosing fields to retrieve, Multi-value filters  
+* **Required Properties:**  
+  * controlOptions (Array): List of available options, each with key and value  
+* **Optional Properties:**  
+  * value (String): Default selected values (joined by delimiter)  
+  * pluralItemsDisplayValue (String): Display text when multiple items are selected (e.g., "fields" shows "3 fields selected")  
+  * singleItemDisplayValue (String): Display text when one item is selected (e.g., "field" shows "1 field selected")  
+  * pairsDelimiter (String): Delimiter used to join selected values. Default is ",". Use `\\n` for newline-separated values  
+  * initialSelection (Array): Array of key values to pre-select by default  
+  * fieldToSave (String): Which field from controlOptions to save - "key" or "value"  
+  * fieldToShow (String): Which field from controlOptions to display  
+  * autocompleteParams (Object): For dynamic options from API (e.g., `{ entityType: 27 }`)
+  * required (Boolean): If true, at least one item must be selected. Default is false  
+  * styleClass (String): CSS class for styling (e.g., "one-line")
+
+**JSON Example:**  
+```
+{
+  "key": "Properties",
+  "label": "Properties",
+  "baseType": "control",
+  "controlType": "multiSelect",
+  "styleClass": "one-line",
+  "pluralItemsDisplayValue": "properties",
+  "singleItemDisplayValue": "property",
+  "pairsDelimiter": ",",
+  "initialSelection": ["Groups"],
+  "controlOptions": [
+    {
+      "key": "l",
+      "value": "City"
+    },
+    {
+      "key": "company",
+      "value": "Company"
+    },
+    {
+      "key": "c",
+      "value": "Country"
+    },
+    {
+      "key": "department",
+      "value": "Department"
+    },
+    {
+      "key": "memberOf",
+      "value": "Groups"
+    }
+  ]
+}
+```

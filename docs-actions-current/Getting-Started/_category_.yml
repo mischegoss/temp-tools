@@ -1,0 +1,8 @@
+position: 10
+label: Getting Started # This controls how it appears in the sidebar
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Getting Started
+  

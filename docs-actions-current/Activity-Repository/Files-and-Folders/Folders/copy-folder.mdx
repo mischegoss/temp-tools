@@ -1,0 +1,36 @@
+---
+sidebar_position: 10
+id: copy-folder
+title: Copy Folder
+---
+
+## Activity Description
+
+Copies the contents of a specified folder from a source location to a destination location.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Source**
+    * **Path** – The path of the source folder.
+    * **Host Name** – The host name or IP address.
+    * **User Name** – If required, the username of an account that has read-write access to the host.
+    * **Password** – If required, the password of the account listed in the User Name field.
+    * **Include Subfolders** – Determines whether or not to copy folders that reside within the folder to the destination folder.
+* **Destination**
+    * **Path** – The path of the destination folder (where the contents are pasted).
+    * **Host Name** – The host name or IP address.
+    * **User Name** – If required, the username of an account that has read-write access to the host.
+    * **Password** – If required, the password of the account listed in the User Name field.
+
+:::note
+If the folder's contents are copied to a remote machine, use the remote location path (e.g., `\\machine name\c$\...`).
+:::
+
+:::note
+In case the destination folder does not already exist, it will be automatically created.
+:::

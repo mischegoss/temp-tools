@@ -1,0 +1,7 @@
+position: 10
+label: Network
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Network

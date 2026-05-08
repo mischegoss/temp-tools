@@ -1,0 +1,26 @@
+---
+sidebar_position: 10
+id: aws-delete-volume
+title: AWS Delete Volume
+---
+
+## Activity Description
+
+Deletes an existing Amazon Web Service volume from an instance.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Region** – The region in which the instance resides.  
+   Example: `ap-northeast-1`
+* **Volume Name/Id** – The name or ID of the volume to delete.  
+   Example: `vol-1234567890abcdef0`
+* **Override Connection Parameters** – Used to delete an existing volume on a different AWS account, instead of the original default account saved under the AWS module.
+* **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.

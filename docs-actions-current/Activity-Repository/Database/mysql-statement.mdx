@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: mysql-statement-activity
+title: MySQL Statement
+---
+
+## Activity Description
+
+Runs a statement (INSERT, DELETE and UPDATE) on a MySQL database.
+
+:::note
+To use MySQL activities, you need to install [MySQL Connector Net 6.4.4](http://www.mysql.com/downloads/connector/net/) on the machine where the VAR::PRODUCT_FULL executor is installed.  
+After installing the MySQL Connector, contact your Resolve representative for updating the path to the connector in the activity's configuration.
+:::
+
+## Settings
+
+* **Statement** – The query's text (e.g., `Delete from hosts Where name='server1'`). For example, Delete from logs.
+* **Connection String** – Specifies the required connection string in order to connect the database.  
+  Example: `Server=SRV01;Database=myDataBase;`
+* **User Authentication** – Determines whether a user's authentication credentials are required to execute the query (if the credentials are not specified in the clear text connection string).
+* **User Name** – A MySQL user authorized to execute the query (e.g., `sa`).
+* **Password** – The user's password.
+
+:::note
+To avoid translation of `%TEXT%` (in case `TEXT` is not a variable name), add `@` before the percentage character. For example: `Select * From TableName Where ColumnName LIKE '@%TEXT%'`.
+:::
+
+:::note
+To use the word `variable` within a statement, use the following convention: `@%variable%` (else it is referred to as a system variable).
+:::

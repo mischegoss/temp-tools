@@ -1,0 +1,8 @@
+position: 50
+label: Home Page # This controls how it appears in the sidebar
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Home Page
+  slug: Product-Navigation/Home-Page # Add this line to control the URL

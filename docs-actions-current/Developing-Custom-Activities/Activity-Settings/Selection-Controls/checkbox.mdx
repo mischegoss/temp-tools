@@ -1,0 +1,29 @@
+---
+sidebar_position: 10
+id: checkbox
+title: checkbox
+---
+* **Description:** Boolean toggle for enabling/disabling options  
+* **Base Type:** control  
+* **Data Type:** Boolean  
+* **Validation Rules:**  
+  * Only accepts true/false values  
+  * Default state may be checked or unchecked  
+* **Example Values:** `true`, `false`  
+* **Common Use Cases:** Feature toggles, Option flags, Yes/No settings  
+* **Optional Properties:**  
+  * `value` (String): Default value - `"true"` for checked, `""` or `"false"` for unchecked  
+  * `checked` (Boolean): If `true`, the checkbox is checked by default  
+  * `inline` (Boolean): If `true`, displays the checkbox inline. Default is `false`.  
+  * required (Boolean): If `true`, the field must be filled. Default is `false`.
+
+**JSON Example:**  
+```
+{
+  "key": "enableFeature",
+  "label": "Enable Feature",
+  "baseType": "control",
+  "controlType": "checkbox",
+  "checked": true
+}
+```

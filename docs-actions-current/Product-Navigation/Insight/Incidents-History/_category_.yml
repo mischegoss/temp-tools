@@ -1,0 +1,8 @@
+position: 40
+label: Incidents History
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Incidents History
+

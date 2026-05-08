@@ -1,0 +1,30 @@
+---
+sidebar_position: 10
+id: wait-for-input-activity
+title: Wait for Input
+---
+
+## Activity Description
+
+Pauses the workflow until a recipient's input that complies with a specified condition is received.
+
+## Settings
+
+
+* **Default Time Format/Use Variable** – Determines whether to use a constant time value or a variable. Default Time Format uses the timeout listed in the activity; by default this is one minute for most activities.
+* **Time Interval** – If you elected to use a variable time value, set the time unit that the variable represents.
+* **Time** – The name of the variable holding a numeric value.
+
+:::note
+To refer to the incoming email information, use the following syntax:
+
+%waitForInput1.body%
+
+%waitForInput1.source%
+
+%waitForInput1.subject%
+
+%waitForInput1.username%
+
+%waitForInput1.userfullname%
+:::

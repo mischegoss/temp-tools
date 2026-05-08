@@ -1,0 +1,42 @@
+---
+sidebar_position: 10
+id: button
+title: button
+---
+* **Description:** Clickable button for triggering actions. Typically used for UI interactions within the activity settings panel.  
+* **Base Type:** control  
+* **Data Type:** N/A (Action trigger)  
+* **Validation Rules:**  
+  * No input validation (action only)  
+  * May be disabled based on form state  
+* **Common Use Cases:** Generate values, Trigger operations, Form interactions
+
+**Optional Properties:**
+
+* label (String): Button text (supports HTML)  
+* styleClass (String): CSS class for styling  
+* disabled (Boolean): If true, button is disabled
+
+**JSON Example:**  
+```
+{
+  "key": "generateBtn",
+  "label": "Generate",
+  "baseType": "control",
+  "controlType": "button",
+  "value": ""
+}
+```
+
+**JSON Example (With Styling):**  
+```
+{
+  "key": "refreshBtn",
+  "label": "Refresh",
+  "styleClass": "secondary-button",
+  "baseType": "control",
+  "controlType": "button",
+  "value": "",
+  "disabled": false
+}
+```

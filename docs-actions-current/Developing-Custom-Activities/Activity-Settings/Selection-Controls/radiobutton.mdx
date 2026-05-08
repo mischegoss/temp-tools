@@ -1,0 +1,45 @@
+---
+sidebar_position: 20
+id: radiobutton
+title: radiobutton
+---
+* **Description:** Simple single selection from a predefined list of mutually exclusive options. Each option is a standalone choice with no additional input fields.  
+* **Base Type:** control  
+* **Data Type:** String (Single selection)  
+* **Validation Rules:**  
+  * Only one option can be selected at a time  
+  * Must select from predefined options  
+* **Example Values:** `JSON`, `XML`, `CSV`  
+* **Common Use Cases:** Output format selection, Simple mode selection, Yes/No choices  
+* **Required Properties:**  
+  * controlOptions (Array): List of available options, each with label (display text) and value (stored value)  
+* **Optional Properties:**  
+  * value (String): Default selected value (should match one of the controlOptions values)  
+  * styleClass (String): Use "one-line" to display options horizontally instead of vertically  
+  * required (Boolean): If true, the field must be filled. Default is false
+
+**JSON Example:**  
+```
+{
+  "key": "outputFormat",
+  "label": "Output Format",
+  "baseType": "control",
+  "controlType": "radiobutton",
+  "styleClass": "one-line",
+  "value": "JSON",
+  "controlOptions": [
+    {
+      "label": "JSON",
+      "value": "JSON"
+    },
+    {
+      "label": "XML",
+      "value": "XML"
+    },
+    {
+      "label": "CSV",
+      "value": "CSV"
+    }
+  ]
+}
+```

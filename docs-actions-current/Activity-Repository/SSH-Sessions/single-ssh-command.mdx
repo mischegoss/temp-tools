@@ -1,0 +1,30 @@
+---
+sidebar_position: 10
+id: single-ssh-command-activity
+title: Single SSH Command
+---
+
+## Activity Description
+
+Sends a single SSH protocol command.
+
+:::note
+
+"Single SSH Command" opens an SSH session, executes the command and terminates the session.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Host Name** – The host name or IP address.
+* **User Name** – If required, the username of an account that has read-write access to the host.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Port** – The default port of SSH is 22.
+* **Certification Type** – Select the certification type (the default is None).
+* **Certification Path** – If selected a certification type, enter the full path to the certification.
+* **Command** – The SSH command you wish to run (e.g., `ls –la /etc`).
+* **Return** – The return can be either STD Out or Exit Code.
+

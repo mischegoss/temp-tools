@@ -1,0 +1,85 @@
+---
+sidebar_position: 10
+id: configuring-the-slack-integration
+title: Configuring the Slack Integration
+---
+The Resolve Actions Platform provides built-in activities to integrate with Slack. Using these, you can automate actions, including sending messages, managing channels, and responding to Slack events in real time. 
+
+The activities available are:
+
+- [Slack Archive Channel](../../../Activity-Repository/Slack/slack-archive-channel.mdx)
+- [Slack Create Channel](../../../Activity-Repository/Slack/slack-create-channel.mdx)
+- [Slack Invite to Channel](../../../Activity-Repository/Slack/slack-invite-to-channel.mdx)
+- [Slack Kick from Channel](../../../Activity-Repository/Slack/slack-kick-from-channel.mdx)
+- [Slack List Users](../../../Activity-Repository/Slack/slack-list-users.mdx)
+- [Slack Send Message](../../../Activity-Repository/Slack/slack-send-message.mdx)
+
+:::note
+
+All of the prerequisite configuration listed below will occur on the Slack site itself.
+
+:::
+
+## Prerequisites
+
+To use the Slack integration, you will need to own a Workspace in Slack and create an Slack app from the [api.slack.com](https://api.slack.com/) menu.
+
+Once you create the app, you will need:
+
+- App ID (under *Basic Information*)
+- Signing Secret (under *Basic Information*)
+- Bot Token (under *OAuth & Permissions*)  
+
+You will need to copy the App ID and the Signing Secret directly from this page. 
+
+### Bot Token Scopes
+
+Before generating the Bot Token,
+1. Navigate to **OAuth & Permissions**.
+2. Add the scopes listed below under **Scopes > Bot Token Scopes.**
+3. Scroll up to the **OAuth Tokens** section and install the bot to your environment.
+4. This will generate the **Bot User OAuth Token**.
+
+#### Bot Token Scopes
+
+- `channels:history`
+- `channels:manage`
+- `channels: write.invites`
+- `chat:write`
+- `groups:write`
+- `im:write`
+- `mpim:write`
+- `users:read`
+
+:::note
+
+If a required scope is missing, Resolve will return an error message listing which scopes need to be added.
+
+:::
+
+## Set Global variables
+
+Once you have completed the steps listed above, keep your Slack settings open to copy the required information into Resolve Actions. 
+
+1. In the top left hamburger menu, navigate to **Repository > General**.
+2. Click the **Global Variables** dropdown.
+3. Find the **SlackBotToken** and click the name to open its configuration module.
+    - Enter the Slack bot token taken from the **OAuth & Permissions** screen by clicking **Change Password**.
+    - **Save** the configuration.
+4. Find the **SlackSigningSecret** variable and click the name top open its configuration module.
+    - Enter the Signing Secret by clicking **Change Password**.
+    - **Save** the configuration.
+
+
+## Add Event Subscriptions
+
+To enable Resolve Actions to receive incoming data from Slack, configure **Event Subscriptions** in Slack as follows:
+
+1. In the Resolve Actions platform, navigate to the top hamburger menu and **Configuration > API Access**.
+2. Copy the **Events URL.**
+3. Navigate back to **api.slack.com**.
+4. In the left-hand menu, click **Event Subscriptions**.
+5. Paste the **Events URL** into the **Request URL** field. 
+6. Once the connection is verified, toggle **On** in the upper right corner to enable the subscription.
+7. Under **Subscribe to bot events**, select *message.channels* to subscribe to Slack messages. Add additional events as needed.
+8. Click **Save**.

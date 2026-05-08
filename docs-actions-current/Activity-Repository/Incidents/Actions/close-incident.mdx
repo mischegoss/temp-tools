@@ -1,0 +1,22 @@
+---
+sidebar_position: 10
+id: close-incident
+title: Close Incident
+---
+
+## Activity Description
+
+Closes an incident (the activity does not terminate the workflow).
+
+## Settings
+
+
+* **Use Current Incident/Use Another Incident** – Determines whether to close the incident that triggered the workflow, or another incident.
+* **Type: Device/Service** – Determines whether the incident is ascribed to a Device or a Service.
+* **Name** – The name of the constant/dynamic incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%DeviceName%`
+* **Classification** – The classification of the incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%AlertType%`
+* **Reason** – The reason for closing the incident is registered to the workflow's log. The reason is documented in Actions Incident History.
+* **Send Notification** – Notify the recipients who received the previous notification within the scope of this incident. All recipients will be contacted via the same manner they were previously contacted.
+* **Terminate Workflow** – Check to terminate the workflow that was triggered by the incident.

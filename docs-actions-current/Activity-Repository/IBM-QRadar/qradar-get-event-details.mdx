@@ -1,0 +1,23 @@
+---
+sidebar_position: 10
+id: qradar-get-event-details-activity
+title: QRadar Get Event Details
+---
+
+## Activity Description
+
+Gets a list of QRadar events/flows according to the selected criteria.
+
+## Output
+
+A ResultSet of all matching events/flows.
+
+## Settings
+
+
+* **Module Name** – The name of the IBM QRadar module that will execute this activity.
+* **Event Type** – The type of event you wish to get details for. Events are correlated to Log Activity, and Flows are correlated to Network Activity.
+* **Time Frame** – When selecting a time frame (either predefined or custom), only days/hours/minutes are respected. Seconds are rounded off to the nearest minute. This affects the results returned for the specific time frame.
+* **From Time** – Choose the From Time (custom) for the event.
+* **To Time** – Choose the To Time (custom) for the event.
+* **Filters** – Filters are applied (by the activity) to events/flows that contain values in the specified field. Filters should be as specific as possible.

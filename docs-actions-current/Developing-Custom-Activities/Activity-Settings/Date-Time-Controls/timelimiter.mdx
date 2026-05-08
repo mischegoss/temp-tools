@@ -1,0 +1,29 @@
+---
+sidebar_position: 20
+id: timelimiter
+title: timeLimiter
+---
+* **Description:** Time duration or time limit configuration control  
+* **Base Type:** control  
+* **Data Type:** Time Duration  
+* **Validation Rules:**  
+  * Format: `D.HH:MM:SS` or `HH:MM:SS`  
+  * Must be a positive duration  
+  * May have maximum limit  
+* **Example Values:** `1.00:00:00 (1 day)`, `00:05:00 (5 minutes)`  
+* **Common Use Cases:** Event age limits, Timeout settings, Time filters  
+* **Optional Properties:**  
+  * value (String): Default time duration value  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * max (String): Maximum allowed duration
+
+**JSON Example:** 
+```
+{
+  "key": "maxAge",
+  "label": "Maximum Age",
+  "baseType": "control",
+  "controlType": "timeLimiter",
+  "value": "1.00:00:00"
+}
+```

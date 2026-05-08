@@ -1,0 +1,99 @@
+---
+sidebar_position: 30
+id: filtersettingscontrol
+title: filterSettingsControl
+---
+* **Description:** Advanced filter grid for module-based data queries. Provides a Name/Relation/Value grid where users can build filter conditions. The field names, operators, and possible values are loaded dynamically from a selected module/form.  
+* **Base Type:** control  
+* **Data Type:** XML or JSON (serialized filter conditions)  
+* **Validation Rules:**  
+  1. Must define valid field names from the available fields source  
+  2. Operators must match field data types (string, number, date, etc.)  
+  3. Values must be compatible with selected operator  
+  4. Cannot have duplicate field+operator combinations  
+* **Important:** This control **cannot work in isolation**. It requires:  
+  1. A parent activity of type module-table that manages module/form selection  
+  2. Dynamic fieldNameSource populated at runtime when a module/form is selected  
+  3. Dynamic fieldOperatorSource with operators per field type  
+  4. A parsingConfig object with structureType for serialization  
+* **Common Use Cases:** ServiceNow record queries, Jira issue filtering, SCOM alert filtering, Salesforce record queries, and other module-based "Get" activities
+
+**Required Properties:**
+
+* parsingConfig (Object): Configuration for XML/JSON serialization:  
+  * structureType (String): Serialization format \- "table" (default), "dupFilterVal" (SCOM-style), or "json"
+
+**Optional Properties:**
+
+* value (String): Initial serialized filter data  
+* required (Boolean): If true, at least one filter must be configured. Default is false  
+* xmlFieldsMap (Array): Custom XML tag mapping for serialization (used with structureType: "table")  
+* xmlTagName (String): Custom XML tag name for the filter collection
+
+**structureType Options:**
+
+| Value | Description | Example Activities |
+| :---- | :---- | :---- |
+| table | Default XML format with customizable xmlFieldsMap | ServiceNow Get Record, Jira Get Issue |
+| dupFilterVal | SCOM-style duplicate filter values format | SCOM Get Alert |
+| json | JSON string serialization | Custom JSON-based modules |
+
+**JSON Example (ServiceNow Style with xmlFieldsMap):**  
+```
+{
+  "value": "",
+  "disabled": false,
+  "required": true,
+  "key": "XMLTableResult",
+  "label": "",
+  "styleClass": "one-line",
+  "baseType": "control",
+  "controlType": "filterSettingsControl",
+  "controlOptions": [],
+  "xmlFieldsMap": [
+    {
+      "tagName": "FilterName",
+      "tagValue": "name",
+      "encode": true
+    },
+    {
+      "tagName": "Operator",
+      "tagValue": "operator.labelField",
+      "encode": true
+    },
+    {
+      "tagName": "Valueitems",
+      "tagValue": [
+        {
+          "tagName": "FilterValue",
+          "tagValue": "value.labelField",
+          "encode": true
+        }
+      ]
+    },
+    {
+      "tagName": "VariableDate",
+      "tagValue": "False"
+    }
+  ]
+}
+```
+
+**JSON Example (SCOM Style with dupFilterVal):** 
+```
+{
+  "value": "",
+  "disabled": true,
+  "required": true,
+  "key": "XMLTableResult",
+  "parsingConfig": {
+    "structureType": "dupFilterVal"
+  },
+  "label": "",
+  "styleClass": "one-line",
+  "baseType": "control",
+  "controlType": "filterSettingsControl"
+}
+```
+
+**Note:** The field dropdown options (fieldNameSource) and operators (fieldOperatorSource) are populated dynamically by the parent module-table activity when the user selects a Module Name and Form Name. This control will appear empty until those parent controls trigger the field loading.

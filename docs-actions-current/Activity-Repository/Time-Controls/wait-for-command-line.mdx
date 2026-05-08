@@ -1,0 +1,34 @@
+---
+sidebar_position: 10
+id: wait-for-command-line-activity
+title: Wait for Command Line
+---
+
+## Activity Description
+
+Pauses the workflow until a Resolve Actions CMD message that complies with a specific condition is received.
+
+:::note
+This activity must be followed by an If-Else activity. The If-Else activity must contain a ReturnValue activity in which a custom condition refers to the Actions CMD message.
+:::
+
+## Settings
+
+
+* **Default Time Format/Use Variable–** Determines whether to use a constant time value or a variable. Default Time Format uses the timeout listed in the activity; by default this is one minute for most activities.
+* **Time Interval** – If you elected to use a variable time value, set the time unit that the variable represents.
+* **Time** – The name of the variable holding a numeric value.
+
+:::note
+To use to the incoming command information, use the following syntax:
+
+%waitForCMD1.body%
+
+%waitForCMD1.source%
+
+%waitForCMD1.subject%
+
+%waitForCMD1.username%
+
+%waitForCMD1.userfullname%
+:::

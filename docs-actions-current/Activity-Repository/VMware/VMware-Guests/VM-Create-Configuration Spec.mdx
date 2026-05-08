@@ -1,0 +1,44 @@
+---
+sidebar_position: 10
+id: vm-create-configuration-spec
+title: VM Create Configuration Spec
+---
+
+:::note
+To be able to use the activity, you need to install [VMware PowerCLI](https://developer.vmware.com/web/tool/vmware-powercli) on the VAR::PRODUCT_FULL Executor server.
+:::
+
+## Activity Description
+
+Creates a Virtual Machine customization specification file that can be used when cloning a Virtual Machine.
+
+## Output
+
+Success/Failure
+
+## Settings
+* **Host Name**—The host name or IP address. This must be either the vCenter device or the ESXi device (you can configure the device with **Platform** type **vCenter/ESXi** under [Devices](../../../Product-Navigation/Repository/Incident-Configuration/Devices.mdx).)
+* **User Name**—The user name of an account that has read/write access to the host. 
+* **Password**—The password of the account listed in the User Name field.
+* **Specification Name**—The name of the new customization specification file. 
+* **Registration** section—Defines the **Name**, **Organization**, and the **Computer Name**. 
+  * **Use VM name as the computer name**—Select to use the VM name as the computer name. 
+* **License** section —Defines the licensing method. 
+  * **Product Key**—The license product key. 
+  * **Include server licensing information (Per seat/Per Server)**—Select to include information about the server licensing. 
+  * **Maximum Connections**—If **Per Server** is selected, input the maximum number of connections. 
+* **Administrator Password** section—Defines the Administrator's credentials for accessing the machine.
+  * **Automatically log on as Administrator**—Select to automatically log on as Administrator. 
+  * **Number of times to log on automatically**—If **Automatically log on as Administrator** is selected, type the number of times to log on automatically. 
+* **Run Once > Run command after boot**—Defines the command to run upon the machine's boot. 
+* **IP Address**—Defines the IP address details.
+  * **Use DHCP**—Select to use DHCP IP settings. 
+  * **Use the following IP settings**—Select to use custom IP settings (**IP Address**, **Subnet Mask**, **Default Gateway**, and **Alternate Gateway**). 
+* **DNS Server** section—Defines the DNS server details.
+  * **Use DHCP**—If required, the password of the account listed in the **User Name** field. 
+  * **Use the following IP settings**—Select to use custom IP settings (**Default DNS Server** and **Secondary DNS Server**). 
+* **Domain** section—Defines the domain and workgroup to which the machine belongs. 
+  * **Workgroup**—Select to use the workgroup of the domain (for example, "Administrators"). 
+  * **Windows Server Domain**—Select to use the Windows server domain (instead of the workgroup).
+* **OS Options > Generate new Security Id**—Select to generate a new Security ID.
+

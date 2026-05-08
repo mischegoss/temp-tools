@@ -1,0 +1,8 @@
+position: 70
+label: Activity Repository
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Activity Repository
+  slug: activity-repository

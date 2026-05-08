@@ -1,0 +1,17 @@
+---
+sidebar_position: 30
+id: json
+title: JSON
+---
+In the activity designer, the JSON tab is where you can write the custom activity's frontend code, which is how the UI box of each custom activity is created.
+
+The JSON of the Activity Designer includes:
+
+1. **General properties** (begins with the "data" property):
+
+- **name**: activity's name (eg., `"name":"Add Spaces"`)
+- **description**: A brief description of the activity. (e.g., `"description": "Add a space between chars"`).
+- **timeout**: The activity's timeout period (e.g., `"Timeout": "00:01:00"`)
+- **activitySettings**: An array of control objects representing the activity's configurable settings (e.g., `"activitySettings": []`)
+
+2. **Control Properties** (under "activitySettings"): Each control has mandatory and optional properties, with some controls featuring unique properties specific to their functionality.

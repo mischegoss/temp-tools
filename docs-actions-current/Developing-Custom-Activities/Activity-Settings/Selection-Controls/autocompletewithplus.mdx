@@ -1,0 +1,82 @@
+---
+sidebar_position: 90
+id: autocompletewithplus
+title: autocompleteWithPlus
+---
+* **Description:** Autocomplete field with ability to add new entries directly to the system. When the user types a value that doesn't exist, they can create it as a new entity. **Requires** autocompleteParams with entityType to function properly \- the entityType determines what kind of entity can be created (e.g., Commands, MessageTemplates, Devices).  
+* **Base Type:** control  
+* **Data Type:** String (Searchable with add capability)  
+* **Validation Rules:**  
+  * Can search and select existing values  
+  * Can create new entries if not found (opens creation dialog)  
+  * Selected/created value's ID is stored in the field specified by idFieldName  
+* **Example Values:** `ExistingCommand`, `NewTemplate`, `server-prod-01`  
+* **Common Use Cases:** Command selection with ability to create new commands, Template selection with creation, Host/device selection  
+* **Required Properties:**  
+  * autocompleteParams (Object): Configuration specifying the entity type:  
+    * entityType (Number): EntityTypes enum value (see autocomplete section for full list)  
+* **Optional Properties:**  
+  * value (String): Default selected value  
+  * idFieldName (String): Field name to store the selected item's ID (e.g., "CommandNumber", "TemplateNumber")  
+  * idDefaultValue (String): Default ID value (typically "0" or "-2")  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * disabled (Boolean): If true, the control is read-only
+
+**Common EntityTypes for autocompleteWithPlus:**
+
+| Value | Name | Description |
+| :---- | :---- | :---- |
+| 2 | Device | Device/server selection with creation |
+| 10 | Commands | Command/executor selection with creation |
+| 35 | MessageTemplates | Message template selection with creation |
+| 78 | DeviceWithNoMaster | Device without master selection |
+
+**JSON Example (Command Selection - Executor Activity):**  
+```
+{
+  "key": "Command",
+  "label": "Command",
+  "baseType": "control",
+  "controlType": "autocompleteWithPlus",
+  "value": "",
+  "idFieldName": "CommandNumber",
+  "idDefaultValue": "0",
+  "required": true,
+  "autocompleteParams": {
+    "entityType": 10
+  }
+}
+```
+
+**JSON Example (Message Template Selection - Send Email):**  
+```
+{
+  "key": "TemplateName",
+  "label": "Template Name",
+  "baseType": "control",
+  "controlType": "autocompleteWithPlus",
+  "value": "",
+  "idFieldName": "TemplateNumber",
+  "required": true,
+  "autocompleteParams": {
+    "entityType": 35
+  }
+}
+```
+
+**JSON Example (Host Selection - Standard Pattern):**  
+```
+{
+  "key": "HostName",
+  "label": "Host Name",
+  "baseType": "control",
+  "controlType": "autocompleteWithPlus",
+  "value": "",
+  "idFieldName": "HostId",
+  "idDefaultValue": "-2",
+  "required": true,
+  "autocompleteParams": {
+    "entityType": 78
+  }
+}
+```

@@ -1,0 +1,7 @@
+position: 10
+label: Application Pools
+collapsible: true
+collapsed: true
+link:
+  type: doc
+  id: introduction-to-application-pools

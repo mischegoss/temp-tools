@@ -1,0 +1,98 @@
+---
+sidebar_position: 20
+id: gridcontrolextended
+title: gridControlExtended
+---
+* **Description:** Extended grid control for displaying and editing tabular data with configurable columns. Supports multiple serialization formats (XML, JSON, inline string, dictionary) and column templates for read-only or editable cells with autocomplete.  
+* **Base Type:** control  
+* **Data Type:** Serialized grid data (XML, JSON, inline string, or dictionary format)  
+* **Validation Rules:**  
+  * Column definitions must match data structure  
+  * Editable columns accept user input  
+  * Non-editable columns display read-only values  
+* **Common Use Cases:** Field mapping, User synchronization, Property mapping, Parameter configuration
+
+**Required Properties:**
+
+* outputConfig (Object): Serialization configuration:  
+  * type (String): Output format - "xml", "json", "inlineStr", or "dictionary"  
+  * xmlKey (String): For XML type - property name for key attribute  
+  * xmlValue (String): For XML type - property name for value attribute  
+  * xmlRoot (String): For XML type - root element name  
+* tableOptions (Object): Grid configuration:  
+  * columns (Array): Column definitions with:  
+    * name (String): Column header display name  
+    * prop (String): Property name in row data  
+    * templateType (String): "input" for text, "dropdown" for select, "acInput" for autocomplete  
+    * isEditable (Boolean): If true, column values can be edited  
+    * fieldToSave (String): For dropdown/acInput - which field to save ("key" or "value")  
+    * fieldToShow (String): For dropdown/acInput - which field to display  
+  * rows (Array): Initial row data with values  
+  * sources (Object): Dropdown/autocomplete options keyed by column prop name
+
+**Optional Properties:**
+
+* value (String): Initial serialized grid data  
+* required (Boolean): If true, grid must have valid data
+
+**JSON Example (AD Users Synchronization - Field Mapping):**  
+```
+{
+  "key": "fieldMappingGroup",
+  "label": "Field Mapping",
+  "baseType": "group",
+  "activitySettings": [
+    {
+      "value": "",
+      "required": true,
+      "key": "Map",
+      "label": "",
+      "styleClass": "one-line",
+      "baseType": "control",
+      "controlType": "gridControlExtended",
+      "outputConfig": {
+        "type": "xml",
+        "xmlKey": "eyeShareProperty",
+        "xmlValue": "adProperty",
+        "xmlRoot": "root"
+      },
+      "tableOptions": {
+        "rows": [
+          { "eyeShareProperty": "FirstName", "adProperty": {} },
+          { "eyeShareProperty": "LastName", "adProperty": {} },
+          { "eyeShareProperty": "Mail", "adProperty": {} },
+          { "eyeShareProperty": "Mobile", "adProperty": {} }
+        ],
+        "columns": [
+          {
+            "name": "NG Property",
+            "prop": "eyeShareProperty",
+            "templateType": "input",
+            "isEditable": false
+          },
+          {
+            "name": "AD Property",
+            "prop": "adProperty",
+            "isEditable": true,
+            "templateType": "acInput",
+            "fieldToSave": "key",
+            "fieldToShow": "value"
+          }
+        ],
+        "sources": {
+          "adProperty": [
+            { "key": "givenname", "value": "givenname" },
+            { "key": "sn", "value": "sn" },
+            { "key": "mail", "value": "mail" },
+            { "key": "mobile", "value": "mobile" },
+            { "key": "telephonenumber", "value": "telephonenumber" }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+
+**Note:** The rows array contains the initial data displayed in the grid. For autocomplete columns (templateType: "acInput"), the value is an object that will be populated from the sources when selected.  

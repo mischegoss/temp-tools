@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: vm-host-list
+title: VM Host List
+---
+
+:::note
+To be able to use the activity, you need to install [VMware PowerCLI](https://developer.vmware.com/web/tool/vmware-powercli) on the VAR::PRODUCT_FULL Executor server.
+:::
+
+## Activity Description
+
+Retrieves a list of all VM hosts in the vCenter.
+
+## Output
+
+A ResultSet of the VM host names.
+
+## Settings
+
+
+* **Host Name**—The host name or IP address. This must be either the vCenter device or the ESXi device (you can configure the device with **Platform** type **vCenter/ESXi** under [Devices](../../../Product-Navigation/Repository/Incident-Configuration/Devices.mdx)).
+* **User Name**—The user name of an account that has read/write access to the host.
+* **Password**—The password of the account listed in the **User Name** field.
+

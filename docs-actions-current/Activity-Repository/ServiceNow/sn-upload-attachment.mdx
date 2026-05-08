@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: sn-upload-attachment-activity
+title: SN Upload Attachment
+---
+
+## Activity Description
+
+Uploads an attachment to an existing record in ServiceNow.
+
+:::note
+Only files located in the same server where the VAR::PRODUCT_FULL ServiceNow integration is installed can be uploaded.
+:::
+
+## Output
+
+Success/Failure.
+
+## Settings
+
+
+* **Module Name** – The name of the ServiceNow module in VAR::PRODUCT_FULL.
+* **Form Name** – The name of the ServiceNow form.
+* **Field Name** – The name of the field that indicates the record number.
+* **Record Number** – The ID of the ServiceNow record.
+   Example: `%snCreateRecord1%`
+* **Path** – The path of the file to upload.  
+   Example: `C:\attachment.txt`

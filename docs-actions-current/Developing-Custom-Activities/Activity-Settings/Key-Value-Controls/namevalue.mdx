@@ -1,0 +1,47 @@
+---
+sidebar_position: 10
+id: namevalue
+title: nameValue
+---
+* **Description:** Key-value pair input for defining multiple name-value entries in a grid format. Allows users to add, edit, and remove name-value pairs dynamically.  
+* **Base Type:** control  
+* **Data Type:** Key-Value pairs (serialized based on conversionType)  
+* **Validation Rules:**  
+  * Each entry can have required name and/or value fields  
+  * Names can be validated with regex patterns  
+  * Empty names are typically not allowed when nameRequired is true  
+* **Example Values:** {`"Header1": "Value1", "Header2": "Value2"`}  
+* **Common Use Cases:** HTTP headers, Custom properties, Environment variables, Script parameters  
+* **Optional Properties:**  
+  * value (String): Default value (serialized format)  
+  * nameLabel (String): Label for the name column (e.g., "Name", "Parameter")  
+  * valueLabel (String): Label for the value column (e.g., "Value")  
+  * nameRequired (Boolean): If true, name field is required for each entry  
+  * valueRequired (Boolean): If true, value field is required for each entry  
+  * nameValidationPattern (String): Regex pattern to validate name field (e.g., `^\[\_a-zA-Z\]\[\_a-zA-Z0-9\]\*$` for valid variable names)  
+  * nameToolTipPopUpMessage (String): Tooltip/error message shown when name validation fails (can be any custom message)  
+  * conversionType (Number): How the data is serialized:  
+    * 0: Delimited string format  
+    * 1: XML DataSet format  
+  * required (Boolean): If true, at least one entry must exist. Default is false  
+  * disabled (Boolean): If true, the control is read-only
+
+**JSON Example:**  
+```
+{
+  "key": "variableProperties",
+  "label": "",
+  "baseType": "control",
+  "controlType": "nameValue",
+  "value": "",
+  "nameLabel": "Name",
+  "valueLabel": "Value",
+  "nameRequired": true,
+  "valueRequired": true,
+  "nameValidationPattern": "^[_a-zA-Z][_a-zA-Z0-9]*$",
+  "nameToolTipPopUpMessage": "Name must start with a letter or underscore and contain only letters, numbers, and underscores",
+  "conversionType": 1,
+  "required": true,
+  "disabled": false
+}
+```

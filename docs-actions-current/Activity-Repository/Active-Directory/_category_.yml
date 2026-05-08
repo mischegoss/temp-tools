@@ -1,0 +1,7 @@
+position: 10
+label: Active Directory
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Active Directory

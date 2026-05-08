@@ -1,0 +1,82 @@
+---
+sidebar_position: 50
+id: dropdownwithadd
+title: dropdownWithAdd
+---
+* **Description:** Dropdown with a "+" (add) button that appends the selected value to another target field (typically a textarea). Used for building up values incrementally - when user selects an option and clicks the add button, the selected value is concatenated/appended to a separate input field. The dropdown options can contain complex objects with multiple properties (e.g., formula and description), where selecting an option can populate preview/description fields before appending.  
+* **Base Type:** control  
+* **Data Type:** String (From list)  
+* **Behavior:**  
+  * User selects an option from the dropdown  
+  * Selecting an option populates read-only preview fields (Formula, Description)  
+  * Clicking the "+" button appends the formula to the target textarea field  
+  * Allows building complex values incrementally (e.g., combining multiple regex patterns)  
+* **Example Values:** `Number`, `Email Address`, `IP Address`, `URL`  
+* **Common Use Cases:** Building regular expressions from predefined patterns, Combining multiple formula components, Incremental value construction  
+* **Required Properties:**  
+  * controlOptions (Array): List of options, each with key (can be an object with additional properties like formula, description) and value (display label)  
+* **Optional Properties:**  
+  * value (String): Default selected value  
+  * styleClass (String): CSS class for styling (e.g., "one-line")  
+* **Note:** This control is typically used together with other controls - a target textarea where values are appended, and optional read-only preview fields.
+
+**JSON Example (Full Activity Context):** 
+```
+[
+  {
+    "key": "MatchFormula",
+    "label": "Regular Expression",
+    "baseType": "control",
+    "controlType": "textarea",
+    "styleClass": "xl-textarea",
+    "value": "",
+    "required": true
+  },
+  {
+    "key": "regexSelector",
+    "label": "Choose Regular Expression",
+    "baseType": "control",
+    "controlType": "dropdownWithAdd",
+    "styleClass": "one-line",
+    "controlOptions": [
+      {
+        "key": {
+          "formula": "[0-9]+",
+          "description": "Matches any number of at least 1 digit."
+        },
+        "value": "Number"
+      },
+      {
+        "key": {
+          "formula": "\\b([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4})\\b",
+          "description": "Matches a valid email address."
+        },
+        "value": "Email Address"
+      },
+      {
+        "key": {
+          "formula": "[\\w]+",
+          "description": "Returns all alphanumeric words in a sentence."
+        },
+        "value": "All Words"
+      }
+    ]
+  },
+  {
+    "key": "formulaDescription",
+    "label": "Description",
+    "baseType": "control",
+    "controlType": "textarea",
+    "readonly": true,
+    "value": ""
+  },
+  {
+    "key": "formulaDisplay",
+    "label": "Formula",
+    "baseType": "control",
+    "controlType": "textarea",
+    "readonly": true,
+    "value": ""
+  }
+]
+```

@@ -1,0 +1,93 @@
+---
+sidebar_position: 50
+id: sortordercontrol
+title: sortOrderControl
+---
+* **Description:** Grid-based sort order configuration for defining column sort sequences. Uses an internal grid-control with Column Name input and Sort Order dropdown. Allows adding multiple sort criteria with ascending/descending options.  
+* **Base Type:** control  
+* **Data Type:** Inline string (serialized sort configuration)  
+* **Validation Rules:**  
+  * Column names cannot be empty  
+  * Column names cannot be duplicated  
+  * Each column must have a sort direction (ASC/DESC)  
+* **Common Use Cases:** Result Set sorting, Table data ordering, Query result sorting
+
+**Required Properties:**
+
+* outputConfig (Object): Configuration for serialization:  
+  * type (String): Output format \- "inlineStr" for inline string serialization  
+  * cols (Array): Column property names to serialize (e.g., \["columnName", "sortOrder"\])  
+* tableOptions (Object): Grid configuration:  
+  * isFooterTemplate (Boolean): If true, shows footer for adding new rows  
+  * isRemovable (Boolean): If true, rows can be deleted  
+  * columns (Array): Column definitions with name, prop, templateType, hasFooter, isEditable  
+  * sources (Object): Dropdown options keyed by column prop name (e.g., sortOrder options)
+
+**Optional Properties:**
+
+* value (String): Initial serialized sort data  
+* required (Boolean): If true, at least one sort column must be specified. Default is false
+
+**JSON Example (Sort Table Activity):**  
+```
+{
+  "value": "",
+  "required": true,
+  "key": "ResultSetName",
+  "label": "Table Variable",
+  "labelKey": "TABLE_VARIABLE",
+  "baseType": "control",
+  "controlType": "textbox"
+},
+{
+  "value": "",
+  "required": true,
+  "key": "SortStatement",
+  "label": "",
+  "labelKey": "",
+  "styleClass": "one-line",
+  "baseType": "control",
+  "controlType": "sortOrderControl",
+  "outputConfig": {
+    "type": "inlineStr",
+    "cols": [
+      "columnName",
+      "sortOrder"
+    ]
+  },
+  "tableOptions": {
+    "isFooterTemplate": true,
+    "isRemovable": true,
+    "columns": [
+      {
+        "name": "Column Name",
+        "prop": "columnName",
+        "templateType": "input",
+        "hasFooter": true,
+        "isEditable": true
+      },
+      {
+        "name": "Sort Order",
+        "prop": "sortOrder",
+        "templateType": "dropdown",
+        "fieldToSave": "key",
+        "fieldToShow": "value",
+        "hasFooter": true,
+        "isEditable": true
+      }
+    ],
+    "sources": {
+      "sortOrder": [
+        {
+          "key": "ASC",
+          "value": "Ascending"
+        },
+        {
+          "key": "DESC",
+          "value": "Descending"
+        }
+      ]
+    }
+  }
+}
+```

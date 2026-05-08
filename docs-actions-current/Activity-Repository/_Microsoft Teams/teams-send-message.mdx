@@ -1,0 +1,33 @@
+---
+sidebar_position: 10
+id: teams-send-message-activity
+title: Teams Send Message
+---
+
+## Activity Description
+
+Send a message to the specified channel or user.
+
+## Output
+
+Message sent/Failure
+
+## Settings
+
+
+* **Module Name** — Select the Teams module that will execute this activity.
+* **Teams Conversation** — The identifier conversation that denotes this Teams session. Can be generated automatically by the Teams Integration for incoming messages (as %ConversationID%), or initiated via the MS Teams Start Conversation activity
+* **Send To** — Select whether to send to a User or a Channel. When sending a message to a Channel, sends a message to the defined channel. The Response option will automatically be set to No, as responses cannot be accepted from a Channel.
+* **Name** — Enter the name of the intended recipient. Enter the username to send to a user, or a combination of Team/Channel (e.g. R&D/Managers) to send to a specific channel.  
+   Example: `%User%`
+* **Message** — The message to send.
+* **Response** — What's expected in terms of a response back from the user.  
+   :::note
+   Responses can only be received from specific users, not from channels. This includes the Response type as well as Buttons, which cannot be defined when sending to a channel.
+   :::
+   * Yes: A response is expected, wait for response.
+   * No: A response is not expected, go on to the next activity.
+   * Complete: This is terminating activity in the conversation, the connection will be closed.
+* **Button Name** — The name of the button that will be displayed as part of the message sent.
+* **ButtonID** — The ID of the button, will be sent to the Webhook URL for further processing. Cannot contain spaces.
+

@@ -1,0 +1,8 @@
+position: 60
+label: Product Navigation
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Product Navigation
+  slug: product-navigation

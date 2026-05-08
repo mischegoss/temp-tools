@@ -1,0 +1,7 @@
+position: 30
+label: From Event to Incident
+collapsible: true
+collapsed: true
+link:
+  type: doc
+  id: from-event-to-incident-background

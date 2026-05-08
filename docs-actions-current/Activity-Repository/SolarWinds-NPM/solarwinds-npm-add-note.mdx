@@ -1,0 +1,23 @@
+---
+sidebar_position: 10
+id: solarwinds-npm-add-note-activity
+title: SolarWinds NPM Add Note
+---
+
+## Activity Description
+
+Adds a note to an active alert in SolarWinds.
+
+## Output
+
+Success/Failure.
+
+## Settings
+
+
+* **Module Name** – The name of the SolarWinds Module in VAR::PRODUCT_FULL.
+* **Alert Active Id** – The alert to unacknowledge.  
+   Example: `%getAlertID%`
+* **By** – The user who acknowledges the alert.  
+   Example: `jsmith`
+* **Note** – Free text added to the acknowledgment.

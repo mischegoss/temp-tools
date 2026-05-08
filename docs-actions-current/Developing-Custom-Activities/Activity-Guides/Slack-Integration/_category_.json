@@ -1,0 +1,8 @@
+position: 100
+label: Slack Integration
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Slack Integration
+  slug: "/activity-guides/slack-integration"

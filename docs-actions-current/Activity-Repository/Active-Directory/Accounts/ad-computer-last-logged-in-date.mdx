@@ -1,0 +1,24 @@
+---
+sidebar_position: 10
+id: ad-computer-last-logged-in-date
+title: AD Computer Last Logged In Date
+---
+
+## Activity Description
+
+Retrieves the last date in which a selected machine logged in to the Active Directory.
+
+## Output
+
+Date (by the default operating system's regional setting format).
+
+## Settings
+
+* **Computer Name** – The computer that logged in to the Active Directory (e.g., `Austin HQ`).  
+  :::note
+  The selected computer must be defined as a Device in VAR::PRODUCT_FULL.
+  :::
+* **Host Name** – The name or IP address of the Active Directory's server.
+* **User Name** – If required, the user name of an account that has read-write access to the Active Directory.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Port** – The port through which we connect to Active Directory. Port 389 is the default unsecured port. Port 636 is the pre-defined secured port. You may enter any other accessible port here.

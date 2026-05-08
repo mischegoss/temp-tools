@@ -1,0 +1,38 @@
+---
+sidebar_position: 70
+id: importing-activities
+title: Importing Activities
+---
+
+If you have a custom activity that was created in a different environment or an activity [downloaded](../../Product-Navigation/Workflow-Designer/Add-Activities/importing-activities-from-exchange.mdx) from the [VAR::EXCHANGE](https://exchange.resolve.io/), you can import it into your current environment.
+
+After clicking **+New Activity** on the left menu:
+
+1. Select **Import from an existing activity** on the *Create a new activity* screen.
+2. Upload the activity.
+3. Click **Save & Continue**.
+
+
+:::note
+Imported files must be the .zip file that was exported from the source system or a .ayh file from the .zip export.
+:::
+
+* Imported activities appear in the **Imported Activities** category. You can move them to other categories as desired.
+
+* When importing custom activities, any third-party DLLs are not imported as part of the activity. For the activity to run correctly, you need to place these DLLs on every server that has an Executor.
+* The .ayh file is a ZIP archive with a different extension. It must contain a code file (.cs, .vb, or .py), a JSON file (.json), and a metadata file (.xml) for the activity to be successfully imported and used.
+
+:::note
+The activity is not imported if another activity with the same name already exists in the system.
+:::
+
+
+
+
+
+
+
+
+
+
+

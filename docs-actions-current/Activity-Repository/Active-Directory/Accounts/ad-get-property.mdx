@@ -1,0 +1,26 @@
+---
+sidebar_position: 10
+id: ad-get-property
+title: AD Get Property
+---
+
+## Activity Description
+
+Queries the Active Directory for a specific property value in a selected user/ computer account.
+
+## Output
+
+The selected property's value.
+
+## Settings
+
+
+* **Account Type** – The account's type (user/computer).
+* **Account Name** – The account name (e.g., `John`).
+* **Host Name** – The name or IP address of the Active Directory's server.
+* **User Name** – If required, the user name of an account that has read-write access to the Active Directory.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Property Name** – The queried property (e.g., `Employee ID`).  
+:::note  
+The list of properties in this field is not discovered automatically; it is preset with default values. To use a property that does not exist in the list, type in the actual name of the property as it exists in Active Directory (not the display name).
+:::

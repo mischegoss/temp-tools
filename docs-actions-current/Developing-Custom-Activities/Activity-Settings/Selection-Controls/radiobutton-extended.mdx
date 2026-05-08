@@ -1,0 +1,95 @@
+---
+sidebar_position: 20
+id: radiobutton-extended
+title: radiobutton-extended
+---
+* **Description:** Radio button where each option can optionally have an associated input control (textbox, datePicker, dropdown, etc.) displayed alongside. Unlike simple radiobutton, each option can include an embedded input field that becomes relevant when that option is selected. Some options may have no input (standalone choices), while others have different input types.  
+* **Base Type:** control  
+* **Data Type:** String (Single selection with associated input values)  
+* **Validation Rules:**  
+  * Only one radio option can be selected at a time  
+  * The associated input control for the selected option may have its own validation (e.g., required)  
+  * Can enable/disable other controls based on selection using valueChangesActions  
+* **Example Values:** `0`, `1`, `2`, `3` (typically numeric string values)  
+* **Common Use Cases:** Date selection modes (Current Date / Specific Date / Days Back / Variable), Filter by different criteria, Mode selection with dependent inputs  
+* **Required Properties:**  
+  * controlOptions (Array): List of options, each containing:  
+    * radio (Object): The radio option with value and label  
+    * input (Object, optional): An embedded control with key, controlType, value, and optionally required, label, newLine  
+* **Optional Properties:**  
+  * value (String): Default selected radio value  
+  * styleClass (String): Use "one-line" to display options horizontally  
+  * valueChangesActions (Object): Actions to perform when selection changes - can enable, disable other controls or setValue on other fields
+
+**JSON Example:**  
+```
+{
+  "value": "0",
+  "label": "",
+  "key": "DateStartSelectionType",
+  "baseType": "control",
+  "controlType": "radiobutton-extended",
+  "styleClass": "one-line",
+  "controlOptions": [
+    {
+      "radio": {
+        "value": "0",
+        "label": "Current Date"
+      }
+    },
+    {
+      "radio": {
+        "value": "1",
+        "label": "Default Values"
+      },
+      "input": {
+        "key": "defaultValuesStart",
+        "controlType": "datePicker",
+        "value": "",
+        "required": true
+      }
+    },
+    {
+      "radio": {
+        "value": "3",
+        "label": "# Days Back"
+      },
+      "input": {
+        "key": "daysBackStart",
+        "controlType": "textbox",
+        "value": "",
+        "required": true
+      }
+    },
+    {
+      "radio": {
+        "value": "2",
+        "label": "Variable"
+      },
+      "input": {
+        "key": "useVariableStart",
+        "controlType": "textbox",
+        "value": "",
+        "required": true
+      }
+    }
+  ],
+  "valueChangesActions": {
+    "0": {
+      "disable": ["defaultValuesStart", "daysBackStart", "useVariableStart"]
+    },
+    "1": {
+      "disable": ["daysBackStart", "useVariableStart"],
+      "enable": ["defaultValuesStart"]
+    },
+    "2": {
+      "disable": ["daysBackStart", "defaultValuesStart"],
+      "enable": ["useVariableStart"]
+    },
+    "3": {
+      "disable": ["defaultValuesStart", "useVariableStart"],
+      "enable": ["daysBackStart"]
+    }
+  }
+}
+```

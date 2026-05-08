@@ -1,0 +1,7 @@
+position: 30
+label: Integrations and Modules
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Integrations and Modules

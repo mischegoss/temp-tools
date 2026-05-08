@@ -1,0 +1,91 @@
+---
+sidebar_position: 20
+id: repository-workflows
+title: Workflows
+---
+
+## Managing your Workflows
+
+Navigate to **Repository > Workflows**. You will be offered the following display:
+
+![](img/Actions_Repository_Workflows.png)
+
+Expand the **Workflows** section. In a new system, the list contains pre-installed workflows. An existing system will also include any that you have added. If you create workflows, consider adding your own folder structure under the default **Workflows**. To create a new folder under the currently selected one, click the New Folder icon. It creates a new folder below the last in the list and invites you to enter a name:
+
+## Moving and Copying Workflows
+
+:::note
+The treatment here is brief since it requires familiarity with the [Workflow Designer](../../../Building-Your-Workflow/introduction.mdx) where it is covered in detail.
+:::
+
+So far, the workflow catalog behavior is similar to a familiar computer file system. You cannot however, drag and drop workflows between folders. There are two ways to move or copy a workflow to another folder:
+
+To move a workflow to a different folder:
+
+1. Load it into the Workflow Designer.
+2. Use the **Save As** option to save the workflow into the required folder.  
+   The workflow is moved to the required folder.
+
+To copy a workflow to a different folder:
+
+1. Export the workflow. It will be downloaded by your browser as an XML file.
+2. Import it back to the required folder. It will show with the validation icon grayed out:  
+   ![Imported Workflows](img/Actions_Repository_WorkflowsandTemplates_Workflows.png)
+3. From the action list in ([Operations on Workflows](#operations-on-workflows)), open the workflow in the Workflow Designer and click **Save**.
+   The Save action will also validate the workflow and enable the validated indicator icon.
+
+## Operations on Workflows
+
+The toolbar in the Workflow section's header contains the following action icons:
+
+| Icon | Description |
+| --- | --- |
+|![](img/1638e0055aee0e.png) | Add a new folder (see previous section) |
+|![](img/1638e0055d0dfb.png) | Import a workflow to the selected folder. (This applies to a workflow exported from the Workflow Designer or from the workflow list as shown below.) |
+|![](img/1638e0055d7040.png) | Delete the selected folder. It is grayed out for the root Workflow folder, but is available for user-defined folders. |
+
+Selecting a workflow reveals its Actions menu (three-dot icon) on the far right. Some of the actions in the list can be accessed from the icons on the top right of the selected workflow as well.
+
+import Admonition from '@theme/Admonition';
+
+| Icon | Description |
+| --- | --- |
+|![Add_New_Gray.png](img/1638e0055f24d6.png) | Add an existing workflow to the catalog |
+|![Export_Gray.png](img/1638e0056044c5.png) | Export the selected workflow |
+| ![Delete_Gray.png](img/1638e00560aa7d.png) | Remove the workflow from the catalog. The workflow is not deleted. |
+|![Open_in_WF_Designer.png](img/1638e004d24fce.png) | Open the workflow in the Workflow Designer |
+|![Run.png](img/1638e00561185e.png) | Run the workflow. Two options are available:<br></br><br></br><ul><li><strong>Move to Audit Trail</strong> : After running the workflow, the Audit Trail window opens so that you can watch its progress</li><li><strong>Stay in current</strong>: After running the workflow, you remain in the current Workflows window. Use this option to concurrently run several workflows.</li></ul><br></br><Admonition type="note"><p>To run the workflow with variables that have been set by using the <strong>Set Variables</strong> function, see <a href="#running-workflows-with-variables">Running Workflows with Variables</a>.</p></Admonition>|
+
+Finally, at the end of each workflow line are three indicator icons:
+
+| Icon | Description |
+| --- | --- |
+|![Triggered.png](img/1638e005625ce5.png) | Black: Triggered |
+|![Scheduled.png](img/1638e00562c09e.png) | Black: Scheduled |
+|![Valid.png](img/1638e005632498.png) | Black: Valid Gray: Invalid. Check in the Workflow editor |
+
+:::note
+For any workflow entry, you may see additional properties by clicking the icon as described in [Using Entity Panels](../../../Product-Navigation/Repository/Repository-Entities/Using-Entity-Panels.mdx).
+:::
+
+## Running Workflows with Variables
+
+Once variables have been set (see [Setting Variables in Workflows](../../../Building-Your-Workflow/Variables/set-variables-in-workflows.mdx)), clicking on the **Run** button from **Workflows Repository** will display the **Set Values & Run** window.
+
+Users with editing permissions have the option to select which variables to be used during the workflow execution while users without editing permissions must insert values for all of the required variables to execute the workflow.
+
+### Users with Editing Permissions
+
+![](img/1638e00563f16f.png)
+
+User can use the checkboxes on the left side to select which variables will be used during the workflow execution. Variables that have been set as required (marked with \*) can be unchecked if desired.
+
+Clicking on **Run** executes the workflow using the selected variables with their inserted values.
+
+### User without Editing Permissions
+
+![](img/1638e00564516c.png)
+
+User must insert values for the variables that have been set as required (marked with \*). Variables that have not been set as required can be left empty.
+
+Clicking on **Run** executes the workflow using the variables with their inserted values.

@@ -1,0 +1,77 @@
+---
+sidebar_position: 20
+id: notificationstepscontrol
+title: notificationStepsControl
+---
+* **Description:** Multi-step notification escalation grid for configuring recipient notification sequences. Allows adding multiple notification steps with recipient type (User/Group), name, channel (Email/SMS/All), and reply time. Each step can have advanced settings for time frames, message customization, and recovery notifications.  
+* **Base Type:** control  
+* **Data Type:** XML DataSet (serialized notification steps)  
+* **Validation Rules:**  
+  * At least one notification step must be configured  
+  * Each step must have a valid recipient type, name, and channel  
+  * Reply time is optional  
+* **Important:** When singleMessage: true, this control requires sibling controls with **exact keys**: SingleType, SingleSubject, SingleBody, SingleTemplateName, SingleTemplateNumber. The component binds to these form controls to read message configuration. When singleMessage: false, each notification step has its own independent message configuration.  
+* **Common Use Cases:** Alert escalation, Incident notifications, Multi-recipient communication workflows  
+* **Optional Properties:**  
+  * value (String): Default XML DataSet value  
+  * required (Boolean): If true, at least one step must be configured. Default is false  
+  * singleMessage (Boolean): If true, reads message config from sibling controls. If false, each step has independent settings.
+
+**Required Sibling Controls (when singleMessage: true):**
+| Key | Control Type | Purpose |
+| :---- | :---- | :---- |
+| SingleType | radiobutton | Message type (Original/Custom/Template) |
+| SingleSubject | textbox | Email subject |
+| SingleBody | richtext | Message body |
+| SingleTemplateName | autocompleteWithPlus | Template name (entityType: 35\) |
+| SingleTemplateNumber | hidden | Template ID |
+
+**JSON Example (With Single Message \- Full Template):**  
+```
+{
+  "value": "Original",
+  "key": "SingleType",
+  "label": "Message Type",
+  "styleClass": "one-line",
+  "baseType": "control",
+  "controlType": "radiobutton",
+  "controlOptions": [
+    { "value": "Original", "label": "Original" },
+    { "value": "Custom", "label": "Custom" },
+    { "value": "Template", "label": "Template" }
+  ]
+},
+{
+  "value": "",
+  "key": "SingleSubject",
+  "label": "Subject",
+  "baseType": "control",
+  "controlType": "textbox"
+},
+{
+  "value": "",
+  "key": "SingleBody",
+  "label": "Body",
+  "baseType": "control",
+  "controlType": "richtext"
+},
+{
+  "value": "",
+  "key": "SingleTemplateName",
+  "label": "Template Name",
+  "baseType": "control",
+  "controlType": "autocompleteWithPlus",
+  "idFieldName": "SingleTemplateNumber",
+  "idDefaultValue": "-1",
+  "autocompleteParams": { "entityType": 35 }
+},
+{
+  "value": "",
+  "key": "SerializedData",
+  "label": "",
+  "baseType": "control",
+  "controlType": "notificationStepsControl",
+  "required": true,
+  "singleMessage": true
+}
+```

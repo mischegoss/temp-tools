@@ -1,0 +1,46 @@
+---
+sidebar_position: 10
+id: send-email-activity
+title: Send Email
+---
+
+## Activity Description
+
+Sends an email to a User, a Group, or a Last Response.
+
+## Settings
+
+
+* **Module Name** – Select the module instance that will provide the email functionality. Do either of the following:
+   * Select the module instance from the drop-down list.
+     :::note
+     Only module instances that you have [write access](../../Product-Navigation/Configuration/Integrations-and-Modules/access-control-on-integrations-and-modules.mdx) to appear in the list.
+     :::
+   * Enter a reference to a variable (like `%moduleName%`) that contains the module instance name.  
+     In case the variable value is empty, the activity attempts to use the default module instance of that type. If the value is not an actual instance name, the activity returns an error.
+     :::caution
+     Passing a module instance name as a variable allows the use of any module instance even if it doesn't give write permissions to the current user.
+     :::
+* **"To" Destination Type** – The email's recipient/s.
+* **"CC" Destination Type** – The email's CC recipient/s.  
+   * **User** – A specific User in Actions Recipients Repository.  
+   * **Group** – All Users in a Group.  
+   * **Last Response** – The recipient who took responsibility for the Incident that triggered the Workflow.  
+     :::note
+     You can add multiple email addresses in the following convention: `<address1>;<address2>`.
+     :::
+     :::note
+     You cannot create or edit users within an activity. User configuration must be managed within the users area.
+     :::
+* **Message Type** – The type of message sent to the recipient/s via email:  
+   * **Original** – The message that triggered the Workflow.  
+   *  **Custom** – Any entered free text.  
+   *  **Template** – A predefined message.  
+   :::note
+   Message templates are created via the General page of the Repository section.
+   :::
+   *  **Subject** – The subject of the email.
+   *  **Body** – The text of the email (you may edit the text style as you wish).
+   *  **Send Recovery Notification** – Adds the selected recipient to the recovery notification list. When the Incident is recovered, all recipients on the recovery list are notified.
+* **Attachments** – The path of the file/s you wish to attach to the email (e.g., `\\exchange-srv\logs\log.txt`).
+   * Alternatively, enter the variable returned from the [Load Remote File](../Files-and-Folders/Files/load-remote-file.mdx) activity (e.g., `%loadRemoteFile1.File%`). You can add multiple attachments to the email by pressing **Enter** and typing another attachment's path.

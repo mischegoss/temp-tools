@@ -1,0 +1,8 @@
+position: 40
+label: Guides # This controls how it appears in the sidebar
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Guides
+  

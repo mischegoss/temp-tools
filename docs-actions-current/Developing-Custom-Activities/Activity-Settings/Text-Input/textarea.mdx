@@ -1,0 +1,27 @@
+---
+sidebar_position: 30
+id: textarea
+title: textarea
+---
+* **Description:** Multi-line text input field for longer content  
+* **Base Type:** control  
+* **Data Type:** String (Multi-line)  
+* **Example Values:** `JSON payloads`, `Script content`, `Multi-line messages`  
+* **Common Use Cases:** POST data, Script bodies, Multi-line messages, JSON/XML content  
+* **Optional Properties:**  
+  * value (String): Default value  
+  * required (Boolean): If true, the field must be filled (empty or whitespace-only values are rejected). Default is false  
+  * requiredWithoutTrim (Boolean): If true, the field must be filled but whitespace-only values are accepted. Default is false
+
+**JSON Example:**  
+
+```
+{
+  "key": "multiLineContent",
+  "label": "Multi-Line Content",
+  "baseType": "control",
+  "controlType": "textarea",
+  "styleClass": "xl-textarea",
+  "value": ""
+}
+```

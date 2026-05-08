@@ -1,0 +1,115 @@
+---
+sidebar_position: 10
+id: keyvaluegridcontrol
+title: keyValueGridControl
+---
+* **Description:** Advanced grid-based editor with configurable columns, dropdown sources, and XML serialization. Provides a tabular interface for mapping properties to values with support for dropdown selections, text inputs, and removable rows.  
+* **Base Type:** control  
+* **Data Type:** XML-serialized key-value pairs  
+* **Validation Rules:**  
+  * Columns can be editable or read-only  
+  * Dropdown columns validate against provided source options  
+  * Supports add/remove row functionality  
+* **Example Values:** XML settings structure like `\<?xml version="1.0"?\>\<Settings\>\<Settings propertyName="givenName" propertyValue="John"/\>\</Settings\>`  
+* **Common Use Cases:** AD property mapping, Field configuration, Complex property-value grids  
+* **Optional Properties:**  
+  * value (String): Default XML value (e.g., `\<?xml version=\\\\"1.0\\\\"?\>\<Settings /\>`)  
+  * required (Boolean): If true, at least one row must exist. Default is false  
+  * outputConfig (Object): Configuration for XML serialization:  
+    * type (String): Output type (e.g., "settings")  
+    * mainHeader (String): XML header (e.g., `\<?xml version=\\\\"1.0\\\\"?\>`)  
+    * itemTagName (String): XML root tag name  
+    * subRoot (String): XML sub-root element name  
+    * attrsExport (Array): Attribute mapping for export with attrName and attrValueField  
+    * attrsImport (Array): Attribute mapping for import with attrName and attrValueField  
+  * tableOptions (Object): Grid configuration:  
+    * isRemovable (Boolean): If true, rows can be deleted  
+    * isFooterTemplate (Boolean): If true, shows footer for adding new rows  
+    * rows (Array): Initial row data  
+    * columns (Array): Column definitions with:  
+      * name (String): Column header display name  
+      * prop (String): Property name in row data  
+      * isEditable (Boolean): If true, column is editable  
+      * templateType (String): "dropdown" or "input"  
+      * fieldToSave (String): For dropdowns, which field to save ("key" or "value")  
+      * fieldToShow (String): For dropdowns, which field to display  
+      * hasFooter (Boolean): If true, column has footer input  
+    * sources (Object): Dropdown options keyed by column prop name
+
+**JSON Example (AD Property Mapping):** 
+```
+{
+  "key": "ADResult",
+  "label": "",
+  "baseType": "control",
+  "controlType": "keyValueGridControl",
+  "value": "<?xml version=\"1.0\"?><Settings />",
+  "required": true,
+  "outputConfig": {
+    "type": "settings",
+    "mainHeader": "<?xml version=\"1.0\"?>",
+    "itemTagName": "Settings",
+    "subRoot": "Settings",
+    "attrsExport": [
+      {
+        "attrName": "propertyName.key",
+        "attrValueField": "propertyValue"
+      }
+    ],
+    "attrsImport": [
+      {
+        "attrName": "propertyName",
+        "attrValueField": "propertyValue"
+      }
+    ]
+  },
+  "tableOptions": {
+    "isRemovable": true,
+    "isFooterTemplate": true,
+    "rows": [
+      {
+        "propertyName": { "key": "givenName", "value": "First Name" },
+        "propertyValue": ""
+      },
+      {
+        "propertyName": { "key": "sn", "value": "Last Name" },
+        "propertyValue": ""
+      }
+    ],
+    "columns": [
+      {
+        "name": "Property Name",
+        "prop": "propertyName",
+        "isEditable": true,
+        "templateType": "dropdown",
+        "fieldToSave": "key",
+        "fieldToShow": "value",
+        "hasFooter": true
+      },
+      {
+        "name": "Property Value",
+        "prop": "propertyValue",
+        "templateType": "input",
+        "isEditable": true,
+        "hasFooter": true
+      }
+    ],
+    "sources": {
+      "propertyName": [
+        { "key": "l", "value": "City" },
+        { "key": "company", "value": "Company" },
+        { "key": "c", "value": "Country" },
+        { "key": "department", "value": "Department" },
+        { "key": "displayName", "value": "Display Name" },
+        { "key": "mail", "value": "Email" },
+        { "key": "givenName", "value": "First Name" },
+        { "key": "sn", "value": "Last Name" },
+        { "key": "manager", "value": "Manager" },
+        { "key": "mobile", "value": "Mobile" },
+        { "key": "telephoneNumber", "value": "Telephone Number" },
+        { "key": "title", "value": "Title" }
+      ]
+    }
+  }
+}
+```

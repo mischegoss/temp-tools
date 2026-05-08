@@ -1,0 +1,27 @@
+---
+sidebar_position: 10
+id: teams-add-to-team-activity
+title: Teams Add To Team
+---
+
+## Activity Description
+
+Add the defined user to the selected team.
+
+## Output
+
+User added/Failure
+
+## Settings
+
+
+* **Module Name** — Select the Teams module that will execute this activity.
+* **Team Name** — The name of the team to which the user will be added.
+* **Type** — The type of users to add - specific user or entire team to add. Adding a team will add all users in that team.
+* **Name** — The name of the user or team to add.  
+   Example: `john@administrator.onmicrosoft.com`
+* **Set as Owner** — Sets the specified user as an owner of the team. Works only when adding an individual user.
+
+:::note
+At this time, only unique team names are supported. Trying to add a user or users to a team where the name is not unique within your Teams organization will fail.
+:::

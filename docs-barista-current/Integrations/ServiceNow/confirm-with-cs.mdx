@@ -1,0 +1,48 @@
+---
+id: confirm-with-cd
+title: Confirm Connections with Customer Service
+description: Directions for contacting customer service to confirm settings.
+sidebar_position: 90
+keywords: [barista, servicenow, integrations] # Used for LLM search enrichment and internal search — include at least 4.
+tags: [integrations, servicenow] 
+---
+:::note
+To complete the remaining setup, work with your customer service representative and provide the required information from your Barista configuration.  
+This ensures any customer-specific settings or integrations are finalized correctly.
+:::
+
+### Contact Customer Service
+
+Once you have completed the steps to integrate your Barista tenant with ServiceNow, contact customer service to:
+
+1. Enable knowledge base support
+2. Set variables
+
+
+####  Create your Knowledge Base Filter
+
+:::note
+Confirm KB has been enabled and variables set as described above before proceeding.
+:::
+
+1. Log in to `https://[instance].service-now.com`.  
+2. Navigate to the **Knowledge Center** (or **Knowledge**) module.
+
+:::tip
+On ServiceNow's **Zurich** release, the Knowledge UI does not allow copying the filter query.  
+To access the old UI, edit the URL:  
+`https://<instance_name>.service-now.com/now/nav/ui/classic/params/target/kb_knowledge_list.do`
+:::
+
+3. Apply filters for the articles you want to sync with Barista.  
+   - Typically, customers sync articles from a specific knowledge base or category.  
+4. **Do not** include `workflow_state=published` in your filter — this prevents new articles from being ingested.  
+5. Copy the filter query. You will need to provide it to customer service in the next step.
+
+####  Contact Customer Service to Configure Variables
+
+With the filter query, contact customer service:
+1. Request that variables are added to your tenant.
+2. Request that sync status is started to pull knowledge base articles.
+
+

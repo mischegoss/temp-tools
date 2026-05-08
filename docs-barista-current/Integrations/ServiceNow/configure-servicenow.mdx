@@ -1,0 +1,38 @@
+---
+id: configure-servicenow
+title: Configure ServiceNow
+description: Directions for configuring ServiceNow to work with Barista.
+sidebar_position: 60
+keywords: [barista, servicenow, integrations] # Used for LLM search enrichment and internal search — include at least 4.
+tags: [integrations, servicenow] 
+---
+### Configure ServiceNow to Barista Connection
+
+:::note
+All steps in this section are completed in ServiceNow.
+:::
+
+#### Access ServiceNow
+
+1. Log in to `https://[instance].service-now.com` as an Admin.
+
+#### Configure Integration Settings
+
+1. In the search bar of the ServiceNow navigator, type **Espressive**.  
+2. Click **Espressive > Integration Settings**.  
+3. Type the following information in the respective fields:
+   - **Username:** `esp.integration`  
+   - **Password:** `[password from Configure ESP Integration User]`  
+   - **Base URL:** `https://{tenant}.espressive.com/` *(include trailing slash)*  
+4. Click **Save**.
+
+#### Test Connection
+
+1. In the search bar of the ServiceNow navigator, type **Espressive**.  
+2. Click **Espressive > Integration Hub**.  
+3. Click **Test/Refresh Connection**.  
+4. Wait 5-10 seconds and verify the success message.
+
+:::note
+If the test fails, wait 1-2 minutes and retry. f it continues to fail, please verify that all steps above have been completed successfully.
+:::

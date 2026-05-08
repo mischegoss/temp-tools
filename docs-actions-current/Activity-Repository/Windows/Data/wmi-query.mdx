@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: wmi-query
+title: WMI Query
+---
+
+## Activity Description
+
+Explores and queries the management classes, objects, and properties of a WMI (Windows Management Instrumentation).
+
+## Output
+
+The ResultSet of the WMI query.
+
+## Settings
+
+
+* **Host Name** – The host name or IP address.
+* **User Name** – If required, the username of an account that has read-write access to the host.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Namespace** – A container grouping child objects related to one another. The most commonly used namespace is CIMV2.  
+   Example: `root\CIMV2`
+* **Query** – Any WQL query.  
+   Example:
+   ```
+   1 Select SystemUptime
+   2 From Win32_PerfFormattedDate_PerfOS_System
+   ```

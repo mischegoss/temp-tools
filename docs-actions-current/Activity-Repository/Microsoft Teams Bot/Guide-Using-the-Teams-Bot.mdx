@@ -1,0 +1,66 @@
+---
+sidebar_position: 30
+id: using-the-teams-bot
+title: Guide - Using the Teams Bot
+---
+# Guide: Using the Teams Bot
+
+This guide is an overview of how you can use Microsoft Teams to interact with automation directly within the Resolve Actions platform. 
+
+The guide includes the basics of initiating interactions using simple trigger phrases and how to perform basic workflows using the Teams Bot integration. This guide will help you understand the integration and get started with using automation effectively in your daily tasks. 
+
+## Getting Started
+1. Open the **Microsoft Teams Bot.**
+2. **Initiate Chat**:
+   - Type either "hi" or "hello" to the bot.
+3. **Receive Greeting**:
+   - The bot will greet you by name and present a menu with options like:
+     - Virtual Machines
+     - Tickets
+     - New Hire Onboarding
+     - Password Resets
+     - Account Requests
+
+### Example: Account Request
+1. **Account Request**
+   - Click on the "Account Requests" option.
+   - Select your software.
+2. **Automated Workflow Enabled**:
+   - The system will retrieve your email and contact your manager via Active Directory for approval.
+3. **Manager Notification**:
+   - The manager receives an email to approve or deny the request. They can reply with "yes" or "no".
+4. **Receive Update**:
+   - You will be notified in Microsoft Teams of the approval status and any notes regarding your new account.
+
+### Example: Managing Virtual Machines
+
+1. **Virtual Machines**
+    - Select the "Virtual Machine" option.
+2. **Provision Virtual Machine**
+    - Choose to create a new Virtual Machine. 
+    - Select options for: datastore, CPU, disk size, and RAM
+3. **Confirmation**
+    - The bot will send notification once the VM is created.
+    - You will receive a link to the documented ticket.
+
+### Example: Password Reset
+
+1. **Password Reset**
+    - Select the "Password Reset" option.
+2. **Security Challenge**
+    - Complete the security challenge.
+    - The security challenge will come from your service, e.g., Active Directory, Okta, etc.
+3. **Completion**
+   - The system will initiate the password reset and document it in a ticket.
+
+## Finalizing your Interaction
+
+Once you have completed your interaction with the bot, you will see a window that asks "Would you like to perform another task on the Microsoft Teams chatbot? 
+
+Clicking **No** will end your session.
+
+:::note
+You can review the visual workflows in Resolve Actions for any actions performed with the Microsoft Teams chatbot.
+:::
+
+

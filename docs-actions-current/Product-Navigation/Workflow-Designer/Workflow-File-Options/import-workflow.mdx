@@ -1,0 +1,30 @@
+---
+sidebar_position: 10
+id: import-workflow
+title: Import Workflow
+---
+
+### Importing a Workflow {#UUID-d6ddc503-4c1d-3774-f7c1-ab2398b65de9}
+
+You can import workflows saved as XM.
+
+:::note Export Format
+ZIP files contain one more more XML workflows and a `workflows_export_summary.xml` (which can be ignored). You can import the full ZIP or individual XML files.
+:::
+
+To import:
+
+1.  Ensure the workflow has been exported in XML file format.
+2.  In **Open Workflow**, click **Import from file**.  
+    The standard operating system file opening dialog is displayed.
+3.  Selet the XML or ZIP file and click **Open**.  
+     
+    :::note
+    If a required module is missing, you'll be prompted to choose a replacement. 
+    One modules you have [write permissions](../../../Product-Navigation/Configuration/Integrations-and-Modules/access-control-on-integrations-and-modules.mdx) to will be shown.
+    :::
+
+    :::caution
+    Importing a Workflow that contains an Integration Module (e.g., AWS) requires manually remapping activities to modules. Without manual remapping, you will receive an error: "Integration module is not ready."
+    :::
+

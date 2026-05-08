@@ -1,0 +1,8 @@
+position: 30
+label: Self Service Portal
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Self Service Portal
+  slug: Self-Service-Portal

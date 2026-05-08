@@ -1,0 +1,25 @@
+---
+sidebar_position: 20
+id: hiddeninui
+title: hiddeninUI
+---
+* **Description:** Field hidden in the user interface but accessible via API  
+* **Base Type:** control  
+* **Data Type:** String (Hidden in UI)  
+* **Validation Rules:**  
+  * Not visible in standard UI  
+  * Can be accessed and modified via API  
+  * Used for advanced configuration  
+* **Example Values:** `\<http://localhost:8080\>`  
+* **Common Use Cases:** Advanced settings, API-only configuration, Base URLs
+
+**JSON Example:**  
+```
+{
+  "key": "advancedSetting",
+  "label": "Advanced Setting",
+  "baseType": "control",
+  "controlType": "hiddenInUI",
+  "value": "default-value"
+}
+```

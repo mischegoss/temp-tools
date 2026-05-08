@@ -1,0 +1,51 @@
+---
+sidebar_position: 40
+id: dropdown
+title: dropdown
+---
+* **Description:** Dropdown list for selecting a single value from predefined options  
+* **Base Type:** control  
+* **Data Type:** String (From list)  
+* **Validation Rules:**  
+  * Must select from available options  
+  * May have a default selection  
+  * Options are predefined and fixed  
+* **Example Values:** `Option1`, `Option2`, `Option3`  
+* **Common Use Cases:** HTTP methods, Status values, Return types  
+* **Required Properties:**  
+  * controlOptions (Array): List of available options, each with key and value  
+* **Optional Properties:**  
+  * value (String): Default selected value  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * disabled (Boolean): If true, the control is read-only
+
+**JSON Example:** 
+```
+{
+  "key": "httpMethod",
+  "label": "HTTP Method",
+  "baseType": "control",
+  "controlType": "dropdown",
+  "value": "GET",
+  "disabled": false,
+  "required": true,
+  "controlOptions": [
+    {
+      "key": "GET",
+      "value": "GET"
+    },
+    {
+      "key": "POST",
+      "value": "POST"
+    },
+    {
+      "key": "PUT",
+      "value": "PUT"
+    },
+    {
+      "key": "DELETE",
+      "value": "DELETE"
+    }
+  ]
+}
+```

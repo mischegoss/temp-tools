@@ -1,0 +1,27 @@
+---
+sidebar_position: 10
+id: aws-create-snapshot
+title: AWS Create Snapshot
+---
+
+## Activity Description
+
+Creates a new Amazon Web Service snapshot based on an existing volume.
+
+## Output
+
+The volume snapshot status.
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Region** – The region in which the instance resides.  
+   Example: `ap-northeast-1`
+* **Volume Name/Id** – The name or ID of the EBS volume.  
+   Example: `vol-1234567890abcdef0`
+* **Description** – A description for the snapshot.
+* **Override Connection Parameters** – Used to create a snapshot based on an existing volume on a different AWS account, instead of the original default account saved under the AWS module.
+* **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.

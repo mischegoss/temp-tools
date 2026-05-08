@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: vm-create-from-template
+title: VM Create from Template
+---
+
+:::note
+To be able to use the activity, you need to install [VMware PowerCLI](https://developer.vmware.com/web/tool/vmware-powercli) on the VAR::PRODUCT_FULL Executor server.
+:::
+
+## Activity Description
+
+Creates a Virtual Machine from a template.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Host Name**—The host name or IP address. This must be either the vCenter device or the ESXi device (you can configure the device with **Platform** type **vCenter/ESXi** under [Devices](../../../Product-Navigation/Repository/Incident-Configuration/Devices.mdx)).
+* **User Name**—The user name of an account that has read/write access to the host.
+* **Password**—The password of the account listed in the **User Name** field.
+* **Template name**—The name/UUID of the Virtual Machine from which to clone the new Virtual Machine.
+* **Target Host (ESX)**—Enables you to create the template in a different host than the one that was listed in Host Name.
+* **Clone Name**—The name of the new Virtual Machine.
+* **Spec Name**—The name of the Virtual Machine's configuration specification file.

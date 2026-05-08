@@ -1,0 +1,19 @@
+---
+sidebar_position: 10
+id: result-set-filter
+title: Result Set Filter
+---
+
+## Activity Description
+
+Filters a table according to a statement and returns the filtered table.
+
+## Settings
+
+
+* **Table Variable** – The name of the table (variable names must follow the convention `%Variable%`).
+* **Filter** – The statement according to which the table is filtered.
+
+:::note
+To avoid translation of `%TEXT%` (in case TEXT is not a variable name), add "@" before the percentage character. For example: `ColumnName LIKE '@%TEXT%'`.
+:::

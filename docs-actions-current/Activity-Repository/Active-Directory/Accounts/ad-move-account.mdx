@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: ad-move-account
+title: AD Move Account
+---
+
+## Activity Description
+
+Moves the selected user account from one OU to another.
+
+## Output
+
+List
+
+## Settings
+
+
+* **Account Type** – The account's type (user/computer).
+* **Name** – The account name (e.g., `John`).
+* **Path** – The path of the group to which the new user account is assigned (e.g., `\Europe\Users`)  
+   The path may follow the following conventions:
+    * `OU=<OU Name1>, OU=<Name2>`
+    * `<OU Name1>\<OU Name2>`
+    * `/<OU Name1>/<OU Name2>`
+    * `\`
+* **Host Name** – The name or IP address of the Active Directory's server.
+* **User Name** – If required, the user name of an account that has read-write access to the Active Directory.
+* **Password** – If required, the password of the account listed in the User Name field.

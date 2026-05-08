@@ -1,0 +1,21 @@
+---
+sidebar_position: 10
+id: run-workflow-activity
+title: Run Workflow
+---
+
+## Activity Description
+
+Runs a child workflow within the current one. When running a few concurrent workflows, you can use a variable's value retrieved by a parallel workflow's activity. When doing so, make sure to use the value only after the activity has been performed; otherwise no value is retrieved. In addition, you can run the nested (child) workflow with variables, which is ideal when the variable in the parent workflow is dynamic – as is the case when running a loop – and those changes need to be captured and used in the child workflow as it runs in the background.
+
+## Settings
+
+
+* **Workflow Name** - The child workflow to run (the name of the Run Workflow activity cannot be identical to the name of the workflow executed by the activity).
+* **Variables** - If desired, set variables to be used when the selected child workflow is executed. The **Name** is the variable's name to be referenced (the name must differ from the activity's name and must start with a letter and contain only the A-Z, a-z, 0-9 characters). The **Value** is the variable's value - a constant value or another variable (variable names must follow the convention `%Variable%`). Note that it is not possible to send both text and a variable in the same field (i.e., `getrowscount(%tablename%)`).  
+
+:::note
+The variable passed to the child workflow is a copy of the variable in the parent workflow, meaning that changes made to the variable in the child workflow will not be reflected in the parent workflow.
+:::
+
+* **Run in Background** – Check to run both workflows at the same time. Uncheck to wait for the parent workflow to wait for the child workflow's termination before continuing to the next activity.

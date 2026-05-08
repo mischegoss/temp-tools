@@ -1,0 +1,26 @@
+---
+sidebar_position: 10
+id: aws-copy-snapshot
+title: AWS Copy Snapshot
+---
+
+## Activity Description
+
+Copies an Amazon Web Service snapshot of the same region or another one.
+
+## Output
+
+The ID of the new snapshot.
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Override Connection Parameters** – Used to copy a snapshot of the same region or another one on a different AWS account, instead of the original default account saved under the AWS module.
+* **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.
+* **Source Snapshot/Region** – The ID of the Region that contains the snapshot to be copied.  
+   Example: `ap-northeast-1`
+* **Snapshot Name/Id** – The name or ID of the EBS snapshot to copy.  
+   Example: `snap-039bd6747d2921369`

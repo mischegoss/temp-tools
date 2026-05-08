@@ -1,0 +1,10 @@
+---
+sidebar_position: 20
+id: configuring-ad-for-saml-sso
+title: Configuring AD for SAML SSO
+description: Configure individual AD users or entire AD groups to log in using SSO
+---
+
+VAR::PRODUCT_FULL allows you to enable individual AD users or entire AD groups to log in using SSO. However, it is recommended to use groups in your Azure AD to manage who can use SSO with VAR::PRODUCT. As explained in [Synchronizing with Azure AD](./configuring-resolve-actions-for-saml-sso.mdx) and [Enabling Recipients to Log In](./configuring-resolve-actions-for-saml-sso.mdx#enabling-recipients-to-log-in), you need to convert each recipient group or user to a login manually, which could make for a time-consuming task if you are synchronizing more than a handful of users. With a group, you can convert multiple users in a single step.
+
+In addition, using groups allows you to [more flexibly manage new users](./configuring-resolve-actions-for-saml-sso.mdx#including-optional-attributes) without having to run regular synchronizations.

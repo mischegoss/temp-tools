@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: ad-ldap-query-activity
+title: AD LDAP Query
+---
+## Activity Description
+
+Queries the Active Directory using an LDAP Query.
+
+## Output
+
+ResultSet.
+
+## Settings
+
+
+* **Domain** – The Active Directory's domain.  
+  Example: `mddc.com`  
+  :::note
+  If the Domain field is left empty, the default domain is selected.
+  :::
+* **Path** – The group's location in the Active Directory's hierarchy (e.g., `US\Users`).
+  :::note
+  If the Path field is left empty, the default path is selected.
+  :::
+* **Query** – The LDAP query's text (e.g., `(givenname=J*)`.
+* **Properties** – The properties (of the Active Directory's entities that match the query's criteria) to return.  
+  :::note
+  If the Properties field is left empty, all properties of the matching entities are returned.
+  :::
+* **Search Scope** – The level of search to perform.

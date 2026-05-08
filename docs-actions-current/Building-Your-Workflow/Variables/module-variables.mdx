@@ -1,0 +1,25 @@
+---
+sidebar_position: 50
+id: module-variables
+title: Module Variables
+---
+**Module variables** are a way to access data from your integrations. A module variable will be automatically created by VAR::PRODUCT for every data field in every form that you set in the module settings.
+
+:::note
+Integration Module variables only exist for the types of Integrations that have extended **Forms**, **Filters**, and **Mapping** settings.
+:::
+
+For example, in the [Jira](../../Activity-Repository/Jira/Jira-Overview.mdx) module, each form represents a Jira project. All Jira project fields will be auto-mapped to VAR::PRODUCT module variables for you to use in workflows. Optionally, you can map as many of them to global variables on the **Mapping** tab, if you want to give those Jira fields alternative or more unique names.
+
+When auto-mapping module variables, VAR::PRODUCT tries to preserve the original integration name if possible:
+```
+%integrationPropertyName%
+```
+
+For example, `Approver groups` will be mapped as `%Approver groups%`.
+
+Only integration property names that match reserved words in VAR::PRODUCT are not kept. These are automatically prefixed with an underscore (`_`). Examples include properties like `Severity` and `Source`, which are displayed in VAR::PRODUCT as `_Severity` and `_Source` respectively and referenced as `%_Severity%` and `%_Source%`.  
+
+To make referencing variables easier, VAR::PRODUCT provides a helper variable picker. To see the full list of module variables at the time of building the workflow, start by typing the percentage sign (`%`) in an activity text field. After the autocomplete window appears, click its **Integrations and Modules** tab. On the tab, each list entry represents a module that you have configured, and the number next to the module name is the number of forms available to the module. After expanding a module and a form, you see the list of module variables.
+
+Note that this picker only serves as a helper. You are free to reference another variable if you know it is going to be part of the event's payload. Similarly, a field that you pick from the helper might not be part of the event's payload. At the end of the day, the requirement for successfully executing the workflow is for the variable to be part of the event's payload come execution time.

@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: attachment-list
+title: Attachment List
+---
+
+## Activity Description
+
+Lists the files attached to the email that triggered the workflow (saved to `C:\Program Files\Resolve\Actions Express Server\Files`). Wildcards are supported (e.g., file type).
+
+## Settings
+
+
+* **Name Pattern** – The attachment file criteria. This field can be left empty.
+
+For example, to retrieve all XML files attached to the triggering email, enter `*.xml`).
+
+:::note
+To control the download attachment parameters you can:
+
+* Access Actions `C:\Program Files\Resolve\Actions Express Email Server\Email Server.exe.config` and edit the file using a text editor.
+* Change the following key parameters:
+    * **DownloadAttachments** – Used to determine whether to download the files attached to emails arriving at Actions (can be set to either True or False).
+    * **IgnoreAttachmentsFiles** – Used to ignore specific file types (any type of file extension can be set, e.g., `<addkey="IgnoreAttachmentsFiles" value="*.gif;*.jpeg"/>`. The parameter should be copied and edited per ignored file type).
+:::

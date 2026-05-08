@@ -1,0 +1,64 @@
+---
+id: esp-integration-users-mdx
+title: Configure ESP Integration User
+description: Directions for configuring ESP integration users.
+sidebar_position: 40
+keywords: [barista, servicenow, integrations] # Used for LLM search enrichment and internal search — include at least 4.
+tags: [integrations, servicenow] 
+---
+### Configure ESP Integration User
+
+:::note
+All steps in this section are performed in ServiceNow. Steps may vary slightly depending on your ServiceNow version.
+:::
+
+#### Navigate to the ESP User
+
+1. Type **Users** in the search bar at the top of the side panel menu.
+2. Click **Organization > Users**.  
+3. Search for `esp.integration`.  
+4. Click on the **esp.integration** user.
+
+#### Add Roles
+
+1. In the **Roles** section, click **Edit**.  
+2. Search for all `esp_roles`, including:
+   - `esp_integration_admin`
+   - `esp_integration_dev`
+   - `esp_integration`  
+3. Find the following roles, and add them to the `esp.integration` users:
+   - `knowledge_admin` - Required for Knowledge Base access  
+   - `itil` - Required for incident/ticket access  
+   - `rest_api_explorer` - Required for API access  
+4. Click **Save**.
+
+:::note
+The `esp_roles` handle the Barista integration. The `knowledge_admin`, `itil`, and `rest_api_explorer` roles are required if your tenant uses Knowledge Base and ticketing.
+:::
+
+#### Set Password for ESP Integration Users
+
+1. Click **Set Password** on the esp.integration user record.
+2. Click **Generate** to create a new password or enter a secure password you created.  
+3. Copy and save the password securely.  
+4. Click **Save Password**.
+
+:::caution
+To avoid a connection failure after setting the password:
+- Uncheck the *Password needs reset* checkbox
+- Save the user record 
+:::
+
+#### Check
+
+Before moving forward, confirm the following steps were completed successfully:
+
+- Update set committed successfully
+- ESP modules visible in navigator
+- `esp.integration` user includes all three Barista roles
+- Password generated and saved securely
+- *Password needs reset* is UNCHECKED
+- Access to the following data for the next step:
+   - ServiceNow Instance URL: https://[instance].service-now.com
+   - Username: `esp.integration`
+   - Password configured for the ESP Integration

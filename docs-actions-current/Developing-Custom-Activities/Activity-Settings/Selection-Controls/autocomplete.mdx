@@ -1,0 +1,131 @@
+---
+sidebar_position: 80
+id: autocomplete
+title: autocomplete
+---
+* **Description:** Text input with searchable dropdown suggestions. Can use static controlOptions or dynamic options from API via autocompleteParams. Supports workflow variable autocomplete when typing %.  
+* **Base Type:** control  
+* **Data Type:** String (Searchable)  
+* **Validation Rules:**  
+  * User can type to filter options  
+  * Can select from filtered results or type custom values (if allowed)  
+  * Options can be static (controlOptions) or dynamic (autocompleteParams)  
+* **Example Values:** `us-east-1`, `server-prod-01`, `admin-group`, `%VariableName%`  
+* **Common Use Cases:** Entity selection (devices, users, workflows), Region selection, Dynamic lookups  
+* **Optional Properties:**  
+  * controlOptions (Array): Static list of options with key and value (used when autocompleteParams is not specified)  
+  * autocompleteParams (Object): Configuration for dynamic API-based options:  
+    * entityType (Number): EntityTypes enum value specifying what kind of entities to fetch  
+    * stringToSearch (String): Optional search string filter  
+    * extraParams (Any): Optional additional parameters for the API call  
+  * value (String): Default selected value  
+  * idFieldName (String): Field name to store the selected item's ID  
+  * idDefaultValue (String): Default ID value  
+  * excludeItems (Array): Items to exclude from the autocomplete results  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * disabled (Boolean): If true, the control is read-only
+
+**EntityTypes Enum Values (for autocompleteParams.entityType):**
+
+| Value | Name | Description |
+| :---- | :---- | :---- |
+| 0 | None | No entity type |
+| 1 | Workflow | Workflow selection |
+| 2 | Device | Device/server selection |
+| 3 | User | User selection |
+| 4 | Group | User group selection |
+| 5 | Duty | Duty/shift selection |
+| 6 | Templates | Template selection |
+| 7 | Global_Variables | Global variables |
+| 8 | Services | Service selection |
+| 9 | Classifications | Classification selection |
+| 10 | Commands | Command/executor selection |
+| 11 | Sites | Site selection |
+| 12 | OperationSystem | Operating system selection |
+| 16 | TimeFrames | Time frame selection |
+| 17 | Condition | Condition selection |
+| 18 | Modules | Module/integration selection |
+| 19 | ErrorHandling | Error handling configuration |
+| 20 | Clusters | Cluster selection |
+| 21 | Activities | Activity selection |
+| 27 | Incident | Incident selection |
+| 31 | IncidentDevices | Incident devices selection |
+| 32 | IncidentServices | Incident services selection |
+| 35 | MessageTemplates | Message template selection |
+| 36 | ModulesFiltered | Filtered modules |
+| 37 | FoldersWorkflows | Workflow folders |
+| 38 | FoldersTemplates | Template folders |
+| 40 | ErrorMessages | Error message selection |
+| 41 | TimeZone | Time zone selection |
+| 42 | UserByFullName | User by full name |
+| 46 | Notes | Notes selection |
+| 54 | Queues | Queue selection |
+| 55 | ModuleFields | Module fields |
+| 62 | AwsRegion | AWS region selection |
+| 63 | AwsInstanceType | AWS instance type |
+| 64 | AwsVolumeType | AWS volume type |
+| 67 | SelfServiceFolders | Self-service folders |
+| 68 | SelfServiceForms | Self-service forms |
+| 78 | DeviceWithNoMaster | Device without master |
+| 94 | WebServices | Web services |
+| 131 | RecipientUser | Recipient user |
+| 132 | RecipientGroup | Recipient group |
+
+**JSON Example (Static Options):**  
+```
+{
+  "key": "serverRegion",
+  "label": "Server Region",
+  "baseType": "control",
+  "controlType": "autocomplete",
+  "value": "us-east-1",
+  "disabled": false,
+  "required": true,
+  "controlOptions": [
+    {
+      "key": "1",
+      "value": "us-east-1"
+    },
+    {
+      "key": "2",
+      "value": "us-west-2"
+    },
+    {
+      "key": "3",
+      "value": "eu-west-1"
+    }
+  ]
+}
+```
+
+**JSON Example (Dynamic Options with autocompleteParams):** 
+```
+{
+  "key": "targetDevice",
+  "label": "Target Device",
+  "baseType": "control",
+  "controlType": "autocomplete",
+  "value": "",
+  "idFieldName": "DeviceId",
+  "idDefaultValue": "0",
+  "required": true,
+  "autocompleteParams": {
+    "entityType": 2
+  }
+}
+```
+
+**JSON Example (AWS Region Selection):**  
+```
+{
+  "key": "awsRegion",
+  "label": "AWS Region",
+  "baseType": "control",
+  "controlType": "autocomplete",
+  "value": "",
+  "required": true,
+  "autocompleteParams": {
+    "entityType": 62
+  }
+}
+```

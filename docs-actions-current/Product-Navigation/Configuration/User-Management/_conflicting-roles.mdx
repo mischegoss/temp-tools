@@ -1,0 +1,16 @@
+If a user is included as part of a login group and also named individually in the **Users** table, the higher of the two permissions will be the one the user has upon login.
+
+For example:
+
+- John Doe is listed in the Users table with the role **Administrator**.
+- John Doe is part of the Help Desk group listed in the Groups table with the role **Workflow Editor**.
+- Upon login, John Doe will always be granted administrator privileges.
+
+There is a known issue with deleting accounts - the user deleting the account is not always recognized as having the appropriate permissions. The user's individual role is the only one being checked, and not any group role that they are in. In such a case, if their individual role isn’t sufficient, they will not be able to delete some accounts.
+
+For example:
+
+- John Doe is listed in the Users table with role **Operator**.
+- John Doe is part of the Administrators group with role **Administrator**.
+- John Doe tries to delete another administrator account, which he should be able to do since he's part of the Administrators group.
+- The delete fails because John Doe's individual **Operator** role is the only one taken into account, and is not sufficient for deleting an administrative account.

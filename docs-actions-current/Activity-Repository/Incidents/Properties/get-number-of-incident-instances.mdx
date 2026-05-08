@@ -1,0 +1,19 @@
+---
+sidebar_position: 10
+id: get-number-of-incident-instances
+title: Get Number of Incident Instances
+---
+
+## Activity Description
+
+Returns a specific incident's number of concurrent instances.
+
+## Settings
+
+
+* **Use Current Incident/Use Another Incident** – Determines whether to return the number of instances of the incident that triggered the workflow, or another incident.
+* **Type: Device/Service** – Determines whether the incident is ascribed to a Device or a Service.
+* **Name** – The name of the constant/dynamic incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%ServiceName%`
+* **Classification** – The classification of the incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%Type%`

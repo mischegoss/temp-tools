@@ -1,0 +1,93 @@
+---
+sidebar_position: 35
+id: access-control-on-integrations-and-modules
+title: Access Control on Integrations and Modules
+---
+
+The integration modules allow you to set optional permissions for added access control to the activities that rely on the module. This way, only entitled users will be able to use the module, and therefore the integration, when building workflows.
+
+:::note
+Access control is only available for integration modules.
+:::
+
+:::note
+You can use multiple instances of an integration module to provide your VAR::PRODUCT_FULL users with more flexible access to a third-party system.
+
+For example, you could set up a pair of third-party system accounts with different levels of access - one with access to tables A and B and another with access to tables C and D. You could then use each to authenticate a separate integration instance. Finally, you could give different VAR::PRODUCT_FULL users access to each of the integrations.
+:::
+
+## Implications of Restricting Access to Integrations and Modules
+
+As a user who is restricted from using an integration or module, either fully or partially, you see the following implications on your work in **Workflow Designer**:
+
+* When viewing a workflow that already includes activities that rely on the integration or module, the activity settings behave as follows:
+  * When you have read access only, you can see the settings but not change them.
+  * When you don't have any access, the settings are not available for viewing or editing.
+* If you don't have write permissions for a integration instance when building or editing a workflow, the **Activities** palette grays out any activities that rely on the integration instance, preventing you from adding those activities to the workflow. Similarly, these activities do not appear in the **Activities** palette search.  
+  :::note
+  You will still have the full activity functionality if there is another integration instance set up that does provide you with access.
+  :::
+* When setting up an activity that relates to the same integration type, you only see the integration instances that you have access to.
+* When importing a workflow, and you are asked to select a replacement integration to map to, you don't see restricted integrations.
+
+  :::caution
+  The aforementioned restrictions do not apply to custom activities.
+  :::
+
+## Default Integrations and Modules Permissions
+
+If you don't set any permissions, all users have access to activities that rely on the integration or module.
+
+The Administrator role always has write access to the integration or module and activities that rely on it.
+
+## Setting Integrations and Modules Permissions
+
+The integration or module permissions are available for setting while creating a new integration or later when editing an integration.
+
+You have three options when configuring integration and module permissions:
+
+* Provide access to all users
+* Provide access only to Administrator role users
+* Provide access to specified users or groups, plus all Administrator role users
+
+Take these steps to edit the permissions of an integration or module:
+
+1. Navigate to the permissions settings:
+   * For an existing integration:
+     1. From the **Main Menu**, navigate to **Configuration > Integrations and Modules**.
+     2. Expand the **Integrations** section.
+     3. Click the integration that you want to edit and then expand the side panel on the right to view the integration settings.
+   * For a new integration:
+     4. From the **Main Menu**, navigate to **Configuration > Integrations and Modules**.
+     5. In the **Integrations** section, click the plus icon to add a new integration.
+     6. Follow the instruction in [Operations on Integrations and Modules](./operations-on-integrations-and-modules.mdx) to fill in the settings.
+2. Expand the **Permissions** section.
+3. Set the permissions:
+   * To provide access to all users, leave the **Enable Permissions** box unchecked. 
+   * To provide access only to Administrator role users, click **Enable Permissions** but do not enter any security principals in the table.
+   * To provide access to specified users or groups complete the following: 
+     1. In the **Type** column, select the type you are giving permissions to: **User** or **Group**.
+     2. In the **Name** column, select the user or group.
+     3. Check **Read** to provide read access to the Integration.  
+     4. Check **Write** to provide write access to the Integration.  
+     5. Continue adding users or groups until you have set the Integration's permissions the way you want to.  
+     To remove, click the **X icon** next to its name in the table.
+4.  Click **Save**.
+
+:::note Cumulative Permissions
+Permissions granted to a user can be direct (granted to the individual user) or indirect (granted to groups of which the user is a member).
+
+For example, if a group has Write privileges but User A's (a member of that group) individual entry only gives Read privileges, User A will have both Read and Write privileges.
+:::
+
+## Modules without Access Control
+
+Not all integration modules offer access control, such as **Syslog**, **SNMP**, and **Message Queue - Microsoft** that only provide events, don't have a **Permissions** section.
+
+## Limitations
+
+The following limitations apply to the module permissions:
+
+* The module selection field of **Communication** activities (Send Email, Send SMS, and so on) allows for passing a variable reference (like `%moduleName%`) instead of an explicit module name. If you are importing a workflow that includes such an activity, and you don't have write permissions for the referenced module instance, the activity will act as if you do.
+* The [**Last Response**](../../../Activity-Repository/Communication/last-response.mdx) activity always attempts to find a working communication module, starting with the default, and cannot be locked to a particular module instance. To that end, this activity does not support access control.
+

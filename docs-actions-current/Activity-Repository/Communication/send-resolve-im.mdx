@@ -1,0 +1,24 @@
+---
+sidebar_position: 10
+id: send-resolve-im-activity
+title: Send Resolve IM
+description: Sends a Resolve Actions instant message to a User or a Group.
+---
+
+## Activity Description
+
+Sends an VAR::PRODUCT_FULL instant message to a User or a Group.
+
+## Settings
+
+
+* **Notification**—The IM recipient(s).  
+   * **User**—A specific user in VAR::PRODUCT (configured in **Repository > Recipients**).  
+   * **Group**—All users in a group.  
+   * **Last response**—The recipient who took responsibility for the Incident that triggered the workflow.
+* **Message**—The type of message to be sent.
+   * **Original**—The message that triggered the workflow.  
+   * **Custom**—Any entered free text.  
+   * **Template**—A predefined message (created in **Repository > General > Message Templates**).
+   * **Template Name**—Sends a predefined message template.
+   * **Send Recovery Notification**—Adds the selected recipient to the recovery notification list. Upon incident recovery, all recipients in the recovery list are notified.

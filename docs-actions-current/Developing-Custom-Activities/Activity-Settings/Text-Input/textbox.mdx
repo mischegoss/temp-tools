@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: textbox
+title: Textbox
+---
+
+* **Description:** Single-line text input field for short string values. Supports variable autocomplete for workflow variables starting with %.  
+* **Base Type:** control  
+* **Data Type:** String  
+* **Example Values:** `server01.domain.com`, `C:\\\\temp\\\\file.txt`, `user@email.com`  
+* **Common Use Cases:** Hostnames, File paths, Usernames, Simple identifiers  
+* **Optional Properties:**  
+  * value (String): Default value  
+  * required (Boolean): If true, the field must be filled (empty or whitespace-only values are rejected). Default is false  
+  * requiredWithoutTrim (Boolean): If true, the field must be filled but whitespace-only values are accepted. Default is false  
+  * disabled (Boolean): If true, the control is read-only
+
+**JSON Example:**  
+
+```
+{
+  "key": "myTextField",
+  "label": "My Text Field",
+  "baseType": "control",
+  "controlType": "textbox",
+  "value": ""
+}
+```

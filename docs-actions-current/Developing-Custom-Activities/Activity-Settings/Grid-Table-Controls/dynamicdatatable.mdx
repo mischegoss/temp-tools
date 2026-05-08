@@ -1,0 +1,79 @@
+---
+sidebar_position: 10
+id: dynamicdatatable
+title: dynamicDatatable
+---
+* **Description:** Interactive spreadsheet-like data table with editable column headers and cell values. Supports dynamic row/column count, cell editing, copy/paste, and XML DataSet serialization. The grid automatically generates column headers (A, B, C...) and allows renaming.  
+* **Base Type:** control  
+* **Data Type:** XML DataSet (with schema and data rows)  
+* **Validation Rules:**  
+  * Column headers must be unique and valid identifiers  
+  * Column headers cannot start with a number  
+  * Column headers can only contain alphanumeric characters and underscores  
+  * Row/column counts have configurable min/max limits  
+* **Important:** This control requires sibling controls to specify row and column counts via rowFieldId and columnFieldId properties.  
+* **Common Use Cases:** Create Memory Table activity, Bulk data configuration, Tabular data entry
+
+**Required Properties:**
+
+* rowFieldId (String): Key of the sibling control that specifies row count  
+* columnFieldId (String): Key of the sibling control that specifies column count
+
+**Optional Properties:**
+
+* value (String): Initial XML DataSet value with schema and data  
+* styleClass (String): CSS class (e.g., "builderTheme")  
+* dfControl\_genericToolTipEnabled (Boolean): Enable/disable tooltips
+
+**JSON Example (Create Memory Table):** 
+```
+{
+  "key": "TableName",
+  "label": "Table Name",
+  "required": true,
+  "validation": "^[_a-zA-Z][_a-zA-Z0-9]*$",
+  "genericToolTipPopUpMessage": "ERRORS.382",
+  "value": "",
+  "baseType": "control",
+  "controlType": "textbox"
+},
+{
+  "key": "ColumnNumber",
+  "label": "Columns",
+  "required": true,
+  "value": "3",
+  "baseType": "control",
+  "controlType": "limit2Num",
+  "min": 0,
+  "max": 50,
+  "updateInputInBlurEvent": "true"
+},
+{
+  "key": "RowNumber",
+  "label": "Rows",
+  "required": true,
+  "value": "14",
+  "baseType": "control",
+  "controlType": "limit2Num",
+  "min": 0,
+  "max": 3000,
+  "updateInputInBlurEvent": "true"
+},
+{
+  "key": "TableAsString",
+  "value": "<NewDataSet> <xs:schema id='NewDataSet' xmlns='' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:msdata='urn:schemas-microsoft-com:xml-msdata'> <xs:element name='NewDataSet' msdata:IsDataSet='true' msdata:MainDataTable='resultSet' msdata:UseCurrentLocale='true'> <xs:complexType> <xs:choice minOccurs='0' maxOccurs='unbounded'> <xs:element name='resultSet'> <xs:complexType> <xs:sequence> <xs:element name='A' type='xs:string' minOccurs='0' /> <xs:element name='B' type='xs:string' minOccurs='0' /> <xs:element name='C' type='xs:string' minOccurs='0' /> </xs:sequence> </xs:complexType> </xs:element> </xs:choice> </xs:complexType> </xs:element> </xs:schema> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> <resultSet> <A /> <B /> <C /> </resultSet> </NewDataSet>",
+  "baseType": "control",
+  "controlType": "dynamicDatatable",
+  "styleClass": "builderTheme",
+  "rowFieldId": "RowNumber",
+  "columnFieldId": "ColumnNumber",
+  "dfControl_genericToolTipEnabled": false
+},
+{
+  "key": "isEmptyGrid",
+  "value": "0",
+  "baseType": "control",
+  "controlType": "hidden"
+}
+```
+**Note:** The value contains both the XML schema (defining column structure) and data rows. Each `\<resultSet\>` element represents a row, with child elements for each column value. The number of `\<resultSet\>` elements should match the `RowNumber` value (14 rows in this example).

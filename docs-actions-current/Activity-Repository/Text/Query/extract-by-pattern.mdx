@@ -1,0 +1,35 @@
+---
+sidebar_position: 10
+id: extract-by-pattern
+title: Extract by Pattern
+---
+
+## Activity Description
+
+Extracts all rows within a pattern.
+
+## Output
+
+A table.
+
+## Settings
+
+
+* **Source String** The text in which to search for the pattern.  
+   Example:
+   ```
+   extractByPattern start "c1" #data1& "c2" #data2& "c3" #data3& "c4" #data4&
+   ```
+* **Pattern Delimiters: Starting** – The text that indicates the beginning of the pattern.  
+   Example: `"`
+* **Pattern Delimiters: Ending)** – The text that indicates the end of the pattern.  
+   Example: `&`
+* **Output Format / Result as Table** – Checks to retrieve the result as a table.
+* **Column Name Delimiters: Starting** – The text that indicates the beginning of a column name.  
+   Example: `#`
+* **Column Name Delimiters: Ending)** – The text that indicates the end of a column name.  
+   Example: `*`
+* **Column Data Delimiters: Starting** – The text that indicates the beginning of the column's data.  
+   Example: `#`
+* **Column Data Delimiters: Ending)** – The text that indicates the end of the column's data.  
+   Example: `&`

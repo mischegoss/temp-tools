@@ -1,0 +1,14 @@
+---
+sidebar_position: 10
+id: from-event-to-incident-background
+title: From Event to Incident
+---
+
+As explained in [Understanding the Data Flow](../../Welcome/Understanding-the-Data-Flow.mdx), when an event is retrieved by VAR::PRODUCT_FULL:
+
+1. The incoming event arrives at the parsing/mapping checkpoint, where it is determined whether the event qualifies as an incident or is handled as a basic event.
+2. The event/incident is checked by the Workflow Trigger, and if certain conditions apply, the event (or incident) invokes a workflow.  
+   :::note
+   In case of an incident, such conditions may refer to variables that were produced during the parsing/mapping procedure.
+   :::
+3. Regardless of workflow execution, if an Incident was created, it is displayed in the Actions LIVE dashboard.

@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: vm-create
+title: VM Create
+---
+
+:::note
+To be able to use the activity, you need to install [VMware PowerCLI](https://developer.vmware.com/web/tool/vmware-powercli) on the VAR::PRODUCT_FULL Executor server.
+:::
+
+## Activity Description
+
+Creates a Virtual Machine.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Host Name**—The host name or IP address. This must be either the vCenter device or the ESXi device (you can configure the device with **Platform** type **vCenter/ESXi** under [Devices](../../../Product-Navigation/Repository/Incident-Configuration/Devices.mdx)).
+* **User Name**—The user name of an account that has read/write access to the host.
+* **Password**—The password of the account listed in the **User Name** field.
+* **VM Name**—The name of the Virtual Machine to create.
+* **VM Annotation**—The annotations related to a Virtual Machine.
+* **Datastore Name**—The Virtual Machine's data store name.
+* **Disk Size**—The Virtual Machine's disk size in MB.
+* **Memory Size**—The Virtual Machine's memory size in MB.
+* **Number of CPUs**—The Virtual Machine's number of CPUs.
+* **Guest OS Id**—The Virtual Machine's OS type.

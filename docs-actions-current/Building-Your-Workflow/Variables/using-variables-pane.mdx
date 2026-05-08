@@ -1,0 +1,24 @@
+---
+sidebar_position: 20
+id: using-variables-pane
+title: Using Variables Pane
+---
+When working inside the Workflow Builder, the **Variables** pane on the right gives you a one-stop place to keep track of all the variables that are used or can be used by the workflow, including non-workflow variables like global variables and module variables.
+
+The **Variables** pane also gives you quick clipboard access to variable names. To copy a variable name to the clipboard, click the variable name in the pane.
+
+To collapse the pane, click the arrow icon on the Reference toolbar.
+
+:::note Case Study
+Assume that you want to build a URL on the fly and include in it a piece of data that you extract from Active Directory (AD).
+
+You would start by using one of the AD activities to get the data. Let's say you named it `getUserFolder`.
+
+To construct the URL, you will need the **Memory Set** activity. In it, first provide a name for the variable that you are creating in **Variable Name**—`userVaultPath` for example. In **Variable Value**, construct the URL, referencing the `%getUserFolder%` activity result:
+
+```
+http://www.example.com/vault?userpath=%getUserFolder%
+```
+
+After you construct the URL, you can refer to it from other activities using the user-defined variable name (`%userVaultPath%` in this case). Note that, unlike other activities, you don't use the **Memory Set** activity's instance name to refer to its result.
+:::

@@ -1,0 +1,23 @@
+---
+sidebar_position: 70
+id: using-integration-module-variables
+title: Using Integration Module Variables
+description: When the ServiceNow Module is available, related variables are discovered in Resolve Actions and can be used to define conditions or workflow activities.
+---
+
+When the ServiceNow Module is available, related variables are discovered in VAR::PRODUCT_FULL and can be used to define conditions or workflow activities.
+
+To use integration module variables in a condition:
+
+1. In the condition properties, under **Variable Type**, select the relevant integration module.
+2. Under **Module Form**, from the available list of forms, select the relevant form.
+3. Under **Object**, select the mapped variable.
+4. Complete the condition.
+
+To use integration module variables in activities:
+
+* Use the convention `%variable_name%`.
+
+:::note
+In Resolve Actions, the names of "State" and "Severity" integration variables are `_State` and `_Severity`.
+:::

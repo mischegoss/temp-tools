@@ -1,0 +1,42 @@
+---
+sidebar_position: 40
+id: global-variables
+title: Global Variables
+---
+*Global variables* are available to all workflows in your VAR::PRODUCT instance and are managed from **Main Menu > Repository > General > Variables**. This type of variables can only be referenced in workflows and [trigger conditions](../../Product-Navigation/Repository/General/Conditions.mdx).
+
+* Built-in global variables—Also known as Standard Objects. A set of incident-related variables that come with VAR::PRODUCT and cannot be deleted. Examples include `Classification`, `Device`, `Description`, and `Incident` (see [Variables](../../Product-Navigation/Repository/General/Variables.mdx) for the full list). Their names are reserved words in VAR::PRODUCT. Because of that, any parameters with the same names that might be incoming from integration modules are automatically prefixed with an underscore (`_Device`). You can choose to map such a parameter to a user-defined global variable (for example, `JiraDevice`) or address it directly with the underscored notation.
+* User-defined global variables—Any number of variables that you can create for data that you want to be accessible to all your workflows. Several data types are supported; see [Variables](../../Product-Navigation/Repository/General/Variables.mdx) for the list.
+
+A global variable can be created in any of the following modes, which determine how it gets its value:
+
+* **Set Variable's Value Only When Incident is Created**—The variable is set only once during the incident's lifecycle—to the data received with the event responsible for the incident's creation. Any updated values incoming with other events considered to be part of the same incident, are ignored.
+* **Set Variable's Value on Every Incident Update**—The variable updates its value every time a new event is received, where one of the pre-parsed properties has the same name.
+* **Read-Only Mode**—The variable is a constant that cannot be changed.
+* **Read-Write Mode**—The variable can be modified during a workflow run.
+
+:::caution
+Because global variables are available to all workflows, pay special attention when using them. Ensure that you design your logic such that a global variable shared by two or more workflows is not inadvertently modified midway through the workflow execution by another workflow.
+:::
+
+To reference a global variable in an activity, type its name enclosed in percentage signs (`%`). Another option is to enter the opening percentage sign (`%`) and, after the autocomplete window appears, to click its **Global** tab and select the variable to use.
+
+```
+%globalVariableName%
+```
+
+One application of global variables is to capture data from incoming events. In this case, you need to:
+
+* Create the global variable with the same name as the event parameter that you want to capture.  
+  :::note
+  Matching is case-insensitive.
+  :::
+* Create the global variable with either of these modes (subject to your use case; see [Incident Caching](../../Product-Navigation/Repository/Incident-Configuration/Incident-Caching.mdx) for context):
+  * **Set Variable's Value Only When Incident is Created**
+  * **Set Variable's Value on Every Incident Update**
+
+When set up this way, the global variable will be set as soon as VAR::PRODUCT receives an event containing a parameter that matches it, regardless of whether the event classifies as an incident or not. The event must be coming from an integration module.
+
+If the variable's mode is **Set Variable's Value on Every Incident Update**, it will update on every matching event. If the mode is **Set Variable's Value on Every Incident Update**, and the event classifies as an incident, any further value updates are skipped while the incident is in **Down** state.
+
+When working with events from Integration Modules with extended **Forms**, **Filters**, and **Mapping** settings, you have the option to map an integration parameter to a global variable. This gives you the option to use an alternative name for that parameter in your workflow.

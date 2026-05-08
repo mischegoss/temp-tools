@@ -1,0 +1,32 @@
+---
+sidebar_position: 10
+id: limit2num
+title: limit2num
+---
+* **Description:** Numeric input with constraints for defining bounded limits  
+* **Base Type:** control  
+* **Data Type:** Number  
+* **Validation Rules:**  
+  * Accepts numeric values within the specified min/max range  
+  * Used for row counts, ranges, or bounded values  
+* **Example Values:** `14`, `100`, `1000`  
+* **Common Use Cases:** Row limits, Table sizes, Numeric constraints, Bounded values  
+* **Optional Properties:**  
+  * value (String): Default value  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * min (Number): Minimum allowed value  
+  * max (Number): Maximum allowed value
+
+**JSON Example:**  
+```
+{
+  "key": "rowLimit",
+  "label": "Row Limit",
+  "baseType": "control",
+  "controlType": "limit2Num",
+  "value": "100",
+  "min": 1,
+  "max": 10000,
+  "required": true
+}
+```

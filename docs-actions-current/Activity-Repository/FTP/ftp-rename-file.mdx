@@ -1,0 +1,26 @@
+---
+sidebar_position: 10
+id: ftp-rename-file-activity
+title: FTP Rename File
+---
+
+## Activity Description
+
+Renames a file on the FTP server.
+
+:::note
+This activity should be placed after the Start FTP Session activity and refer to the started session.
+:::
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **FTP Session** – The FTP session in which to rename the file.
+* **Source Path** – The path of the file to rename.  
+   Example: `/upload/log.txt`
+* **Target Path** – The path including the new name of the file.  
+   Example: `/upload/log_old.txt`

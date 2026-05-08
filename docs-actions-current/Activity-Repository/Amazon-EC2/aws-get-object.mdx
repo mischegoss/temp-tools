@@ -1,0 +1,30 @@
+---
+sidebar_position: 10
+id: aws-get-object-activity
+title: AWS Get Object
+---
+
+## Activity Description
+
+Retrieves a list of objects of the selected type according to the specified criteria. Only objects from the connected region are retrieved.
+
+:::note
+Not all columns are supported to use as a filter in the Amazon API. Some columns appear with different names in the filter selection window.
+:::
+
+## Output
+
+A result set of all matching objects.
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Region** – The region in which the instance resides.  
+   Example: `ap-northeast-1`
+* **Object Name** – The name of the object to get.
+* **Override Connection Parameters** – Used to get a list of objects on a different AWS account, instead of the original default account saved under the AWS module.
+* **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.
+* **Filters** – Optional filters to return the object only if it meets the condition(s).

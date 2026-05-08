@@ -1,0 +1,8 @@
+position: 70
+label: Special Controls
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Special Controls
+

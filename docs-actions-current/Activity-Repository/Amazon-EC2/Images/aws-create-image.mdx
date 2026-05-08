@@ -1,0 +1,25 @@
+---
+sidebar_position: 10
+id: aws-create-image
+title: AWS Create Image
+---
+
+## Activity Description
+
+Create a new Amazon Web Service image based on an existing instance.
+
+## Output
+
+The ID of the new image.
+
+## Settings
+
+
+- **Module Name** – The name of the AWS module through which the activity will execute.
+- **Region** – The region in which the image will be created.  
+  Example: `ap-northeast-1`
+- **Instance Name/Id** – The instance name or ID of the image.
+- **Image Name** – The name of the new image to be created.
+- **Description** – The new image's description (optional).
+- **No Reboot** – If the 'No Reboot' option is set, Amazon EC2 doesn't shut down the instance before creating the image (By default, Amazon EC2 attempts to shut down and reboot the instance before creating the image).
+- **Override Connection Parameters** – Creates an image based on an existing instance on a different AWS account, instead of the original default account saved under the AWS module.

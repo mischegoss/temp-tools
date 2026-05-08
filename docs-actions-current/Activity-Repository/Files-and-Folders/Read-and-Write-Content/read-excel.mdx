@@ -1,0 +1,33 @@
+---
+sidebar_position: 10
+id: read-excel
+title: Read Excel
+---
+
+## Activity Description
+
+Reads an Excel file and returns all data in it.
+
+## Output
+
+A ResultSet of the file's content.
+
+:::note
+This activity supports Excel 2003, Excel 2007, Excel 2010 and Excel 2014 files.
+:::
+
+:::note
+In case of a duplicated column name, one column will be renamed.
+:::
+
+## Settings
+
+
+* **Path** – The path where the file is stored.
+* **Host Name** – The host name or IP address.
+* **User Name** – If required, the username of an account that has read-write access to the host.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Sheet Name** – The name of the sheet to read. If blank, the first sheet will be read.
+* **Range** – The range of cells to read. If blank, all cells in the specified sheet will be read.  
+   Example: `a1:b45`
+* **My table has header** – checkbox to mark if the sheet has a header row. If unchecked, the first row of cells will be counted as part of the data and not a header row.

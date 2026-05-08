@@ -1,0 +1,70 @@
+---
+sidebar_position: 60
+id: permissions
+title: permissions
+---
+* **Description:** File/folder permissions control with checkbox-based selection. Displays checkboxes for Full Control, Modify, Read, Read & Execute, Write, and Delete permissions with automatic dependency handling (e.g., selecting Full Control enables all others).  
+* **Base Type:** control  
+* **Data Type:** Inline string with \<value\> tags (e.g., username\<value\>True\<value\>False\<value\>...)  
+* **Validation Rules:**  
+  * Permissions have hierarchical dependencies (Full Control → all, Modify → Read+Write+Delete, etc.)  
+  * Unchecking a base permission unchecks dependent permissions automatically  
+* **Important:** This control requires a sibling textbox control with key recipient to specify the User/Group Name. The permissions value is prefixed with the recipient name.  
+* **Common Use Cases:** Set File Permissions, Set Folder Permissions activities
+
+**Permission Checkboxes:**
+
+| Permission | Description | Dependencies |
+| :---- | :---- | :---- |
+| Full Control | All permissions | Enables: Modify, Read, Read & Execute, Write, Delete |
+| Modify | Modify access | Enables: Read, Read & Execute, Write, Delete |
+| Read | Read access | Disabling disables: Read & Execute, Modify |
+| Read & Execute | Read and execute access | Enables: Read; Disabling disables: Modify, Full Control |
+| Write | Write access | Disabling disables: Modify, Full Control |
+| Delete | Delete access | Disabling disables: Modify, Full Control |
+
+**JSON Example (Set File Permissions):** 
+```
+{
+  "value": "",
+  "required": true,
+  "key": "Path",
+  "label": "Path",
+  "baseType": "control",
+  "controlType": "textbox"
+},
+{
+  "isCollapse": true,
+  "isVisible": true,
+  "styleClass": ["formGroup"],
+  "key": "permissions",
+  "label": "Permissions",
+  "baseType": "group",
+  "activitySettings": [
+    {
+      "value": "",
+      "required": true,
+      "key": "recipient",
+      "label": "User/Group Name",
+      "baseType": "control",
+      "controlType": "textbox"
+    },
+    {
+      "value": "",
+      "key": "PermissionsData",
+      "label": "",
+      "baseType": "control",
+      "controlType": "permissions"
+    },
+    {
+      "checked": false,
+      "key": "InheritablePermissions",
+      "label": "Remove Existing Permissions",
+      "baseType": "control",
+      "controlType": "checkbox"
+    }
+  ]
+}
+```
+
+**Note:** The `permissions` control must be inside a group with a sibling `textbox` control with key `recipient`. The output value format is: `{recipientName}\<value\>{fullControl}\<value\>{modify}\<value\>{readAndExecute}\<value\>{read}\<value\>{write}\<value\>{delete}` where each permission is `True` or `False`.

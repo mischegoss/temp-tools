@@ -1,0 +1,54 @@
+---
+id: servicenow-prerequisites
+title: Prerequisites
+description: Prerequisites for the ServiceNow integration
+sidebar_position: 10
+keywords: [barista, servicenow, integrations] # Used for LLM search enrichment and internal search — include at least 4.
+tags: [integrations, servicenow] 
+---
+
+### Prerequisites: Gather Required Information
+
+Before configuring the Barista integration, ensure you have the following information prepared.
+
+#### ServiceNow Credentials
+
+- **ServiceNow instance URL**  
+  Format: `https://[instance].service-now.com`
+
+- **Admin credentials**  
+  Username and password for a ServiceNow account with sufficient privileges
+
+- **Required permissions**  
+  The account must be able to:
+  - Import update sets  
+  - Create and modify users  
+  - Configure integration settings  
+
+- **Additional access requirements** *(if applicable)*  
+  - VPN access  
+  - Multi-factor authentication (MFA)  
+  - IP allowlisting  
+
+### ESP Integration User Password
+
+- A secure password for the ESP integration user  
+  *(This user will be created or generated within ServiceNow)*  
+
+:::tip
+Use the same password in both ServiceNow and Barista to ensure successful authentication.
+:::
+
+#### User Provisioning Criteria
+
+- Define which users should be synchronized from ServiceNow, such as:
+  - All active users  
+  - Specific departments  
+  - Locations  
+  - Roles  
+
+:::tip
+ServiceNow should already be enabled on the Status Page. If the integration is not visible in the Admin page, navigate to:
+
+`https://{tenant}.espressive.com/status` → **Display Settings** → **Integrations** → enable the **ServiceNow** toggle.
+:::

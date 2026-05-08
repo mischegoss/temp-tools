@@ -1,0 +1,38 @@
+---
+sidebar_position: 10
+id: jira-update-issue-activity
+title: Jira Update Issue
+---
+
+## Activity Description
+
+Updates an existing Jira issue.
+
+## Output
+
+Success/Failure.
+
+## Settings
+
+
+* **Module Name** – The Jira module.
+* **Project Name** – The Jira project in which to update the new issue.
+* **Issue Type** – The type of the issue to update.
+* **Issue Key** – The key of the issue to update.
+* **Properties** – The properties of the selected issue type.
+
+:::note
+If there are no existing issues in Jira for the selected Issue Type, the module will not be able to discover the issue's properties. To resolve this problem, manually create an issue for the selected issue type and clear the module's cache.
+:::
+
+:::note
+To set the value of Label, Multiple Choice, Radio Button and Checkbox type properties, select the required action from the Update Issue activity and change one value at a time.
+:::
+
+:::note
+To set the value of Select List Cascading type fields, use the following format: Value1: Value1.1 (Value 1 is the value to the parent list and Value1.1 is the value to the child list).
+:::
+
+:::note
+Not all special characters are supported when used in Jira properties names. Using unsupported special characters may case failure to communicate with the Jira module.
+:::

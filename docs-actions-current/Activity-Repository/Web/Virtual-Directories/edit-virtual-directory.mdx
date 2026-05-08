@@ -1,0 +1,39 @@
+---
+sidebar_position: 10
+id: edit-virtual-directories
+title: Edit Virtual Directory
+---
+
+## Activity Description
+
+Edits a Virtual Directory on an IIS website.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Host Name** – The host name or IP address.
+* **User Name** – If required, the username of an account that has read-write access to the host.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Website Name** – The website in which the Virtual Directory resides.
+* **Virtual Directory Name** – The name of the Virtual Directory to edit.
+* **Virtual Directory Content Source (A directory…/A redirection…)** – Determines whether the Virtual Directory's content is taken from a directory located on the local machine or from an external URL.
+   * When a local directory is selected as the Virtual Directory's content source:
+      * **Local Path** – The path of the source directory.
+      * **Read** – Determines whether to permit clients which access the Virtual Directory to read data from it.
+      * **Write -** Determines whether to permit clients which access the Virtual Directory to write data in it.
+      * **Directory Browsing -** Determines whether to permit clients which access the Virtual Directory to browse the list of files in it.
+   * When an external URL directory is selected as the Virtual Directory's content source:
+      * **Redirect URL** – The source URL.
+      * **The exact URL entered above -** The client is sent to the exact specified URL.
+      * **Only redirect requests to content in this directory -** The client is sent to any directory which resides in the specified URL.
+      * **A permanent redirection for this resource** – The client is automatically redirected to a different URL.
+* **Application Settings**:
+   * **Execute Permissions: None/Scripts Only/Scripts and Executables** – Sets the security level of files and resources in the Virtual Directory.
+   * **Create Application** – Determines whether to create an application out of the Virtual Directory's content.
+   * **Application Name** – The name of the application.
+   * **Custom Application Pool** – Select to create a custom application pool.
+   * **Pool Name** – The name of the application pool (overrides the default name).

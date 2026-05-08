@@ -1,0 +1,29 @@
+---
+sidebar_position: 10
+id: get-open-incidents
+title: Get Open Incidents
+---
+
+## Activity Description
+
+Returns the list of the currently open incidents in Resolve Actions, according to predefined criteria.
+
+## Output
+
+The list of open incidents.
+
+## Settings
+
+
+* **Name** – The name of the incident to retrieve (wild cards are supported).  
+   Example: `SQL-SRV`
+* **Classification** – The incident's classification (wild cards are supported).  
+   Example: `Server Down`
+
+:::note
+When Name is specified and Classification is not, the activity's output is the list of incidents that **contain** the specified string in their name. When Classification is specified and Name is not, the activity's output is the list of incidents that **contain** the classification string in their name.
+:::
+
+:::note
+When neither Name nor Classification is selected, the activity returns all open incidents in the VAR::PRODUCT Dashboard.
+:::

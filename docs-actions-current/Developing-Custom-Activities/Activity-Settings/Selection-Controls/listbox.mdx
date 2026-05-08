@@ -1,0 +1,39 @@
+---
+sidebar_position: 70
+id: listbox
+title: listBox
+---
+* **Description:** Editable list control that allows users to add, edit, and remove items from a list. Displays items in a scrollable grid with delete buttons, and provides an input field at the bottom to add new items. Items can be added by typing and pressing Enter or clicking the add button. Supports workflow variable autocomplete in the input field.  
+* **Base Type:** control  
+* **Data Type:** String (serialized based on conversionType)  
+* **Behavior:**  
+  * Displays existing items in a scrollable list with inline editing  
+  * Each item has a delete button (X) to remove it  
+  * New items are added via input field at bottom (type and press Enter)  
+  * Supports workflow variable autocomplete when typing %  
+  * Can limit maximum number of items  
+* **Example Values:** Depends on conversionType - can be delimited string, XML DataSet, JSON array, or XML dictionary  
+* **Common Use Cases:** Managing lists of values, Input parameters, Dynamic item collections  
+* **Optional Properties:**  
+  * value (String): Default value (serialized format based on conversionType)  
+  * conversionType (Number): How the list is serialized:  
+    * 0: Delimited string (e.g., "item1,item2,item3")  
+    * 1: XML DataSet format  
+    * 2: JSON array format  
+    * 3: XML dictionary format  
+  * maxElementsCount (Number): Maximum number of items allowed in the list  
+  * parsingConfig (Object): Configuration for XML parsing when using conversionType 3  
+  * required (Boolean): If true, at least one item must be in the list. Default is false
+
+**JSON Example:**  
+```
+{
+  "key": "inputItems",
+  "label": "Input Values",
+  "baseType": "control",
+  "controlType": "listBox",
+  "value": "",
+  "conversionType": 0,
+  "maxElementsCount": 10
+}
+```

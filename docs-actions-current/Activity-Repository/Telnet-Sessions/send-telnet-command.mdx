@@ -1,0 +1,19 @@
+---
+sidebar_position: 10
+id: send-telnet-command-activity
+title: Send Telnet Command
+---
+
+## Activity Description
+
+Sends a Telnet command.
+
+## Settings
+
+
+* **Telnet Session** – The Telnet session in which to run the command.
+* **Command** – The command to run.  
+   Example: `TELNET>OPEN host [/TN3270]`
+* **Encrypt Command** – Determines whether the command is encrypted or not. Check this option to encrypt the command.
+* **Add Key Stroke** – Determines whether the system should wait for a special character to indicate the command's termination. Check this option to add a keystroke following the command.
+* **Wait For** – When this key is retrieved from the command's output, the activity no longer waits for further output, and returns the result to the workflow.

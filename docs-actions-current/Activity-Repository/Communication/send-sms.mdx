@@ -1,0 +1,36 @@
+---
+sidebar_position: 10
+id: send-sms-activity
+title: Send SMS
+---
+
+## Activity Description
+
+Sends an SMS to a User or a Group.
+
+## Settings
+
+
+* **Module Name** – Select the module instance that will provide the SMS functionality. Do either of the following:
+   * Select the module instance from the drop-down list.
+     :::note
+     Only module instances that you have [write access](../../Product-Navigation/Configuration/Integrations-and-Modules/access-control-on-integrations-and-modules.mdx) to appear in the list.
+     :::
+   * Enter a reference to a variable (like `%moduleName%`) that contains the module instance name.  
+     In case the variable value is empty, the activity attempts to use the default module instance of that type. If the value is not an actual instance name, the activity returns an error.
+     :::caution
+     Passing a module instance name as a variable allows the use of any module instance even if it doesn't give write permissions to the current user.
+     :::
+* **Destination Type** – The SMS recipient/s.  
+   * **User** – A specific User in Actions Recipients Repository.  
+   * **Group** – All Users in a Group.  
+   * **Last response** – The recipient who took responsibility for the Incident that triggered the Workflow.
+* **Message Type** – The type of message sent to the recipient via SMS:  
+   * **Original** – The message that triggered the Workflow.  
+   * **Custom** – Any entered free text.  
+   * **Template** – A predefined message.  
+   :::note
+   Message templates are created via VAR::PRODUCT_FULL General Repository. For additional information on message templates, please refer to the [Message Templates](../../Product-Navigation/Repository/General/Message-Templates.mdx).
+   :::
+   * **Template Name** – Sends a predefined message template.
+   * **Send Recovery Notification** – Adds the selected recipient to the recovery notification list. When the Incident is recovered, all recipients in the recovery list are notified.

@@ -1,0 +1,42 @@
+---
+sidebar_position: 1
+id: data-mapping-overview
+title: Data Mapping Overview
+---
+Data mapping allows you to parse and map JSON-formatted data to multiple variables based on a provided schema.
+
+## Creating a Data Map
+
+To generate the Data Map activity:
+1. Navigate to the hamburger icon on the top left and click **Builder > Workflow Designer.**
+2. Create a new **Activity** -- _Data Mapping._
+
+# Settings
+
+* **Data Source** - The source of the incoming data. The data source is a variable or the result of another Activity (e.g., an HTTP Request).
+
+* **Data Type** - The type of data mapped. Select JSON or XML.
+
+* **Schema** - Defines the structure and format expected for the JSON data. This Activity will use the schema to validate the JSON, checking for errors such as misspellings or issues from copy/pasting. _The 'Generate Map' button will be enabled when the JSON conforms to the schema._
+
+* **Generate Map** - The button to activate data mapping. The button is only available when a valid schema is specified. Clicking this button will map all available paths to variables used in the Workflow.
+
+* **Variable Map** - A table showing the mappings for variables. 
+    * The _Name_ column represents the variables that will be named for reference in the Workflow. 
+    * The _Value_ column represents the path the Data Mapping Activity uses to parse the result from the incoming data. For JSON, these are JSON Paths.
+
+# Output
+
+The output of the Data Mapping Activity is multiple variables based on properties within the parsed JSON response. The output is similar to the JSON to Table Activity.
+
+## Using the 'Generate Map' Button
+
+A schema must be provided to use the _Generate Map_ button.
+
+Clicking _Generate Map_ will automatically populate the mapping table using the property names as variable names. The provided JSON keys will set their values.
+
+:::note
+The variable names can be changed if desired.
+:::
+
+

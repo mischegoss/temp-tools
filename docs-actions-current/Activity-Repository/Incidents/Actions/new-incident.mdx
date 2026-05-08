@@ -1,0 +1,23 @@
+---
+sidebar_position: 10
+id: new-incident
+title: New Incident
+---
+
+## Activity Description
+
+Creates an incident and sends it to be evaluated by the rule base engine.
+
+## Settings
+
+
+* **Type: Device/Service** – Determines whether the incident is ascribed to a Device or a Service.
+* **Name** – The name of the constant/dynamic incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%ServiceName%`
+* **Classification** – The classification of the incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%Type%`
+* **Event** – Any free text displayed in the event's column in the VAR::PRODUCT_FULL Dashboard.  
+   Example: `%info%`
+* **Status** – The status of the event created in the Actions Dashboard. Optional statuses are: Down, Warning.
+* **Severity** – The severity of the event created in Actions.
+* **Link New Incident to This Workflow** – By default, when creating a new incident via the New Incident Activity, the Active Logs of the new incident does not display the current workflow execution. You can change this and use this option to set the new incident as the incident that controls the current workflow.

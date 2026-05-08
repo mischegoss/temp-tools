@@ -1,0 +1,31 @@
+---
+sidebar_position: 15
+id: access-control
+title: Access Control
+description: Each login user in Resolve Actions can have one of the roles listed below that grants them permission to various components of the platform.
+---
+
+In VAR::PRODUCT_FULL, each login user is assigned a specific role that grants them permissions to various components of the platform.
+
+## Permissions per Role
+
+The following VAR::PRODUCT roles with their respective permissions are available:
+
+- **Administrator**: Can view Home Page, Insight, Builder, Repository, Knowledge Base, and Configuration.
+- **Developer**: Can view Home Page, Insight, Builder (including the Activity Designer), Repository, and Knowledge Base.
+- **Workflow Editor**: Can view Home Page, Insight, Builder (except for Activity Designer), Repository, and Knowledge Base.
+- **Specialist**: Can view Home Page, Insight, Builder (except for Activity Designer), Repository, and Knowledge Base.
+- **Operator**: Can view Home Page, Insight, Builder (except for Activity Designer), Repository, Knowledge Base, License Details, and User Management.
+- **Advanced User**: Can view Home Page and Analytics.
+- **Self Service User**: Can view only Self Service Portal.
+- **Analytics User**: Can view Home Page and Insight.
+
+:::note
+Since **Administrator** is the only role with access to the Configuration functionalities, it is the only one that can modify other users' roles.
+:::
+
+## Conflicting Roles
+
+import ImpConflictingRoles from './_conflicting-roles.mdx';
+
+<ImpConflictingRoles />

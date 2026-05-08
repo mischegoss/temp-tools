@@ -1,0 +1,29 @@
+---
+sidebar_position: 10
+id: ad-list-ou-activity
+title: AD List OU
+---
+
+## Activity Description
+
+Lists the content of a specific organizational unit in the Active Directory – users, computers, other OUs, and groups.
+
+## Output
+
+List
+
+## Settings
+
+
+* **Recursive** – Check to list all sub-OUs within and OU.
+* **Path** – The path of the group to which the new user account is assigned (e.g., `\US\Users`)  
+   The path can follow the following conventions:
+   * `OU=<OU Name1>, OU=<Name2>`
+   * `<OU Name1>\<OU Name2>`
+   * `/<OU Name1>/<OU Name2>`
+   * `\`
+   * Type in `all` to scan the entire Active Directory.
+* **Filter** – The criteria of the listed OUs.
+* **Host Name** – The host name or IP address of the Active Directory's server.
+* **User Name** – If required, the user name of an account that has read-write access to the Active Directory.
+* **Password** – If required, the password of the account listed in the User Name field.

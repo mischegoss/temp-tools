@@ -1,0 +1,67 @@
+---
+sidebar_position: 10
+id: json-to-table-activity
+title: JSON to Table
+---
+
+
+## Activity Description
+
+Returns a memory table of all values under the specified key path.
+
+## Output
+
+A table where each value under the specified key is a separate column. Note that object values are kept as a monolithic value.
+
+## Settings
+
+* **Json Session**—Select the name of a related JSON session (the name of a [Start Json Session](./start-json-session.mdx) activity) in VAR::PRODUCT_FULL.
+* **Key Path**—Enter the path to the key whose value you want to extract, in a dot notation: `<keyname>.<keyname>. ... <keyname>`.
+
+## Example
+
+Assume you have included the following JSON code in your JSON session:
+
+```json
+{
+  "glossary":{
+    "title":"example glossary",
+    "GlossDiv":{
+      "title":"S",
+      "GlossList":{
+        "GlossEntry":{
+          "ID":"SGML",
+          "SortAs":"SGML",
+          "GlossTerm":"Standard Generalized Markup Language",
+          "Acronym":"SGML",
+          "Abbrev":"ISO 8879:1986",
+          "GlossDef":{
+            "para":"A meta-markup language, used to create markup languages such as DocBook.",
+            "GlossSeeAlso":[
+              "GML",
+              "XML"
+            ]
+          },
+          "GlossSee":"markup"
+        }
+      }
+    }
+  }
+```
+
+If you request the `glossary.GlossDiv.GlossList.GlossEntry` key path, you will get the following table:
+
+||||||
+|---|---|---|---|---|
+| SGML | SGML | Standard Generalized Markup Language | SGML | ISO 8879:1986 |
+
+ ```js
+ {
+  "para": "A meta-markup language, used to create markup languages such as DocBook.",
+  
+  "GlossSeeAlso": [
+    "GML",
+    "XML"
+    ]
+    }
+```

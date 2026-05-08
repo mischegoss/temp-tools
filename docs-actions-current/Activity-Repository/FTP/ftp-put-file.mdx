@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: ftp-put-file-activity
+title: FTP Put File
+---
+
+## Activity Description
+
+Uploads a file to the FTP server.
+
+:::note
+This activity should be placed after the Start FTP Session activity and refer to the started session.
+:::
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **FTP Session** – The FTP session in which to upload the file.
+* **Source File** – The path of the file to upload.  
+   Example: `C:\logs\log.txt`
+* **Target Path** – The path to which the file is uploaded.  
+   Example: `/upload`
+* **Transfer Mode** – The FTP transfer mode.
+
+:::note
+Wildcards are supported.
+:::

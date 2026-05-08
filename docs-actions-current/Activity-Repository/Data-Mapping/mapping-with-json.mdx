@@ -1,0 +1,63 @@
+---
+sidebar_position: 20
+id: mapping-with-json
+title: Mapping with a JSON Schema
+---
+# Example
+
+Given the JSON schema: 
+
+```
+{
+    "name": "Yavin IV", 
+    "rotation_period": "24", 
+    "orbital_period": "4818", 
+    "diameter": "10200", 
+    "climate": "temperate, tropical", 
+    "gravity": "1 standard", 
+    "terrain": "jungle, rainforests", 
+    "surface_water": "8", 
+    "population": "1000", 
+    "residents": [], 
+    "films": [
+        "https://swapi.dev/api/films/1/"
+    ], 
+    "created": "2014-12-10T11:37:19.144000Z", 
+    "edited": "2014-12-20T20:58:18.421000Z", 
+    "url": "https://swapi.dev/api/planets/3/"
+}
+```
+
+The _Generate Map_ activity will produce: 
+
+| Name | Value |
+|------|------|
+|name| name|
+|rotation_period|rotation_period|
+|orbital_period|orbital_period|
+|diameter|diameter|
+|climate|climate|
+|gravity|gravity|
+|terrain|terrain|
+|surface_water|surface_water|
+|population|population|
+|films.[0]|films.[0]|
+|created|created|
+|edited|edited|
+|url|url|
+
+:::note
+
+Variables can be renamed or manually added.
+
+:::
+
+## Using Variables
+
+Once mapped, the variables can be used in other activities.
+
+### Example
+
+```
+The gravity on planet %name% is %gravity%.
+```

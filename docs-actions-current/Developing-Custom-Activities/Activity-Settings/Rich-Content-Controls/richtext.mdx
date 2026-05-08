@@ -1,0 +1,41 @@
+---
+sidebar_position: 10
+id: richtext
+title: richtext
+---
+* **Description:** Rich text editor with formatting capabilities (bold, italic, links, lists, etc.)  
+* **Base Type:** control  
+* **Data Type:** HTML/Rich Text  
+* **Validation Rules:**  
+  * Supports HTML formatting (bold, italic, links, etc.)  
+  * May have size/length limits  
+  * HTML is sanitized for security  
+* **Example Values:** `\<b\>Bold text\</b\>`, `\<a href="url"\>Link\</a\>`  
+* **Common Use Cases:** Email bodies, Formatted messages, HTML content  
+* **Optional Properties:**  
+  * value (String): Default HTML content  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * styleClass (String): Use "showImageButton" to enable image upload functionality
+
+**JSON Example (Basic):** 
+```
+{
+  "key": "messageBody",
+  "label": "Message Body",
+  "baseType": "control",
+  "controlType": "richtext",
+  "value": ""
+}
+```
+
+**JSON Example (With Image Upload):**
+```
+{
+  "key": "Body",
+  "label": "Body",
+  "baseType": "control",
+  "controlType": "richtext",
+  "styleClass": "showImageButton",
+  "value": ""
+}
+```

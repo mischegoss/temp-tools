@@ -1,0 +1,7 @@
+position: 40
+label: Recipients
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Recipients

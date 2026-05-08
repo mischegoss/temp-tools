@@ -1,0 +1,24 @@
+---
+sidebar_position: 10
+id: reset-incident
+title: Reset Incident
+---
+
+## Activity Description
+
+Resets an incident that triggered the workflow, or any other incident (typically used in cases of false alerts).
+
+:::note
+Unlike closing an activity, resetting it does not affect its MTTR and does not send a recovery message to the involved recipients.
+:::
+
+## Settings
+
+
+* **Use Current Incident/Use Another Incident** – Determines whether to reset the incident that triggered the workflow, or another incident.
+* **Type: Device/Service** – Determines whether the incident is ascribed to a Device or a Service.
+* **Name** – The name of the constant/dynamic incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%DeviceName%`
+* **Classification** – The classification of the incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%AlertType%`
+* **Reason** – The reason for resetting the incident (the reason is written to the log).

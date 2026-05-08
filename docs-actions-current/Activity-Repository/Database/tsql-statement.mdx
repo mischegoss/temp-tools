@@ -1,0 +1,30 @@
+---
+sidebar_position: 10
+id: tsql-statement-activity
+title: TSQL Statement
+---
+
+## Activity Description
+
+Runs an SQL statement (INSERT, DELETE, UPDATE) on a Microsoft database in order to insert, delete, or update data from the database.
+
+:::note
+To avoid translation of `%TEXT%` (in case TEXT is not a variable name), add `@` before the percentage character. For example: `Select * From TableName Where ColumnName LIKE '@%TEXT%'`.
+:::
+
+:::note
+To use the word "variable" within a query, use the following convention: `@%variable%` (else it is referred to as a system variable).
+:::
+
+## Settings
+
+
+* **Statement** – The query's text (e.g., `Delete from hosts Where name='server1'`).
+* **Connection String** – Specifies the required connection string in order to connect the database.  
+  For example:
+  ```sql
+  Data Source=myServerAddress;Initial Catalog=myDataBase;User Id=myUsername;Password=myPassword;
+  ```
+* **User Authentication** – Determines whether a user's authentication credentials are required to execute the query (if the credentials are not specified in the clear text connection string).
+* **User Name** – An SQL user authorized to execute the query (e.g., `sa`).
+* **Password** – The user's password.

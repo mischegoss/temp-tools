@@ -1,0 +1,30 @@
+---
+sidebar_position: 10
+id: aws-attach-volume
+title: AWS Attach Volume
+---
+
+## Activity Description
+
+Attaches an existing volume to an Amazon Web Service instance.
+
+## Output
+
+An attachment notice.
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Region** – The region in which the instance resides.  
+   Example: `ap-northeast-1`
+* **Instance Name/Id** – The name or ID of the instance.  
+   Example: `i-1234567890abcdef0`
+* **Volume Name/Id** – The name or ID of the EBS volume to attach. The volume and instance must be within the same Availability Zone.  
+   Example: `vol-1234567890abcdef0`
+* **Device Name** – Refers to the instance's Root Device property. This needs to be set with the device name mapping; for example, the mapping for a Windows server is xvdf.  
+   Example: `/dev/sdf`
+* **Override Connection Parameters** – Used to attach an existing volume to an instance on a different AWS account, instead of the original default account saved under the AWS module.
+* **Action Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.

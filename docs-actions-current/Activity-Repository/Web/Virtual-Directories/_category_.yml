@@ -1,0 +1,7 @@
+position: 10
+label: Virtual Directories
+collapsible: true
+collapsed: true
+link:
+  type: doc
+  id: introduction-to-virtual-directories

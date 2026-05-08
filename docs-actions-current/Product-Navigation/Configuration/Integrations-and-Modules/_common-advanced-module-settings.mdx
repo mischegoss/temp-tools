@@ -1,0 +1,41 @@
+---
+sidebar_position: 80
+id: common-advanced-module-settings
+title: Common Advanced Module Settings
+---
+
+Some module settings that are rarely used can only be changed directly in the VAR::COMPANY DB. A subset of these settings are common between all modules; they are explained in the current article. Modules can also have advanced settings specific to them; see the respective module's documentation for a list.   
+
+## Changing an Advanced Setting
+
+Use this procedure to change a module setting in the DB:
+
+To change an advanced module setting:
+1. Open the `Resolve` SQL database.
+2. Open the `dbo.Modules` table.
+3. Find the row that corresponds to the module that you are configuring.  
+   The module name is kept in the `Mname` column.
+4. In the `Params` column, configure the setting:
+   * If the setting already exists in the column, change the value following the equals sign:
+     ```
+     logsdirectory=ValueToChange
+     ```
+   * If the setting does not appear in the column, append the setting to the existing value.  
+     For example:
+     ```
+     //before
+     loglevel=1 logsdirectory=Logs lognumberofdaystopreserve=14 dateformat=us
+     //after
+     loglevel=1 logsdirectory=Logs lognumberofdaystopreserve=14 dateformat=us maxthreads=5
+     ```
+
+## List of Common Advanced Module Settings
+
+These are the advanced settings that you can change for all modules:
+
+* `loglevel`—Select how verbose you want the module-related log messages to be. Level 1 is the least verbose while 3 is the most verbose. This is the same setting as the module's **Configuration Options > Log Level** UI setting. Default value: `1`.
+* `logsdirectory`—The folder where the module's log will be written, relative to the module's installation folder (`C:\Program Files\Resolve\<Module Name>` by default). Default value: `Logs`.
+* `lognumberofdaystopreserve`—Log files are rotated daily. This setting determines the maximum number of log files to be kept at any single time. Default value: `14`. 
+* `dateformat`—The localization code determining the date/time format that is used in the log file for timestamps. Default value: `us`.
+* `maxthreads`—Maximum number of threads that the module can use to process queries. A new thread is dispatched for each new query if there is a free thread count remaining. After the maximum thread count is reached, new queries will have to wait in the queue. Default value: `5`.
+* `Smtpout`—Sets the VAR::PRODUCT pulling interval (in seconds) from the module's alert queue. Default value: `10`.

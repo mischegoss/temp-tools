@@ -1,0 +1,50 @@
+---
+sidebar_position: 40
+id: json-properties
+title: JSON Properties
+---
+## Mandatory Control Properties
+
+The JSON code requires several mandatory properties. The table below lists the mandatory properties along with their uses.
+<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRLYer-mO6hoIjJi3SY-8PeuTlxpGJhTIz0TIvWDKpsE3eUuaZuYsb6PScTwkTB-_4Hs9xuqkrLp11j/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" width="100%" height="500px"></iframe>
+
+[View table here.](https://docs.google.com/spreadsheets/d/e/2PACX-1vRLYer-mO6hoIjJi3SY-8PeuTlxpGJhTIz0TIvWDKpsE3eUuaZuYsb6PScTwkTB-_4Hs9xuqkrLp11j/pubhtml?gid=0&single=true)
+
+## Optional Control Properties
+
+In addition to mandatory properties, there are optional properties you can use to develop activities. The table below lists the optional properties along with their uses.
+<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRLYer-mO6hoIjJi3SY-8PeuTlxpGJhTIz0TIvWDKpsE3eUuaZuYsb6PScTwkTB-_4Hs9xuqkrLp11j/pubhtml?gid=1981131460&amp;single=true&amp;widget=true&amp;headers=false" width="100%" height="400px"></iframe>
+
+[View table here.](https://docs.google.com/spreadsheets/d/e/2PACX-1vRLYer-mO6hoIjJi3SY-8PeuTlxpGJhTIz0TIvWDKpsE3eUuaZuYsb6PScTwkTB-_4Hs9xuqkrLp11j/pubhtml?gid=1981131460&single=true)
+
+## Special Properties for Control Types
+
+The "controlType" property options each have their own properties.
+<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRLYer-mO6hoIjJi3SY-8PeuTlxpGJhTIz0TIvWDKpsE3eUuaZuYsb6PScTwkTB-_4Hs9xuqkrLp11j/pubhtml?gid=762291336&amp;single=true&amp;widget=true&amp;headers=false" width="100%" height="800px"></iframe>
+
+[View table here.](https://docs.google.com/spreadsheets/d/e/2PACX-1vRLYer-mO6hoIjJi3SY-8PeuTlxpGJhTIz0TIvWDKpsE3eUuaZuYsb6PScTwkTB-_4Hs9xuqkrLp11j/pubhtml?gid=762291336&single=true)
+
+### "valueChangesActions" Property
+
+When using the controls "dropdown", "checkbox", and "radiobutton", you may include a **"valueChangesActions"** property in it.
+
+The **"valueChangesActions"** property supports three actions:
+
+1. Enable
+2. Disable
+3. Set Value
+
+For example, if you add a Date Difference as a checkbox control, you can add the **"valueChangesActions"** property.
+
+#### False Setting
+
+If the **"valueChangesActions"** property is false:
+
+- the controls "FirstDateFormat" and "FirstDate" will be enabled.
+
+#### True Setting
+
+If the **"valueChangesActions"** property is true:
+
+- "disable" will disable the controls **"FirstDateFormat"** and **"FirstDate"** (disable and enable actions receive an array of strings - control keys)
+- "setValue" will set their values to be empty strings ("").

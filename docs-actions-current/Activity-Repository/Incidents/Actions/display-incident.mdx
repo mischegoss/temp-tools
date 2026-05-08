@@ -1,0 +1,26 @@
+---
+sidebar_position: 10
+id: display-incident
+title: Display Incident
+---
+
+## Activity Description
+
+Adds an incident to the Resolve Actions Dev Dashboard.
+
+:::note
+Unlike the New Incident activity, this activity does not go through the rule base engine.
+:::
+
+## Settings
+
+
+* **Type: Device/Service** – Determines whether the incident is ascribed to a Device or a Service.
+* **Name** – The name of the constant/dynamic incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%DeviceName%`
+* **Classification** – The classification of the incident's Device/Service (if you selected using a constant incident, the list changes according to Type selection).  
+   Example: `%AlertType%`
+* **Event** – Any free text displayed in the event's column in the VAR::PRODUCT Dev Dashboard.  
+   Example: `%message%`
+* **Status** – The status of the event created in the Actions Dev Dashboard. Optional statuses are: Down, Warning.
+* **Severity** – The severity of the event created in the Actions Dev Dashboard.

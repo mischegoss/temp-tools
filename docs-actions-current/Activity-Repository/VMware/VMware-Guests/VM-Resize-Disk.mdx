@@ -1,0 +1,27 @@
+---
+sidebar_position: 10
+id: vm-resize-disk
+title: VM Resize Disk
+---
+
+:::note
+To be able to use the activity, you need to install [VMware PowerCLI](https://developer.vmware.com/web/tool/vmware-powercli) on the VAR::PRODUCT_FULL Executor server.
+:::
+
+## Activity Description
+
+Resizes a Virtual Machine's disk.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Host Name**—The host name or IP address. This must be either the vCenter device or the ESXi device (you can configure the device with **Platform** type **vCenter/ESXi** under [Devices](../../../Product-Navigation/Repository/Incident-Configuration/Devices.mdx)).
+* **User Name**—The user name of an account that has read/write access to the host.
+* **Password**—The password of the account listed in the **User Name** field.
+* **VM Name/UUID**—The name/UUID of the Virtual Machine.
+* **Disk Name**—The name of the disk to resize.
+* **Disk Size (KB)**—The new size of the disk (in KB).

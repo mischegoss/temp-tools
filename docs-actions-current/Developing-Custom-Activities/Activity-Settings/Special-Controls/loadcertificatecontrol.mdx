@@ -1,0 +1,26 @@
+---
+sidebar_position: 70
+id: loadcertificatecontrol
+title: loadCertficateControl
+---
+* **Description:** Certificate file loader for SSL/TLS configuration  
+* **Base Type:** control  
+* **Data Type:** Certificate reference  
+* **Validation Rules:**  
+  * Must be a valid certificate file (.cer, .crt, .pfx, .pem)  
+  * Certificate must not be expired  
+  * May require password for protected certificates  
+* **Example Values:** certificate.pfx, server.crt  
+* **Common Use Cases:** HTTPS configuration, URL checks, Secure connections
+
+**JSON Example:**  
+```
+{
+  "key": "sslCertificate",
+  "label": "SSL Certificate",
+  "baseType": "control",
+  "controlType": "loadCertificateControl",
+  "value": "",
+  "required": true
+}
+```

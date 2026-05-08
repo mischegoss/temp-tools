@@ -1,0 +1,25 @@
+---
+sidebar_position: 40
+id: three-ways-to-create-an-incident
+title: Three Ways to Create an Incident
+---
+
+Incidents are created in one of three ways:
+
+1. **Event Parsing:**  
+  Event parsing is the mechanism for examining incoming messages and extracting relevant information from them (such as server name and the related event's nature). By using a short VB or C# program, events may be converted to incidents and displayed in the  VAR::PRODUCT_FULL dashboard.  
+  
+  When Resolve Actions receives an event, the list of event parsers is scanned to determine whether the event matches the criteria of one of them. The first that matches the event parses it; therefore, the order of event parses in the list is highly significant.
+  
+  
+  After the event is parsed and the incident is created, it will go through the [trigger](../../../Product-Navigation/Repository/Schedules-and-Triggers/Triggers.mdx) list to determine whether it should invoke a workflow.
+  
+  The new incident will be displayed in the Actions LIVE dashboard whether or not it invoked a workflow.
+1. **Mapping:**  
+  When an event is created by an external integration it must be mapped to an event in the Resolve format.
+  
+  Mapping configuration is performed during [module configuration](../../../Product-Navigation/Configuration/Integrations-and-Modules/managing-modules.mdx). In real-time, it replaces the event parsing. 
+3. **New Incident Activity:**  
+  You can create a workflow that will create a new incident. To do this, include the New Incident activity in the workflow.  An incident will be created using the data that was entered into the New Incident activity.
+  
+  The main difference between the previous two methods and this one, is that with the workflow activity, the workflow is triggered before the incident. The new incident will go through the list of triggers. If a matching trigger is found, another workflow will be executed. If not - the new incident will be dropped.

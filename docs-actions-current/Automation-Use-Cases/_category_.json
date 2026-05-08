@@ -1,0 +1,8 @@
+position: 20
+label: Automation Use Cases
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Automation Use Cases
+  slug: automation-use-cases

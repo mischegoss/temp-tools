@@ -1,0 +1,28 @@
+---
+sidebar_position: 10
+id: ad-create-group
+title: AD Create Group
+---
+
+## Activity Description
+
+Creates a new group in the Active Directory.
+
+## Output
+
+Success/Failure
+
+## Settings
+
+
+* **Path** – The group's location in the Active Directory's hierarchy (e.g., `\US\Users`)  
+   The path may follow the following conventions:
+    * `OU=<OU Name1>, OU=<Name2>`
+    * `<OU Name1>\<OU Name2>`
+    * `/<OU Name1>/<OU Name2>`
+    * `\`
+* **Group Name** – The name of new group (e.g., `Resolve_IT`).
+* **Host Name** – The name or IP address of the Active Directory's server.
+* **User Name** – If required, the user name of an account that has read-write access to the Active Directory.
+* **Password** – If required, the password of the account listed in the User Name field.
+

@@ -1,0 +1,22 @@
+---
+sidebar_position: 10
+id: sn-delete-record-activity
+title: SN Delete Record
+---
+
+## Activity Description
+
+Deletes an existing record from ServiceNow.
+
+## Output
+
+Success/Failure.
+
+## Settings
+
+
+* **Module Name** – The name of the ServiceNow Module in VAR::PRODUCT_FULL.
+* **Form Name** – The name of the ServiceNow form.  
+   Example: `Incident(incident)`
+* **Field Name** – The name of the field that indicates the record number.
+* **Record Number** – The name of the record to delete (`%<the name of the activity instance that created the record>%`).

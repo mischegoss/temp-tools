@@ -1,0 +1,136 @@
+---
+sidebar_position: 40
+id: azure-ad-user-synchronization
+title: Azure AD User Synchronization
+description: Resolve Actions supports the synchronization of users and groups from Azure Active Directory (AD).
+---
+
+VAR::PRODUCT_FULL enables the synchronization of users and groups from Azure Active Directory (AD).  
+This is helpful for organizations that do not wish to manage separate user accounts in VAR::PRODUCT. They can utilize the AD User Synchronization activity to sync specific users, organizational units (OUs), or groups from the company's Azure AD accounts into VAR::PRODUCT.
+
+:::note
+To use this functionality, your license must include the AD activities.
+:::
+
+## Setting Up Client Application and Client ID in Azure AD
+
+Before you start using the Azure AD synchronization functionality, you need to register a client application and an application (client) ID in Azure AD. To do that, proceed as follows:
+
+1. In the [Azure portal](https://portal.azure.com/#home), select **Azure Active Directory**.
+2. In the panel on the left, select **App registrations**.
+3. Select **New registration**. 
+4. In the **Name** field, give the application an indicative name.
+5. For **Supported account types**, select **Accounts in any organizational directory (Any Azure AD directory – Multitenant)**.
+6. Click **Register**.
+7. In the panel on the left, click **Authentication**.
+8. Under **Advanced settings > Treat application as public client**, select **Yes**.
+9. In the panel on the left, click **API permissions**. 
+10. Click **Add a permission**.
+11. Select **Microsoft Graph**. 
+12. Select **Delegated permissions**.
+    :::note 
+    Currently, Application permissions are not supported.
+    :::
+13. Add required permissions to the app (minimum requirements):
+    - Directory.Read.All
+    - Group.Read.All
+    - GroupMember.Read.All
+    - User.Read
+    - User.Read.All
+14. Click **Add permissions**.
+15. Click **Grant admin consent**. 
+
+The Application (client) ID will now be visible from the **Overview** tab in the left-hand panel. Use this ID in the [Azure Ad Users Synchronization Actity](../../../Activity-Repository/Azure/azure-ad-users-synchronization.mdx) activity when syncing users and groups.
+
+## Syncing Users and Groups into VAR::PRODUCT
+
+:::note
+Note that, by default, if a user or a group with the same name already exists in VAR::PRODUCT (created manually), they will not be synchronized. If you want to update them, you need to enable the **Update Existing** option in the Azure AD User Synchronization procedure described below.
+:::
+
+Syncing Azure AD users and groups into VAR::PRODUCT using the Azure AD User Synchronization activity turns them into VAR::PRODUCT Recipients, which can then in turn be made into Login [Users](./Managing-Users.mdx#creating-users) and [Groups](./Managing-Groups.mdx#adding-groups).
+
+To create a workflow for syncing AD users into VAR::PRODUCT, proceed as follows:
+
+1. In the **Workflow Designer**, create a new workflow with the following activities: 
+   1. [Create Memory Table](../../../Activity-Repository/Tables/Table/create-memory-table.mdx)
+   2. [Azure Ad Users Synchronization Activity](../../../Activity-Repository/Azure/azure-ad-users-synchronization.mdx)
+      ![](img/ax-azure-ad-create-workflow.png)
+2. Edit the table in the Create Memory Table activity while maintaining the following guidelines:
+   - The table must contain only two columns: **Type**, **Object ID**.
+   - Add a row for each group that you want to sync, setting **Type** to Group and **Object ID** to the ID of the specified object.
+   - Add a row for each user that you want to sync, setting **Type** to User and **Object ID** to the ID of the specified object.
+   - You may add as many rows to the table as you want.
+     ![](img/ax-azure-ad-create-memory-table.png)
+3. Edit the Azure AD Users Synchronization activity settings:
+   - **Tenant ID**: Tenant ID in Azure AD.
+   - **App Client ID**: The Application (client) ID associated with the Azure App Registration.
+   - **Client Secret**: Secret string generated within the Azure App Registration for requesting a token.
+   - **AD Users**: The list of AD users/groups to synchronize. This can be static (the object ID for a single user and/or group) or a reference to a memory table created for this purpose.  
+     If we use the above example, the value of this field will be the **Table Name** field of the Create Memory Table activity: `%AzureID%`.
+   - **Update Existing**: By default, if a user or a group already exists (has been created manually before synchronization), they will not be updated. When this is checked, existing users are updated.
+   - **Recursive Groups**: When a group is synchronized, you may decide whether to synchronize the data recursively or not. When synchronizing the data recursively, subgroups and user data are also synchronized.  
+    In VAR::PRODUCT, subgroups appear at the same level as their parent groups.
+4. Run the workflow.
+
+:::info
+To sync multiple Azure tenants, use either of these approaches:
+- Create a separate workflow for each of the tenants.
+- Within the same workflow, add and configure a separate Azure AD Users Synchronization activity for each tenant.
+:::
+
+When the process is completed, you will be able to see all imported Azure AD groups in the VAR::PRODUCT Main Menu > **Repository > Recipients > Groups** (containing their users' objects) and all imported AD users in the VAR::PRODUCT Main Menu > **Repository > Recipients > Users**. Subgroups also appear as their own row in the Groups table to allow for more granular management.
+
+The **Tenants** and **Domains** associated with the imported Users and Groups will be visible in the VAR::PRODUCT Main Menu > **User Management > Azure Tenants** grid.
+
+Users and groups synced from Azure AD are in read-only mode, and their information and/or membership cannot be changed in VAR::PRODUCT. Any changes must be made in Azure AD and then synced into VAR::PRODUCT in order to be reflected in the user or group.
+
+:::note
+To ensure that the data in VAR::PRODUCT most closely reflects the data in your AD, we recommend that the Azure AD Users Synchronization workflow be run at a regular interval (hourly, daily, or weekly, depending on your requirements).
+:::
+
+## Syncing Creates Recipients
+
+Using the Azure AD Users Synchronization activity and workflow syncs specified users from AD to become **Recipients** in VAR::PRODUCT. These recipients can be used in any VAR::PRODUCT user- and group-related processes, for example, the To field in the Send Email activity.
+
+Users will be created in the **Recipients > Users** table, along with their respective information from Azure AD. Groups will be created in the **Recipients > Groups** table, along with their respective users and subgroups. Subgroups also appear as their own row in the **Groups** table to allow for more granular management.
+
+Users and groups synced from AD are in read-only mode, and their information and/or membership cannot be changed in VAR::PRODUCT. Any changes must be made in AD and then synced into VAR::PRODUCT in order to be reflected in the user or group.
+
+## Creating Users from Recipients
+
+Once Azure AD users have been synced to the **Recipients** section in VAR::PRODUCT, desired users/groups can be designated as **Users** and be allowed to log in to VAR::PRODUCT with a specific role.
+
+See how to create recipient [users](./Managing-Users.mdx#creating-users) and [groups](./Managing-Groups.mdx#adding-groups).
+
+:::note
+Only Azure AD Security Groups can be synced to make **Login Groups** in VAR::PRODUCT. AD Distribution Groups are not supported in this manner.
+
+When syncing a Security Group, you don't need to re-run the synchronization workflow each time a new user is added to that group. Any new AD users added to the already synced Security Group can log in to VAR::PRODUCT and their account will be automatically created.
+:::
+
+For security purposes, once a manually created group becomes a login group, it can only be managed in the **User Management** page and not the **Recipients** page. 
+
+## Viewing Synced Azure Tenants
+
+You can sync multiple Azure tenants to your VAR::PRODUCT deployment and view them in the **Azure Tenants** table located in the **User Management** page. It is populated with tenants that are synced using the Azure AD Users Synchronization activity, displayed with their Tenant Name, Domain Name, and App Client ID.
+
+From here, you can only delete Azure tenants but not modify them or add new ones.
+
+To add tenants, re-run the Azure AD User Synchronization activity with the newly added ones. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

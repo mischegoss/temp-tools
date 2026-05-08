@@ -1,0 +1,27 @@
+---
+sidebar_position: 10
+id: aws-launch-instance
+title: AWS Launch Instance
+---
+
+## Activity Description
+
+Launches a new Amazon Web Service instance.
+
+## Output
+
+The ID of the new instance created.
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Region** – The region in which the instance resides.
+* **Image Name/Id** – The image that belongs to the connected Access Key. In the Amazon Console these are under Images > AMIs > AMI ID /AMI name.
+* **Key Pair Name** – They key pair to be used. In the Amazon Console go to Network & Security > Key Pairs > administratorNG.
+* **Group Name/Id** – The Name or ID of the group. In the Amazon Console these are under Network & Security > Security Group > Group Name (VAR::PRODUCT_FULL Default).
+* **Instance Type** – The type of instance to launch, select from the drop-down list. M1small (for example).
+* **Override Connection Parameters** – Used to launch a new instance using a different AWS account, instead of the original default account saved under the AWS module.
+* **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.

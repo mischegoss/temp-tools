@@ -1,0 +1,20 @@
+---
+sidebar_position: 30
+id: configuring-the-idp-for-saml-sso
+title: Configuring the IdP for SAML SSO
+description: To set up your IdP for SAML, you need to configure the relevant Resolve Actions and AD data.
+---
+
+When setting up your IdP's SAML settings for VAR::PRODUCT_FULL, make sure the following is in place:
+
+*  Assertion consumer URL for the SP—Use one of the following URLs. If the IdP can't build the full URL automatically from the base URL, try entering the full one. You can find your **Tenant Name** under **Main Menu > Configuration > License Details > General License Details**.
+   * `https://<TenantName>.express.resolveactions.com`
+   * `https://<TenantName>.express.resolveactions.com:443/server/api/Account/VerifySamlLogin?tenantName=<TenantName>`
+* Required SAML response attributes:
+   * `NameId`—The user ID that you are sending back to VAR::PRODUCT must be the part of the UPN preceding the @ character (the username/logon name).
+   * `domainName`—Configure it to contain the last part of the UPN, after the @ symbol.
+   * `userGroups`—Configure it to contain the list of groups that the user is a member of.
+*   Optional SAML response attributes (see [Including Optional Attributes](./configuring-resolve-actions-for-saml-sso.mdx#including-optional-attributes)):
+   * `first_name`—Configure it to contain the first name of the user.
+   * `last_name`—Configure it to contain the last name of the user.
+   * `activeDirectoryId`—Configure it to contain the `objectGUID` of the user.

@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: sn-download-attachment-activity
+title: SN Download Attachment
+---
+
+## Activity Description
+
+Downloads a specific attachment from an existing record in ServiceNow.
+
+:::note
+The file path listed will only reference the host where the ServiceNow integration is installed.
+:::
+
+## Output
+
+Success/Failure.
+
+## Settings
+
+
+* **Module Name** – The name of the ServiceNow Module in VAR::PRODUCT_FULL.
+* **Form Name** – The name of the ServiceNow form.  
+   Example: `Incident(incident)`
+* **Field Name** – The name of the field that indicates the record number.
+* **Record Number** – The ID of the ServiceNow record.  
+   Example: `%snCreateRecord1%`
+* **Name** – The name of the file to download.  
+   Example: `Logfiles.txt`
+* **Path** – The path of the file to download.  
+   Example: `C:\Temp\Attachment`

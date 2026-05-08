@@ -1,0 +1,26 @@
+---
+sidebar_position: 10
+id: xch-get-mailbox-database-activity
+title: XCH Get Mailbox Database
+---
+
+## Activity Description
+
+Retrieves a mailbox's database object from an Exchange server.
+
+:::note
+The activity does not support a 32-bit MS Windows installation. If the VAR::PRODUCT_FULL server is installed on a 32-bit server, contact [Resolve Support](https://support.resolve.com) for additional information on how to use the activity.
+:::
+
+## Output
+
+The selected database object.
+
+## Settings
+
+
+* **Host Name** – The Exchange server's name.
+* **User Name** – If required, the user name of an account that has read-write access to the host.
+* **Password** If required, the password of the account listed in the User Name field.
+* **DB Name (Optional)** – The database's name. If not set then the activity will return a table containing information about all mailbox databases.
+* **Property Name –** The name of the selected database property.

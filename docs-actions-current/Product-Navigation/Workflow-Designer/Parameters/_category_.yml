@@ -1,0 +1,7 @@
+position: 100
+label: Parameters
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Parameters

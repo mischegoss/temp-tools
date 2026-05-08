@@ -1,0 +1,48 @@
+---
+sidebar_position: 40
+id: specifying-workflow-costs
+title: Specifying Workflow Costs
+---
+
+Before you can [view ROI data](./viewing-analytics-charts.mdx) for your organization, you need to provide base numbers reflecting the costs that executing the workflows manually used to incur.
+
+The **Workflow cost** screen shows the list of all available workflows where the user can fill in the cost and time for manual execution of workflows, which are then used for calculating cost and time savings realized through automating the workflow.
+
+To specify the base workflow cost of execution on the **Workflow cost** screen, do the following:
+
+1. Go to **Main Menu > Insight > Analytics**.  
+    If it is the first time you use the Analytics Dashboard, you see a welcome screen at this point.
+
+    If it is not the first time you use it, you see the Analytics Dashboard screen.
+2. Click the **Workflow costs** button in the top-right corner.
+3. With each listed workflow, take the following actions:
+    1. In **Cost Per Hour**, enter the cost per hour for the manual execution of a workflow.
+        :::note
+        The currency for cost per hour is US dollars.
+        :::
+    2. In **Average Time To Complete**, enter the average time for the manual completion of the workflow in minutes.
+    3. To search for a workflow, enter a partial or the whole workflow name in the **Search workflow** field and press **Enter**.
+    4. To exclude a workflow from the cost calculation, right-click on it and select **Hide from list (Cost doesn't apply)**.
+    5. To include a hidden workflow in the cost calculation, take these steps:
+        1. From the drop-down menu in the top-right corner, select **Show hidden only**.
+        2. Right-click the workflow you want to re-include and select **Show in list**.
+        3. Select **Show all** from the drop-down menu.
+    6. To clear a workflow cost, right-click the workflow and select **Clear cost**.
+    7. In the **Average Run Time** column, you can view how long the workflow needed to execute on average in VAR::PRODUCT_FULL.
+        :::note
+        Minimum displayed time is 1 minute.
+        :::
+    8. In the **Run Count** column, you can view how many times the workflow was executed since it was created.
+        :::note
+        The run count does not include manual runs started in the Workflow Designer.
+        :::
+4. Click the **Close** button to recalculate the statistics and view the Analytics charts.
+
+:::note
+Use the drop-down menu in the top-right corner to switch to different workflow views:
+
+* Don't show hidden
+* Show hidden only
+* Show all
+
+:::

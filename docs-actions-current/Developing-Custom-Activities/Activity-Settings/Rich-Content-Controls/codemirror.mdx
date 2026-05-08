@@ -1,0 +1,67 @@
+---
+sidebar_position: 20
+id: codemirror
+title: codemirror
+---
+* **Description:** Code editor with syntax highlighting using the CodeMirror library. Provides line numbers, code folding, and language-specific highlighting.  
+* **Base Type:** control  
+* **Data Type:** String (Code)  
+* **Validation Rules:**  
+  * Supports syntax highlighting for various languages  
+  * Preserves indentation and formatting  
+  * Line numbers and code folding enabled by default  
+* **Example Values:** `PowerShell scripts`, `SQL queries`, `Python code`, `Shell commands`  
+* **Common Use Cases:** Script input (PowerShell, Bash), Query editing, Code snippets  
+* **Optional Properties:**  
+  * value (String): Default code content  
+  * required (Boolean): If true, the field must be filled. Default is false  
+  * withFormLine (Boolean): If true, displays with form line styling  
+  * codeMirrorConfig (Object): Configuration for the CodeMirror editor:  
+    * mode (String): Syntax highlighting mode (default: "application/x-powershell")  
+    * theme (String): Editor theme (default: "default activityCodeMirror")  
+    * lineNumbers (Boolean): Show line numbers (default: true)  
+    * lineWrapping (Boolean): Wrap long lines (default: true)  
+    * readOnly (Boolean): Make editor read-only (default: false)  
+    * foldGutter (Boolean): Enable code folding (default: true)
+
+**Supported Language Modes:**
+
+| Mode Value | Language |
+| :---- | :---- |
+| application/x-powershell | PowerShell (default) |
+| text/x-sh | Shell/Bash |
+| text/x-python | Python |
+| text/x-csharp | C\# |
+| text/x-java | Java |
+| text/javascript | JavaScript |
+| application/json | JSON |
+| text/x-sql | SQL |
+| text/x-yaml | YAML |
+| application/xml | XML |
+
+**JSON Example (PowerShell \- Default):**  
+```
+{
+  "key": "ScriptCode",
+  "label": "Script Code",
+  "baseType": "control",
+  "controlType": "codemirror",
+  "value": "",
+  "required": true
+}
+```
+
+**JSON Example (With Language Mode Configuration):**  
+```
+{
+  "key": "pythonScript",
+  "label": "Python Script",
+  "baseType": "control",
+  "controlType": "codemirror",
+  "value": "",
+  "required": true,
+  "codeMirrorConfig": {
+    "mode": "text/x-python"
+  }
+}
+```

@@ -1,0 +1,34 @@
+---
+sidebar_position: 10
+id: tsql-query-activity
+title: TSQL Query
+---
+
+## Activity Description
+
+Executes an SQL query on a Microsoft database and returns a table.
+
+## Output
+
+A resultSet.
+
+## Settings
+
+
+:::note
+To avoid translation of `%TEXT%` (in case TEXT is not a variable name), add `@` before the percentage character. For example: `Select * From TableName Where ColumnName LIKE '@%TEXT%'`.
+:::
+
+:::note
+To use the word "variable" within a query, use the following convention: `@%variable%` (else it is referred to as a system Variable).
+:::
+
+* **Query** The query's text (e.g., `Select from hosts`).
+* **Connection String** – specifies the required connection string in order to connect the database.  
+  For example:
+  ```sql
+  Data Source=myServerAddress;Initial Catalog=myDataBase;User Id=myUsername;Password=myPassword;
+  ```
+* **User Authentication** – Determines whether a user's authentication credentials are required to execute the query (if the credentials are not specified in the clear text connection string).
+* **User Name** – An SQL user authorized to execute the query (e.g., `sa`).
+* **Password** – The user's password.

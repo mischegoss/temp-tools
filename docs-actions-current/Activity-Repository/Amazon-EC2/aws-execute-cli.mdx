@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+id: aws-execute-cli-activity
+title: AWS Execute CLI
+---
+
+## Activity Description
+
+Executes a command line on Amazon EC2 objects, using the Amazon Web Service's CLI.
+
+:::note
+This activity requires an installation of Amazon CLI Tools onto the server where the AWS Module is installed.
+:::
+
+## Output
+
+The command result as it was returned from Amazon EC2.
+
+## Settings
+
+
+* **Module Name** – The name of the AWS module to be used.
+* **Region** – The region in which the instance resides.  
+   Example: `ap-northeast-1`
+* **CLI Tool/AWS CLI Tool** – If the instance is VMware AWS, select CLI Tool. Otherwise, select AWS CLI Tool.
+* **Result Format** – The format of the command result from Amazon EC2 (Json/Table/Text/XML).
+* **Command** – The command line to execute on Amazon EC2 objects.
+* **Override Connection Parameters** – Used to execute a command line to AWS EC2 objects on a different AWS account, instead of the original default account saved under the AWS module.
+* **Access Key** – If overriding the connection parameters set at the module level, enter a different access key here.
+* **Secret Key** – If overriding the connection parameters set at the module level, enter a different secret key here.
+* **Token** – If overriding the connection parameters set at the module level, enter a different token here.

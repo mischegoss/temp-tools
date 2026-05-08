@@ -1,0 +1,7 @@
+position: 10
+label: IBM QRadar
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: IBM QRadar

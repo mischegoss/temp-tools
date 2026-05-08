@@ -1,0 +1,33 @@
+---
+sidebar_position: 10
+id: list-folder
+title: List Folder
+---
+
+## Activity Description
+
+Lists all files and folders under a specified folder, according to predefined time criteria.
+
+## Output
+
+A ResultSet (table) of the files and folders which reside in the specified folder and match the predefined time criteria. The ResultSet columns are:
+* Type
+* Name
+* Path Directory
+* Size
+* Creation Date
+* Modified Date
+* Accessed Date
+
+## Settings
+
+
+* **Recursive** – Determines whether the search is recursive or not**.**
+* **Path** – The path of the folder (e.g., `c:\logs\*.txt`).
+* **Host Name** – The host name or IP address.
+* **User Name** – If required, the username of an account that has read-write access to the host.
+* **Password** – If required, the password of the account listed in the User Name field.
+* **Time Filter** – Determines whether to use a time filter.
+    * **Filter** – The type of time filter (creation time, accessed time or modification time).
+    * **Condition** – The type of time conditioning (**older than** or **during last**).
+    * **days, hrs, mins, secs** – Sets the time frame according to which the time filter operates.

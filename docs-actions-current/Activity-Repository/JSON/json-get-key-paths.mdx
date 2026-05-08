@@ -1,0 +1,22 @@
+---
+sidebar_position: 10
+id: json-get-key-paths-activity
+title: JSON Get Key Paths
+---
+
+
+## Activity Description
+
+Returns the paths of all instances of a key found in the JSON session.
+
+## Output
+
+The output contains a memory table with a pair of columns: the key path and the key's parent's path. Each instance of the key that was found is a separate row.
+
+:::note
+You can use the [Table](../../Activity-Repository/Tables/Table/Introduction-to-Table.mdx), [Row](../../Activity-Repository/Tables/Row/Introduction-to-Row.mdx), [Column](../../Activity-Repository/Tables/Column/introduction-to-column), and [Cell](../../Activity-Repository/Tables/Cell/Introduction-to-Cell.mdx) activities to manipulate the result.
+:::
+
+## Settings
+* **Json Session**—Select the name of a related JSON session (the name of a [Start Json Session](./start-json-session.mdx) activity) in VAR::PRODUCT_FULL.
+* **Key**—The key name to search for in the JSON code. Enter the key name without the surrounding quotes.

@@ -1,0 +1,8 @@
+position: 50
+label: Developing Custom Activities
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Developing Custom Activities
+  slug: "/developing-custom-activities"

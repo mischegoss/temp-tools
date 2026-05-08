@@ -1,0 +1,19 @@
+---
+sidebar_position: 20
+id: self-service-input-activity
+title: Self Service Input
+---
+
+**Activity Description:** Allows you to define multiple runtime inputs for a Self Service workflow. In the Self Service Portal, pops a dialog where the user can be asked for multiple inputs at once during form execution. Each input definition is a field in the Self Service form dialog.
+
+**Output:** Result set table with two columns — the first column contains the input definitions, and the second one the user inputs. If no user input is available, the column will be empty.
+
+**Settings:**
+
+* **Input definition:** Free text and/or a variable name (variable names must follow the convention `%Variable%`). 
+
+Currently, up to ten input entries are supported.
+
+:::note
+The Self Service form dialog will have the same timeout period as the one set for this activity.
+:::
